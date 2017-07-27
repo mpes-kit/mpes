@@ -1,0 +1,1824 @@
+# Calibration Dataset for Phoibos 150 without aperture
+# $Revision: 34208 $
+# $Date: 2013-04-22 10:16:01 +0200 (Mo, 22 Apr 2013) $
+
+[SPECS Phoibos2D Calibration Dataset Version 100]
+aUnit  = "unit"
+aInner = 10 # unit
+eShift = -0.05 0 0.05 # Ep
+eRange = -0.066 0.066 # Ep
+aRange = -15 15
+eGrid  = 0.01 # Ep
+aGrid  = 1 # unit
+De1    = 0.0033
+Da1    = 1 1 1 # mm_z/unit
+Da3    = 0 0 0 # mm_z/unit^3
+Da5    = 0 0 0 # mm_z/unit^5
+Da7    = 0 0 0 # mm_z/unit^7
+
+# =================== LowAngularDispersion =================== 
+
+[LowAngularDispersion defaults]
+aUnit  = "deg"
+aRange = -7 7
+eShift = -0.05 0 0.05 # Ep
+
+[LowAngularDispersion@0.070]
+aInner = 7 # deg
+Da1 = 1.003 1.356 1.334 # mm_z/deg^1
+Da3 = -0.02919 0.04922 0.2014 # mm_z/deg^3
+Da5 = -0.0805 0.0122 0.06046 # mm_z/deg^5
+Da7 = 0.05888 -0.02795 -0.0782 # mm_z/deg^7
+
+[LowAngularDispersion@0.100]
+aInner = 7 # deg
+Da1 = 1.059 1.33 1.409 # mm_z/deg^1
+Da3 = -0.02261 0.05624 0.1846 # mm_z/deg^3
+Da5 = -0.02439 0.009775 0.06243 # mm_z/deg^5
+Da7 = 0.008029 -0.02778 -0.08614 # mm_z/deg^7
+
+[LowAngularDispersion@0.150]
+aInner = 7 # deg
+Da1 = 1.066 1.313 1.457 # mm_z/deg^1
+Da3 = -0.02208 0.04435 0.1375 # mm_z/deg^3
+Da5 = -0.04867 -0.006544 0.02874 # mm_z/deg^5
+Da7 = 0.01439 -0.02391 -0.06169 # mm_z/deg^7
+
+[LowAngularDispersion@0.200]
+aInner = 7 # deg
+Da1 = 1.019 1.273 1.465 # mm_z/deg^1
+Da3 = 0.004101 0.05662 0.1341 # mm_z/deg^3
+Da5 = -0.02951 0.003854 0.02751 # mm_z/deg^5
+Da7 = 0.01513 -0.02309 -0.03414 # mm_z/deg^7
+
+[LowAngularDispersion@0.300]
+aInner = 7 # deg
+Da1 = 1.113 1.364 1.568 # mm_z/deg^1
+Da3 = -0.05816 -0.01242 0.06502 # mm_z/deg^3
+Da5 = -0.05943 -0.04286 -0.04492 # mm_z/deg^5
+Da7 = 0.0233 -0.001784 -0.008105 # mm_z/deg^7
+
+[LowAngularDispersion@0.400]
+aInner = 7 # deg
+Da1 = 1.232 1.399 1.522 # mm_z/deg^1
+Da3 = -0.01379 0.07008 0.1861 # mm_z/deg^3
+Da5 = -0.05695 -0.0725 -0.08736 # mm_z/deg^5
+Da7 = -0.002436 -0.004567 -0.0235 # mm_z/deg^7
+
+[LowAngularDispersion@0.500]
+aInner = 7 # deg
+Da1 = 1.291 1.418 1.502 # mm_z/deg^1
+Da3 = 0.02511 0.1315 0.2733 # mm_z/deg^3
+Da5 = -0.1064 -0.1345 -0.1766 # mm_z/deg^5
+Da7 = 0.02416 0.01381 0.01179 # mm_z/deg^7
+
+[LowAngularDispersion@0.700]
+aInner = 7 # deg
+Da1 = 1.327 1.434 1.506 # mm_z/deg^1
+Da3 = -0.003597 0.08699 0.2003 # mm_z/deg^3
+Da5 = -0.1276 -0.1522 -0.1588 # mm_z/deg^5
+Da7 = 0.02997 0.02644 -0.01164 # mm_z/deg^7
+
+[LowAngularDispersion@0.800]
+aInner = 7 # deg
+Da1 = 1.322 1.456 1.558 # mm_z/deg^1
+Da3 = -0.07679 -0.002322 0.0919 # mm_z/deg^3
+Da5 = -0.06852 -0.09276 -0.1093 # mm_z/deg^5
+Da7 = 0.01151 0.01951 0.01234 # mm_z/deg^7
+
+[LowAngularDispersion@1.000]
+aInner = 7 # deg
+Da1 = 1.334 1.461 1.562 # mm_z/deg^1
+Da3 = -0.08814 -0.01701 0.06686 # mm_z/deg^3
+Da5 = -0.0656 -0.09791 -0.1037 # mm_z/deg^5
+Da7 = 0.01008 0.02976 0.01203 # mm_z/deg^7
+
+[LowAngularDispersion@1.200]
+aInner = 7 # deg
+Da1 = 1.334 1.464 1.569 # mm_z/deg^1
+Da3 = -0.1033 -0.03506 0.04681 # mm_z/deg^3
+Da5 = -0.04639 -0.08084 -0.09629 # mm_z/deg^5
+Da7 = -0.009669 0.0216 0.01752 # mm_z/deg^7
+
+[LowAngularDispersion@1.400]
+aInner = 7 # deg
+Da1 = 1.341 1.459 1.553 # mm_z/deg^1
+Da3 = -0.09809 -0.02981 0.05064 # mm_z/deg^3
+Da5 = -0.067 -0.1023 -0.1191 # mm_z/deg^5
+Da7 = 0.01192 0.03716 0.0315 # mm_z/deg^7
+
+[LowAngularDispersion@1.600]
+aInner = 7 # deg
+Da1 = 1.353 1.459 1.542 # mm_z/deg^1
+Da3 = -0.08919 -0.01954 0.06358 # mm_z/deg^3
+Da5 = -0.09524 -0.1249 -0.1493 # mm_z/deg^5
+Da7 = 0.03447 0.04689 0.0504 # mm_z/deg^7
+
+[LowAngularDispersion@1.800]
+aInner = 7 # deg
+Da1 = 1.366 1.462 1.535 # mm_z/deg^1
+Da3 = -0.08066 -0.0088 0.07327 # mm_z/deg^3
+Da5 = -0.1243 -0.1554 -0.1706 # mm_z/deg^5
+Da7 = 0.05057 0.06305 0.05341 # mm_z/deg^7
+
+[LowAngularDispersion@2.000]
+aInner = 7 # deg
+Da1 = 1.373 1.462 1.528 # mm_z/deg^1
+Da3 = -0.07249 0.002554 0.08803 # mm_z/deg^3
+Da5 = -0.1337 -0.1761 -0.1976 # mm_z/deg^5
+Da7 = 0.04552 0.0719 0.06441 # mm_z/deg^7
+
+[LowAngularDispersion@2.500]
+aInner = 7 # deg
+Da1 = 1.378 1.438 1.474 # mm_z/deg^1
+Da3 = -0.01647 0.0721 0.175 # mm_z/deg^3
+Da5 = -0.2316 -0.2702 -0.3071 # mm_z/deg^5
+Da7 = 0.08986 0.09482 0.0917 # mm_z/deg^7
+
+[LowAngularDispersion@3.000]
+aInner = 7 # deg
+Da1 = 1.383 1.446 1.486 # mm_z/deg^1
+Da3 = -0.03772 0.04791 0.1452 # mm_z/deg^3
+Da5 = -0.2206 -0.2589 -0.2811 # mm_z/deg^5
+Da7 = 0.1032 0.1171 0.1002 # mm_z/deg^7
+
+[LowAngularDispersion@3.500]
+aInner = 7 # deg
+Da1 = 1.388 1.447 1.481 # mm_z/deg^1
+Da3 = -0.04113 0.0498 0.1493 # mm_z/deg^3
+Da5 = -0.2555 -0.2992 -0.3147 # mm_z/deg^5
+Da7 = 0.1359 0.1539 0.1284 # mm_z/deg^7
+
+[LowAngularDispersion@4.000]
+aInner = 7 # deg
+Da1 = 1.373 1.403 1.405 # mm_z/deg^1
+Da3 = 0.0616 0.1667 0.2895 # mm_z/deg^3
+Da5 = -0.4321 -0.4567 -0.4886 # mm_z/deg^5
+Da7 = 0.2212 0.2006 0.1808 # mm_z/deg^7
+
+[LowAngularDispersion@5.000]
+aInner = 7 # deg
+Da1 = 1.387 1.424 1.436 # mm_z/deg^1
+Da3 = -0.005176 0.1048 0.2295 # mm_z/deg^3
+Da5 = -0.4067 -0.4446 -0.4798 # mm_z/deg^5
+Da7 = 0.2402 0.2378 0.2254 # mm_z/deg^7
+
+[LowAngularDispersion@6.000]
+aInner = 7 # deg
+Da1 = 1.376 1.394 1.384 # mm_z/deg^1
+Da3 = 0.08113 0.2186 0.3726 # mm_z/deg^3
+Da5 = -0.5916 -0.6632 -0.7294 # mm_z/deg^5
+Da7 = 0.3314 0.3571 0.3665 # mm_z/deg^7
+
+[LowAngularDispersion@7.500]
+aInner = 7 # deg
+Da1 = 1.42 1.442 1.437 # mm_z/deg^1
+Da3 = 0.01933 0.1738 0.3443 # mm_z/deg^3
+Da5 = -0.7245 -0.8123 -0.8891 # mm_z/deg^5
+Da7 = 0.5072 0.548 0.5692 # mm_z/deg^7
+
+[LowAngularDispersion@9.000]
+aInner = 7 # deg
+Da1 = 1.407 1.419 1.403 # mm_z/deg^1
+Da3 = 0.1121 0.2759 0.4596 # mm_z/deg^3
+Da5 = -0.9133 -0.9983 -1.082 # mm_z/deg^5
+Da7 = 0.6556 0.6934 0.7203 # mm_z/deg^7
+
+[LowAngularDispersion@10.000]
+aInner = 7 # deg
+Da1 = 1.416 1.434 1.427 # mm_z/deg^1
+Da3 = 0.02262 0.1845 0.3623 # mm_z/deg^3
+Da5 = -0.8195 -0.9148 -0.996 # mm_z/deg^5
+Da7 = 0.6043 0.6683 0.7072 # mm_z/deg^7
+
+[LowAngularDispersion@12.500]
+aInner = 7 # deg
+Da1 = 1.402 1.455 1.488 # mm_z/deg^1
+Da3 = -0.1788 -0.06059 0.07847 # mm_z/deg^3
+Da5 = -0.5318 -0.5231 -0.5293 # mm_z/deg^5
+Da7 = 0.5335 0.5109 0.5012 # mm_z/deg^7
+
+[LowAngularDispersion@15.000]
+aInner = 7 # deg
+Da1 = 1.436 1.486 1.517 # mm_z/deg^1
+Da3 = -0.1538 -0.03753 0.09221 # mm_z/deg^3
+Da5 = -0.3592 -0.4046 -0.4382 # mm_z/deg^5
+Da7 = 0.2248 0.2693 0.2954 # mm_z/deg^7
+
+[LowAngularDispersion@20.000]
+aInner = 7 # deg
+Da1 = 1.39 1.428 1.449 # mm_z/deg^1
+Da3 = 0.09156 0.1967 0.3167 # mm_z/deg^3
+Da5 = -0.7486 -0.7679 -0.7846 # mm_z/deg^5
+Da7 = 0.5587 0.5684 0.5703 # mm_z/deg^7
+
+[LowAngularDispersion@21.000]
+aInner = 7 # deg
+Da1 = 1.42 1.486 1.537 # mm_z/deg^1
+Da3 = -0.1062 -0.01075 0.09943 # mm_z/deg^3
+Da5 = -0.4044 -0.4081 -0.4109 # mm_z/deg^5
+Da7 = 0.3463 0.3515 0.3523 # mm_z/deg^7
+
+[LowAngularDispersion@22.000]
+aInner = 7 # deg
+Da1 = 1.416 1.503 1.577 # mm_z/deg^1
+Da3 = -0.1905 -0.1042 -0.003454 # mm_z/deg^3
+Da5 = -0.2138 -0.2103 -0.2089 # mm_z/deg^5
+Da7 = 0.1601 0.1613 0.1655 # mm_z/deg^7
+
+[LowAngularDispersion@23.000]
+aInner = 7 # deg
+Da1 = 1.344 1.479 1.608 # mm_z/deg^1
+Da3 = -0.2058 -0.1285 -0.0377 # mm_z/deg^3
+Da5 = 0.01626 0.03937 0.05624 # mm_z/deg^5
+Da7 = -0.3008 -0.326 -0.3355 # mm_z/deg^7
+
+[LowAngularDispersion@26.500]
+aInner = 7 # deg
+Da1 = 1.352 1.533 1.715 # mm_z/deg^1
+Da3 = -0.3228 -0.2553 -0.1677 # mm_z/deg^3
+Da5 = -0.1047 -0.1229 -0.171 # mm_z/deg^5
+Da7 = -0.7647 -0.7589 -0.7073 # mm_z/deg^7
+
+[LowAngularDispersion@30.000]
+aInner = 7 # deg
+Da1 = 1.407 1.563 1.716 # mm_z/deg^1
+Da3 = -0.3245 -0.2503 -0.1618 # mm_z/deg^3
+Da5 = 0.02241 0.02883 0.03431 # mm_z/deg^5
+Da7 = -0.5853 -0.6076 -0.6187 # mm_z/deg^7
+
+# =================== MediumAngularDispersion =================== 
+
+[MediumAngularDispersion defaults]
+aUnit  = "deg"
+aRange = -4.5 4.5
+eShift = -0.050 0 0.050 # Ep
+Da7 = 0 0 0 # mm_z/deg^7
+
+[MediumAngularDispersion@0.100]
+aInner = 4 # deg
+Da1 = 1.587 1.936 1.463 # mm_z/deg^1
+Da3 = 0.06021 2.081 5.28 # mm_z/deg^3
+Da5 = -0.449 -1.978 -3.094 # mm_z/deg^5
+
+[MediumAngularDispersion@0.150]
+aInner = 4 # deg
+Da1 = 1.859 2.084 1.911 # mm_z/deg^1
+Da3 = 0.1242 1.171 2.771 # mm_z/deg^3
+Da5 = -0.5712 -1.4 -2.229 # mm_z/deg^5
+
+[MediumAngularDispersion@0.180]
+aInner = 4 # deg
+Da1 = 1.908 2.118 2.042 # mm_z/deg^1
+Da3 = 0.1488 0.9283 2.082 # mm_z/deg^3
+Da5 = -0.5091 -1.093 -1.669 # mm_z/deg^5
+
+[MediumAngularDispersion@0.200]
+aInner = 4 # deg
+Da1 = 1.921 2.118 2.058 # mm_z/deg^1
+Da3 = 0.1671 0.9503 2.094 # mm_z/deg^3
+Da5 = -0.5403 -1.121 -1.723 # mm_z/deg^5
+
+[MediumAngularDispersion@0.250]
+aInner = 4 # deg
+Da1 = 1.946 2.19 2.22 # mm_z/deg^1
+Da3 = -0.02519 0.5315 1.303 # mm_z/deg^3
+Da5 = -0.4991 -0.8649 -1.139 # mm_z/deg^5
+
+[MediumAngularDispersion@0.280]
+aInner = 4 # deg
+Da1 = 1.959 2.226 2.296 # mm_z/deg^1
+Da3 = -0.1005 0.3651 1.002 # mm_z/deg^3
+Da5 = -0.4959 -0.7599 -0.9327 # mm_z/deg^5
+
+[MediumAngularDispersion@0.290]
+aInner = 4 # deg
+Da1 = 1.982 2.218 2.27 # mm_z/deg^1
+Da3 = -0.05536 0.4063 1.026 # mm_z/deg^3
+Da5 = -0.5029 -0.7566 -0.9223 # mm_z/deg^5
+
+[MediumAngularDispersion@0.300]
+aInner = 4 # deg
+Da1 = 1.973 2.238 2.333 # mm_z/deg^1
+Da3 = -0.07135 0.3075 0.8336 # mm_z/deg^3
+Da5 = -0.3997 -0.5679 -0.6981 # mm_z/deg^5
+
+[MediumAngularDispersion@0.350]
+aInner = 4 # deg
+Da1 = 2.009 2.256 2.383 # mm_z/deg^1
+Da3 = -0.2162 0.08887 0.5037 # mm_z/deg^3
+Da5 = -0.4924 -0.6648 -0.8572 # mm_z/deg^5
+
+[MediumAngularDispersion@0.370]
+aInner = 4 # deg
+Da1 = 2.018 2.276 2.417 # mm_z/deg^1
+Da3 = -0.1913 0.06888 0.427 # mm_z/deg^3
+Da5 = -0.3873 -0.5362 -0.6781 # mm_z/deg^5
+
+[MediumAngularDispersion@0.390]
+aInner = 4 # deg
+Da1 = 2.018 2.212 2.311 # mm_z/deg^1
+Da3 = 0.08163 0.3791 0.7744 # mm_z/deg^3
+Da5 = -0.429 -0.5599 -0.7039 # mm_z/deg^5
+
+[MediumAngularDispersion@0.400]
+aInner = 4 # deg
+Da1 = 1.991 2.172 2.269 # mm_z/deg^1
+Da3 = 0.06209 0.3263 0.6907 # mm_z/deg^3
+Da5 = -0.2634 -0.4381 -0.6761 # mm_z/deg^5
+
+[MediumAngularDispersion@0.440]
+aInner = 4 # deg
+Da1 = 1.928 2.193 2.389 # mm_z/deg^1
+Da3 = -0.1387 0.04107 0.292 # mm_z/deg^3
+Da5 = -0.1006 -0.1862 -0.3204 # mm_z/deg^5
+
+[MediumAngularDispersion@0.500]
+aInner = 4 # deg
+Da1 = 1.99 2.224 2.405 # mm_z/deg^1
+Da3 = -0.01767 0.2132 0.5291 # mm_z/deg^3
+Da5 = -0.4266 -0.6679 -0.9327 # mm_z/deg^5
+
+[MediumAngularDispersion@0.550]
+aInner = 4 # deg
+Da1 = 1.994 2.184 2.325 # mm_z/deg^1
+Da3 = 0.2869 0.5981 0.9926 # mm_z/deg^3
+Da5 = -0.6903 -0.9404 -1.214 # mm_z/deg^5
+
+[MediumAngularDispersion@0.600]
+aInner = 4 # deg
+Da1 = 1.978 2.181 2.346 # mm_z/deg^1
+Da3 = 0.2811 0.5507 0.8812 # mm_z/deg^3
+Da5 = -0.6534 -0.8795 -1.097 # mm_z/deg^5
+
+[MediumAngularDispersion@0.650]
+aInner = 4 # deg
+Da1 = 1.998 2.186 2.339 # mm_z/deg^1
+Da3 = 0.2994 0.5328 0.8205 # mm_z/deg^3
+Da5 = -0.5613 -0.7059 -0.8669 # mm_z/deg^5
+
+[MediumAngularDispersion@0.700]
+aInner = 4 # deg
+Da1 = 2.017 2.222 2.397 # mm_z/deg^1
+Da3 = 0.1018 0.263 0.4583 # mm_z/deg^3
+Da5 = -0.3434 -0.4675 -0.5714 # mm_z/deg^5
+
+[MediumAngularDispersion@0.720]
+aInner = 4 # deg
+Da1 = 2.02 2.223 2.399 # mm_z/deg^1
+Da3 = 0.1113 0.2669 0.4544 # mm_z/deg^3
+Da5 = -0.3441 -0.4566 -0.55 # mm_z/deg^5
+
+[MediumAngularDispersion@0.750]
+aInner = 4 # deg
+Da1 = 2.013 2.21 2.381 # mm_z/deg^1
+Da3 = 0.1791 0.3364 0.5297 # mm_z/deg^3
+Da5 = -0.3927 -0.4774 -0.5695 # mm_z/deg^5
+
+[MediumAngularDispersion@0.800]
+aInner = 4 # deg
+Da1 = 2.011 2.244 2.457 # mm_z/deg^1
+Da3 = -0.04614 0.04838 0.1631 # mm_z/deg^3
+Da5 = -0.2505 -0.3309 -0.3886 # mm_z/deg^5
+
+[MediumAngularDispersion@0.850]
+aInner = 4 # deg
+Da1 = 2.025 2.235 2.425 # mm_z/deg^1
+Da3 = 0.05525 0.1614 0.2855 # mm_z/deg^3
+Da5 = -0.2766 -0.3333 -0.3729 # mm_z/deg^5
+
+[MediumAngularDispersion@0.880]
+aInner = 4 # deg
+Da1 = 2.023 2.215 2.386 # mm_z/deg^1
+Da3 = 0.143 0.2508 0.383 # mm_z/deg^3
+Da5 = -0.2677 -0.296 -0.3407 # mm_z/deg^5
+
+[MediumAngularDispersion@0.900]
+aInner = 4 # deg
+Da1 = 2.038 2.244 2.432 # mm_z/deg^1
+Da3 = 0.0566 0.1542 0.2688 # mm_z/deg^3
+Da5 = -0.2561 -0.2991 -0.3332 # mm_z/deg^5
+
+[MediumAngularDispersion@0.950]
+aInner = 4 # deg
+Da1 = 2.034 2.273 2.496 # mm_z/deg^1
+Da3 = -0.1675 -0.1168 -0.04972 # mm_z/deg^3
+Da5 = -0.1054 -0.1423 -0.1769 # mm_z/deg^5
+
+[MediumAngularDispersion@0.970]
+aInner = 4 # deg
+Da1 = 2.064 2.291 2.501 # mm_z/deg^1
+Da3 = -0.1548 -0.1081 -0.04729 # mm_z/deg^3
+Da5 = -0.1826 -0.1851 -0.1893 # mm_z/deg^5
+
+[MediumAngularDispersion@0.980]
+aInner = 4 # deg
+Da1 = 2.066 2.29 2.498 # mm_z/deg^1
+Da3 = -0.1447 -0.09478 -0.03274 # mm_z/deg^3
+Da5 = -0.1764 -0.1882 -0.1943 # mm_z/deg^5
+
+[MediumAngularDispersion@1.000]
+aInner = 4 # deg
+Da1 = 2.061 2.275 2.471 # mm_z/deg^1
+Da3 = -0.06832 -0.009583 0.07017 # mm_z/deg^3
+Da5 = -0.1987 -0.1978 -0.2237 # mm_z/deg^5
+
+[MediumAngularDispersion@1.100]
+aInner = 4 # deg
+Da1 = 2.054 2.276 2.485 # mm_z/deg^1
+Da3 = -0.1029 -0.04743 0.02183 # mm_z/deg^3
+Da5 = -0.1944 -0.2222 -0.2478 # mm_z/deg^5
+
+[MediumAngularDispersion@1.250]
+aInner = 4 # deg
+Da1 = 2.049 2.278 2.497 # mm_z/deg^1
+Da3 = -0.1667 -0.1268 -0.07344 # mm_z/deg^3
+Da5 = -0.1319 -0.1633 -0.2011 # mm_z/deg^5
+
+[MediumAngularDispersion@1.400]
+aInner = 4 # deg
+Da1 = 2.072 2.287 2.491 # mm_z/deg^1
+Da3 = -0.1313 -0.09076 -0.04111 # mm_z/deg^3
+Da5 = -0.1639 -0.1686 -0.1673 # mm_z/deg^5
+
+[MediumAngularDispersion@1.500]
+aInner = 4 # deg
+Da1 = 2.07 2.288 2.496 # mm_z/deg^1
+Da3 = -0.1412 -0.1022 -0.05267 # mm_z/deg^3
+Da5 = -0.1456 -0.1572 -0.1679 # mm_z/deg^5
+
+[MediumAngularDispersion@1.750]
+aInner = 4 # deg
+Da1 = 2.065 2.286 2.497 # mm_z/deg^1
+Da3 = -0.1768 -0.1382 -0.09287 # mm_z/deg^3
+Da5 = -0.09967 -0.1189 -0.117 # mm_z/deg^5
+
+[MediumAngularDispersion@2.000]
+aInner = 4 # deg
+Da1 = 2.067 2.291 2.506 # mm_z/deg^1
+Da3 = -0.2196 -0.1821 -0.1364 # mm_z/deg^3
+Da5 = -0.06972 -0.07488 -0.07275 # mm_z/deg^5
+
+[MediumAngularDispersion@2.500]
+aInner = 4 # deg
+Da1 = 2.077 2.283 2.478 # mm_z/deg^1
+Da3 = -0.1915 -0.1547 -0.1018 # mm_z/deg^3
+Da5 = -0.1004 -0.08832 -0.1069 # mm_z/deg^5
+
+[MediumAngularDispersion@3.000]
+aInner = 4 # deg
+Da1 = 2.071 2.29 2.501 # mm_z/deg^1
+Da3 = -0.2267 -0.2047 -0.1671 # mm_z/deg^3
+Da5 = -0.1204 -0.1028 -0.1108 # mm_z/deg^5
+
+[MediumAngularDispersion@3.300]
+aInner = 4 # deg
+Da1 = 2.068 2.29 2.504 # mm_z/deg^1
+Da3 = -0.2378 -0.2095 -0.1754 # mm_z/deg^3
+Da5 = -0.09365 -0.08982 -0.07792 # mm_z/deg^5
+
+[MediumAngularDispersion@3.500]
+aInner = 4 # deg
+Da1 = 2.08 2.298 2.506 # mm_z/deg^1
+Da3 = -0.2584 -0.228 -0.1827 # mm_z/deg^3
+Da5 = -0.06247 -0.04654 -0.05205 # mm_z/deg^5
+
+[MediumAngularDispersion@4.000]
+aInner = 4 # deg
+Da1 = 2.054 2.257 2.448 # mm_z/deg^1
+Da3 = -0.2462 -0.197 -0.1392 # mm_z/deg^3
+Da5 = -0.03488 -0.04662 -0.05152 # mm_z/deg^5
+
+[MediumAngularDispersion@4.250]
+aInner = 4 # deg
+Da1 = 2.089 2.294 2.488 # mm_z/deg^1
+Da3 = -0.2863 -0.243 -0.1926 # mm_z/deg^3
+Da5 = -0.03287 -0.0478 -0.058 # mm_z/deg^5
+
+[MediumAngularDispersion@4.500]
+aInner = 4 # deg
+Da1 = 2.085 2.297 2.499 # mm_z/deg^1
+Da3 = -0.2685 -0.2346 -0.1841 # mm_z/deg^3
+Da5 = -0.04607 -0.0385 -0.05495 # mm_z/deg^5
+
+[MediumAngularDispersion@4.750]
+aInner = 4 # deg
+Da1 = 2.035 2.272 2.505 # mm_z/deg^1
+Da3 = -0.3012 -0.2836 -0.2592 # mm_z/deg^3
+Da5 = -0.1304 -0.1307 -0.1275 # mm_z/deg^5
+
+[MediumAngularDispersion@5.000]
+aInner = 4 # deg
+Da1 = 2.023 2.28 2.535 # mm_z/deg^1
+Da3 = -0.4196 -0.3873 -0.3442 # mm_z/deg^3
+Da5 = -0.2114 -0.2439 -0.2699 # mm_z/deg^5
+
+[MediumAngularDispersion@5.200]
+aInner = 4 # deg
+Da1 = 2.011 2.237 2.455 # mm_z/deg^1
+Da3 = -0.1597 -0.05139 0.07414 # mm_z/deg^3
+Da5 = -0.6782 -0.7605 -0.8351 # mm_z/deg^5
+
+[MediumAngularDispersion@5.500]
+aInner = 4 # deg
+Da1 = 2.054 2.266 2.466 # mm_z/deg^1
+Da3 = 0.0309 0.2061 0.4133 # mm_z/deg^3
+Da5 = -1.402 -1.583 -1.793 # mm_z/deg^5
+
+[MediumAngularDispersion@5.650]
+aInner = 4 # deg
+Da1 = 2.069 2.288 2.495 # mm_z/deg^1
+Da3 = -0.06586 0.1187 0.332 # mm_z/deg^3
+Da5 = -1.622 -1.85 -2.08 # mm_z/deg^5
+
+[MediumAngularDispersion@5.700]
+aInner = 4 # deg
+Da1 = 2.063 2.272 2.468 # mm_z/deg^1
+Da3 = 0.06985 0.267 0.5028 # mm_z/deg^3
+Da5 = -1.684 -1.891 -2.145 # mm_z/deg^5
+
+[MediumAngularDispersion@5.750]
+aInner = 4 # deg
+Da1 = 2.05 2.239 2.411 # mm_z/deg^1
+Da3 = 0.3699 0.6093 0.886 # mm_z/deg^3
+Da5 = -1.899 -2.143 -2.418 # mm_z/deg^5
+
+[MediumAngularDispersion@5.900]
+aInner = 4 # deg
+Da1 = 2.054 2.236 2.402 # mm_z/deg^1
+Da3 = 0.4171 0.6751 0.9568 # mm_z/deg^3
+Da5 = -2.114 -2.386 -2.621 # mm_z/deg^5
+
+[MediumAngularDispersion@6.000]
+aInner = 4 # deg
+Da1 = 2.044 2.233 2.404 # mm_z/deg^1
+Da3 = 0.3534 0.5986 0.8888 # mm_z/deg^3
+Da5 = -1.881 -2.149 -2.469 # mm_z/deg^5
+
+[MediumAngularDispersion@6.150]
+aInner = 4 # deg
+Da1 = 2.06 2.27 2.466 # mm_z/deg^1
+Da3 = 0.03096 0.2208 0.4464 # mm_z/deg^3
+Da5 = -1.433 -1.641 -1.879 # mm_z/deg^5
+
+[MediumAngularDispersion@6.250]
+aInner = 4 # deg
+Da1 = 2.052 2.246 2.423 # mm_z/deg^1
+Da3 = 0.2222 0.4444 0.6974 # mm_z/deg^3
+Da5 = -1.498 -1.746 -2.001 # mm_z/deg^5
+
+[MediumAngularDispersion@6.500]
+aInner = 4 # deg
+Da1 = 2.046 2.248 2.435 # mm_z/deg^1
+Da3 = 0.08201 0.2906 0.5382 # mm_z/deg^3
+Da5 = -1.489 -1.719 -1.987 # mm_z/deg^5
+
+[MediumAngularDispersion@7.000]
+aInner = 4 # deg
+Da1 = 2.068 2.279 2.474 # mm_z/deg^1
+Da3 = -0.03846 0.1839 0.4404 # mm_z/deg^3
+Da5 = -1.59 -1.869 -2.144 # mm_z/deg^5
+
+[MediumAngularDispersion@7.500]
+aInner = 4 # deg
+Da1 = 2.072 2.291 2.497 # mm_z/deg^1
+Da3 = -0.1889 0.003992 0.2302 # mm_z/deg^3
+Da5 = -1.287 -1.542 -1.808 # mm_z/deg^5
+
+[MediumAngularDispersion@8.500]
+aInner = 4 # deg
+Da1 = 2.076 2.292 2.493 # mm_z/deg^1
+Da3 = -0.1633 0.04916 0.3056 # mm_z/deg^3
+Da5 = -1.692 -1.996 -2.328 # mm_z/deg^5
+
+[MediumAngularDispersion@9.000]
+aInner = 4 # deg
+Da1 = 2.071 2.266 2.442 # mm_z/deg^1
+Da3 = 0.1669 0.4413 0.7653 # mm_z/deg^3
+Da5 = -2.054 -2.397 -2.783 # mm_z/deg^5
+
+[MediumAngularDispersion@10.000]
+aInner = 4 # deg
+Da1 = 2.072 2.283 2.478 # mm_z/deg^1
+Da3 = -0.09951 0.1187 0.3681 # mm_z/deg^3
+Da5 = -1.56 -1.848 -2.121 # mm_z/deg^5
+
+[MediumAngularDispersion@11.500]
+aInner = 4 # deg
+Da1 = 2.075 2.286 2.481 # mm_z/deg^1
+Da3 = -0.09947 0.1289 0.3869 # mm_z/deg^3
+Da5 = -1.659 -1.948 -2.218 # mm_z/deg^5
+
+[MediumAngularDispersion@13.000]
+aInner = 4 # deg
+Da1 = 2.078 2.287 2.481 # mm_z/deg^1
+Da3 = -0.08502 0.1591 0.4421 # mm_z/deg^3
+Da5 = -1.857 -2.145 -2.434 # mm_z/deg^5
+
+[MediumAngularDispersion@14.000]
+aInner = 4 # deg
+Da1 = 2.081 2.282 2.465 # mm_z/deg^1
+Da3 = 0.02405 0.2996 0.6242 # mm_z/deg^3
+Da5 = -2.134 -2.451 -2.801 # mm_z/deg^5
+
+[MediumAngularDispersion@15.000]
+aInner = 4 # deg
+Da1 = 2.087 2.276 2.446 # mm_z/deg^1
+Da3 = 0.1678 0.4964 0.8741 # mm_z/deg^3
+Da5 = -2.624 -3.016 -3.431 # mm_z/deg^5
+
+[MediumAngularDispersion@16.000]
+aInner = 4 # deg
+Da1 = 2.08 2.259 2.416 # mm_z/deg^1
+Da3 = 0.2877 0.6562 1.068 # mm_z/deg^3
+Da5 = -3.058 -3.492 -3.901 # mm_z/deg^5
+
+[MediumAngularDispersion@17.000]
+aInner = 4 # deg
+Da1 = 2.09 2.287 2.463 # mm_z/deg^1
+Da3 = 0.04017 0.3802 0.7784 # mm_z/deg^3
+Da5 = -2.681 -3.099 -3.55 # mm_z/deg^5
+
+[MediumAngularDispersion@18.000]
+aInner = 4 # deg
+Da1 = 2.087 2.259 2.405 # mm_z/deg^1
+Da3 = 0.449 0.8422 1.312 # mm_z/deg^3
+Da5 = -3.492 -3.882 -4.361 # mm_z/deg^5
+
+[MediumAngularDispersion@18.500]
+aInner = 4 # deg
+Da1 = 2.082 2.275 2.446 # mm_z/deg^1
+Da3 = 0.1254 0.4768 0.8881 # mm_z/deg^3
+Da5 = -2.901 -3.268 -3.671 # mm_z/deg^5
+
+[MediumAngularDispersion@19.000]
+aInner = 4 # deg
+Da1 = 2.08 2.28 2.459 # mm_z/deg^1
+Da3 = 0.04128 0.379 0.7736 # mm_z/deg^3
+Da5 = -2.658 -3.022 -3.416 # mm_z/deg^5
+
+[MediumAngularDispersion@20.000]
+aInner = 4 # deg
+Da1 = 2.062 2.242 2.398 # mm_z/deg^1
+Da3 = 0.3558 0.7345 1.172 # mm_z/deg^3
+Da5 = -2.858 -3.265 -3.72 # mm_z/deg^5
+
+[MediumAngularDispersion@21.000]
+aInner = 4 # deg
+Da1 = 2.066 2.264 2.441 # mm_z/deg^1
+Da3 = 0.07823 0.4089 0.7951 # mm_z/deg^3
+Da5 = -2.389 -2.749 -3.137 # mm_z/deg^5
+
+[MediumAngularDispersion@25.000]
+aInner = 4 # deg
+Da1 = 2.056 2.264 2.453 # mm_z/deg^1
+Da3 = -0.03855 0.2422 0.5856 # mm_z/deg^3
+Da5 = -2.026 -2.258 -2.582 # mm_z/deg^5
+
+[MediumAngularDispersion@27.000]
+aInner = 4 # deg
+Da1 = 2.046 2.264 2.465 # mm_z/deg^1
+Da3 = -0.1342 0.1251 0.4247 # mm_z/deg^3
+Da5 = -1.818 -2.014 -2.209 # mm_z/deg^5
+
+[MediumAngularDispersion@29.000]
+aInner = 4 # deg
+Da1 = 2.029 2.222 2.396 # mm_z/deg^1
+Da3 = 0.2033 0.5068 0.8457 # mm_z/deg^3
+Da5 = -1.985 -2.233 -2.465 # mm_z/deg^5
+
+[MediumAngularDispersion@35.000]
+aInner = 4 # deg
+Da1 = 2.048 2.251 2.437 # mm_z/deg^1
+Da3 = 0.01804 0.2866 0.601 # mm_z/deg^3
+Da5 = -1.877 -2.116 -2.385 # mm_z/deg^5
+
+[MediumAngularDispersion@37.500]
+aInner = 4 # deg
+Da1 = 2.05 2.249 2.431 # mm_z/deg^1
+Da3 = 0.04 0.3187 0.6337 # mm_z/deg^3
+Da5 = -1.944 -2.212 -2.475 # mm_z/deg^5
+
+[MediumAngularDispersion@40.000]
+aInner = 4 # deg
+Da1 = 2.032 2.204 2.355 # mm_z/deg^1
+Da3 = 0.3867 0.7124 1.078 # mm_z/deg^3
+Da5 = -2.329 -2.711 -3.09 # mm_z/deg^5
+
+[MediumAngularDispersion@41.000]
+aInner = 4 # deg
+Da1 = 2.034 2.222 2.391 # mm_z/deg^1
+Da3 = 0.1512 0.4376 0.7634 # mm_z/deg^3
+Da5 = -1.946 -2.246 -2.553 # mm_z/deg^5
+
+[MediumAngularDispersion@42.000]
+aInner = 4 # deg
+Da1 = 1.993 2.15 2.285 # mm_z/deg^1
+Da3 = 0.5564 0.9021 1.29 # mm_z/deg^3
+Da5 = -2.49 -2.889 -3.288 # mm_z/deg^5
+
+[MediumAngularDispersion@43.000]
+aInner = 4 # deg
+Da1 = 2.037 2.211 2.364 # mm_z/deg^1
+Da3 = 0.3567 0.6706 1.037 # mm_z/deg^3
+Da5 = -2.246 -2.59 -2.999 # mm_z/deg^5
+
+[MediumAngularDispersion@44.000]
+aInner = 4 # deg
+Da1 = 2.062 2.251 2.421 # mm_z/deg^1
+Da3 = 0.03565 0.3125 0.6294 # mm_z/deg^3
+Da5 = -1.765 -2.098 -2.432 # mm_z/deg^5
+
+[MediumAngularDispersion@45.000]
+aInner = 4 # deg
+Da1 = 2.07 2.265 2.44 # mm_z/deg^1
+Da3 = -0.06424 0.18 0.4673 # mm_z/deg^3
+Da5 = -1.471 -1.753 -2.077 # mm_z/deg^5
+
+[MediumAngularDispersion@46.500]
+aInner = 4 # deg
+Da1 = 2.084 2.28 2.455 # mm_z/deg^1
+Da3 = -0.1644 0.07683 0.3666 # mm_z/deg^3
+Da5 = -1.377 -1.649 -1.974 # mm_z/deg^5
+
+[MediumAngularDispersion@50.000]
+aInner = 4 # deg
+Da1 = 2.076 2.265 2.433 # mm_z/deg^1
+Da3 = -0.1029 0.1455 0.4403 # mm_z/deg^3
+Da5 = -1.462 -1.765 -2.118 # mm_z/deg^5
+
+[MediumAngularDispersion@54.000]
+aInner = 4 # deg
+Da1 = 2.091 2.295 2.481 # mm_z/deg^1
+Da3 = -0.3376 -0.129 0.1222 # mm_z/deg^3
+Da5 = -1.132 -1.354 -1.615 # mm_z/deg^5
+
+[MediumAngularDispersion@60.000]
+aInner = 4 # deg
+Da1 = 2.064 2.269 2.455 # mm_z/deg^1
+Da3 = -0.3187 -0.1236 0.1009 # mm_z/deg^3
+Da5 = -1.076 -1.281 -1.486 # mm_z/deg^5
+
+[MediumAngularDispersion@70.000]
+aInner = 4 # deg
+Da1 = 2.061 2.237 2.391 # mm_z/deg^1
+Da3 = 0.004318 0.2565 0.5412 # mm_z/deg^3
+Da5 = -1.732 -2.051 -2.369 # mm_z/deg^5
+
+[MediumAngularDispersion@75.000]
+aInner = 4 # deg
+Da1 = 2.092 2.297 2.486 # mm_z/deg^1
+Da3 = -0.3537 -0.1571 0.07826 # mm_z/deg^3
+Da5 = -1.114 -1.289 -1.482 # mm_z/deg^5
+
+[MediumAngularDispersion@80.000]
+aInner = 4 # deg
+Da1 = 2.082 2.28 2.46 # mm_z/deg^1
+Da3 = -0.2089 -0.009036 0.2278 # mm_z/deg^3
+Da5 = -1.339 -1.545 -1.791 # mm_z/deg^5
+
+[MediumAngularDispersion@85.000]
+aInner = 4 # deg
+Da1 = 2.059 2.256 2.438 # mm_z/deg^1
+Da3 = -0.1293 0.07061 0.3 # mm_z/deg^3
+Da5 = -1.302 -1.521 -1.745 # mm_z/deg^5
+
+[MediumAngularDispersion@90.000]
+aInner = 4 # deg
+Da1 = 2.072 2.284 2.484 # mm_z/deg^1
+Da3 = -0.3376 -0.1754 0.01415 # mm_z/deg^3
+Da5 = -1.014 -1.179 -1.334 # mm_z/deg^5
+
+[MediumAngularDispersion@93.000]
+aInner = 4 # deg
+Da1 = 2.076 2.282 2.474 # mm_z/deg^1
+Da3 = -0.3291 -0.1619 0.03258 # mm_z/deg^3
+Da5 = -1.048 -1.23 -1.411 # mm_z/deg^5
+
+[MediumAngularDispersion@95.000]
+aInner = 4 # deg
+Da1 = 2.082 2.281 2.465 # mm_z/deg^1
+Da3 = -0.2782 -0.09693 0.1139 # mm_z/deg^3
+Da5 = -1.101 -1.301 -1.508 # mm_z/deg^5
+
+[MediumAngularDispersion@97.000]
+aInner = 4 # deg
+Da1 = 2.065 2.264 2.449 # mm_z/deg^1
+Da3 = -0.3133 -0.1465 0.05909 # mm_z/deg^3
+Da5 = -1.002 -1.17 -1.38 # mm_z/deg^5
+
+[MediumAngularDispersion@98.000]
+aInner = 4 # deg
+Da1 = 2.08 2.286 2.478 # mm_z/deg^1
+Da3 = -0.3905 -0.2298 -0.03889 # mm_z/deg^3
+Da5 = -0.9253 -1.085 -1.258 # mm_z/deg^5
+
+[MediumAngularDispersion@99.000]
+aInner = 4 # deg
+Da1 = 2.073 2.262 2.436 # mm_z/deg^1
+Da3 = -0.2504 -0.06181 0.1651 # mm_z/deg^3
+Da5 = -1.125 -1.328 -1.568 # mm_z/deg^5
+
+[MediumAngularDispersion@101.000]
+aInner = 4 # deg
+Da1 = 2.027 2.183 2.319 # mm_z/deg^1
+Da3 = 0.1624 0.4054 0.6928 # mm_z/deg^3
+Da5 = -1.916 -2.202 -2.533 # mm_z/deg^5
+
+[MediumAngularDispersion@102.000]
+aInner = 4 # deg
+Da1 = 2.054 2.222 2.37 # mm_z/deg^1
+Da3 = -0.05942 0.1581 0.4121 # mm_z/deg^3
+Da5 = -1.429 -1.69 -1.977 # mm_z/deg^5
+
+[MediumAngularDispersion@103.000]
+aInner = 4 # deg
+Da1 = 2.091 2.286 2.465 # mm_z/deg^1
+Da3 = -0.4122 -0.2382 -0.02845 # mm_z/deg^3
+Da5 = -0.7709 -0.9248 -1.097 # mm_z/deg^5
+
+[MediumAngularDispersion@103.500]
+aInner = 4 # deg
+Da1 = 2.069 2.248 2.407 # mm_z/deg^1
+Da3 = -0.2057 -0.01703 0.2121 # mm_z/deg^3
+Da5 = -1.168 -1.372 -1.628 # mm_z/deg^5
+
+[MediumAngularDispersion@104.000]
+aInner = 4 # deg
+Da1 = 2.036 2.198 2.34 # mm_z/deg^1
+Da3 = 0.09884 0.3163 0.5713 # mm_z/deg^3
+Da5 = -1.628 -1.887 -2.189 # mm_z/deg^5
+
+[MediumAngularDispersion@104.200]
+aInner = 4 # deg
+Da1 = 2.078 2.269 2.443 # mm_z/deg^1
+Da3 = -0.2985 -0.1263 0.08045 # mm_z/deg^3
+Da5 = -0.9733 -1.16 -1.372 # mm_z/deg^5
+
+[MediumAngularDispersion@104.400]
+aInner = 4 # deg
+Da1 = 2.081 2.271 2.445 # mm_z/deg^1
+Da3 = -0.2668 -0.09014 0.1179 # mm_z/deg^3
+Da5 = -0.974 -1.162 -1.36 # mm_z/deg^5
+
+[MediumAngularDispersion@104.600]
+aInner = 4 # deg
+Da1 = 2.021 2.178 2.315 # mm_z/deg^1
+Da3 = 0.1297 0.3623 0.6341 # mm_z/deg^3
+Da5 = -1.868 -2.163 -2.492 # mm_z/deg^5
+
+[MediumAngularDispersion@104.800]
+aInner = 4 # deg
+Da1 = 2.048 2.221 2.375 # mm_z/deg^1
+Da3 = -0.005368 0.1994 0.4423 # mm_z/deg^3
+Da5 = -1.536 -1.774 -2.043 # mm_z/deg^5
+
+[MediumAngularDispersion@104.900]
+aInner = 4 # deg
+Da1 = 2.067 2.25 2.416 # mm_z/deg^1
+Da3 = -0.1596 0.03975 0.2743 # mm_z/deg^3
+Da5 = -1.264 -1.492 -1.747 # mm_z/deg^5
+
+[MediumAngularDispersion@105.000]
+aInner = 4 # deg
+Da1 = 1.998 2.146 2.273 # mm_z/deg^1
+Da3 = 0.3999 0.6528 0.9466 # mm_z/deg^3
+Da5 = -2.14 -2.449 -2.802 # mm_z/deg^5
+
+[MediumAngularDispersion@105.100]
+aInner = 4 # deg
+Da1 = 2.107 2.154 2.166 # mm_z/deg^1
+Da3 = 0.3262 0.6361 1.002 # mm_z/deg^3
+Da5 = -2.209 -2.409 -2.681 # mm_z/deg^5
+
+[MediumAngularDispersion@105.200]
+aInner = 4 # deg
+Da1 = 2.136 2.303 2.448 # mm_z/deg^1
+Da3 = -0.6803 -0.3983 -0.07609 # mm_z/deg^3
+Da5 = -0.213 -0.2718 -0.3415 # mm_z/deg^5
+
+[MediumAngularDispersion@105.300]
+aInner = 4 # deg
+Da1 = 2.137 2.289 2.417 # mm_z/deg^1
+Da3 = -0.6152 -0.3676 -0.08123 # mm_z/deg^3
+Da5 = -0.2534 -0.2911 -0.3634 # mm_z/deg^5
+
+[MediumAngularDispersion@105.400]
+aInner = 4 # deg
+Da1 = 2.123 2.241 2.331 # mm_z/deg^1
+Da3 = -0.4417 -0.1946 0.09368 # mm_z/deg^3
+Da5 = -0.6702 -0.7872 -0.9401 # mm_z/deg^5
+
+[MediumAngularDispersion@105.600]
+aInner = 4 # deg
+Da1 = 2.126 2.286 2.424 # mm_z/deg^1
+Da3 = -0.591 -0.3823 -0.1379 # mm_z/deg^3
+Da5 = -0.2178 -0.2543 -0.3142 # mm_z/deg^5
+
+[MediumAngularDispersion@105.800]
+aInner = 4 # deg
+Da1 = 2.124 2.209 2.264 # mm_z/deg^1
+Da3 = 0.06941 0.3393 0.6542 # mm_z/deg^3
+Da5 = -1.548 -1.719 -1.936 # mm_z/deg^5
+
+[MediumAngularDispersion@106.000]
+aInner = 4 # deg
+Da1 = 2.116 2.229 2.316 # mm_z/deg^1
+Da3 = -0.3335 -0.08846 0.2033 # mm_z/deg^3
+Da5 = -0.7368 -0.8453 -1.01 # mm_z/deg^5
+
+[MediumAngularDispersion@107.000]
+aInner = 4 # deg
+Da1 = 2.112 2.222 2.304 # mm_z/deg^1
+Da3 = -0.3298 -0.0833 0.2133 # mm_z/deg^3
+Da5 = -0.7571 -0.8745 -1.051 # mm_z/deg^5
+
+[MediumAngularDispersion@108.000]
+aInner = 4 # deg
+Da1 = 2.13 2.259 2.361 # mm_z/deg^1
+Da3 = -0.5763 -0.3031 0.008174 # mm_z/deg^3
+Da5 = -0.3535 -0.4484 -0.5684 # mm_z/deg^5
+
+[MediumAngularDispersion@110.000]
+aInner = 4 # deg
+Da1 = 2.133 2.29 2.424 # mm_z/deg^1
+Da3 = -0.6386 -0.4123 -0.1492 # mm_z/deg^3
+Da5 = -0.2316 -0.2691 -0.3327 # mm_z/deg^5
+
+[MediumAngularDispersion@120.000]
+aInner = 4 # deg
+Da1 = 2.095 2.201 2.28 # mm_z/deg^1
+Da3 = -0.2394 0.002486 0.2962 # mm_z/deg^3
+Da5 = -1.03 -1.169 -1.367 # mm_z/deg^5
+
+[MediumAngularDispersion@125.000]
+aInner = 4 # deg
+Da1 = 2.119 2.237 2.331 # mm_z/deg^1
+Da3 = -0.518 -0.2607 0.03937 # mm_z/deg^3
+Da5 = -0.5004 -0.5992 -0.7284 # mm_z/deg^5
+
+[MediumAngularDispersion@130.000]
+aInner = 4 # deg
+Da1 = 2.13 2.265 2.376 # mm_z/deg^1
+Da3 = -0.5693 -0.319 -0.02896 # mm_z/deg^3
+Da5 = -0.3504 -0.4211 -0.528 # mm_z/deg^5
+
+[MediumAngularDispersion@140.000]
+aInner = 4 # deg
+Da1 = 2.191 2.317 2.42 # mm_z/deg^1
+Da3 = -0.6253 -0.3583 -0.04065 # mm_z/deg^3
+Da5 = -0.5171 -0.5941 -0.7144 # mm_z/deg^5
+
+[MediumAngularDispersion@150.000]
+aInner = 4 # deg
+Da1 = 2.099 2.137 2.142 # mm_z/deg^1
+Da3 = 0.4219 0.7761 1.185 # mm_z/deg^3
+Da5 = -2.654 -2.877 -3.171 # mm_z/deg^5
+
+[MediumAngularDispersion@180.000]
+aInner = 4 # deg
+Da1 = 2.13 2.253 2.355 # mm_z/deg^1
+Da3 = -0.648 -0.3348 0.03206 # mm_z/deg^3
+Da5 = -0.4922 -0.5725 -0.6888 # mm_z/deg^5
+
+[MediumAngularDispersion@200.000]
+aInner = 4 # deg
+Da1 = 2.173 2.345 2.498 # mm_z/deg^1
+Da3 = -0.8578 -0.5476 -0.1867 # mm_z/deg^3
+Da5 = -0.3739 -0.4238 -0.4971 # mm_z/deg^5
+
+[MediumAngularDispersion@230.000]
+aInner = 4 # deg
+Da1 = 2.325 2.527 2.714 # mm_z/deg^1
+Da3 = -0.8597 -0.5515 -0.1901 # mm_z/deg^3
+Da5 = -0.6242 -0.6814 -0.7481 # mm_z/deg^5
+
+[MediumAngularDispersion@270.000]
+aInner = 4 # deg
+Da1 = 2.331 2.575 2.814 # mm_z/deg^1
+Da3 = -0.74 -0.4232 -0.04983 # mm_z/deg^3
+Da5 = -2.224 -2.32 -2.385 # mm_z/deg^5
+
+[MediumAngularDispersion@300.000]
+aInner = 4 # deg
+Da1 = 2.359 2.629 2.896 # mm_z/deg^1
+Da3 = -0.6328 -0.3053 0.07609 # mm_z/deg^3
+Da5 = -3.972 -4.131 -4.224 # mm_z/deg^5
+ 
+# =================== HighAngularDispersion =================== 
+
+[HighAngularDispersion defaults]
+aUnit  = "deg"
+aRange = -3 3
+eShift = -0.050 0 0.050 # Ep
+aInner = 3 # deg
+aGrid  = 0.5
+Da1    = 3.1 3.4 3.7
+
+[HighAngularDispersion@0.100]
+aInner = 3 # deg
+Da1 = 2.85 3.564 2.989 # mm_z/deg^1
+Da3 = 0.3602 4.3 9.366 # mm_z/deg^3
+
+[HighAngularDispersion@0.150]
+aInner = 3 # deg
+Da1 = 2.981 3.421 3.287 # mm_z/deg^1
+Da3 = 0.9762 3.475 6.625 # mm_z/deg^3
+
+[HighAngularDispersion@0.200]
+aInner = 3 # deg
+Da1 = 3.05 3.425 3.472 # mm_z/deg^1
+Da3 = 0.8381 2.375 4.358 # mm_z/deg^3
+
+[HighAngularDispersion@0.300]
+aInner = 3 # deg
+Da1 = 3.153 3.488 3.663 # mm_z/deg^1
+Da3 = 0.17 0.9313 1.951 # mm_z/deg^3
+
+[HighAngularDispersion@0.400]
+aInner = 3 # deg
+Da1 = 3.161 3.486 3.707 # mm_z/deg^1
+Da3 = 0.04447 0.6283 1.402 # mm_z/deg^3
+
+[HighAngularDispersion@0.500]
+aInner = 3 # deg
+Da1 = 3.136 3.465 3.728 # mm_z/deg^1
+Da3 = 0.05992 0.4473 0.9495 # mm_z/deg^3
+
+[HighAngularDispersion@0.650]
+aInner = 3 # deg
+Da1 = 3.108 3.426 3.708 # mm_z/deg^1
+Da3 = 0.2682 0.539 0.8724 # mm_z/deg^3
+
+[HighAngularDispersion@0.750]
+aInner = 3 # deg
+Da1 = 3.097 3.418 3.71 # mm_z/deg^1
+Da3 = 0.267 0.4909 0.7595 # mm_z/deg^3
+
+[HighAngularDispersion@0.850]
+aInner = 3 # deg
+Da1 = 3.099 3.425 3.73 # mm_z/deg^1
+Da3 = 0.06311 0.2083 0.3865 # mm_z/deg^3
+
+[HighAngularDispersion@0.900]
+aInner = 3 # deg
+Da1 = 3.115 3.45 3.767 # mm_z/deg^1
+Da3 = -0.1536 -0.06456 0.05264 # mm_z/deg^3
+
+[HighAngularDispersion@0.950]
+aInner = 3 # deg
+Da1 = 3.123 3.455 3.769 # mm_z/deg^1
+Da3 = -0.1906 -0.1114 -0.005306 # mm_z/deg^3
+
+[HighAngularDispersion@1.000]
+aInner = 3 # deg
+Da1 = 3.131 3.458 3.766 # mm_z/deg^1
+Da3 = -0.2022 -0.126 -0.02572 # mm_z/deg^3
+
+[HighAngularDispersion@1.250]
+aInner = 3 # deg
+Da1 = 3.164 3.487 3.796 # mm_z/deg^1
+Da3 = -0.3788 -0.3288 -0.2633 # mm_z/deg^3
+
+[HighAngularDispersion@1.500]
+aInner = 3 # deg
+Da1 = 3.161 3.466 3.755 # mm_z/deg^1
+Da3 = -0.3541 -0.2941 -0.2156 # mm_z/deg^3
+
+[HighAngularDispersion@1.750]
+aInner = 3 # deg
+Da1 = 3.155 3.454 3.738 # mm_z/deg^1
+Da3 = -0.3595 -0.2991 -0.2217 # mm_z/deg^3
+
+[HighAngularDispersion@2.000]
+aInner = 3 # deg
+Da1 = 3.15 3.44 3.716 # mm_z/deg^1
+Da3 = -0.3352 -0.2661 -0.1894 # mm_z/deg^3
+
+[HighAngularDispersion@2.500]
+aInner = 3 # deg
+Da1 = 3.151 3.433 3.699 # mm_z/deg^1
+Da3 = -0.3507 -0.2789 -0.1988 # mm_z/deg^3
+
+[HighAngularDispersion@3.000]
+aInner = 3 # deg
+Da1 = 3.161 3.428 3.676 # mm_z/deg^1
+Da3 = -0.3468 -0.2582 -0.1663 # mm_z/deg^3
+
+[HighAngularDispersion@3.500]
+aInner = 3 # deg
+Da1 = 3.157 3.435 3.696 # mm_z/deg^1
+Da3 = -0.5094 -0.427 -0.3337 # mm_z/deg^3
+
+[HighAngularDispersion@4.000]
+aInner = 3 # deg
+Da1 = 3.142 3.458 3.761 # mm_z/deg^1
+Da3 = -0.7805 -0.723 -0.6421 # mm_z/deg^3
+
+[HighAngularDispersion@4.250]
+aInner = 3 # deg
+Da1 = 3.131 3.458 3.774 # mm_z/deg^1
+Da3 = -0.8406 -0.7788 -0.7051 # mm_z/deg^3
+
+[HighAngularDispersion@4.400]
+aInner = 3 # deg
+Da1 = 3.132 3.458 3.774 # mm_z/deg^1
+Da3 = -0.8377 -0.7741 -0.6985 # mm_z/deg^3
+
+[HighAngularDispersion@4.500]
+aInner = 3 # deg
+Da1 = 3.113 3.464 3.807 # mm_z/deg^1
+Da3 = -0.9464 -0.8961 -0.831 # mm_z/deg^3
+
+[HighAngularDispersion@4.750]
+aInner = 3 # deg
+Da1 = 3.094 3.46 3.822 # mm_z/deg^1
+Da3 = -0.9934 -0.9529 -0.8982 # mm_z/deg^3
+
+[HighAngularDispersion@5.000]
+aInner = 3 # deg
+Da1 = 3.091 3.465 3.835 # mm_z/deg^1
+Da3 = -1.056 -1.018 -0.9663 # mm_z/deg^3
+
+[HighAngularDispersion@5.500]
+aInner = 3 # deg
+Da1 = 3.076 3.45 3.822 # mm_z/deg^1
+Da3 = -1.045 -1.01 -0.9627 # mm_z/deg^3
+
+[HighAngularDispersion@6.000]
+aInner = 3 # deg
+Da1 = 3.072 3.454 3.833 # mm_z/deg^1
+Da3 = -1.179 -1.155 -1.114 # mm_z/deg^3
+
+[HighAngularDispersion@6.750]
+aInner = 3 # deg
+Da1 = 3.081 3.44 3.791 # mm_z/deg^1
+Da3 = -1.116 -1.061 -0.9835 # mm_z/deg^3
+
+[HighAngularDispersion@7.500]
+aInner = 3 # deg
+Da1 = 3.118 3.448 3.763 # mm_z/deg^1
+Da3 = -0.7857 -0.6178 -0.4111 # mm_z/deg^3
+
+[HighAngularDispersion@8.500]
+aInner = 3 # deg
+Da1 = 3.124 3.436 3.729 # mm_z/deg^1
+Da3 = -0.1287 0.2031 0.5857 # mm_z/deg^3
+
+[HighAngularDispersion@10.000]
+aInner = 3 # deg
+Da1 = 3.125 3.435 3.728 # mm_z/deg^1
+Da3 = 0.02394 0.417 0.8754 # mm_z/deg^3
+
+[HighAngularDispersion@15.000]
+aInner = 3 # deg
+Da1 = 3.115 3.433 3.734 # mm_z/deg^1
+Da3 = -0.4613 -0.1025 0.3077 # mm_z/deg^3
+
+[HighAngularDispersion@17.000]
+aInner = 3 # deg
+Da1 = 3.109 3.426 3.728 # mm_z/deg^1
+Da3 = -0.5176 -0.1551 0.2544 # mm_z/deg^3
+
+[HighAngularDispersion@20.000]
+aInner = 3 # deg
+Da1 = 3.072 3.402 3.719 # mm_z/deg^1
+Da3 = -0.7772 -0.4897 -0.159 # mm_z/deg^3
+
+[HighAngularDispersion@21.000]
+aInner = 3 # deg
+Da1 = 3.061 3.375 3.674 # mm_z/deg^1
+Da3 = -0.3545 -0.04436 0.3096 # mm_z/deg^3
+
+[HighAngularDispersion@21.500]
+aInner = 3 # deg
+Da1 = 3.053 3.377 3.69 # mm_z/deg^1
+Da3 = -0.6008 -0.3392 -0.03106 # mm_z/deg^3
+
+[HighAngularDispersion@25.000]
+aInner = 3 # deg
+Da1 = 3.016 3.34 3.654 # mm_z/deg^1
+Da3 = -0.5933 -0.3848 -0.1523 # mm_z/deg^3
+
+[HighAngularDispersion@26.000]
+aInner = 3 # deg
+Da1 = 3.013 3.322 3.618 # mm_z/deg^1
+Da3 = -0.318 -0.1069 0.14 # mm_z/deg^3
+
+[HighAngularDispersion@27.500]
+aInner = 3 # deg
+Da1 = 2.999 3.313 3.615 # mm_z/deg^1
+Da3 = -0.4513 -0.2874 -0.08 # mm_z/deg^3
+
+[HighAngularDispersion@28.000]
+aInner = 3 # deg
+Da1 = 3.003 3.311 3.609 # mm_z/deg^1
+Da3 = -0.4223 -0.2511 -0.05853 # mm_z/deg^3
+
+[HighAngularDispersion@29.000]
+aInner = 3 # deg
+Da1 = 2.994 3.303 3.599 # mm_z/deg^1
+Da3 = -0.476 -0.3344 -0.1594 # mm_z/deg^3
+
+[HighAngularDispersion@30.000]
+aInner = 3 # deg
+Da1 = 2.984 3.293 3.59 # mm_z/deg^1
+Da3 = -0.4536 -0.3237 -0.1579 # mm_z/deg^3
+
+[HighAngularDispersion@35.000]
+aInner = 3 # deg
+Da1 = 2.975 3.293 3.601 # mm_z/deg^1
+Da3 = -0.5876 -0.4715 -0.3403 # mm_z/deg^3
+
+[HighAngularDispersion@42.250]
+aInner = 3 # deg
+Da1 = 3.036 3.331 3.607 # mm_z/deg^1
+Da3 = -0.5204 -0.3568 -0.1682 # mm_z/deg^3
+
+[HighAngularDispersion@45.000]
+aInner = 3 # deg
+Da1 = 3.054 3.345 3.617 # mm_z/deg^1
+Da3 = -0.5979 -0.4346 -0.2404 # mm_z/deg^3
+
+[HighAngularDispersion@46.500]
+aInner = 3 # deg
+Da1 = 3.065 3.349 3.614 # mm_z/deg^1
+Da3 = -0.5611 -0.382 -0.1818 # mm_z/deg^3
+
+[HighAngularDispersion@47.000]
+aInner = 3 # deg
+Da1 = 3.062 3.344 3.606 # mm_z/deg^1
+Da3 = -0.5336 -0.356 -0.1586 # mm_z/deg^3
+
+[HighAngularDispersion@47.500]
+aInner = 3 # deg
+Da1 = 3.061 3.344 3.606 # mm_z/deg^1
+Da3 = -0.5562 -0.3795 -0.1839 # mm_z/deg^3
+
+[HighAngularDispersion@50.000]
+aInner = 3 # deg
+Da1 = 3.082 3.324 3.542 # mm_z/deg^1
+Da3 = -0.04536 0.1984 0.4624 # mm_z/deg^3
+
+[HighAngularDispersion@55.000]
+aInner = 3 # deg
+Da1 = 3.111 3.321 3.503 # mm_z/deg^1
+Da3 = 0.1445 0.4136 0.7094 # mm_z/deg^3
+
+[HighAngularDispersion@60.000]
+aInner = 3 # deg
+Da1 = 3.121 3.284 3.414 # mm_z/deg^1
+Da3 = 0.6506 0.9927 1.357 # mm_z/deg^3
+
+[HighAngularDispersion@65.000]
+aInner = 3 # deg
+Da1 = 3.062 3.123 3.143 # mm_z/deg^1
+Da3 = 2.455 3.025 3.624 # mm_z/deg^3
+
+# =================== WideAngleMode =================== 
+
+[WideAngleMode defaults]
+aUnit  = "deg"
+aRange = -15 15
+eShift = -0.05 0 0.05 # Ep
+aGrid  = 1
+
+[WideAngleMode@0.10]
+aInner = 14 # deg
+Da1 = 0.5102 0.5761 0.42 # mm_z/deg^1
+Da3 = -0.02352 0.0723 0.2424 # mm_z/deg^3
+Da5 = 0.02391 -0.006087 -0.01908 # mm_z/deg^5
+Da7 = -0.01339 -0.001605 -0.005363 # mm_z/deg^7
+
+[WideAngleMode@0.20]
+aInner = 15 # deg
+Da1 = 0.5839 0.6494 0.6104 # mm_z/deg^1
+Da3 = -0.01569 0.05095 0.1621 # mm_z/deg^3
+Da5 = 0.01359 -0.01416 -0.04377 # mm_z/deg^5
+Da7 = -0.008422 -0.0001879 0.00284 # mm_z/deg^7
+
+[WideAngleMode@0.30]
+aInner = 15 # deg
+Da1 = 0.6459 0.7183 0.7196 # mm_z/deg^1
+Da3 = -0.0278 0.03312 0.1291 # mm_z/deg^3
+Da5 = 0.01291 -0.01964 -0.05822 # mm_z/deg^5
+Da7 = -0.008267 0.001243 0.007881 # mm_z/deg^7
+
+[WideAngleMode@0.35]
+aInner = 15 # deg
+Da1 = 0.6674 0.7306 0.7326 # mm_z/deg^1
+Da3 = -0.02429 0.03752 0.133 # mm_z/deg^3
+Da5 = 0.009284 -0.02501 -0.0667 # mm_z/deg^5
+Da7 = -0.006816 0.002873 0.01045 # mm_z/deg^7
+
+[WideAngleMode@0.42]
+aInner = 15 # deg
+Da1 = 0.6697 0.7217 0.7196 # mm_z/deg^1
+Da3 = -0.02665 0.03711 0.1309 # mm_z/deg^3
+Da5 = 0.008432 -0.02877 -0.07389 # mm_z/deg^5
+Da7 = -0.006662 0.004071 0.01335 # mm_z/deg^7
+
+[WideAngleMode@0.50]
+aInner = 15 # deg
+Da1 = 0.6991 0.7439 0.7434 # mm_z/deg^1
+Da3 = -0.01501 0.04937 0.1412 # mm_z/deg^3
+Da5 = -0.0006575 -0.03754 -0.08251 # mm_z/deg^5
+Da7 = -0.003704 0.006261 0.01549 # mm_z/deg^7
+
+[WideAngleMode@0.55]
+aInner = 15 # deg
+Da1 = 0.7058 0.7458 0.7439 # mm_z/deg^1
+Da3 = -0.008975 0.05661 0.1479 # mm_z/deg^3
+Da5 = -0.006069 -0.0435 -0.08837 # mm_z/deg^5
+Da7 = -0.002209 0.007638 0.01681 # mm_z/deg^7
+
+[WideAngleMode@0.60]
+aInner = 15 # deg
+Da1 = 0.7059 0.7423 0.7397 # mm_z/deg^1
+Da3 = -0.006106 0.05967 0.1493 # mm_z/deg^3
+Da5 = -0.008789 -0.04677 -0.09165 # mm_z/deg^5
+Da7 = -0.001481 0.008548 0.01792 # mm_z/deg^7
+
+[WideAngleMode@0.70]
+aInner = 15 # deg
+Da1 = 0.7062 0.7413 0.7424 # mm_z/deg^1
+Da3 = -0.008549 0.05506 0.1385 # mm_z/deg^3
+Da5 = -0.00828 -0.04674 -0.09076 # mm_z/deg^5
+Da7 = -0.001887 0.008696 0.01859 # mm_z/deg^7
+
+[WideAngleMode@0.75]
+aInner = 15 # deg
+Da1 = 0.719 0.7557 0.7617 # mm_z/deg^1
+Da3 = -0.003456 0.05766 0.1366 # mm_z/deg^3
+Da5 = -0.0112 -0.04802 -0.08967 # mm_z/deg^5
+Da7 = -0.001002 0.009015 0.01844 # mm_z/deg^7
+
+[WideAngleMode@0.82]
+aInner = 15 # deg
+Da1 = 0.7084 0.7419 0.7459 # mm_z/deg^1
+Da3 = -0.006823 0.05387 0.1313 # mm_z/deg^3
+Da5 = -0.009674 -0.0471 -0.08955 # mm_z/deg^5
+Da7 = -0.001572 0.00896 0.01913 # mm_z/deg^7
+
+[WideAngleMode@0.90]
+aInner = 15 # deg
+Da1 = 0.7244 0.7582 0.7652 # mm_z/deg^1
+Da3 = 0.0008157 0.06046 0.1351 # mm_z/deg^3
+Da5 = -0.01545 -0.05178 -0.0925 # mm_z/deg^5
+Da7 = 4.007e-05 0.01006 0.01978 # mm_z/deg^7
+
+[WideAngleMode@0.95]
+aInner = 15 # deg
+Da1 = 0.7253 0.7577 0.764 # mm_z/deg^1
+Da3 = 0.001804 0.06184 0.1363 # mm_z/deg^3
+Da5 = -0.01676 -0.05357 -0.09462 # mm_z/deg^5
+Da7 = 0.0003728 0.01061 0.02056 # mm_z/deg^7
+
+[WideAngleMode@1.00]
+aInner = 15 # deg
+Da1 = 0.7271 0.7587 0.7651 # mm_z/deg^1
+Da3 = 0.003299 0.06326 0.1371 # mm_z/deg^3
+Da5 = -0.0185 -0.05538 -0.09634 # mm_z/deg^5
+Da7 = 0.0007674 0.01105 0.02108 # mm_z/deg^7
+
+[WideAngleMode@1.50]
+aInner = 15 # deg
+Da1 = 0.6942 0.7123 0.7088 # mm_z/deg^1
+Da3 = 0.01158 0.0791 0.1612 # mm_z/deg^3
+Da5 = -0.03046 -0.07548 -0.127 # mm_z/deg^5
+Da7 = 0.003665 0.01679 0.03061 # mm_z/deg^7
+
+[WideAngleMode@2.00]
+aInner = 15 # deg
+Da1 = 0.6921 0.705 0.6988 # mm_z/deg^1
+Da3 = 0.02141 0.09505 0.1808 # mm_z/deg^3
+Da5 = -0.04294 -0.09396 -0.1501 # mm_z/deg^5
+Da7 = 0.006322 0.02134 0.03696 # mm_z/deg^7
+
+[WideAngleMode@3.35]
+aInner = 15 # deg
+Da1 = 0.7382 0.7642 0.7766 # mm_z/deg^1
+Da3 = 0.02953 0.07911 0.1371 # mm_z/deg^3
+Da5 = -0.04626 -0.07608 -0.1103 # mm_z/deg^5
+Da7 = 0.00581 0.01515 0.02558 # mm_z/deg^7
+
+[WideAngleMode@3.42]
+aInner = 15 # deg
+Da1 = 0.743 0.7703 0.7843 # mm_z/deg^1
+Da3 = 0.0221 0.07082 0.128 # mm_z/deg^3
+Da5 = -0.04016 -0.06931 -0.1031 # mm_z/deg^5
+Da7 = 0.003953 0.01312 0.02345 # mm_z/deg^7
+
+[WideAngleMode@3.50]
+aInner = 15 # deg
+Da1 = 0.741 0.7689 0.784 # mm_z/deg^1
+Da3 = 0.01761 0.06534 0.1203 # mm_z/deg^3
+Da5 = -0.03521 -0.06335 -0.09506 # mm_z/deg^5
+Da7 = 0.002566 0.01148 0.02137 # mm_z/deg^7
+
+[WideAngleMode@3.75]
+aInner = 15 # deg
+Da1 = 0.7347 0.7609 0.7746 # mm_z/deg^1
+Da3 = 0.02843 0.076 0.1309 # mm_z/deg^3
+Da5 = -0.04637 -0.07367 -0.1045 # mm_z/deg^5
+Da7 = 0.005664 0.01426 0.02376 # mm_z/deg^7
+
+[WideAngleMode@4.00]
+aInner = 15 # deg
+Da1 = 0.7315 0.7563 0.7684 # mm_z/deg^1
+Da3 = 0.03234 0.0789 0.1326 # mm_z/deg^3
+Da5 = -0.05177 -0.07691 -0.1053 # mm_z/deg^5
+Da7 = 0.006915 0.01477 0.02347 # mm_z/deg^7
+
+[WideAngleMode@4.50]
+aInner = 15 # deg
+Da1 = 0.7114 0.7277 0.7314 # mm_z/deg^1
+Da3 = 0.05143 0.1023 0.1597 # mm_z/deg^3
+Da5 = -0.07263 -0.1002 -0.1304 # mm_z/deg^5
+Da7 = 0.01226 0.02096 0.03036 # mm_z/deg^7
+
+[WideAngleMode@5.00]
+aInner = 15 # deg
+Da1 = 0.708 0.7207 0.7206 # mm_z/deg^1
+Da3 = 0.06204 0.1114 0.1668 # mm_z/deg^3
+Da5 = -0.08391 -0.1089 -0.1357 # mm_z/deg^5
+Da7 = 0.01484 0.02283 0.03133 # mm_z/deg^7
+
+[WideAngleMode@5.50]
+aInner = 15 # deg
+Da1 = 0.7136 0.7254 0.7247 # mm_z/deg^1
+Da3 = 0.06091 0.1079 0.16 # mm_z/deg^3
+Da5 = -0.0819 -0.1041 -0.1276 # mm_z/deg^5
+Da7 = 0.01381 0.02115 0.02887 # mm_z/deg^7
+
+[WideAngleMode@6.00]
+aInner = 15 # deg
+Da1 = 0.7291 0.7418 0.7426 # mm_z/deg^1
+Da3 = 0.06369 0.1081 0.1565 # mm_z/deg^3
+Da5 = -0.08204 -0.1014 -0.1216 # mm_z/deg^5
+Da7 = 0.0132 0.01974 0.02669 # mm_z/deg^7
+
+[WideAngleMode@7.00]
+aInner = 15 # deg
+Da1 = 0.7633 0.7803 0.7854 # mm_z/deg^1
+Da3 = 0.0683 0.1053 0.1481 # mm_z/deg^3
+Da5 = -0.07987 -0.09177 -0.1064 # mm_z/deg^5
+Da7 = 0.01094 0.0152 0.02043 # mm_z/deg^7
+
+[WideAngleMode@7.60]
+aInner = 15 # deg
+Da1 = 0.7706 0.7861 0.7899 # mm_z/deg^1
+Da3 = 0.07551 0.1138 0.1565 # mm_z/deg^3
+Da5 = -0.08652 -0.09952 -0.1142 # mm_z/deg^5
+Da7 = 0.0123 0.01693 0.0223 # mm_z/deg^7
+
+[WideAngleMode@8.00]
+aInner = 15 # deg
+Da1 = 0.7698 0.7845 0.7883 # mm_z/deg^1
+Da3 = 0.06995 0.1088 0.1488 # mm_z/deg^3
+Da5 = -0.07987 -0.09345 -0.1049 # mm_z/deg^5
+Da7 = 0.01032 0.01527 0.01982 # mm_z/deg^7
+
+[WideAngleMode@9.00]
+aInner = 14 # deg
+Da1 = 0.7775 0.7903 0.7917 # mm_z/deg^1
+Da3 = 0.06557 0.1022 0.1422 # mm_z/deg^3
+Da5 = -0.07905 -0.08999 -0.1016 # mm_z/deg^5
+Da7 = 0.009359 0.01382 0.01879 # mm_z/deg^7
+
+[WideAngleMode@9.25]
+aInner = 14 # deg
+Da1 = 0.7813 0.7928 0.7929 # mm_z/deg^1
+Da3 = 0.07381 0.1122 0.1524 # mm_z/deg^3
+Da5 = -0.08673 -0.09952 -0.1106 # mm_z/deg^5
+Da7 = 0.01096 0.0159 0.02056 # mm_z/deg^7
+
+[WideAngleMode@9.50]
+aInner = 14 # deg
+Da1 = 0.7803 0.7913 0.7907 # mm_z/deg^1
+Da3 = 0.06996 0.108 0.1482 # mm_z/deg^3
+Da5 = -0.08267 -0.09493 -0.1059 # mm_z/deg^5
+Da7 = 0.009901 0.01474 0.01949 # mm_z/deg^7
+
+[WideAngleMode@9.75]
+aInner = 14 # deg
+Da1 = 0.783 0.794 0.7933 # mm_z/deg^1
+Da3 = 0.06895 0.1055 0.1451 # mm_z/deg^3
+Da5 = -0.08245 -0.09305 -0.1034 # mm_z/deg^5
+Da7 = 0.009759 0.01415 0.0188 # mm_z/deg^7
+
+[WideAngleMode@10.00]
+aInner = 14 # deg
+Da1 = 0.7868 0.7968 0.7953 # mm_z/deg^1
+Da3 = 0.06753 0.1067 0.1475 # mm_z/deg^3
+Da5 = -0.08081 -0.09454 -0.1064 # mm_z/deg^5
+Da7 = 0.0087 0.01423 0.01943 # mm_z/deg^7
+
+# =================== LargeArea =================== 
+
+[LargeArea defaults]
+aUnit  = "mm"
+aInner = 18 # mm
+aRange = -18 18 # mm
+aGrid  = 2 # mm
+eGrid  = 0.02 # Ep
+Da1    = 1 1 1 # mm_z/mm
+
+[LargeArea@0.1]
+
+[LargeArea@1000]
+
+
+# =================== MediumArea =================== 
+
+[MediumArea defaults]
+aUnit  = "mm"
+aInner = 7 # mm
+aRange = -7 7 # mm
+aGrid  = 2 # mm
+eGrid  = 0.02 # Ep
+Da1    = 3 3 3 # mm_z/mm
+
+[MediumArea@0.1]
+
+[MediumArea@500]
+
+
+# =================== SmallArea =================== 
+
+[SmallArea defaults]
+aUnit  = "mm"
+aInner = 2 "mm"
+aRange = -2 2 # mm
+aGrid  = 0.5 # mm
+eGrid  = 0.01 # Ep
+Da1    = 10 10 10 # mm_z/mm
+
+[SmallArea@0.1]
+
+[SmallArea@1500]
+
+
+# =================== SmallArea2 =================== 
+
+[SmallArea2 defaults]
+aUnit  = "mm"
+aInner = 2 # mm
+aRange = -2 2 # mm
+aGrid  = 0.5 # mm
+eGrid  = 0.01 # Ep
+Da1    = 10 10 10 # mm_z/mm
+
+[SmallArea2@0.2]
+
+[SmallArea2@300]
+
+
+# =================== HighMagnification2 =================== 
+
+[HighMagnification2 defaults]
+aUnit  = "mm"
+aInner = 2 # mm
+aRange = -2 2 # mm
+aGrid  = 0.5 # mm
+eGrid  = 0.01 # Ep
+Da1    = 10 10 10 # mm_z/mm
+
+[HighMagnification2@0.1]
+
+[HighMagnification2@300]
+
+
+# =================== HighMagnification =================== 
+
+[HighMagnification defaults]
+aUnit  = "mm"
+aInner = 2 # mm
+aRange = -2 2 # mm
+aGrid  = 0.5 # mm
+eGrid  = 0.01 # Ep
+Da1    = 10 10 10 # mm_z/mm
+
+[HighMagnification@0.1]
+
+[HighMagnification@1500]
+
+
+# =================== MediumMagnification =================== 
+
+[MediumMagnification defaults]
+aUnit  = "mm"
+aInner = 7 # mm
+aRange = -7 7 # mm
+aGrid  = 2 # mm
+eGrid  = 0.02 # Ep
+Da1    = 3 3 3 # mm_z/mm
+
+[MediumMagnification@0.1]
+
+[MediumMagnification@1500]
+
+
+# =================== LowMagnification =================== 
+
+[LowMagnification defaults]
+aUnit  = "mm"
+aInner = 18 # mm
+aRange = -18 18 # mm
+aGrid  = 2 # mm
+eGrid  = 0.02 # Ep
+Da1    = 1 1 1 # mm_z/mm
+
+[LowMagnification@0.1]
+
+[LowMagnification@1500]
+
+# =================== SuperWideAngleMode =================== 
+
+[SuperWideAngleMode defaults]
+aUnit  = "deg"
+aRange = -20 20
+eShift = -0.05 0 0.05 # Ep
+aGrid  = 1
+
+[SuperWideAngleMode@0.060]
+aInner = 12 # deg
+Da1 = 0.2237 0.3674 0.1601 # mm_z/deg^1
+Da3 = -0.02816 0.03497 0.1762 # mm_z/deg^3
+Da5 = 0.0001303 -0.003557 -0.01019 # mm_z/deg^5
+Da7 = -0.003049 0.00011 -0.001742 # mm_z/deg^7
+
+[SuperWideAngleMode@0.080]
+aInner = 15 # deg
+Da1 = 0.2816 0.4386 0.3641 # mm_z/deg^1
+Da3 = -0.04373 0.02371 0.1393 # mm_z/deg^3
+Da5 = 0.02101 -0.004447 -0.01694 # mm_z/deg^5
+Da7 = -0.006405 -2.404e-05 -0.0007129 # mm_z/deg^7
+
+[SuperWideAngleMode@0.100]
+aInner = 16 # deg
+Da1 = 0.3309 0.4616 0.41 # mm_z/deg^1
+Da3 = -0.03227 0.02183 0.1251 # mm_z/deg^3
+Da5 = 0.01489 -0.003832 -0.01841 # mm_z/deg^5
+Da7 = -0.004271 -0.000262 -0.0001484 # mm_z/deg^7
+
+[SuperWideAngleMode@0.150]
+aInner = 18 # deg
+Da1 = 0.402 0.483 0.434 # mm_z/deg^1
+Da3 = -0.02469 0.0286 0.138 # mm_z/deg^3
+Da5 = 0.009004 -0.008425 -0.03161 # mm_z/deg^5
+Da7 = -0.002563 0.0001962 0.001555 # mm_z/deg^7
+
+[SuperWideAngleMode@0.200]
+aInner = 18 # deg
+Da1 = 0.4419 0.4867 0.425 # mm_z/deg^1
+Da3 = -0.01862 0.04393 0.167 # mm_z/deg^3
+Da5 = 0.004619 -0.01617 -0.04659 # mm_z/deg^5
+Da7 = -0.001662 0.001148 0.003307 # mm_z/deg^7
+
+[SuperWideAngleMode@0.230]
+aInner = 19 # deg
+Da1 = 0.4553 0.4882 0.4256 # mm_z/deg^1
+Da3 = -0.01717 0.04997 0.1764 # mm_z/deg^3
+Da5 = 0.003356 -0.02009 -0.05366 # mm_z/deg^5
+Da7 = -0.001439 0.001701 0.004315 # mm_z/deg^7
+
+[SuperWideAngleMode@0.300]
+aInner = 19 # deg
+Da1 = 0.4744 0.4873 0.4256 # mm_z/deg^1
+Da3 = -0.008778 0.06337 0.1876 # mm_z/deg^3
+Da5 = -0.0009218 -0.02723 -0.06347 # mm_z/deg^5
+Da7 = -0.0007146 0.00275 0.005941 # mm_z/deg^7
+
+[SuperWideAngleMode@0.400]
+aInner = 20 # deg
+Da1 = 0.4908 0.4981 0.4495 # mm_z/deg^1
+Da3 = -0.004603 0.06512 0.1759 # mm_z/deg^3
+Da5 = -0.003454 -0.03071 -0.06728 # mm_z/deg^5
+Da7 = -0.0003195 0.003441 0.007276 # mm_z/deg^7
+
+[SuperWideAngleMode@0.500]
+aInner = 19 # deg
+Da1 = 0.5001 0.5099 0.4767 # mm_z/deg^1
+Da3 = -0.00705 0.05557 0.1496 # mm_z/deg^3
+Da5 = -0.002444 -0.02847 -0.06249 # mm_z/deg^5
+Da7 = -0.0004979 0.003327 0.00738 # mm_z/deg^7
+
+[SuperWideAngleMode@0.600]
+aInner = 20 # deg
+Da1 = 0.5023 0.5106 0.4832 # mm_z/deg^1
+Da3 = -0.002985 0.0584 0.1469 # mm_z/deg^3
+Da5 = -0.004696 -0.03087 -0.06442 # mm_z/deg^5
+Da7 = -0.0001618 0.003715 0.007909 # mm_z/deg^7
+
+[SuperWideAngleMode@0.640]
+aInner = 19 # deg
+Da1 = 0.5029 0.5137 0.4918 # mm_z/deg^1
+Da3 = -0.00837 0.04877 0.1299 # mm_z/deg^3
+Da5 = -0.001709 -0.02669 -0.05847 # mm_z/deg^5
+Da7 = -0.000643 0.0032 0.007368 # mm_z/deg^7
+
+[SuperWideAngleMode@0.700]
+aInner = 19 # deg
+Da1 = 0.5054 0.5185 0.5023 # mm_z/deg^1
+Da3 = -0.01235 0.04061 0.1143 # mm_z/deg^3
+Da5 = 0.0006434 -0.023 -0.0527 # mm_z/deg^5
+Da7 = -0.001037 0.002716 0.006783 # mm_z/deg^7
+
+[SuperWideAngleMode@0.800]
+aInner = 19 # deg
+Da1 = 0.5057 0.5185 0.5058 # mm_z/deg^1
+Da3 = -0.006631 0.04381 0.1119 # mm_z/deg^3
+Da5 = -0.002309 -0.02474 -0.05222 # mm_z/deg^5
+Da7 = -0.0005942 0.002948 0.00673 # mm_z/deg^7
+
+[SuperWideAngleMode@1.000]
+aInner = 20 # deg
+Da1 = 0.5106 0.5245 0.5178 # mm_z/deg^1
+Da3 = 0.002187 0.04605 0.1034 # mm_z/deg^3
+Da5 = -0.006644 -0.02558 -0.04865 # mm_z/deg^5
+Da7 = 6.529e-05 0.003033 0.006298 # mm_z/deg^7
+
+[SuperWideAngleMode@1.400]
+aInner = 20 # deg
+Da1 = 0.5072 0.5197 0.5165 # mm_z/deg^1
+Da3 = 0.01043 0.04905 0.09646 # mm_z/deg^3
+Da5 = -0.0109 -0.02729 -0.04623 # mm_z/deg^5
+Da7 = 0.0005863 0.003196 0.005996 # mm_z/deg^7
+
+[SuperWideAngleMode@1.700]
+aInner = 20 # deg
+Da1 = 0.5061 0.5173 0.5139 # mm_z/deg^1
+Da3 = 0.01729 0.05218 0.09526 # mm_z/deg^3
+Da5 = -0.01408 -0.02818 -0.04515 # mm_z/deg^5
+Da7 = 0.001009 0.003261 0.005852 # mm_z/deg^7
+
+[SuperWideAngleMode@2.200]
+aInner = 20 # deg
+Da1 = 0.5068 0.515 0.5101 # mm_z/deg^1
+Da3 = 0.02905 0.06107 0.09946 # mm_z/deg^3
+Da5 = -0.01947 -0.0316 -0.04589 # mm_z/deg^5
+Da7 = 0.001709 0.003671 0.005903 # mm_z/deg^7
+
+[SuperWideAngleMode@2.500]
+aInner = 20 # deg
+Da1 = 0.5149 0.522 0.5164 # mm_z/deg^1
+Da3 = 0.03546 0.0669 0.1043 # mm_z/deg^3
+Da5 = -0.02256 -0.03415 -0.0478 # mm_z/deg^5
+Da7 = 0.002066 0.003936 0.006093 # mm_z/deg^7
+
+[SuperWideAngleMode@2.700]
+aInner = 20 # deg
+Da1 = 0.5198 0.5262 0.5205 # mm_z/deg^1
+Da3 = 0.03547 0.06698 0.1035 # mm_z/deg^3
+Da5 = -0.02255 -0.03425 -0.0475 # mm_z/deg^5
+Da7 = 0.002003 0.003936 0.006064 # mm_z/deg^7
+
+[SuperWideAngleMode@3.000]
+aInner = 20 # deg
+Da1 = 0.5158 0.5193 0.5108 # mm_z/deg^1
+Da3 = 0.04363 0.07473 0.1104 # mm_z/deg^3
+Da5 = -0.0266 -0.03769 -0.05027 # mm_z/deg^5
+Da7 = 0.00251 0.004326 0.006374 # mm_z/deg^7
+
+[SuperWideAngleMode@4.000]
+aInner = 20 # deg
+Da1 = 0.5263 0.5251 0.5127 # mm_z/deg^1
+Da3 = 0.06199 0.09077 0.1222 # mm_z/deg^3
+Da5 = -0.03383 -0.04267 -0.05191 # mm_z/deg^5
+Da7 = 0.003336 0.004802 0.006341 # mm_z/deg^7
+
+[SuperWideAngleMode@5.000]
+aInner = 20 # deg
+Da1 = 0.5156 0.5047 0.482 # mm_z/deg^1
+Da3 = 0.08018 0.11 0.1416 # mm_z/deg^3
+Da5 = -0.04213 -0.05063 -0.05911 # mm_z/deg^5
+Da7 = 0.004325 0.005775 0.007254 # mm_z/deg^7
+
+[SuperWideAngleMode@6.000]
+aInner = 20 # deg
+Da1 = 0.5215 0.5031 0.4727 # mm_z/deg^1
+Da3 = 0.09559 0.126 0.1569 # mm_z/deg^3
+Da5 = -0.05235 -0.06057 -0.06803 # mm_z/deg^5
+Da7 = 0.005679 0.007117 0.008503 # mm_z/deg^7
+
+[SuperWideAngleMode@9.000]
+aInner = 16 # deg
+Da1 = 0.666 0.6551 0.632 # mm_z/deg^1
+Da3 = 0.06148 0.0882 0.1157 # mm_z/deg^3
+Da5 = -0.04339 -0.04942 -0.05468 # mm_z/deg^5
+Da7 = 0.003496 0.004645 0.005747 # mm_z/deg^7
+
+[SuperWideAngleMode@9.500]
+aInner = 16 # deg
+Da1 = 0.7057 0.6985 0.6786 # mm_z/deg^1
+Da3 = 0.04065 0.06536 0.09167 # mm_z/deg^3
+Da5 = -0.03707 -0.04206 -0.04676 # mm_z/deg^5
+Da7 = 0.002342 0.003315 0.004325 # mm_z/deg^7
+
+[SuperWideAngleMode@10.000]
+aInner = 16 # deg
+Da1 = 0.7417 0.739 0.724 # mm_z/deg^1
+Da3 = 0.0206 0.04453 0.0694 # mm_z/deg^3
+Da5 = -0.02885 -0.03356 -0.03754 # mm_z/deg^5
+Da7 = 0.0009215 0.001836 0.002719 # mm_z/deg^7

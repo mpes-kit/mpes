@@ -1,0 +1,12 @@
+# Dev/Deployment
+numpy
+pandas
+scipy
+matplotlib
+scikit-image
+glob2
+sphinx
+sphinx_rtd_theme
+nose
+coverage
+pypi-publisher
