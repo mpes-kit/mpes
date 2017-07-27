@@ -8,14 +8,15 @@ In a photoemission process, an extreme UV or X-ray photon liberates an electron 
 
 [`TrARPES`](http://ac.els-cdn.com/S036820481400108X/1-s2.0-S036820481400108X-main.pdf?_tid=00fe4a76-705f-11e7-aa2e-00000aacb35f&acdnat=1500894080_b61b6aadc82bb357e2797ddac6419991) is an emerging technique that combines state-of-the-art ultrafast laser systems (~ fs resolution) with an existing ARPES experimental setup. TrARPES studies light-induced electronic dynamics such as phase transition, exciton dynamics, reaction kinetics, etc. It adds a time dimension, usually on the order of femtoseconds to nanoseconds, to the scope of ARPES measurements. Due to complex electronic dynamics, various coupling effects between the energy and momentum dimensions come into play in time. A complete understanding of the multidimensional time series from trARPES measurements can reveal dynamic constants crucial to the understanding of material properties and aid in simulation, design and further device applications.
 
-## Installation
+### Installation
 ```
-pip install git+http://https://github.com/RealPolitiX/mpes.git
+pip install git+https://github.com/RealPolitiX/mpes.git
 ``` 
 
 Documentation and examples will be posted [`here`](http://mpes.readthedocs.io/)
 
-## Overview of submodules  
+### Overview of submodules  
+The mpes package contains the following submodules, listed here along with suggested import aliases
 ```
 import mpes.fprocessing as fp  
 import mpes.segmentation as seg
