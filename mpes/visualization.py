@@ -41,8 +41,16 @@ def initmpl():
     mpl.rcParams['ytick.labelsize'] = 15
 
 
+#==========#
+# 1D plots #
+#==========#
+
 #def linplot(datamat, xstep)
 
+
+#==========#
+# 2D plots #
+#==========#
 
 def colormesh2d(data, **kwargs):
     """
@@ -50,7 +58,8 @@ def colormesh2d(data, **kwargs):
 	
 	Parameters
 	----------
-	data : the 2D data to plot
+	data : numeric 2D array
+		the 2D data to plot
 	**kwds : keyword arguments
 		imgsize
 		x
@@ -122,9 +131,9 @@ def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
 	Returns:
 	--------
 	axu : axes object 
-		handle for the upper plot axes
+		handle for the upper subplot axes
 	axl : axes object
-		handle for the lower plot axes
+		handle for the lower subplot axes
     """
     
     r, c = datamat.shape
@@ -176,3 +185,82 @@ def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
     fig.subplots_adjust(hspace=0)
     
     return [axu, axl]
+
+	
+def sliceview3d(datamat, axis=0, numbered=True, **kwds):
+	"""
+    3D matrix slices displayed in a grid of subplots
+	
+	Parameters
+	----------
+	datamat : numeric 3D array 
+			the 3D data to plot
+	axis : int
+		the axis to slice through
+	numbered : bool
+		condition for numbering the subplots
+	**kwds : keyword arguments
+		ncol
+		nrow
+		cmp
+		cscale
+		numcolor
+		cmap
+		wspace
+		hspace
+		maintitle
+		
+	Return
+	------
+	ax : axes object
+		handle for the subplot axes
+    """
+    
+    # Gather parameters from input
+    cutdim = datamat.shape[axis]
+    nc = kwds.pop('ncol', 4)
+    nr = kwds.pop('nrow', np.ceil(cutdim/nc).astype('int'))
+    cmap = kwds.pop('cmp', 'Greys')
+    cscale = kwds.pop('cscale', 'log')
+    numcolor = kwds.pop('numcolor', 'black')
+    ngrid = nr*nc
+    
+    # Construct a grid of subplots
+    fw, fh = 5*figaspect(np.zeros((nr, nc)))
+    f, ax = plt.subplots(nrows=nr, ncols=nc, figsize=(fw,fh))
+    
+    # Put each figure in a subplot, remove empty subplots
+    for i in range(ngrid):
+        
+        # Select the current axis based on the index
+        axcurr = ax[np.unravel_index(i, (nr, nc))]
+        
+        if i <= cutdim - 1:
+            # Roll the slicing axis to the start of the matrix before slicing
+            img = np.rollaxis(datamat, axis)[i,:,:]
+            im = axcurr.imshow(img, cmap=cmap)
+            
+            # Set color scaling for each image individually
+            if cscale == 'log':
+                im.set_norm(mpl.colors.LogNorm())
+            elif cscale == 'linear':
+                im.set_norm(mpl.colors.Normalize())
+            
+            axcurr.get_xaxis().set_visible(False)
+            axcurr.get_yaxis().set_visible(False)
+            
+            if numbered == True:
+                axcurr.text(0.03, 0.92, '#%s' % i, fontsize=15, color=numcolor, transform=axcurr.transAxes)
+        else:
+            f.delaxes(axcurr)
+    
+    # Add the main title
+    figtitle = kwds.pop('maintitle', '')
+    if figtitle:
+        f.text(0.5, 0.955, figtitle, horizontalalignment='center', fontproperties=FontProperties(size=20))
+    
+    wsp = kwds.pop('wspace', 0.05)
+    hsp = kwds.pop('hspace', 0.05)
+    plt.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95, wspace=wsp, hspace=hsp)
+    
+    return ax.ravel()
