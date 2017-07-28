@@ -9,6 +9,8 @@ from __future__ import print_function
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from matplotlib.figure import figaspect
+from matplotlib.font_manager import FontProperties
 import matplotlib.gridspec as matgrid
 
 
