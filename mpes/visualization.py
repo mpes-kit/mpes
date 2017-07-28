@@ -5,6 +5,7 @@
 @author: R. Patrick Xian
 """
 
+from __future__ import print_function
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -14,6 +15,10 @@ import matplotlib.gridspec as matgrid
 def initmpl():
     """
     Initialize plot style
+	
+	Parameters:
+	-----------
+	None
     """
     
     mpl.rcParams['text.usetex'] = True
@@ -42,6 +47,24 @@ def initmpl():
 def colormesh2d(data, **kwargs):
     """
     Basic color mesh plot of a 2D data matrix
+	
+	Parameters
+	----------
+	data : the 2D data to plot
+	**kwds : keyword arguments
+		imgsize
+		x
+		y
+		xlabel
+		ylabel
+		cmap
+		axislabelsize
+		ticklabelsize
+		
+	Return
+	------
+	ax : axes object
+		handle for the plot axes
     """
     
     # Remove singleton dimension from matrix
@@ -63,9 +86,9 @@ def colormesh2d(data, **kwargs):
         shape_tpl = imgsize*plt.figaspect(data)[::-1]
     elif len(imgsize) == 2: # When specify image size manually
         shape_tpl = np.asarray(imgsize)
-        print shape_tpl
+        print(shape_tpl)
     else:
-        print 'Too many input arguments!'
+        print('Too many input arguments!')
     figure, ax = plt.subplots(1, figsize=shape_tpl)
     
     # Use pcolormesh to render 2D plot
@@ -84,6 +107,24 @@ def colormesh2d(data, **kwargs):
 def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
     """
     Split screen plot of an ARPES spectrum
+	
+	Parameters:
+	-----------
+	datamat : numeric 2D array
+			the 2D data matrix to plot
+	xaxis : numeric 1D array
+			the x axis coordinates
+	yaxis : numeric 1D array
+			the y axis coordinates
+	ysplit : int 
+			the index of the split y position
+	
+	Returns:
+	--------
+	axu : axes object 
+		handle for the upper plot axes
+	axl : axes object
+		handle for the lower plot axes
     """
     
     r, c = datamat.shape
@@ -107,16 +148,16 @@ def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
 
     fig = plt.figure(num=None, figsize=(8,8))
     
-    # Plot the upper split graph (axh = axis higher)
-    axh = plt.subplot(gs[0:hdiv-1, :37])
+    # Plot the upper split graph (axu = axis upper)
+    axu = plt.subplot(gs[0:hdiv-1, :37])
     axcbh = plt.subplot(gs[0:hdiv-1, 38:40])
     x, y = np.meshgrid(Angaxis, Ehi)
     arpesmin, arpesmax = np.min(datahi[:]), 1.2*np.max(datahi[:])
     levscale = np.linspace(arpesmin, arpesmax, 20, endpoint=True)
-    cnth = axh.contourf(x, y, datahi, levels=levscale, cmap='Blues', vmin=arpesmin, vmax=arpesmax*0.75, zorder=1)
-    axh.contour(x, y, datahi, levscale, colors='k', linewidths=np.linspace(0.3,1.2,20))
-    axh.set_xticks([])
-    axh.set_ylabel('Energy (eV)', fontsize=20)
+    cnth = axu.contourf(x, y, datahi, levels=levscale, cmap='Blues', vmin=arpesmin, vmax=arpesmax*0.75, zorder=1)
+    axu.contour(x, y, datahi, levscale, colors='k', linewidths=np.linspace(0.3,1.2,20))
+    axu.set_xticks([])
+    axu.set_ylabel('Energy (eV)', fontsize=20)
     cbarh = plt.colorbar(cnth, cax=axcbh)
     cbarh.set_ticks([])
     
@@ -134,4 +175,4 @@ def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
 
     fig.subplots_adjust(hspace=0)
     
-    return [axh, axl]
+    return [axu, axl]
