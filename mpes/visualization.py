@@ -52,32 +52,28 @@ def initmpl():
 
 def colormesh2d(data, **kwds):
     """
-    Basic color mesh plot of a 2D data matrix
+    Efficient one-line color mesh plot of a 2D data matrix
 
-    Parameters
-    ----------
+    **Parameters**
+    
     data : numeric 2D array
         the 2D data to plot
     **kwds : keyword arguments
-        * *imgsize* : tuple or list
-            (horizontal_size, vertical_size)
-        * *x* : 1D numerical array
-            x axis coordinates
-        * *y* : 1D numerical array
-            y axis coordinates
-        * *xlabel* : str
-            x axis label
-        * *ylabel* : str
-            y axis label
-        * *cmap* : str 
-            colormap string
-        * *axislabelsize* : int
-            axis label size
-        * *ticklabelsize* : int
-            tick label size
+        =============  ==========  ===================================
+        keyword        data type   meaning
+        =============  ==========  ===================================
+        imgsize        tuple/list  (horizontal_size, vertical_size)
+        x              1D array    x axis coordinates
+        y              1D array    y axis coordinates
+        xlabel         str         x axis label
+        ylabel         str         y axis label
+        cmap           str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
+        axislabelsize  int         font size of axis text labels
+        ticklabelsize  int         font size of axis tick labels
+        =============  ==========  ===================================
 
-    Return
-    ------
+    **Return**
+    
     ax : axes object
         handle for the plot axes
     """
@@ -122,10 +118,10 @@ def colormesh2d(data, **kwds):
 
 def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
     """
-    Split screen plot of an ARPES spectrum
+    Split-screen plot of an ARPES spectrum (intensity scaled differently for valence and conduction bands)
 
-    Parameters:
-    -----------
+    **Parameters**
+
     datamat : numeric 2D array
             the 2D data matrix to plot
     xaxis : numeric 1D array
@@ -135,8 +131,8 @@ def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
     ysplit : int
             the index of the split y position
 
-    Returns:
-    --------
+    **Returns**
+    
     axu : axes object
         handle for the upper subplot axes
     axl : axes object
@@ -233,8 +229,8 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     """
     3D matrix slices displayed in a grid of subplots
 
-    Parameters
-    ----------
+    **Parameters**
+    
     datamat : numeric 3D array
             the 3D data to plot
     axis : int
@@ -245,18 +241,18 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         ==========  =========  =====================================
         keyword     data type  meaning
         ==========  =========  =====================================
-        ncol        int        number of columns
-        nrow        int        number of rows
-        cmap        str        colormap string
+        ncol        int        number of columns in subplot grid
+        nrow        int        number of rows in subplot grid
+        cmap        str        `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
         cscale      str        colormap scaling ('log' or 'linear')
         numcolor    str        color code for subplot number    
         wspace      float      width spacing between subplots
         hspace      float      height spacing betweens subplots
-        maintitle   str        main title
+        maintitle   str        main title of the plot
         ==========  =========  =====================================
 
-    Return
-    ------
+    **Return**
+    
     ax : axes object
         handle for the subplot axes
     """

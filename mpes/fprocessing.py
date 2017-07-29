@@ -21,7 +21,19 @@ from scipy.signal import savgol_filter
 
 def find_nearest(val, narray):
     """
-    Find the value closest to a given one in an array
+    Find the value closest to a given one in a 1D array
+
+    **Parameters**
+    
+    val : float
+        Value of interest
+    narray : 1D numeric array
+        array to look for the nearest value
+
+    **Return**
+
+    ind : int
+        index of the value nearest to the sepcified
     """
 
     return np.argmin(np.abs(narray - val))
@@ -43,6 +55,20 @@ def sgfltr(dmat, span, order):
 def SortNamesBy(namelist, pattern):
     """
     Sort a list of names according to a particular sequence of numbers (specified by a regular expression search pattern)
+
+    Parameters
+
+    namelist : str
+        List of name strings
+    pattern : str
+        Regular expression of the pattern
+
+    Returns
+
+    orderedseq : array
+        Ordered sequence from sorting 
+    sortednamelist : str
+        Sorted list of name strings
     """
 
     # Extract a sequence of numbers from the names in the list
