@@ -7,6 +7,7 @@
 
 from math import cos, pi
 from skimage import measure, filters
+import numpy as np
 
 
 def segment2d(img, nbands=1, **kwds):
@@ -14,13 +15,17 @@ def segment2d(img, nbands=1, **kwds):
     Electronic band segmentation using local thresholding
     and connected component labeling
 
-    Parameters
-    ----------
+    **Parameters**
+    
     img : numeric 2D array
         the 2D matrix to segment
     nbands : int
         number of electronic bands
     **kwds : keyword arguments
+
+    **Return**
+    
+    imglabeled : labeled mask
     """
 
     nlabel  =  0
@@ -44,5 +49,5 @@ def to_odd(num):
     Convert to nearest odd number
     """
 
-    rem = num % 2
+    rem = np.round(num) % 2
     return num + int(cos(rem*pi/2))
