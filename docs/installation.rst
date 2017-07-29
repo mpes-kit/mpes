@@ -1,8 +1,13 @@
 Installation
 ============
 
-Clone git repository
---------------------
+Install from git repository
 
-.. code-block::
-git clone https://github.com/RealPolitiX/mpes.git
+
+.. code-block:: bash
+
+	pip install git+https://github.com/RealPolitiX/mpes.git
+
+
+Install from PyPI
+
