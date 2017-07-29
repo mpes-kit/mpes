@@ -2,5 +2,5 @@ Segmentation
 ======================================
 Methods for image and volumetric data segmentation
 
-.. automodule:: segmentation
+.. automodule:: mpes.segmentation
    :members:
