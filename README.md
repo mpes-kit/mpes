@@ -16,7 +16,7 @@ pip install git+https://github.com/RealPolitiX/mpes.git
 Documentation and examples will be posted [`here`](http://mpes.readthedocs.io/)
 
 ### Overview of submodules  
-The mpes package contains the following submodules, listed here along with suggested import aliases
+The mpes package contains the following submodules, listed here along with suggested import conventions
 ```
 import mpes.fprocessing as fp  
 import mpes.segmentation as seg
