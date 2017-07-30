@@ -22,6 +22,3 @@ import mpes.fprocessing as fp
 import mpes.segmentation as seg
 import mpes.visualization as vis
 ```
-
-
-...still work in progress
