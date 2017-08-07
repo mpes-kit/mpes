@@ -67,7 +67,7 @@ def colormesh2d(data, **kwds):
         y              1D array    y axis coordinates
         xlabel         str         x axis label
         ylabel         str         y axis label
-        cmap           str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
+        colormap       str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
         axislabelsize  int         font size of axis text labels
         ticklabelsize  int         font size of axis tick labels
         =============  ==========  ===================================
@@ -243,7 +243,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         ==========  =========  =====================================
         ncol        int        number of columns in subplot grid
         nrow        int        number of rows in subplot grid
-        cmap        str        `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
+        colormap    str        `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
         cscale      str        colormap scaling ('log' or 'linear')
         numcolor    str        color code for subplot number    
         wspace      float      width spacing between subplots
@@ -261,7 +261,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     cutdim = datamat.shape[axis]
     nc = kwds.pop('ncol', 4)
     nr = kwds.pop('nrow', np.ceil(cutdim / nc).astype('int'))
-    cmap = kwds.pop('cmp', 'Greys')
+    cmap = kwds.pop('colormap', 'Greys')
     cscale = kwds.pop('cscale', 'log')
     numcolor = kwds.pop('numcolor', 'black')
     ngrid = nr * nc
