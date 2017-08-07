@@ -5,6 +5,7 @@
 @author: R. Patrick Xian
 """
 
+from __future__ import print_function
 import numpy as np
 import pandas as pd
 import re
@@ -13,6 +14,7 @@ import numpy.fft as nft
 from scipy.interpolate import interp1d
 from numpy import polyval as poly
 from scipy.signal import savgol_filter
+import igor.igorpy as igor
 
 
 # ================= #
@@ -104,6 +106,35 @@ def rot2d(th, angle_unit):
 # Files I/O #
 # ========= #
 
+def readIgorBinFile(fdir, **kwds):
+	"""
+	Read Igor binary formats (pxp and ibw)
+	"""
+    
+    ftype = kwds.pop('ftype', fdir[-3:])
+    errmsg = "Error in file loading, please check the file format."
+    
+    if ftype == 'pxp':
+        
+        try:
+            igfile = igor.load(fdir)
+        except IOError:
+            print(errmsg)
+            
+    elif ftype == 'ibw':
+        
+        try:
+            igfile = igor.load(fdir)
+        except IOError:
+            print(errmsg)
+            
+    else:
+        
+        raise IOError(errmsg)
+    
+    return igfile
+
+	
 def ReadARPEStxt(fdir, withCoords=True):
     """
     Read and convert Igor-generated ARPES .txt files into numpy arrays
