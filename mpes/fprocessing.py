@@ -107,9 +107,9 @@ def rot2d(th, angle_unit):
 # ========= #
 
 def readIgorBinFile(fdir, **kwds):
-	"""
-	Read Igor binary formats (pxp and ibw)
-	"""
+    """
+    Read Igor binary formats (pxp and ibw)
+    """
     
     ftype = kwds.pop('ftype', fdir[-3:])
     errmsg = "Error in file loading, please check the file format."
@@ -134,7 +134,7 @@ def readIgorBinFile(fdir, **kwds):
     
     return igfile
 
-	
+    
 def ReadARPEStxt(fdir, withCoords=True):
     """
     Read and convert Igor-generated ARPES .txt files into numpy arrays
