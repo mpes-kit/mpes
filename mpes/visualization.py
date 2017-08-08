@@ -5,13 +5,14 @@
 @author: R. Patrick Xian
 """
 
-from __future__ import print_function
+from __future__ import print_function, division
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.figure import figaspect
 from matplotlib.font_manager import FontProperties
 import matplotlib.gridspec as matgrid
+import re
 
 
 def initmpl():
@@ -50,6 +51,33 @@ def initmpl():
 # 2D plots #
 #==========#
 
+def numFormatConversion(seq, form='int', **kwds):
+    """
+    When length keyword is not specified as an argument, the function
+    returns a format-converted sequence of numbers
+    
+    The function returns nothing when the conversion fails due to errors
+    """
+    
+    try:
+        lseq = len(seq)
+    except:
+        raise
+    
+    l = kwds.pop('length', lseq)
+    if lseq == l:
+        # Case of numeric array of the right length but may not be
+        # the right type
+        try:
+            numseq = map(eval(form), seq)
+            return numseq
+        except:
+            raise 
+    else:
+        # Case of numeric array of the right type but wrong length
+        return
+
+
 def colormesh2d(data, **kwds):
     """
     Efficient one-line color mesh plot of a 2D data matrix
@@ -62,7 +90,7 @@ def colormesh2d(data, **kwds):
         =============  ==========  ===================================
         keyword        data type   meaning
         =============  ==========  ===================================
-        imgsize        tuple/list  (horizontal_size, vertical_size)
+        figsize        tuple/list  (horizontal_size, vertical_size)
         x              1D array    x axis coordinates
         y              1D array    y axis coordinates
         xlabel         str         x axis label
@@ -85,7 +113,7 @@ def colormesh2d(data, **kwds):
     # Retrieve user-defined keyword arguments
     xaxis = kwds.pop('x', np.arange(0, rval))
     yaxis = kwds.pop('y', np.arange(0, cval))
-    imgsize = kwds.pop('imgsize', 1.)
+    figuresize = kwds.pop('figsize', 1.)
     # default colormap is reverse terrain
     cmap = kwds.pop('colormap', 'terrain_r')
     xlabel = kwds.pop('xlabel', '')
@@ -94,14 +122,12 @@ def colormesh2d(data, **kwds):
     ticklabelsize = kwds.pop('tk_labelsize', 10)
 
     # Generate plot frame
-    if len([imgsize]) == 1:  # When specify automatic image size determination
-        shape_tpl = imgsize * plt.figaspect(data)[::-1]
-    elif len(imgsize) == 2:  # When specify image size manually
-        shape_tpl = np.asarray(imgsize)
-        print(shape_tpl)
-    else:
-        print('Too many input arguments!')
-    figure, ax = plt.subplots(1, figsize=shape_tpl)
+    try:
+        fw, fh = numFormatConversion(figuresize)
+    except:
+        fw, fh = 2 * figaspect(data)
+    
+    figure, ax = plt.subplots(1, figsize=(fw, fh))
 
     # Use pcolormesh to render 2D plot
     ygrid, xgrid = np.meshgrid(yaxis, xaxis)
@@ -228,7 +254,6 @@ def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
 def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     """
     3D matrix slices displayed in a grid of subplots
-
     **Parameters**
     
     datamat : numeric 3D array
@@ -238,19 +263,21 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     numbered : bool
         condition for numbering the subplots
     **kwds : keyword arguments
-        ==========  =========  =====================================
-        keyword     data type  meaning
-        ==========  =========  =====================================
-        ncol        int        number of columns in subplot grid
-        nrow        int        number of rows in subplot grid
-        colormap    str        `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
-        cscale      str        colormap scaling ('log' or 'linear')
-        numcolor    str        color code for subplot number    
-        wspace      float      width spacing between subplots
-        hspace      float      height spacing betweens subplots
-        maintitle   str        main title of the plot
-        ==========  =========  =====================================
-
+        ==========  ==========  =====================================
+        keyword     data type   meaning
+        ==========  ==========  =====================================
+        ncol        int         number of columns in subplot grid
+        nrow        int         number of rows in subplot grid
+        figsize     tuple/list  figure size, (vertical_size, horizontal_size)
+        colormap    str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
+        cscale      str         colormap scaling ('log', 'linear', or 'gammaA-b', see below)
+        numcolor    str         color code for subplot number
+        numsize     int         fontsize of the subtitle within a subplot
+        wspace      float       width spacing between subplots
+        hspace      float       height spacing betweens subplots
+        maintitle   str         main title of the plot
+        axisreturn  str         'flattened' or 'nested', return format of axis object
+        ==========  ==========  =====================================
     **Return**
     
     ax : axes object
@@ -264,10 +291,16 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     cmap = kwds.pop('colormap', 'Greys')
     cscale = kwds.pop('cscale', 'log')
     numcolor = kwds.pop('numcolor', 'black')
+    figuresize = kwds.pop('figsize', '')
+    numsize = kwds.pop('numsize', 15)
     ngrid = nr * nc
 
     # Construct a grid of subplots
-    fw, fh = 5 * figaspect(np.zeros((nr, nc)))
+    try:
+        fw, fh = numFormatConversion(figuresize)
+    except:
+        fw, fh = 5 * figaspect(np.zeros((nr, nc)))
+
     f, ax = plt.subplots(nrows=nr, ncols=nc, figsize=(fw, fh))
 
     # Put each figure in a subplot, remove empty subplots
@@ -279,13 +312,21 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         if i <= cutdim - 1:
             # Roll the slicing axis to the start of the matrix before slicing
             img = np.rollaxis(datamat, axis)[i, :, :]
-            im = axcurr.imshow(img, cmap=cmap)
 
             # Set color scaling for each image individually
-            if cscale == 'log':
+            if cscale == 'log':  # log scale
+                im = axcurr.imshow(img, cmap=cmap)
                 im.set_norm(mpl.colors.LogNorm())
-            elif cscale == 'linear':
+            elif cscale == 'linear':  # linear scale
+                im = axcurr.imshow(img, cmap=cmap)
                 im.set_norm(mpl.colors.Normalize())
+            elif 'gamma' in cscale:  # gamma scale
+                gfactors = re.split('gamma|-', cscale)[1:]
+                gfactors = numFormatConversion(gfactors, form='float')
+                img = gfactors[0]*(img**gfactors[1])
+                im = axcurr.imshow(img, cmap=cmap)
+            
+            # to do: set global color scaling for 3D matrix
 
             axcurr.get_xaxis().set_visible(False)
             axcurr.get_yaxis().set_visible(False)
@@ -296,7 +337,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
                     0.92,
                     '#%s' %
                     i,
-                    fontsize=15,
+                    fontsize=numsize,
                     color=numcolor,
                     transform=axcurr.transAxes)
         else:
@@ -322,5 +363,9 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         top=0.95,
         wspace=wsp,
         hspace=hsp)
-
-    return ax.ravel()
+    
+    axisreturn = kwds.pop('axisreturn', 'flattened')
+    if axisreturn == 'nested':
+        return ax
+    if axisreturn == 'flattened':
+        return ax.ravel()

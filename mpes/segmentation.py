@@ -5,6 +5,7 @@
 @author: R. Patrick Xian
 """
 
+from __future__ import print_function, division
 from math import cos, pi
 from skimage import measure, filters
 import numpy as np
