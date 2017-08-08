@@ -6,7 +6,7 @@ matplotlib
 scikit-image
 glob2
 sphinx
-# sphinx_rtd_theme
+sphinx_rtd_theme
 nose
 coverage
 pypi-publisher

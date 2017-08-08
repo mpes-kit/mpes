@@ -1,6 +1,6 @@
 # mpes
 
-Python-based data processing routines for static and time- and angle-resolved photoemission spectroscopy (ARPES &amp; trARPES) 
+Python-based data processing routines for static and time- and angle-resolved photoemission spectroscopy (ARPES &amp; trARPES)
 
 
 In a photoemission process, an extreme UV or X-ray photon liberates an electron from the confines of the electronic potential within the material. [`ARPES`](https://en.wikipedia.org/wiki/Angle-resolved_photoemission_spectroscopy) directly measures the electronic energy and momentum parallel to the surface of the sample under study to infer the electronic states of the material. For a tutorial review on ARPES and its applications in physics and material science, see [`here`](http://www.phas.ubc.ca/~damascel/ARPES_Intro.pdf). The data structure of ARPES is a stack of 2D images measured at different sample geometries, which are used to reconstruct the full static 3D band structure of the material.
@@ -11,12 +11,13 @@ In a photoemission process, an extreme UV or X-ray photon liberates an electron 
 ### Installation
 ```
 pip install git+https://github.com/RealPolitiX/mpes.git
-``` 
+```
+PyPI installation coming soon...
 
 Documentation and examples will be posted [`here`](http://mpes.readthedocs.io/)
 
 ### Overview of submodules  
-The mpes package contains the following submodules, listed here along with suggested import conventions
+The mpes package contains the following submodules. They are listed here along with suggested import conventions
 ```
 import mpes.fprocessing as fp  
 import mpes.segmentation as seg
