@@ -106,8 +106,8 @@ def colormesh2d(data, **kwds):
         handle for the plot axes
     """
 
-    # Remove singleton dimension from matrix
-    data = np.squeeze(data)
+    # Remove singleton dimension and mask pixels with NaN values
+    data = np.ma.array(data.squeeze(), mask=np.isnan(data))
     rval, cval = data.shape
 
     # Retrieve user-defined keyword arguments
@@ -283,7 +283,10 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     ax : axes object
         handle for the subplot axes
     """
-
+    
+    # Mask pixels with NaN values
+    datamat = np.ma.array(datamat.squeeze(), mask=np.isnan(datamat))
+    
     # Gather parameters from input
     cutdim = datamat.shape[axis]
     nc = kwds.pop('ncol', 4)
@@ -367,5 +370,5 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     axisreturn = kwds.pop('axisreturn', 'flattened')
     if axisreturn == 'nested':
         return ax
-    if axisreturn == 'flattened':
+    elif axisreturn == 'flattened':
         return ax.ravel()
