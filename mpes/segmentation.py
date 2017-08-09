@@ -14,7 +14,7 @@ from skimage import measure, filters
 
 def shirley(x, y, tol=1e-5, maxit=10):
     """
-    S = shirley_calculate(x,y, tol=1e-5, maxit=10)
+    S = shirley(x,y, tol=1e-5, maxit=10)
     Calculate the best auto-Shirley background S for a dataset (x,y). Finds the biggest peak
     and then uses the minimum value either side of this peak as the terminal points of the
     Shirley background.
@@ -40,7 +40,7 @@ def shirley(x, y, tol=1e-5, maxit=10):
     # It's possible that maxidx will be 0 or -1. If that is the case,
     # we can't use this algorithm, we return a zero background.
     if maxidx == 0 or maxidx >= len(y) - 1:
-        print("shirley: Boundaries too high for algorithm: returning a zero background.")
+        print("Boundaries too high for algorithm: returning a zero background.")
         return np.zeros(x.shape)
 
     # Locate the minima either side of maxidx.
@@ -84,7 +84,7 @@ def shirley(x, y, tol=1e-5, maxit=10):
         it += 1
 
     if it >= maxit:
-        print("shirley: Max iterations exceeded before convergence.")
+        print("Max iterations exceeded before convergence.")
     if is_reversed:
         return (yr + B)[::-1]
     else:
@@ -108,16 +108,18 @@ def segment2d(img, nbands=1, **kwds):
     
     imglabeled : labeled mask
     """
-
+    
+    ofs = kwds.pop('offset', 0)
+    
     nlabel  =  0
     dmax = to_odd(max(img.shape))
     i = 0
     blocksize = dmax - 2 * i
-
+    
     while (nlabel != nbands) or (blocksize <= 0):
 
         binadpt = filters.threshold_local(
-    img, blocksize, method='gaussian', offset=10, mode='reflect')
+    img, blocksize, method='gaussian', offset=ofs, mode='reflect')
         imglabeled, nlabel = measure.label(img > binadpt, return_num=True)
         i += 1
         blocksize = dmax - 2 * i
