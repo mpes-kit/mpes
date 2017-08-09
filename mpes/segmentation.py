@@ -14,7 +14,7 @@ from skimage import measure, filters
 
 def shirley(x, y, tol=1e-5, maxit=10):
     """
-    S = shirley(x,y, tol=1e-5, maxit=10)
+    S = shirley_calculate(x,y, tol=1e-5, maxit=10)
     Calculate the best auto-Shirley background S for a dataset (x,y). Finds the biggest peak
     and then uses the minimum value either side of this peak as the terminal points of the
     Shirley background.
@@ -40,7 +40,7 @@ def shirley(x, y, tol=1e-5, maxit=10):
     # It's possible that maxidx will be 0 or -1. If that is the case,
     # we can't use this algorithm, we return a zero background.
     if maxidx == 0 or maxidx >= len(y) - 1:
-        print "shirley_calculate: Boundaries too high for algorithm: returning a zero background."
+        print("shirley: Boundaries too high for algorithm: returning a zero background.")
         return np.zeros(x.shape)
 
     # Locate the minima either side of maxidx.
@@ -61,7 +61,7 @@ def shirley(x, y, tol=1e-5, maxit=10):
     it = 0
     while it < maxit:
         if DEBUG:
-            print "Shirley iteration: ", it
+            print("Shirley iteration: " + it)
         # Calculate new k = (yl - yr) / (int_(xl)^(xr) J(x') - yr - B(x') dx')
         ksum = 0.0
         for i in range(lmidx, imax):
@@ -84,7 +84,7 @@ def shirley(x, y, tol=1e-5, maxit=10):
         it += 1
 
     if it >= maxit:
-        print "shirley_calculate: Max iterations exceeded before convergence."
+        print("shirley: Max iterations exceeded before convergence.")
     if is_reversed:
         return (yr + B)[::-1]
     else:
