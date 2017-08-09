@@ -1,6 +1,10 @@
 ### History of major changes to mpes since the first pip-installable version
 
 #### 2017.08.08
+1. Added shirley() to segmentation for Shirley background calculation
+2. Added ridgeDetect() to segmentation for band ridge detection
+
+#### 2017.08.08
 1. Added gamma scaling to mpes.visualization.sliceview3d
 2. Improved the image size auto-adjustment in mpes.visualization
 3. Added numFormatConversion() to mpes.visualization
