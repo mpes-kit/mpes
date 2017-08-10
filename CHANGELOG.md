@@ -1,6 +1,9 @@
 ### History of major changes to mpes since the first pip-installable version
 
-#### 2017.08.08
+#### 2017.08.10
+1. Added stackedlineplot() to visualization
+
+#### 2017.08.09
 1. Added shirley() to segmentation for Shirley background calculation
 2. Added ridgeDetect() to segmentation for band ridge detection
 

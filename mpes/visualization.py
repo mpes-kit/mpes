@@ -44,7 +44,67 @@ def initmpl():
 # 1D plots #
 #==========#
 
-# def linplot(datamat, xstep)
+def stackedlineplot(datamat, axis=0, interval=0, binning=None, **kwds):
+    """
+    Stacked line plots (used for visualizing energy or momentum dispersion curves)
+    
+    **Parameters**
+    
+    data : numeric 2D array
+        the 2D data to plot
+    axis : int
+        the axis to cut along
+    interval : float
+        the interval between plots
+    binning : int
+        number of binned rows/columns
+    **kwds : keyword arguments
+        =============  ==========  ===================================
+        keyword        data type   meaning
+        =============  ==========  ===================================
+        figsize        tuple/list  (horizontal_size, vertical_size)
+        xlabel         str         x axis label
+        ylabel         str         y axis label
+        axislabelsize  int         font size of axis text labels
+        ticklabelsize  int         font size of axis tick labels
+        =============  ==========  ===================================
+    **Return**
+    
+    ax : axes object
+        handle for the plot axes
+    """
+    
+    figuresize = kwds.pop('figsize', '')
+    try:
+        fw, fh = numFormatConversion(figuresize)
+    except:
+        fw, fh = 2 * figaspect(data)
+    f, ax = plt.subplots(figsize=(fw, fh))
+    
+    datamat = np.rollaxis(np.asarray(datamat), axis)
+    
+    nr, nc = datamat.shape
+    x = kwds.pop('x', range(nc))
+    y = kwds.pop('y', range(nr))
+    
+    for i in y:
+        
+        yval = datamat[i,:]
+        #print(list(x))
+        ax.plot(x, yval + i*interval, linewidth=2)
+        
+    xlabel = kwds.pop('xlabel', '')
+    ylabel = kwds.pop('ylabel', '')
+    
+    axislabelsize = kwds.pop('ax_labelsize', 12)
+    ticklabelsize = kwds.pop('tk_labelsize', 10)
+    
+    ax.set_xlabel(xlabel, fontsize=axislabelsize)
+    ax.set_ylabel(ylabel, fontsize=axislabelsize)
+    ax.tick_params(labelsize=ticklabelsize)
+    plt.tight_layout()
+    
+    return ax
 
 
 #==========#
