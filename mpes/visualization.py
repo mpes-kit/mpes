@@ -44,7 +44,7 @@ def initmpl():
 # 1D plots #
 #==========#
 
-def stackedlineplot(datamat, axis=0, interval=0, binning=None, **kwds):
+def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     """
     Stacked line plots (used for visualizing energy or momentum dispersion curves)
     
@@ -52,19 +52,21 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=None, **kwds):
     
     data : numeric 2D array
         the 2D data to plot
-    axis : int
+    axis : int | 0
         the axis to cut along
-    interval : float
+    interval : float | 0
         the interval between plots
-    binning : int
+    binning : int | 1 (no binning)
         number of binned rows/columns
     **kwds : keyword arguments
         =============  ==========  ===================================
         keyword        data type   meaning
         =============  ==========  ===================================
         figsize        tuple/list  (horizontal_size, vertical_size)
+        x              1D array    x axis values
         xlabel         str         x axis label
         ylabel         str         y axis label
+        cmap           str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
         axislabelsize  int         font size of axis text labels
         ticklabelsize  int         font size of axis tick labels
         =============  ==========  ===================================
@@ -74,24 +76,35 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=None, **kwds):
         handle for the plot axes
     """
     
+    # Check binning input
+    binning = round(binning)
+    if binning < 1:
+        binning = 1
+    
+    # Determine figure size
     figuresize = kwds.pop('figsize', '')
     try:
         fw, fh = numFormatConversion(figuresize)
     except:
-        fw, fh = 2 * figaspect(data)
+        fw, fh = 2 * figaspect(datamat)
     f, ax = plt.subplots(figsize=(fw, fh))
     
     datamat = np.rollaxis(np.asarray(datamat), axis)
-    
     nr, nc = datamat.shape
-    x = kwds.pop('x', range(nc))
-    y = kwds.pop('y', range(nr))
+    x = kwds.pop('x', range(0, nc))
+    y = range(0, nr, binning)
+    ny = len(y)
+    colormap = kwds.pop('cmap', '')
+    lw = kwds.pop('linewidth', 2)
     
-    for i in y:
+    # Plot lines
+    for ind, i in enumerate(y):
         
-        yval = datamat[i,:]
-        #print(list(x))
-        ax.plot(x, yval + i*interval, linewidth=2)
+        yval = np.mean(datamat[i:i+binning,:], axis=0)
+        line = ax.plot(x, yval + i*interval, linewidth=lw)
+        # Set line color
+        if colormap:
+            line[0].set_color(eval('plt.cm.' + colormap + '(ind/ny)'))
         
     xlabel = kwds.pop('xlabel', '')
     ylabel = kwds.pop('ylabel', '')
