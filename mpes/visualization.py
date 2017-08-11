@@ -13,6 +13,7 @@ from matplotlib.figure import figaspect
 from matplotlib.font_manager import FontProperties
 import matplotlib.gridspec as matgrid
 from mayavi import mlab
+from _utils import numFormatConversion
 import re
 
 
@@ -86,7 +87,7 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     # Determine figure size
     figuresize = kwds.pop('figsize', '')
     try:
-        fw, fh = vis.numFormatConversion(figuresize)
+        fw, fh = numFormatConversion(figuresize)
     except:
         fw, fh = 2 * figaspect(datamat)
     f, ax = plt.subplots(figsize=(fw, fh))
@@ -126,33 +127,6 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
 #==========#
 # 2D plots #
 #==========#
-
-def numFormatConversion(seq, form='int', **kwds):
-    """
-    When length keyword is not specified as an argument, the function
-    returns a format-converted sequence of numbers
-    
-    The function returns nothing when the conversion fails due to errors
-    """
-    
-    try:
-        lseq = len(seq)
-    except:
-        raise
-    
-    l = kwds.pop('length', lseq)
-    if lseq == l:
-        # Case of numeric array of the right length but may not be
-        # the right type
-        try:
-            numseq = map(eval(form), seq)
-            return numseq
-        except:
-            raise 
-    else:
-        # Case of numeric array of the right type but wrong length
-        return
-
 
 def colormesh2d(data, **kwds):
     """
