@@ -450,18 +450,41 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         return ax.ravel()
 
 
-#==========#
-# 3D plots #
-#==========#
+#======================#
+# Plots rendered in 3D #
+#======================#
 
 def surf2d(datamat, **kwds):
     """
     2D surface plot
+        **Parameters**
+    
+    datamat : numeric 2D array
+            the 2D data to plot
+    **kwds : keyword arguments
+        ==========  ==========  =====================================
+        keyword     data type   meaning
+        ==========  ==========  =====================================
+        cmap        str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
+        alpha       float       opacity value from 0 to 1
+        bgc         tuple/list  background color in RGB values
+        warp_scale  float       warp scale value from 0 to 1
+        ==========  ==========  =====================================
+    **Return**
+    
+    f : figure object
+        handle for the figure
     """
+    
+    colormap = kwds.pop('cmap', 'rainbow')
+    ws = kwds.pop('warp_scale', 'auto')
+    op = kwds.pop('alpha', 1.0)
+    bgc = kwds.pop('bgc', (1,1,1))
     
     rval, cval = datamat.shape
     y, x = np.meshgrid(np.arange(cval), np.arange(rval))
-    mlab.figure(bgcolor=(1,1,1))
-    s = mlab.surf(x, y, datamat/np.max(datamat), warp_scale='auto')
+    mlab.figure(bgcolor=bgc)
+    f = mlab.surf(x, y, datamat/np.max(datamat), warp_scale=ws, 
+                  colormap=colormap, opacity=op)
     
-    return s
+    return f
