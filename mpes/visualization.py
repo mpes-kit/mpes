@@ -13,7 +13,7 @@ from matplotlib.figure import figaspect
 from matplotlib.font_manager import FontProperties
 import matplotlib.gridspec as matgrid
 from mayavi import mlab
-from _utils import numFormatConversion
+from ._utils import numFormatConversion
 import re
 
 
