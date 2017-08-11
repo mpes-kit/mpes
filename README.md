@@ -23,3 +23,28 @@ import mpes.fprocessing as fp
 import mpes.segmentation as seg
 import mpes.visualization as vis
 ```
+
+### Use mayavi in Jupyter notebook
+For 3D rendering of multidimensional dataset, the mpes package takes advantage of the recent version of jupyter notebook (4.5.0 and above) with mayavi
+
+Follow the steps below on the command line to allow mayavi output to be displayed on jupyter/ipython notebook
+
+1. Install mayavi using the whl distribution [`here`](http://www.lfd.uci.edu/~gohlke/pythonlibs/#mayavi)
+2. Install mayavi extension for Jupyter notebook
+```
+jupyter nbextension install --py mayavi --user
+```
+3. Enable the mayavi extension (this may give an error, but proceed nevertheless)
+```
+jupyter nbextension enable mayavi --user --py
+```
+4. When starting Jupyter notebook, set the backend to qt and increase the data I/O rate
+```
+jupyter notebook --NotebookApp.iopub_data_rate_limit=1e10 --gui=qt
+```
+5. Enable immediate display in Jupyter notebook
+```
+from mayavi import mlab
+mlab.init_notebook()
+```
+6. Call relevant functions in the mpes.visualization module for data display
