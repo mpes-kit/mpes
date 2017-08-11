@@ -43,5 +43,6 @@ jupyter notebook --NotebookApp.iopub_data_rate_limit=1e10 --gui=qt
 5. Enable immediate display in Jupyter notebook
 ```
 from mayavi import mlab
-mlab.init_notebook()
+mlab.init_notebook('x3d')  # Interactive rendering
+or mlab.init_notebook('png')  # Static rendering
 ```
