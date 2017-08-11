@@ -454,20 +454,26 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
 # Plots rendered in 3D #
 #======================#
 
-def surf2d(datamat, **kwds):
+def surf2d(datamat, frame=True, miniaxes=False, **kwds):
     """
     2D surface plot
         **Parameters**
     
     datamat : numeric 2D array
             the 2D data to plot
+    frame : bool | True
+            controls whether the frame is shown
     **kwds : keyword arguments
         ==========  ==========  =====================================
         keyword     data type   meaning
         ==========  ==========  =====================================
-        cmap        str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
         alpha       float       opacity value from 0 to 1
+        azimuth     float       azimuthal viewing angle (default = 0)
+        cmap        str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
+        elevation   float       zenith viewing angle (default = 0)
         bgc         tuple/list  background color in RGB values
+        kind        str         kind of surface plot, {'points', 'wireframe', 'surface'}
+        framecolor  tuple/list  color of the frame
         warp_scale  float       warp scale value from 0 to 1
         ==========  ==========  =====================================
     **Return**
@@ -479,12 +485,31 @@ def surf2d(datamat, **kwds):
     colormap = kwds.pop('cmap', 'rainbow')
     ws = kwds.pop('warp_scale', 'auto')
     op = kwds.pop('alpha', 1.0)
-    bgc = kwds.pop('bgc', (1,1,1))
+    bgc = kwds.pop('bgc', (1.,1.,1.))
+    rep = kwds.pop('kind', 'surface')
+    xlabel = kwds.pop('xlabel', 'x')
+    ylabel = kwds.pop('ylabel', 'y')
+    zlabel = kwds.pop('zlabel', 'z')
+#     labelsize = kwds.pop('labelsize', 10)
     
-    rval, cval = datamat.shape
-    y, x = np.meshgrid(np.arange(cval), np.arange(rval))
-    mlab.figure(bgcolor=bgc)
+    nr, nc = datamat.shape
+    y, x = np.meshgrid(np.arange(nc), np.arange(nr))
+    mlab.figure(bgcolor=bgc, fgcolor=(0.,0.,0.))
     f = mlab.surf(x, y, datamat/np.max(datamat), warp_scale=ws, 
-                  colormap=colormap, opacity=op)
+                  colormap=colormap, opacity=op, representation=rep)
+    
+    az = kwds.pop('azimuth', 0)
+    elev = kwds.pop('elevation', 0)
+    mlab.view(azimuth=0, elevation=0, distance='auto', focalpoint='auto')
+    
+    # Display the miniature orientation axes
+    if miniaxes == True:
+        mlab.orientation_axes(xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
+    
+    # Display the figure frame
+    if frame == True:
+        frc = kwds.pop('framecolor', (0,0,0))
+        mlab.outline(f, color=frc, line_width=2)
+#     mlab.axes(f, color=(0,0,0), xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
     
     return f
