@@ -11,3 +11,4 @@ nose
 coverage
 pypi-publisher
 igor
+mayavi

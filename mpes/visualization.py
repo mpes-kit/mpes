@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import figaspect
 from matplotlib.font_manager import FontProperties
 import matplotlib.gridspec as matgrid
+from mayavi import mlab
 import re
 
 
@@ -69,6 +70,7 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
         cmap           str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
         axislabelsize  int         font size of axis text labels
         ticklabelsize  int         font size of axis tick labels
+        margins        tuple/list  (xmargin, ymargin), values between 0 and 1
         =============  ==========  ===================================
     **Return**
     
@@ -84,7 +86,7 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     # Determine figure size
     figuresize = kwds.pop('figsize', '')
     try:
-        fw, fh = numFormatConversion(figuresize)
+        fw, fh = vis.numFormatConversion(figuresize)
     except:
         fw, fh = 2 * figaspect(datamat)
     f, ax = plt.subplots(figsize=(fw, fh))
@@ -105,13 +107,14 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
         # Set line color
         if colormap:
             line[0].set_color(eval('plt.cm.' + colormap + '(ind/ny)'))
-        
+    
     xlabel = kwds.pop('xlabel', '')
     ylabel = kwds.pop('ylabel', '')
-    
     axislabelsize = kwds.pop('ax_labelsize', 12)
     ticklabelsize = kwds.pop('tk_labelsize', 10)
     
+    margins = kwds.pop('margins', (0.03, 0.03))
+    plt.margins(x=margins[0], y=margins[1])
     ax.set_xlabel(xlabel, fontsize=axislabelsize)
     ax.set_ylabel(ylabel, fontsize=axislabelsize)
     ax.tick_params(labelsize=ticklabelsize)
@@ -445,3 +448,20 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         return ax
     elif axisreturn == 'flattened':
         return ax.ravel()
+
+
+#==========#
+# 3D plots #
+#==========#
+
+def surf2d(datamat, **kwds):
+    """
+    2D surface plot
+    """
+    
+    rval, cval = datamat.shape
+    y, x = np.meshgrid(np.arange(cval), np.arange(rval))
+    mlab.figure(bgcolor=(1,1,1))
+    s = mlab.surf(x, y, datamat/np.max(datamat), warp_scale='auto')
+    
+    return s
