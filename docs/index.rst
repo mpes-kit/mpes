@@ -5,7 +5,7 @@
 
 mpes documentation
 ################################
-the data procesisng package for (tr)ARPES data
+the data processing package for (tr)ARPES data
 
 
 (tr)ARPES concepts:

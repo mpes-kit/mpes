@@ -145,7 +145,9 @@ def colormesh2d(data, **kwds):
         y              1D array    y axis coordinates
         xlabel         str         x axis label
         ylabel         str         y axis label
-        colormap       str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
+        colormap       str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
+        vmin           float       minimum value of colormap
+        vmax           float       maximum value of colormap
         axislabelsize  int         font size of axis text labels
         ticklabelsize  int         font size of axis tick labels
         =============  ==========  ===================================
@@ -166,6 +168,8 @@ def colormesh2d(data, **kwds):
     figuresize = kwds.pop('figsize', 1.)
     # default colormap is reverse terrain
     cmap = kwds.pop('colormap', 'terrain_r')
+    vmin = kwds.pop('vmin', None)
+    vmax = kwds.pop('vmax', None)
     xlabel = kwds.pop('xlabel', '')
     ylabel = kwds.pop('ylabel', '')
     axislabelsize = kwds.pop('ax_labelsize', 12)
@@ -177,11 +181,11 @@ def colormesh2d(data, **kwds):
     except:
         fw, fh = 2 * figaspect(data)
     
-    figure, ax = plt.subplots(1, figsize=(fw, fh))
+    figure, ax = plt.subplots(1, figsize=(fh, fw))
 
     # Use pcolormesh to render 2D plot
     ygrid, xgrid = np.meshgrid(yaxis, xaxis)
-    ax.pcolormesh(xgrid, ygrid, data, cmap=cmap)
+    ax.pcolormesh(xgrid, ygrid, data, cmap=cmap, vmin=vmin, vmax=vmax)
 
     # Set basic axis properties
     ax.set_xlabel(xlabel, fontsize=axislabelsize)

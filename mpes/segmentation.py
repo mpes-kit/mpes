@@ -24,7 +24,7 @@ def shirley(x, y, tol=1e-5, maxit=10):
     Adapted from Kane O'Donnell's routine
     """
     
-    DEBUG = True
+    DEBUG = False
 
     # Set the energy values in decreasing order
     if x[0] < x[-1]:
@@ -61,7 +61,7 @@ def shirley(x, y, tol=1e-5, maxit=10):
     it = 0
     while it < maxit:
         if DEBUG:
-            print("Shirley iteration: " + it)
+            print("Shirley iteration: " + str(it))
         # Calculate new k = (yl - yr) / (int_(xl)^(xr) J(x') - yr - B(x') dx')
         ksum = 0.0
         for i in range(lmidx, imax):
