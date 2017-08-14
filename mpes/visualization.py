@@ -181,7 +181,7 @@ def colormesh2d(data, **kwds):
     except:
         fw, fh = 2 * figaspect(data)
     
-    figure, ax = plt.subplots(1, figsize=(fh, fw))
+    figure, ax = plt.subplots(1, figsize=(fw, fh))
 
     # Use pcolormesh to render 2D plot
     ygrid, xgrid = np.meshgrid(yaxis, xaxis)
