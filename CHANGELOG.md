@@ -1,5 +1,8 @@
 ### History of major changes to mpes since the first pip-installable version
 
+#### 2017.08.15
+1. Added regionExpand() to mpes.segmentation
+
 #### 2017.08.11
 1. Added surf2d() to mpes.visualization
 

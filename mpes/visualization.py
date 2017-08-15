@@ -177,7 +177,7 @@ def colormesh2d(data, **kwds):
 
     # Generate plot frame
     try:
-        fw, fh = numFormatConversion(figuresize)
+        fh, fw = numFormatConversion(figuresize)
     except:
         fw, fh = 2 * figaspect(data)
     

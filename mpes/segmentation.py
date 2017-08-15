@@ -10,7 +10,7 @@ import numpy as np
 from numpy.linalg import norm
 import pandas as pd
 from math import cos, pi
-from skimage import measure, filters
+from skimage import measure, filters, morphology
 
 def shirley(x, y, tol=1e-5, maxit=10):
     """
@@ -192,3 +192,55 @@ def ridgeDetect(mask, method='mask_mean_y', **kwds):
         ridges.append(band)
     
     return ridges
+
+    
+def regionExpand(mask, **kwds):
+    """
+    Expand the region of a binarized image around a line position
+    
+    **Parameters**
+    
+    mask : numeric binarized 2D array
+        the mask to be expanded
+    **kwds : keyword arguments
+        =============  ==========  ===================================
+        keyword        data type   meaning
+        =============  ==========  ===================================
+        method         str         method of choice ('offset', 'growth')
+        value          numeric     value to be assigned to the masked
+        linecoords     2D array    contains x and y positions of the line
+        axoffsets      tuple/list  [downshift upshift] pixel number
+        clipbounds     tuple/list  bounds in the clipping direction
+        selem          ndarray     structuring element
+        =============  ==========  ===================================
+    **Return**
+    
+    mask : numeric 2D array
+        modified mask (returns the original mask if insufficient arguments
+        are provided for the chosen method for region expansion)
+    """
+    
+    method = kwds.pop('method', 'offset')
+    val = kwds.pop('value', 1)
+    
+    if method == 'offset':
+        
+        try:
+            xpos, ypos = kwds.pop('linecoords')
+            downshift, upshift = kwds.pop('axoffsets')
+            lbl, lbu, ubl, ubu = kwds.pop('clipbounds', [0, np.inf, 0, np.inf])
+            lb, ub = np.clip(ypos - downshift, lbl, lbu).astype('int'), np.clip(ypos + upshift, ubl, ubu).astype('int')
+            for ind, x in enumerate(xpos):
+                mask[x, lb[ind]:ub[ind]] = val
+        except KeyError:
+            print('Please specify the line coordinates and axis offsets!')
+                
+    elif method == 'growth':
+        
+        try:
+            selem = kwds.pop('selem')
+            mask = val*morphology.binary_dilation(mask, selem=selem)
+        except KeyError:
+            print('Please specify a structuring element for dilation!')
+            
+    return mask
