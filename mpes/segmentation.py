@@ -10,7 +10,27 @@ import numpy as np
 from numpy.linalg import norm
 import pandas as pd
 from skimage import measure, filters, morphology
-from ._utils import to_odd
+from math import cos, pi
+
+def to_odd(num):
+    """
+    Convert a single number to its nearest odd number
+    
+    **Parameters**
+    
+    num : float/int
+    
+    **Return**
+    
+    oddnum : int
+        the nearest odd number
+    """
+
+    rem = round(num) % 2
+    oddnum = num + int(cos(rem*pi/2))
+    
+    return oddnum
+
 
 def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
     """
