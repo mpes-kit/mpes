@@ -11,20 +11,38 @@ from numpy.linalg import norm
 import pandas as pd
 from math import cos, pi
 from skimage import measure, filters, morphology
+from ._utils import to_odd
 
-def shirley(x, y, tol=1e-5, maxit=10):
+def shirley(x, y, tol=1e-5, maxiter=20, explicit=False):
     """
-    S = shirley(x,y, tol=1e-5, maxit=10)
-    Calculate the best auto-Shirley background S for a dataset (x,y). Finds the biggest peak
-    and then uses the minimum value either side of this peak as the terminal points of the
-    Shirley background.
-    The tolerance sets the convergence criterion, maxit sets the maximum number
-    of iterations.
+    sbg = shirley(x, y, tol=1e-5, maxiter=20)
+	Calculate the 1D best auto-Shirley background S for a dataset (x, y).
+	Adapted from Kane O'Donnell's routine
+	1. Finds the biggest peak
+    2. Use the minimum value on either side of this peak as the terminal points
+	of the Shirley background.
+    3. Iterate over the process within maximum allowed iteration (maxiter) to
+	reach the tolerance level (tol).
+	
+	**Parameters**
     
-    Adapted from Kane O'Donnell's routine
+    x : 1D numeric array
+        the photoelectron energy axis
+    y : 1D numeric array
+        the photoemission intensity axis
+	tol : float
+		fitting tolerance
+	maxiter : int | 20
+		maximal iteration
+	explicit : bool | False
+		Explicit display of iteration number
+
+    **Return**
+    
+    sbg : 1D numeric array
+		Calculated Shirley background
+    
     """
-    
-    DEBUG = False
 
     # Set the energy values in decreasing order
     if x[0] < x[-1]:
@@ -40,7 +58,7 @@ def shirley(x, y, tol=1e-5, maxit=10):
     # It's possible that maxidx will be 0 or -1. If that is the case,
     # we can't use this algorithm, we return a zero background.
     if maxidx == 0 or maxidx >= len(y) - 1:
-        print("Boundaries too high for algorithm: returning a zero background.")
+        #print("Boundaries too high for algorithm: returning a zero background.")
         return np.zeros(x.shape)
 
     # Locate the minima either side of maxidx.
@@ -58,9 +76,9 @@ def shirley(x, y, tol=1e-5, maxit=10):
     B[:lmidx] = yl - yr
     Bnew = B.copy()
 
-    it = 0
-    while it < maxit:
-        if DEBUG:
+    niter = 0
+    while niter < maxiter:
+        if explicit:
             print("Shirley iteration: " + str(it))
         # Calculate new k = (yl - yr) / (int_(xl)^(xr) J(x') - yr - B(x') dx')
         ksum = 0.0
@@ -81,9 +99,9 @@ def shirley(x, y, tol=1e-5, maxit=10):
             break
         else:
             B = Bnew.copy()
-        it += 1
+        niter += 1
 
-    if it >= maxit:
+    if niter >= maxiter:
         print("Max iterations exceeded before convergence.")
     if is_reversed:
         return (yr + B)[::-1]
@@ -98,7 +116,7 @@ def segment2d(img, nbands=1, **kwds):
 
     **Parameters**
     
-    img : numeric 2D array
+    img : 2D numeric array
         the 2D matrix to segment
     nbands : int
         number of electronic bands
@@ -106,7 +124,8 @@ def segment2d(img, nbands=1, **kwds):
 
     **Return**
     
-    imglabeled : labeled mask
+    imglabeled : 2D numeric array
+		labeled mask
     """
     
     ofs = kwds.pop('offset', 0)
@@ -126,15 +145,6 @@ def segment2d(img, nbands=1, **kwds):
 
     return imglabeled
 
-
-def to_odd(num):
-    """
-    Convert to nearest odd number
-    """
-
-    rem = np.round(num) % 2
-    return num + int(cos(rem*pi/2))
-    
  
 def ridgeDetect(mask, method='mask_mean_y', **kwds):
     """
