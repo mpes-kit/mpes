@@ -5,6 +5,9 @@
 @author: R. Patrick Xian
 """
 
+from math import cos, pi
+import numpy as np
+
 def to_odd(num):
     """
     Convert to nearest odd number

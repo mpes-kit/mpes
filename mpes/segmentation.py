@@ -9,7 +9,6 @@ from __future__ import print_function, division
 import numpy as np
 from numpy.linalg import norm
 import pandas as pd
-from math import cos, pi
 from skimage import measure, filters, morphology
 from ._utils import to_odd
 
