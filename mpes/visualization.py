@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import figaspect
 from matplotlib.font_manager import FontProperties
 import matplotlib.gridspec as matgrid
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.tri as mtri
 from mayavi import mlab
 from ._utils import numFormatConversion
 import re
@@ -491,3 +493,33 @@ def surf2d(datamat, frame=True, miniaxes=False, **kwds):
 #     mlab.axes(f, color=(0,0,0), xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
     
     return f
+	
+
+def trisurf2d(datamat, **kwds):
+    """
+    2D triangulated surface plot rendered using mplot3d
+    """
+    
+    data = np.ma.array(datamat.squeeze(), mask=np.isnan(datamat))
+    rval, cval = datamat.shape
+    xaxis = kwds.pop('x', np.arange(0, rval))
+    yaxis = kwds.pop('y', np.arange(0, cval))
+    colormap = kwds.pop('cmap', 'viridis_r')
+    
+    f = plt.figure()
+    ax = f.add_subplot(111, projection='3d')
+    
+    ygrid, xgrid = np.meshgrid(yaxis, xaxis)
+    tri = mtri.Triangulation(ygrid.flatten(), xgrid.flatten())
+    ax.plot_trisurf(xgrid.flatten(), ygrid.flatten(), datamat.flatten(),
+                    triangles=tri.triangles, cmap=colormap, antialiased=False)
+    
+    xlabel = kwds.pop('xlabel', '')
+    ylabel = kwds.pop('ylabel', '')
+    zlabel = kwds.pop('zlabel', '')
+    lblpad = kwds.pop('labelpad', 15)
+    ax.set_xlabel(xlabel, labelpad=lblpad)
+    ax.set_ylabel(ylabel, labelpad=lblpad)
+    ax.set_zlabel(zlabel, labelpad=lblpad)
+    
+    return ax
