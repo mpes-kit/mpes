@@ -328,6 +328,8 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         flipdir     str         flip up-down or left-right of the matrix ('ud', 'lr')
         colormap    str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
         cscale      str         colormap scaling ('log', 'linear', or 'gammaA-b', see below)
+        vmin        numeric     minimum of the color scale
+        vmax        numeric     maximum of the color scale
         numcolor    str         color code for subplot number
         numsize     int         fontsize of the subtitle within a subplot
         wspace      float       width spacing between subplots
@@ -354,6 +356,8 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     figuresize = kwds.pop('figsize', '')
     flipdir = kwds.pop('flipdir', '')
     numsize = kwds.pop('numsize', 15)
+    vmin = kwds.pop('vmin', None)
+    vmax = kwds.pop('vmax', None)
     ngrid = nr * nc
 
     # Construct a grid of subplots
@@ -382,16 +386,16 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
             
             # Set color scaling for each image individually
             if cscale == 'log':  # log scale
-                im = axcurr.imshow(img, cmap=cmap)
+                im = axcurr.imshow(img, cmap=cmap, vmin=vmin, vmax=vmax)
                 im.set_norm(mpl.colors.LogNorm())
             elif cscale == 'linear':  # linear scale
-                im = axcurr.imshow(img, cmap=cmap)
+                im = axcurr.imshow(img, cmap=cmap, vmin=vmin, vmax=vmax)
                 im.set_norm(mpl.colors.Normalize())
             elif 'gamma' in cscale:  # gamma scale
                 gfactors = re.split('gamma|-', cscale)[1:]
                 gfactors = numFormatConversion(gfactors, form='float')
                 img = gfactors[0]*(img**gfactors[1])
-                im = axcurr.imshow(img, cmap=cmap)
+                im = axcurr.imshow(img, cmap=cmap, vmin=vmin, vmax=vmax)
             
             # to do: set global color scaling for 3D matrix
 
@@ -402,7 +406,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
                 axcurr.text(
                     0.03,
                     0.92,
-                    '#%s' %
+                    '#%d' %
                     i,
                     fontsize=numsize,
                     color=numcolor,
