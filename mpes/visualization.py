@@ -325,6 +325,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         ncol        int         number of columns in subplot grid
         nrow        int         number of rows in subplot grid
         figsize     tuple/list  figure size, (vertical_size, horizontal_size)
+        flipdir     str         flip up-down or left-right of the matrix ('ud', 'lr')
         colormap    str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
         cscale      str         colormap scaling ('log', 'linear', or 'gammaA-b', see below)
         numcolor    str         color code for subplot number
@@ -351,6 +352,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     cscale = kwds.pop('cscale', 'log')
     numcolor = kwds.pop('numcolor', 'black')
     figuresize = kwds.pop('figsize', '')
+    flipdir = kwds.pop('flipdir', '')
     numsize = kwds.pop('numsize', 15)
     ngrid = nr * nc
 
@@ -371,7 +373,13 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         if i <= cutdim - 1:
             # Roll the slicing axis to the start of the matrix before slicing
             img = np.rollaxis(datamat, axis)[i, :, :]
-
+            
+            # Flip the image along an axis (if needed)
+            if flipdir == 'ud':
+                img = np.flipud(img)
+            elif flipdir == 'lr':
+                img = np.fliplr(img)
+            
             # Set color scaling for each image individually
             if cscale == 'log':  # log scale
                 im = axcurr.imshow(img, cmap=cmap)
@@ -493,7 +501,7 @@ def surf2d(datamat, frame=True, miniaxes=False, **kwds):
 #     mlab.axes(f, color=(0,0,0), xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
     
     return f
-	
+    
 
 def trisurf2d(datamat, **kwds):
     """
