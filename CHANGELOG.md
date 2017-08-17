@@ -1,5 +1,9 @@
 ### History of major changes to mpes since the first pip-installable version
 
+#### 2017.08.17
+1. Added sortByAxes() to mpes.segmentation
+2. Added revaxis() to mpes._utils
+
 #### 2017.08.16
 1. Added trisurf2d() to mpes.visualization
 2. Added flipdir option to sliceview3d()

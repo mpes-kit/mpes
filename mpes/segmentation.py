@@ -11,6 +11,7 @@ from numpy.linalg import norm
 import pandas as pd
 from skimage import measure, filters, morphology
 from math import cos, pi
+from ._util import revaxis
 
 def to_odd(num):
     """
@@ -276,3 +277,59 @@ def regionExpand(mask, **kwds):
             print('Please specify a structuring element for dilation!')
             
     return mask
+	
+	
+def sortByAxes(arr, axes):
+    """
+    Sort n-dimensional array into ascending order
+    based on the corresponding axes order
+    
+    **Parameters**
+    
+    arr : numeric nD array
+        the nD array to be sorted
+    axes : tuple/list
+        list of axes
+
+    **Return**
+    if no sorting is needed, returns None
+    
+    if the ndarray and axes are sorted,
+    return the sorted values
+    """
+    
+    arr = np.asarray(arr)
+    dim = np.ndim(arr)
+    dimax = len(axes)
+    if dim != dimax:
+        raise Exception('The number of axes should match the dimenison of arr!')
+    
+    # Sort the axes vectors in ascending order
+    if dimax == 1:
+        sortedaxes = np.sort(axes)
+    else:
+        sortedaxes = map(np.sort, axes)
+    
+    # Check which axis changed, sort the array accordingly
+    sortseq = np.zeros(dim)
+    for i in range(dim):
+        
+        seq = None
+        
+        # if an axis is in ascending order 
+        if np.prod(sortedaxes[i] == axes[i]) == 1:
+            seq = 0
+        
+        # if an axis is in descending order
+        elif np.prod(sortedaxes[i] == axes[i][::-1]) == 1:
+            seq = 1
+            arr = revaxis(arr, axis=i)
+            
+        sortseq[i] = seq
+    
+    # Return sorted arrays or None if sorting is not needed
+    if np.any(sortseq == 1):
+        return arr, sortedaxes
+    else:
+        return
+	
