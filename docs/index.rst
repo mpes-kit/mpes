@@ -27,3 +27,12 @@ Contents:
    segmentation
    visualization
 
+
+General data processing pipeline:
+====================================
+
+1. Load file (Igor binary or txt files)
+2. Use image processing to find initial guess for fitting
+3. Define the fitting model (model function and regularizer)
+4. Carry out fitting
+
