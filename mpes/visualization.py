@@ -82,7 +82,7 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     """
     
     # Check binning input
-    binning = round(binning)
+    binning = int(round(binning))
     if binning < 1:
         binning = 1
     
@@ -95,7 +95,7 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     f, ax = plt.subplots(figsize=(fw, fh))
     
     datamat = np.rollaxis(np.asarray(datamat), axis)
-    nr, nc = datamat.shape
+    nr, nc = map(int, datamat.shape)
     x = kwds.pop('x', range(0, nc))
     y = range(0, nr, binning)
     ny = len(y)
