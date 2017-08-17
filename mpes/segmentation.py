@@ -320,33 +320,41 @@ def sortByAxes(arr, axes):
     
     arr = np.asarray(arr)
     dim = np.ndim(arr)
-    dimax = len(axes)
+    if np.ndim(axes) == 1:
+        dimax = 1
+    else:
+        dimax = len(axes)
     if dim != dimax:
         raise Exception('The number of axes should match the dimenison of arr!')
     
+    sortseq = np.zeros(dim)
     # Sort the axes vectors in ascending order
     if dimax == 1:
         sortedaxes = np.sort(axes)
+        if np.prod(sortedaxes == axes) == 1:
+            seq = 0
+        elif np.prod(sortedaxes == axes[::-1]) == 1:
+            seq = 1
+            arr = arr[::-1]
+        sortseq[0] = seq
     else:
         sortedaxes = map(np.sort, axes)
     
-    # Check which axis changed, sort the array accordingly
-    sortseq = np.zeros(dim)
-    for i in range(dim):
-        
-        seq = None
-        
-        # if an axis is in ascending order 
-        if np.prod(sortedaxes[i] == axes[i]) == 1:
-            seq = 0
-        
-        # if an axis is in descending order
-        elif np.prod(sortedaxes[i] == axes[i][::-1]) == 1:
-            seq = 1
-            arr = revaxis(arr, axis=i)
+        # Check which axis changed, sort the array accordingly
+        for i in range(dim):
             
-        sortseq[i] = seq
-    
+            seq = None
+            # if an axis is in ascending order 
+            if np.prod(sortedaxes[i] == axes[i]) == 1:
+                seq = 0
+            
+            # if an axis is in descending order
+            elif np.prod(sortedaxes[i] == axes[i][::-1]) == 1:
+                seq = 1
+                arr = revaxis(arr, axis=i)
+                
+            sortseq[i] = seq
+        
     # Return sorted arrays or None if sorting is not needed
     if np.any(sortseq == 1):
         return arr, sortedaxes
