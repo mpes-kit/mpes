@@ -11,7 +11,6 @@ from numpy.linalg import norm
 import pandas as pd
 from skimage import measure, filters, morphology
 from math import cos, pi
-from ._utils import revaxis
 
 def to_odd(num):
     """
@@ -31,6 +30,27 @@ def to_odd(num):
     oddnum = num + int(cos(rem*pi/2))
     
     return oddnum
+
+
+def revaxis(arr, axis=-1):
+    """
+    Reverse an ndarray along certain axis
+    
+    **Parameters**
+    arr : nD numeric array
+        array to invert
+    axis : int | -1
+        the axis along which to invert
+    
+    **Return**
+    revarr : nD numeric array
+        axis-inverted nD array
+    """
+    
+    arr = np.asarray(arr).swapaxes(axis, 0)
+    arr = arr[::-1,...]
+    revarr = arr.swapaxes(0, axis)
+    return revarr
 
 
 def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):

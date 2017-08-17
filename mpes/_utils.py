@@ -4,7 +4,6 @@
 """
 @author: R. Patrick Xian
 """
-import numpy as np
 
 def numFormatConversion(seq, form='int', **kwds):
     """
@@ -44,23 +43,3 @@ def numFormatConversion(seq, form='int', **kwds):
         # Case of numeric array of the right type but wrong length
         return
         
-
-def revaxis(arr, axis=-1):
-    """
-    Reverse an ndarray along certain axis
-    
-    **Parameters**
-    arr : nD numeric array
-        array to invert
-    axis : int | -1
-        the axis along which to invert
-    
-    **Return**
-    revarr : nD numeric array
-        axis-inverted nD array
-    """
-    
-    arr = np.asarray(arr).swapaxes(axis, 0)
-    arr = arr[::-1,...]
-    revarr = arr.swapaxes(0, axis)
-    return revarr
