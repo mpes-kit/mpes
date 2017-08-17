@@ -11,7 +11,7 @@ from numpy.linalg import norm
 import pandas as pd
 from skimage import measure, filters, morphology
 from math import cos, pi
-from ._util import revaxis
+from ._utils import revaxis
 
 def to_odd(num):
     """
