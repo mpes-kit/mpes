@@ -277,8 +277,8 @@ def regionExpand(mask, **kwds):
             print('Please specify a structuring element for dilation!')
             
     return mask
-	
-	
+    
+    
 def sortByAxes(arr, axes):
     """
     Sort n-dimensional array into ascending order
@@ -332,4 +332,4 @@ def sortByAxes(arr, axes):
         return arr, sortedaxes
     else:
         return
-	
+    

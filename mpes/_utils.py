@@ -43,7 +43,7 @@ def numFormatConversion(seq, form='int', **kwds):
     else:
         # Case of numeric array of the right type but wrong length
         return
-		
+        
 
 def revaxis(arr, axis=-1):
     """
