@@ -15,7 +15,7 @@ import matplotlib.gridspec as matgrid
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.tri as mtri
 from mayavi import mlab
-from ._utils import numFormatConversion
+from .utils import numFormatConversion
 import re
 
 
