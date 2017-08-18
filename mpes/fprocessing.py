@@ -15,6 +15,7 @@ from scipy.interpolate import interp1d
 from numpy import polyval as poly
 from scipy.signal import savgol_filter
 import igor.igorpy as igor
+from .igoribw  import loadibw
 
 
 # ================= #
@@ -124,7 +125,7 @@ def readIgorBinFile(fdir, **kwds):
     elif ftype == 'ibw':
         
         try:
-            igfile = igor.load(fdir)
+            igfile = loadibw(fdir)
         except IOError:
             print(errmsg)
             
@@ -392,11 +393,8 @@ def zInner_Diff(Ek, Ang, Da):
 
     D1, D3, D5, D7 = Da
 
-    return poly(D1,
-                Ek) + 3 * 10**(-2) * poly(D3,
-                                          Ek) * (Ang)**2 + 5 * 10**(-4) * poly(D5,
-                                                                               Ek) * (Ang)**4 + 7 * 10**(-6) * poly(D7,
-                                                                                                                    Ek) * (Ang)**6
+    return poly(D1, Ek) + 3*10**(-2)*poly(D3, Ek)*(Ang)**2 + \
+        5*10**(-4)*poly(D5, Ek)*(Ang)**4 + 7*10**(-6)*poly(D7,Ek)*(Ang)**6
 
 
 # =================== #
