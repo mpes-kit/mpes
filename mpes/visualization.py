@@ -323,7 +323,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         keyword     data type    meaning
         ==========  ===========  =====================================
         aspect      str/numeric  aspect ratio of each subplot, from ['auto', 'equal' or scalar]
-		ncol        int          number of columns in subplot grid
+        ncol        int          number of columns in subplot grid
         nrow        int          number of rows in subplot grid
         figsize     tuple/list   figure size, (vertical_size, horizontal_size)
         flipdir     str          flip up-down or left-right of the matrix ('ud', 'lr')
@@ -367,7 +367,8 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         fw, fh = numFormatConversion(figuresize)
     except:
         fw, fh = 5 * figaspect(np.zeros((nr, nc)))
-
+    
+    ims = []
     f, ax = plt.subplots(nrows=nr, ncols=nc, figsize=(fw, fh))
 
     # Put each figure in a subplot, remove empty subplots
@@ -386,21 +387,22 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
             elif flipdir == 'lr':
                 img = np.fliplr(img)
             
+            # Make subplot
+            im = axcurr.imshow(img, cmap=cmap, \
+                vmin=vmin, vmax=vmax, aspect=asp)
+            
             # Set color scaling for each image individually
             if cscale == 'log':  # log scale
-                im = axcurr.imshow(img, cmap=cmap, \
-                vmin=vmin, vmax=vmax, aspect=asp)
                 im.set_norm(mpl.colors.LogNorm())
             elif cscale == 'linear':  # linear scale
-                im = axcurr.imshow(img, cmap=cmap, \
-                vmin=vmin, vmax=vmax, aspect=asp)
                 im.set_norm(mpl.colors.Normalize())
             elif 'gamma' in cscale:  # gamma scale
                 gfactors = re.split('gamma|-', cscale)[1:]
-                gfactors = numFormatConversion(gfactors, form='float')
-                img = gfactors[0]*(img**gfactors[1])
-                im = axcurr.imshow(img, cmap=cmap, \
-                vmin=vmin, vmax=vmax, aspect=asp)
+                gfactors = numFormatConversion(gfactors, form='float', length=2)
+                img = gfactors[0]*np.power(img, gfactors[1])
+                im.set_data(img)
+                
+            ims.append(im)
             
             # to do: set global color scaling for 3D matrix
 
@@ -442,9 +444,9 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     
     axisreturn = kwds.pop('axisreturn', 'flattened')
     if axisreturn == 'nested':
-        return ax
+        return ims, ax
     elif axisreturn == 'flattened':
-        return ax.ravel()
+        return ims, ax.ravel()
 
 
 #======================#

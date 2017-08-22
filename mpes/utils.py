@@ -35,11 +35,11 @@ def numFormatConversion(seq, form='int', **kwds):
         # Case of numeric array of the right length but may not be
         # the right type
         try:
-            numseq = map(eval(form), seq)
+            numseq = eval('list(map(' + form + ', seq))')
             return numseq
         except:
             raise 
     else:
         # Case of numeric array of the right type but wrong length
-        return
+        return seq
         
