@@ -11,6 +11,7 @@
 #   share. We hope IGOR Technical Notes will provide you with lots of
 #   valuable information while you are developing IGOR applications.
 
+from __future__ import print_function, division
 import array, struct, types
 import sys
 import numpy as np
@@ -469,7 +470,7 @@ def loadibw(filename, strict=True):
                 if strict:
                     assert max(pad_b) == 0, pad_b
                 else:
-                    print sys.stderr, 'warning: post-data padding not zero: %s.' % pad_b
+                    print(sys.stderr, 'warning: post-data padding not zero: %s.' % pad_b)
             bin_info['note'] = str(f.read(bin_info['noteSize'])).strip()
         elif version == 3:
             # Post-data info:
@@ -489,7 +490,7 @@ def loadibw(filename, strict=True):
                 if strict:
                     assert max(pad_b) == 0, pad_b
                 else:
-                    print sys.stderr, 'warning: post-data padding not zero: %s.' % pad_b
+                    print(sys.stderr, 'warning: post-data padding not zero: %s.' % pad_b)
             bin_info['note'] = str(f.read(bin_info['noteSize'])).strip()
             bin_info['formula'] = str(f.read(bin_info['formulaSize'])).strip()
         elif version == 5:

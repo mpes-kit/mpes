@@ -319,24 +319,25 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     numbered : bool
         condition for numbering the subplots
     **kwds : keyword arguments
-        ==========  ==========  =====================================
-        keyword     data type   meaning
-        ==========  ==========  =====================================
-        ncol        int         number of columns in subplot grid
-        nrow        int         number of rows in subplot grid
-        figsize     tuple/list  figure size, (vertical_size, horizontal_size)
-        flipdir     str         flip up-down or left-right of the matrix ('ud', 'lr')
-        colormap    str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
-        cscale      str         colormap scaling ('log', 'linear', or 'gammaA-b', see below)
-        vmin        numeric     minimum of the color scale
-        vmax        numeric     maximum of the color scale
-        numcolor    str         color code for subplot number
-        numsize     int         fontsize of the subtitle within a subplot
-        wspace      float       width spacing between subplots
-        hspace      float       height spacing betweens subplots
-        maintitle   str         main title of the plot
-        axisreturn  str         'flattened' or 'nested', return format of axis object
-        ==========  ==========  =====================================
+        ==========  ===========  =====================================
+        keyword     data type    meaning
+        ==========  ===========  =====================================
+        aspect      str/numeric  aspect ratio of each subplot, from ['auto', 'equal' or scalar]
+		ncol        int          number of columns in subplot grid
+        nrow        int          number of rows in subplot grid
+        figsize     tuple/list   figure size, (vertical_size, horizontal_size)
+        flipdir     str          flip up-down or left-right of the matrix ('ud', 'lr')
+        colormap    str          `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
+        cscale      str          colormap scaling ('log', 'linear', or 'gammaA-b', see below)
+        vmin        numeric      minimum of the color scale
+        vmax        numeric      maximum of the color scale
+        numcolor    str          color code for subplot number
+        numsize     int          fontsize of the subtitle within a subplot
+        wspace      float        width spacing between subplots
+        hspace      float        height spacing betweens subplots
+        maintitle   str          main title of the plot
+        axisreturn  str          'flattened' or 'nested', return format of axis object
+        ==========  ==========   =====================================
     **Return**
     
     ax : axes object
@@ -358,6 +359,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     numsize = kwds.pop('numsize', 15)
     vmin = kwds.pop('vmin', None)
     vmax = kwds.pop('vmax', None)
+    asp = kwds.pop('aspect', 'auto')
     ngrid = nr * nc
 
     # Construct a grid of subplots
@@ -386,16 +388,19 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
             
             # Set color scaling for each image individually
             if cscale == 'log':  # log scale
-                im = axcurr.imshow(img, cmap=cmap, vmin=vmin, vmax=vmax)
+                im = axcurr.imshow(img, cmap=cmap, \
+                vmin=vmin, vmax=vmax, aspect=asp)
                 im.set_norm(mpl.colors.LogNorm())
             elif cscale == 'linear':  # linear scale
-                im = axcurr.imshow(img, cmap=cmap, vmin=vmin, vmax=vmax)
+                im = axcurr.imshow(img, cmap=cmap, \
+                vmin=vmin, vmax=vmax, aspect=asp)
                 im.set_norm(mpl.colors.Normalize())
             elif 'gamma' in cscale:  # gamma scale
                 gfactors = re.split('gamma|-', cscale)[1:]
                 gfactors = numFormatConversion(gfactors, form='float')
                 img = gfactors[0]*(img**gfactors[1])
-                im = axcurr.imshow(img, cmap=cmap, vmin=vmin, vmax=vmax)
+                im = axcurr.imshow(img, cmap=cmap, \
+                vmin=vmin, vmax=vmax, aspect=asp)
             
             # to do: set global color scaling for 3D matrix
 
