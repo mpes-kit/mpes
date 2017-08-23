@@ -187,7 +187,8 @@ def colormesh2d(data, **kwds):
 
     # Use pcolormesh to render 2D plot
     ygrid, xgrid = np.meshgrid(yaxis, xaxis)
-    ax.pcolormesh(xgrid, ygrid, data, cmap=cmap, vmin=vmin, vmax=vmax)
+    pmesh = ax.pcolormesh(xgrid, ygrid, data, \
+    cmap=cmap, vmin=vmin, vmax=vmax)
 
     # Set basic axis properties
     ax.set_xlabel(xlabel, fontsize=axislabelsize)
@@ -195,7 +196,7 @@ def colormesh2d(data, **kwds):
     ax.tick_params(labelsize=ticklabelsize)
     plt.tight_layout()
 
-    return ax
+    return pmesh, ax
 
 
 def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
@@ -338,9 +339,12 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         maintitle   str          main title of the plot
         axisreturn  str          'flattened' or 'nested', return format of axis object
         ==========  ==========   =====================================
+    
     **Return**
     
-    ax : axes object
+    ims : AxesImage object
+        handle for the images in each subplot
+    ax : AxesSubplot object
         handle for the subplot axes
     """
     
@@ -399,7 +403,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
             elif 'gamma' in cscale:  # gamma scale
                 gfactors = re.split('gamma|-', cscale)[1:]
                 gfactors = numFormatConversion(gfactors, form='float', length=2)
-                img = gfactors[0]*np.power(img, gfactors[1])
+                img = gfactors[0]*(img**gfactors[1])
                 im.set_data(img)
                 
             ims.append(im)
@@ -456,7 +460,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
 def surf2d(datamat, frame=True, miniaxes=False, **kwds):
     """
     2D surface plot
-        **Parameters**
+    **Parameters**
     
     datamat : numeric 2D array
             the 2D data to plot
@@ -517,6 +521,18 @@ def surf2d(datamat, frame=True, miniaxes=False, **kwds):
 def trisurf2d(datamat, **kwds):
     """
     2D triangulated surface plot rendered using mplot3d
+    
+    **Parameters**
+    
+    datamat : numeric 2d array
+        2D data for plotting
+        
+    **Returns**
+    
+    sf : Poly3DCollection object
+        handle for objects in the plot
+    ax : Axes object
+        handle for the axes of the plot
     """
     
     data = np.ma.array(datamat.squeeze(), mask=np.isnan(datamat))
@@ -530,7 +546,7 @@ def trisurf2d(datamat, **kwds):
     
     ygrid, xgrid = np.meshgrid(yaxis, xaxis)
     tri = mtri.Triangulation(ygrid.flatten(), xgrid.flatten())
-    ax.plot_trisurf(xgrid.flatten(), ygrid.flatten(), datamat.flatten(),
+    sf, ax.plot_trisurf(xgrid.flatten(), ygrid.flatten(), datamat.flatten(),
                     triangles=tri.triangles, cmap=colormap, antialiased=False)
     
     xlabel = kwds.pop('xlabel', '')
@@ -541,4 +557,4 @@ def trisurf2d(datamat, **kwds):
     ax.set_ylabel(ylabel, labelpad=lblpad)
     ax.set_zlabel(zlabel, labelpad=lblpad)
     
-    return ax
+    return sf, ax
