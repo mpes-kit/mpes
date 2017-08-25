@@ -546,7 +546,7 @@ def trisurf2d(datamat, **kwds):
     
     ygrid, xgrid = np.meshgrid(yaxis, xaxis)
     tri = mtri.Triangulation(ygrid.flatten(), xgrid.flatten())
-    sf, ax.plot_trisurf(xgrid.flatten(), ygrid.flatten(), datamat.flatten(),
+    sf = ax.plot_trisurf(xgrid.flatten(), ygrid.flatten(), datamat.flatten(),
                     triangles=tri.triangles, cmap=colormap, antialiased=False)
     
     xlabel = kwds.pop('xlabel', '')
