@@ -1,5 +1,8 @@
 ### History of major changes to mpes since the first pip-installable version
 
+#### 2017.08.28
+1. Added 'contourf' option in colormesh2d() and sliceview3d() 
+
 #### 2017.08.18
 1. Added igoribw.py to /mpes, now support igor ibw binary file
 

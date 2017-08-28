@@ -165,6 +165,7 @@ def colormesh2d(data, **kwds):
     rval, cval = data.shape
 
     # Retrieve user-defined keyword arguments
+    plottype = kwds.pop('plottype', 'pcolormesh')
     xaxis = kwds.pop('x', np.arange(0, rval))
     yaxis = kwds.pop('y', np.arange(0, cval))
     figuresize = kwds.pop('figsize', 1.)
@@ -185,10 +186,18 @@ def colormesh2d(data, **kwds):
     
     figure, ax = plt.subplots(1, figsize=(fw, fh))
 
-    # Use pcolormesh to render 2D plot
+    # Use pcolormesh or contourf to render 2D plot
     ygrid, xgrid = np.meshgrid(yaxis, xaxis)
-    pmesh = ax.pcolormesh(xgrid, ygrid, data, \
+    if plottype == 'pcolormesh':
+        p = ax.pcolormesh(xgrid, ygrid, data, \
     cmap=cmap, vmin=vmin, vmax=vmax)
+    elif plottype == 'contourf':
+        origin = kwds.pop('origin', 'upper')
+        lvls = kwds.pop('levels', None)
+        p = ax.contourf(xgrid, ygrid, data, levels=lvls, \
+    cmap=cmap, vmin=vmin, vmax=vmax, origin=origin)
+    else:
+        raise Exception('No such plot type.')
 
     # Set basic axis properties
     ax.set_xlabel(xlabel, fontsize=axislabelsize)
@@ -196,7 +205,7 @@ def colormesh2d(data, **kwds):
     ax.tick_params(labelsize=ticklabelsize)
     plt.tight_layout()
 
-    return pmesh, ax
+    return p, ax
 
 
 def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
@@ -353,10 +362,11 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     
     # Gather parameters from input
     cutdim = datamat.shape[axis]
+    rdata = np.rollaxis(datamat, axis)
     nc = kwds.pop('ncol', 4)
     nr = kwds.pop('nrow', np.ceil(cutdim / nc).astype('int'))
     cmap = kwds.pop('colormap', 'Greys')
-    cscale = kwds.pop('cscale', 'log')
+    cscale = kwds.pop('cscale', 'linear')
     numcolor = kwds.pop('numcolor', 'black')
     figuresize = kwds.pop('figsize', '')
     flipdir = kwds.pop('flipdir', '')
@@ -364,6 +374,8 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     vmin = kwds.pop('vmin', None)
     vmax = kwds.pop('vmax', None)
     asp = kwds.pop('aspect', 'auto')
+    origin = kwds.pop('origin', 'lower')
+    plottype = kwds.pop('plottype','imshow')
     ngrid = nr * nc
 
     # Construct a grid of subplots
@@ -374,6 +386,23 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     
     ims = []
     f, ax = plt.subplots(nrows=nr, ncols=nc, figsize=(fw, fh))
+    
+    # Construct list of plottype for all subplots
+    if isinstance(plottype, list):
+        try:
+            plottype = sum(plottype, [])
+        except:
+            pass
+    
+    if isinstance(plottype, str):
+        plottype = [plottype]*ngrid
+    
+    if 'contourf' in plottype:
+        imr, imc = rdata[0,...].shape
+        lvls = kwds.pop('levels', None)
+        x = kwds.pop('x', range(imr))
+        y = kwds.pop('y', range(imc))
+        xgrid, ygrid = np.meshgrid(y, x)
 
     # Put each figure in a subplot, remove empty subplots
     for i in range(ngrid):
@@ -383,7 +412,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
 
         if i <= cutdim - 1:
             # Roll the slicing axis to the start of the matrix before slicing
-            img = np.rollaxis(datamat, axis)[i, :, :]
+            img = rdata[i, :, :]
             
             # Flip the image along an axis (if needed)
             if flipdir == 'ud':
@@ -392,19 +421,24 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
                 img = np.fliplr(img)
             
             # Make subplot
-            im = axcurr.imshow(img, cmap=cmap, \
-                vmin=vmin, vmax=vmax, aspect=asp)
+            if plottype[i] == 'imshow':
+                im = axcurr.imshow(img, cmap=cmap, \
+                    vmin=vmin, vmax=vmax, aspect=asp, origin=origin)
             
-            # Set color scaling for each image individually
-            if cscale == 'log':  # log scale
-                im.set_norm(mpl.colors.LogNorm())
-            elif cscale == 'linear':  # linear scale
-                im.set_norm(mpl.colors.Normalize())
-            elif 'gamma' in cscale:  # gamma scale
-                gfactors = re.split('gamma|-', cscale)[1:]
-                gfactors = numFormatConversion(gfactors, form='float', length=2)
-                img = gfactors[0]*(img**gfactors[1])
-                im.set_data(img)
+                # Set color scaling for each image individually
+                if cscale == 'log':  # log scale
+                    im.set_norm(mpl.colors.LogNorm())
+                elif cscale == 'linear':  # linear scale
+                    im.set_norm(mpl.colors.Normalize())
+                elif 'gamma' in cscale:  # gamma scale
+                    gfactors = re.split('gamma|-', cscale)[1:]
+                    gfactors = numFormatConversion(gfactors, form='float', length=2)
+                    img = gfactors[0]*(img**gfactors[1])
+                    im.set_data(img)
+            
+            elif plottype[i] == 'contourf':
+                im = axcurr.contourf(xgrid, ygrid, img, cmap=cmap, \
+                    levels=lvls, vmin=vmin, vmax=vmax, origin=origin)
                 
             ims.append(im)
             
