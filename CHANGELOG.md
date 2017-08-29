@@ -1,5 +1,8 @@
 ### History of major changes to mpes since the first pip-installable version
 
+#### 2017.08.29
+1. Added colormap normalization
+
 #### 2017.08.28
 1. Added 'contourf' option in colormesh2d() and sliceview3d() 
 

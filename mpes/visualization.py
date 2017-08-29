@@ -15,6 +15,7 @@ import matplotlib.gridspec as matgrid
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.tri as mtri
 from mayavi import mlab
+import matplotlib.colors as colors
 from .utils import numFormatConversion
 import re
 
@@ -43,6 +44,16 @@ def initmpl():
     mpl.rcParams['xtick.labelsize'] = 15
     mpl.rcParams['ytick.labelsize'] = 15
 
+
+class MidpointNormalize(colors.Normalize):
+
+    def __init__(self, vmin=None, vmax=None, midpoint=None, clip=False):
+        self.midpoint = midpoint
+        colors.Normalize.__init__(self, vmin, vmax, clip)
+
+    def __call__(self, value, clip=None):
+        x, y = [self.vmin, self.midpoint, self.vmax], [0, 0.5, 1]
+        return np.ma.masked_array(np.interp(value, x, y))
 
 #==========#
 # 1D plots #
@@ -148,6 +159,9 @@ def colormesh2d(data, **kwds):
         xlabel         str         x axis label
         ylabel         str         y axis label
         colormap       str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
+        norm           class       `colormap normalization <https://matplotlib.org/api/colors_api.html#matplotlib.colors.Normalize>`_
+        plottype       str         'pcolormesh' or 'contourf'
+        plotaxes       AxesObject  supply an existing AxesObject to plot on
         vmin           float       minimum value of colormap
         vmax           float       maximum value of colormap
         axislabelsize  int         font size of axis text labels
@@ -171,6 +185,7 @@ def colormesh2d(data, **kwds):
     figuresize = kwds.pop('figsize', 1.)
     # default colormap is reverse terrain
     cmap = kwds.pop('colormap', 'terrain_r')
+    norm = kwds.pop('norm', None)
     vmin = kwds.pop('vmin', None)
     vmax = kwds.pop('vmax', None)
     xlabel = kwds.pop('xlabel', '')
@@ -178,24 +193,28 @@ def colormesh2d(data, **kwds):
     axislabelsize = kwds.pop('ax_labelsize', 12)
     ticklabelsize = kwds.pop('tk_labelsize', 10)
 
-    # Generate plot frame
+    # Obtain plot figure size and aspect ratio
     try:
-        fh, fw = numFormatConversion(figuresize)
+        fw, fh = numFormatConversion(figuresize)
     except:
         fw, fh = 2 * figaspect(data)
     
-    figure, ax = plt.subplots(1, figsize=(fw, fh))
-
+    # Check if there is a given axes object
+    try:
+        ax = kwds.pop('plotaxes')
+    except:
+        figure, ax = plt.subplots(1, figsize=(fw, fh))
+    
     # Use pcolormesh or contourf to render 2D plot
     ygrid, xgrid = np.meshgrid(yaxis, xaxis)
     if plottype == 'pcolormesh':
         p = ax.pcolormesh(xgrid, ygrid, data, \
-    cmap=cmap, vmin=vmin, vmax=vmax)
+    cmap=cmap, vmin=vmin, vmax=vmax, norm=norm)
     elif plottype == 'contourf':
         origin = kwds.pop('origin', 'upper')
         lvls = kwds.pop('levels', None)
         p = ax.contourf(xgrid, ygrid, data, levels=lvls, \
-    cmap=cmap, vmin=vmin, vmax=vmax, origin=origin)
+    cmap=cmap, vmin=vmin, vmax=vmax, norm=norm, origin=origin)
     else:
         raise Exception('No such plot type.')
 
@@ -338,13 +357,14 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         figsize     tuple/list   figure size, (vertical_size, horizontal_size)
         flipdir     str          flip up-down or left-right of the matrix ('ud', 'lr')
         colormap    str          `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
-        cscale      str          colormap scaling ('log', 'linear', or 'gammaA-b', see below)
+        cscale      str          colormap scaling ('log', 'linear', 'midpointx', or 'gammaA-b', see below)
         vmin        numeric      minimum of the color scale
         vmax        numeric      maximum of the color scale
         numcolor    str          color code for subplot number
         numsize     int          fontsize of the subtitle within a subplot
         wspace      float        width spacing between subplots
         hspace      float        height spacing betweens subplots
+        plottype    str          'imshow' (default) or 'contourf'
         maintitle   str          main title of the plot
         axisreturn  str          'flattened' or 'nested', return format of axis object
         ==========  ==========   =====================================
@@ -430,6 +450,10 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
                     im.set_norm(mpl.colors.LogNorm())
                 elif cscale == 'linear':  # linear scale
                     im.set_norm(mpl.colors.Normalize())
+                elif 'midpoint' in cscale:
+                    mp = re.split('midpoint', cscale)[1]
+                    im.set_norm(MidpointNormalize(vmin=np.min(img), \
+                    vmax=np.max(img), midpoint=float(mp)))
                 elif 'gamma' in cscale:  # gamma scale
                     gfactors = re.split('gamma|-', cscale)[1:]
                     gfactors = numFormatConversion(gfactors, form='float', length=2)
