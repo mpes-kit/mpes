@@ -4,6 +4,7 @@
 """
 @author: R. Patrick Xian
 """
+import numpy as np
 
 def numFormatConversion(seq, form='int', **kwds):
     """
@@ -64,3 +65,41 @@ def replist(entry, row, column):
     """
 
     return [[entry]*column for _ in range(row)]
+
+    
+def shuffleaxis(arr, axes, direction='front'):
+    """
+    Move multiple axes of a multidimensional array simultaneously
+    to the front or end of its axis order
+    
+    ***Parameters***
+    
+    arr : ndarray
+        array to be shuffled
+    axes : tuple of int
+        dimensions to be shuffled
+    direction : str | 'front'
+        direction of shuffling ('front' or 'end')
+    
+    ***Return***
+    
+    sharr : ndarray
+        dimension-shuffled array
+    """
+    
+    nax, maxaxes, minaxes = len(axes), max(axes), min(axes)
+    ndim = np.ndim(arr)
+    
+    if nax > ndim:
+        raise Exception('Input array has fewer dimensions than specified axes!')
+    elif maxaxes > ndim-1 or minaxes < -ndim:
+        raise Exception("At least one of the input axes doesn't exist!")
+    else:
+        if direction == 'front':
+            shuffled_order = list(range(len(axes)))
+        elif direction == 'end':
+            shuffled_order = list(range(-len(axes),0))
+        
+    sharr = np.moveaxis(arr, axes, shuffled_order)
+    
+    return sharr

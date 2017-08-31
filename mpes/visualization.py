@@ -16,7 +16,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.tri as mtri
 from mayavi import mlab
 import matplotlib.colors as colors
-from .utils import numFormatConversion, replist
+from . import utils as u
 import re
 
 
@@ -100,7 +100,7 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     # Determine figure size
     figuresize = kwds.pop('figsize', '')
     try:
-        fw, fh = numFormatConversion(figuresize)
+        fw, fh = u.numFormatConversion(figuresize)
     except:
         fw, fh = 2 * figaspect(datamat)
     f, ax = plt.subplots(figsize=(fw, fh))
@@ -199,7 +199,7 @@ def colormesh2d(data, **kwds):
 
     # Obtain plot figure size and aspect ratio
     try:
-        fw, fh = numFormatConversion(figuresize)
+        fw, fh = u.numFormatConversion(figuresize)
     except:
         fw, fh = 2 * figaspect(data)
     
@@ -220,11 +220,11 @@ def colormesh2d(data, **kwds):
         origin = kwds.pop('origin', 'upper')
         lvls = kwds.pop('levels', None)
         nlvl = kwds.pop('ncontour', None)
-		# Set the number of contours
+        # Set the number of contours
         if lvls is None and nlvl is not None:
             p = ax.contourf(xgrid, ygrid, data, nlvl, \
     cmap=cmap, vmin=vmin, vmax=vmax, origin=origin, **kwds)
-		# Set directly the values of contour levels
+        # Set directly the values of contour levels
         elif nlvl is None and lvls is not None:
             p = ax.contourf(xgrid, ygrid, data, levels=lvls, \
     cmap=cmap, vmin=vmin, vmax=vmax, origin=origin, **kwds)
@@ -243,7 +243,7 @@ def colormesh2d(data, **kwds):
             p.set_norm(mpl.colors.Normalize())
         elif 'gamma' in cscale:  # gamma scale
             gfactors = re.split('gamma|-', cscale)[1:]
-            gfactors = numFormatConversion(gfactors, form='float', length=2)
+            gfactors = u.numFormatConversion(gfactors, form='float', length=2)
             img = gfactors[0]*(data**gfactors[1])
             p.set_data(data)
     elif isinstance(cscale, dict):
@@ -439,7 +439,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
 
     # Construct a grid of subplots
     try:
-        fw, fh = numFormatConversion(figuresize)
+        fw, fh = u.numFormatConversion(figuresize)
     except:
         fw, fh = 5 * figaspect(np.zeros((nr, nc)))
     
@@ -495,7 +495,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
                     vmax=np.max(img), midpoint=float(mp)))
                 elif 'gamma' in cscale:  # gamma scale
                     gfactors = re.split('gamma|-', cscale)[1:]
-                    gfactors = numFormatConversion(gfactors, form='float', length=2)
+                    gfactors = u.numFormatConversion(gfactors, form='float', length=2)
                     img = gfactors[0]*(img**gfactors[1])
                     im.set_data(img)
             
