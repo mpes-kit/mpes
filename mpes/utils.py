@@ -42,4 +42,25 @@ def numFormatConversion(seq, form='int', **kwds):
     else:
         # Case of numeric array of the right type but wrong length
         return seq
+
         
+def replist(entry, row, column):
+    """
+    Generator of nested lists with identical entries.
+    Generated values are independent of one another.
+    
+    ***Parameters***
+    
+    entry : numeric/str
+        repeated item in nested list
+    row : int
+        number of rows in nested list
+    column : int
+        number of columns in nested list
+    
+    ***Return***
+    
+    nested list
+    """
+
+    return [[entry]*column for _ in range(row)]

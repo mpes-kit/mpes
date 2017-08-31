@@ -16,7 +16,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.tri as mtri
 from mayavi import mlab
 import matplotlib.colors as colors
-from .utils import numFormatConversion
+from .utils import numFormatConversion, replist
 import re
 
 
@@ -159,13 +159,16 @@ def colormesh2d(data, **kwds):
         xlabel         str         x axis label
         ylabel         str         y axis label
         colormap       str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
-        norm           class       `colormap normalization <https://matplotlib.org/api/colors_api.html#matplotlib.colors.Normalize>`_
+        cscale         str/dict    'linear' (default), 'log', 'gammaA-b', dictionary with keys
+                                   ['midpoint', 'vmin', 'vmax'] for bilinear normalization
+        levels         1D array    explicit contour levels (ignores ncontour if not None)
+        ncontour       int         number of contours (ignores levels if not None)
         plottype       str         'pcolormesh' or 'contourf'
         plotaxes       AxesObject  supply an existing AxesObject to plot on
         vmin           float       minimum value of colormap
         vmax           float       maximum value of colormap
-        axislabelsize  int         font size of axis text labels
-        ticklabelsize  int         font size of axis tick labels
+        ax_labelsize   int         font size of axis text labels
+        tk_labelsize   int         font size of axis tick labels
         =============  ==========  ===================================
 
     **Return**
@@ -185,11 +188,12 @@ def colormesh2d(data, **kwds):
     figuresize = kwds.pop('figsize', 1.)
     # default colormap is reverse terrain
     cmap = kwds.pop('colormap', 'terrain_r')
-    norm = kwds.pop('norm', None)
+    cscale = kwds.pop('cscale', 'linear')
     vmin = kwds.pop('vmin', None)
     vmax = kwds.pop('vmax', None)
     xlabel = kwds.pop('xlabel', '')
     ylabel = kwds.pop('ylabel', '')
+    cbar = kwds.pop('cbar', False)
     axislabelsize = kwds.pop('ax_labelsize', 12)
     ticklabelsize = kwds.pop('tk_labelsize', 10)
 
@@ -206,22 +210,57 @@ def colormesh2d(data, **kwds):
         figure, ax = plt.subplots(1, figsize=(fw, fh))
     
     # Use pcolormesh or contourf to render 2D plot
-    ygrid, xgrid = np.meshgrid(yaxis, xaxis)
+    xgrid, ygrid = np.meshgrid(yaxis, xaxis)
+    
     if plottype == 'pcolormesh':
         p = ax.pcolormesh(xgrid, ygrid, data, \
-    cmap=cmap, vmin=vmin, vmax=vmax, norm=norm)
+    cmap=cmap, vmin=vmin, vmax=vmax, **kwds)
+        
     elif plottype == 'contourf':
         origin = kwds.pop('origin', 'upper')
         lvls = kwds.pop('levels', None)
-        p = ax.contourf(xgrid, ygrid, data, levels=lvls, \
-    cmap=cmap, vmin=vmin, vmax=vmax, norm=norm, origin=origin)
+        nlvl = kwds.pop('ncontour', None)
+		# Set the number of contours
+        if lvls is None and nlvl is not None:
+            p = ax.contourf(xgrid, ygrid, data, nlvl, \
+    cmap=cmap, vmin=vmin, vmax=vmax, origin=origin, **kwds)
+		# Set directly the values of contour levels
+        elif nlvl is None and lvls is not None:
+            p = ax.contourf(xgrid, ygrid, data, levels=lvls, \
+    cmap=cmap, vmin=vmin, vmax=vmax, origin=origin, **kwds)
+        else:
+            p = ax.contourf(xgrid, ygrid, data, \
+    cmap=cmap, vmin=vmin, vmax=vmax, origin=origin, **kwds)
+    
     else:
         raise Exception('No such plot type.')
-
+        
+    # Set color scaling for each image individually
+    if isinstance(cscale, str):
+        if cscale == 'log':  # log scale
+            p.set_norm(mpl.colors.LogNorm())
+        elif cscale == 'linear':  # linear scale (default)
+            p.set_norm(mpl.colors.Normalize())
+        elif 'gamma' in cscale:  # gamma scale
+            gfactors = re.split('gamma|-', cscale)[1:]
+            gfactors = numFormatConversion(gfactors, form='float', length=2)
+            img = gfactors[0]*(data**gfactors[1])
+            p.set_data(data)
+    elif isinstance(cscale, dict):
+        mp = cscale.pop('midpoint', 0.)
+        cvmin = cscale.pop('vmin', np.min(data))
+        cvmax = cscale.pop('vmax', np.max(data))
+        p.set_norm(MidpointNormalize(vmin=cvmin, vmax=cvmax, midpoint=mp))
+    
     # Set basic axis properties
     ax.set_xlabel(xlabel, fontsize=axislabelsize)
     ax.set_ylabel(ylabel, fontsize=axislabelsize)
     ax.tick_params(labelsize=ticklabelsize)
+    
+    if cbar:
+        cb = plt.colorbar(p, ax=ax)
+        cb.ax.tick_params(labelsize=ticklabelsize) 
+    
     plt.tight_layout()
 
     return p, ax
