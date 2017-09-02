@@ -11,6 +11,10 @@ from numpy.linalg import norm
 import pandas as pd
 from skimage import measure, filters, morphology
 from math import cos, pi
+from scipy.special import wofz
+
+SQ2 = np.sqrt(2.0)
+SQ2PI = np.sqrt(2*np.pi)
 
 def to_odd(num):
     """
@@ -360,4 +364,21 @@ def sortByAxes(arr, axes):
         return arr, sortedaxes
     else:
         return
+
+
+def voigt(x, amplitude=1.0, center=0.0, sigma=1.0, gamma=None):
+
+    if gamma is None:
+        gamma = sigma
+    z = (x-center + 1j*gamma) / (sigma*SQ2)
+    return amplitude*wofz(z).real / (sigma*SQ2PI)
+
     
+def gaussian(A, x, x0, s):
+    """
+    Gaussian model
+    """
+    
+    gs = A*np.exp(-((x-x0)**2) / (2*s**2))
+    
+    return gs
