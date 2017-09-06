@@ -13,9 +13,6 @@ from skimage import measure, filters, morphology
 from math import cos, pi
 from scipy.special import wofz
 
-SQ2 = np.sqrt(2.0)
-SQ2PI = np.sqrt(2*np.pi)
-
 def to_odd(num):
     """
     Convert a single number to its nearest odd number
@@ -342,7 +339,7 @@ def sortByAxes(arr, axes):
             arr = arr[::-1]
         sortseq[0] = seq
     else:
-        sortedaxes = map(np.sort, axes)
+        sortedaxes = list(map(np.sort, axes))
     
         # Check which axis changed, sort the array accordingly
         for i in range(dim):
@@ -365,15 +362,12 @@ def sortByAxes(arr, axes):
     else:
         return
 
+#################
+# Model fitting #
+#################
+SQ2 = np.sqrt(2.0)
+SQ2PI = np.sqrt(2*np.pi)
 
-def voigt(x, amplitude=1.0, center=0.0, sigma=1.0, gamma=None):
-
-    if gamma is None:
-        gamma = sigma
-    z = (x-center + 1j*gamma) / (sigma*SQ2)
-    return amplitude*wofz(z).real / (sigma*SQ2PI)
-
-    
 def gaussian(A, x, x0, s):
     """
     Gaussian model
@@ -382,3 +376,98 @@ def gaussian(A, x, x0, s):
     gs = A*np.exp(-((x-x0)**2) / (2*s**2))
     
     return gs
+
+
+def voigt(x, amplitude=1.0, center=0.0, sigma=1.0, gamma=None):
+    """
+    Voigt model
+    """
+
+    if gamma is None:
+        gamma = sigma
+    z = (x-center + 1j*gamma) / (sigma*SQ2)
+    vgt = amplitude*wofz(z).real / (sigma*SQ2PI)
+    return vgt
+
+    
+def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
+    """
+    Line-by-line fitting via bootstrapping fitted parameters from one line to the next
+    
+    ***Parameters***
+    
+    data : ndarray
+        data used in fitting
+    axval : list/numeric array
+        value for the axis
+    model : lmfit Model object
+        fitting model
+    params : lmfit Parameters object
+        initial guesses for fitting parameters
+    axis : int | 0
+        axis of the data to fit
+    dfcontainer : pandas DataFrame | None
+        container for the fitting parameters
+    **kwds : keyword arguments
+        =============  ==========  ===================================
+        keyword        data type   meaning
+        =============  ==========  ===================================
+        maxiter        int         maximum iteration per fit (default = 20)
+        concat         bool        concatenate the fit parameters to DataFrame input
+                                   False (default) = no concatenation, use an empty DataFrame to start
+                                   True = with concatenation to input DataFrame
+        verbose        bool        toggle for output message (default = False)
+        =============  ==========  ===================================
+    
+    ***Returns***
+    
+    df_fit : pandas DataFrame
+        filled container for fitting parameters
+    """
+    
+    # Retrieve values from input arguments
+    data = np.rollaxis(data, axis)
+    nr, nc = data.shape
+    vb = kwds.pop('verbose', False)
+    maxiter = kwds.pop('maxiter', 20)
+    concat = kwds.pop('concat', False)
+    
+    # Construct container for fitting parameters
+    if dfcontainer is None:
+        df_fit = pd.DataFrame(columns=params.keys())
+    elif isinstance(dfcontainer, pd.core.frame.DataFrame):
+        dfcontainer.sort_index(axis=1, inplace=True)
+        if concat == False:
+            df_fit = dfcontainer[0:0]
+        else:
+            df_fit = dfcontainer
+    else:
+        raise Exception('Input dfcontainer needs to be a pandas DataFrame!')
+    
+    # Fitting every line in data matrix
+    for i in range(nr):
+        
+        line = data[i,:]
+        # Remove shirley background
+        sbg = shirley(axval, line, maxiter=maxiter, warning=False, **kwds)
+        line_nobg = line - sbg
+        out = model.fit(line_nobg, params, x=axval)
+        
+        # Unpacking dictionary
+        currdict = {}
+        for _, param in out.params.items():
+            currdict[param.name] = param.value
+            currdf = pd.DataFrame.from_dict(currdict, orient='index').T
+        
+        df_fit = pd.concat([df_fit, currdf], ignore_index=True)
+        
+        # Set the next fit initial guesses to be
+        # the best values from the current fit
+        bestdict = out.best_values
+        for (k, v) in bestdict.items():
+            params[k].set(v)
+        
+        if vb == True:
+            print("Finished {}/{}...".format(i+1, nr))
+    
+    return df_fit

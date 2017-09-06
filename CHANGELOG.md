@@ -1,4 +1,6 @@
 ### History of major changes to mpes since the first pip-installable version
+#### 2017.09.06
+1. Added bootstrapfit() to mpes.segmentation
 
 #### 2017.08.31
 1. Now axes handle can be passed to colormesh2d()

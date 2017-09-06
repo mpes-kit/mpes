@@ -11,4 +11,5 @@ nose
 coverage
 pypi-publisher
 igor
+lmfit
 mayavi
