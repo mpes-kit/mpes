@@ -368,6 +368,7 @@ def sortByAxes(arr, axes):
 SQ2 = np.sqrt(2.0)
 SQ2PI = np.sqrt(2*np.pi)
 
+
 def gaussian(feval=False, vardict=None):
     """Gaussian model
     """
@@ -393,7 +394,49 @@ def voigt(feval=False, vardict=None):
     else:
         return eval(expr, vardict, globals())
 
+
+def func_update(func, suffix=''):
+    """
+    Update parameter names and expression with a suffix
+    """
     
+    _params, _expr = func(feval=False)
+    
+    # Update function parameter list
+    params = list(map(lambda p: p + suffix, _params))
+    
+    # Update function expression string
+    replacements = np.array([_params, params]).T.tolist()
+    expr = reduce(lambda string, parampairs: string.replace(*parampairs), replacements, _expr)
+    
+    return params, expr
+
+
+def func_add(*funcs):
+    """
+    Addition of functions
+    """
+    
+    # Update the function variables with suffixes
+    fparts = np.asarray([func_update(f, str(i)) for i, f in enumerate(funcs)]).T.tolist()
+    
+    # Generate combined list of variables and expression string
+    asvars = reduce(add, fparts[0])
+    expr = reduce(add, map(lambda x: x+' + ', fparts[1]))[:-3]
+    
+    def funcsum(feval=False, vardict=None):
+        
+        if feval == False:
+            return asvars, expr
+        else:
+            try:
+                return eval(expr, vardict, globals())
+            except:
+                raise Exception('Not all variables can be assigned.')
+    
+    return funcsum
+
+
 def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
     """
     Line-by-line fitting via bootstrapping fitted parameters from one line to the next

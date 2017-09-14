@@ -1,4 +1,9 @@
 ### History of major changes to mpes since the first pip-installable version
+
+#### 2017.09.15
+1. Modified the gaussian() and voigt() functions in mpes.segmentation
+2. Added func_update() and func_add() to mpes.segmentation
+
 #### 2017.09.06
 1. Added bootstrapfit() to mpes.segmentation
 
