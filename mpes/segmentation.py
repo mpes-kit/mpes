@@ -368,26 +368,30 @@ def sortByAxes(arr, axes):
 SQ2 = np.sqrt(2.0)
 SQ2PI = np.sqrt(2*np.pi)
 
-def gaussian(A, x, x0, s):
-    """
-    Gaussian model
+def gaussian(feval=False, vardict=None):
+    """Gaussian model
     """
     
-    gs = A*np.exp(-((x-x0)**2) / (2*s**2))
+    asvars = ['amp', 'xvar', 'ctr', 'sig']
+    expr = 'amp*np.exp(-((xvar-ctr)**2) / (2*sig**2))'
     
-    return gs
+    if feval == False:
+        return asvars, expr
+    else:
+        return eval(expr, vardict, globals())
 
 
-def voigt(x, amplitude=1.0, center=0.0, sigma=1.0, gamma=None):
+def voigt(feval=False, vardict=None):
+    """Voigt model
     """
-    Voigt model
-    """
 
-    if gamma is None:
-        gamma = sigma
-    z = (x-center + 1j*gamma) / (sigma*SQ2)
-    vgt = amplitude*wofz(z).real / (sigma*SQ2PI)
-    return vgt
+    asvars = ['amp', 'xvar', 'ctr', 'sig', 'gam']
+    expr = 'amp*wofz((xvar-ctr+1j*gam) / (sig*SQ2)).real / (sig*SQ2PI)'
+
+    if feval == False:
+        return asvars, expr
+    else:
+        return eval(expr, vardict, globals())
 
     
 def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
