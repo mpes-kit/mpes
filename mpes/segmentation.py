@@ -12,6 +12,8 @@ import pandas as pd
 from skimage import measure, filters, morphology
 from math import cos, pi
 from scipy.special import wofz
+from functools import reduce
+import operator as op
 
 def to_odd(num):
     """
@@ -397,7 +399,22 @@ def voigt(feval=False, vardict=None):
 
 def func_update(func, suffix=''):
     """
-    Update parameter names and expression with a suffix
+    Attach a suffix to parameter names and their instances
+    in the expression of a function
+    
+    ***Parameters***
+    
+    func : function
+        input function
+    suffix : str | ''
+        suffix to attach to parameter names
+    
+    ***Returns***
+    
+    params : list of str
+        updated function parameters
+    expr : str
+        updated function expression
     """
     
     _params, _expr = func(feval=False)
@@ -414,15 +431,25 @@ def func_update(func, suffix=''):
 
 def func_add(*funcs):
     """
-    Addition of functions
+    Addition of an arbitray number of functions
+    
+    ***Parameters***
+    
+    *funcs : list/tuple
+        functions to combine
+        
+    ***Returns***
+    
+    funcsum : function
+        functional sum
     """
     
     # Update the function variables with suffixes
     fparts = np.asarray([func_update(f, str(i)) for i, f in enumerate(funcs)]).T.tolist()
     
     # Generate combined list of variables and expression string
-    asvars = reduce(add, fparts[0])
-    expr = reduce(add, map(lambda x: x+' + ', fparts[1]))[:-3]
+    asvars = reduce(op.add, fparts[0])
+    expr = reduce(op.add, map(lambda x: x+' + ', fparts[1]))[:-3]
     
     def funcsum(feval=False, vardict=None):
         
