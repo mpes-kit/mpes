@@ -107,6 +107,32 @@ def rot2d(th, angle_unit):
 # Files I/O #
 # ========= #
 
+def readtsv(fdir, header=None, dtype='float', **kwds):
+    """
+    Read tsv file from hemispherical detector
+    
+    ***Parameters***
+    
+    fdir : str
+        file directory
+    header : int | None
+        number of header lines
+    dtype : str | 'float'
+        data type of the return numpy.ndarray
+    **kwds : keyword arguments
+        other keyword arguments for pandas.read_table()
+        
+    ***Return***
+    
+    data : numpy ndarray
+        read and type-converted data
+    """
+    
+    data = np.asarray(pd.read_table(fdir, delim_whitespace=True, \
+                      header=None, **kwds), dtype=dtype)
+    return data
+
+    
 def readIgorBinFile(fdir, **kwds):
     """
     Read Igor binary formats (pxp and ibw)
@@ -135,8 +161,8 @@ def readIgorBinFile(fdir, **kwds):
     
     return igfile
 
-    
-def ReadARPEStxt(fdir, withCoords=True):
+
+def readARPEStxt(fdir, withCoords=True):
     """
     Read and convert Igor-generated ARPES .txt files into numpy arrays
     The withCoords option specify whether the energy and angle information is given
