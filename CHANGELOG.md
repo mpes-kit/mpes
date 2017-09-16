@@ -2,6 +2,7 @@
 
 #### 2017.09.16
 1. Added readtsv() to mpes.fprocessing
+2. Added Model class to mpes.segmentation
 
 #### 2017.09.15
 1. Modified the gaussian() and voigt() functions in mpes.segmentation

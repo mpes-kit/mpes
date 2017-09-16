@@ -11,6 +11,7 @@ from numpy.linalg import norm
 import pandas as pd
 from skimage import measure, filters, morphology
 from math import cos, pi
+import scipy.optimize as opt
 from scipy.special import wofz
 from functools import reduce
 import operator as op
@@ -545,3 +546,72 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
             print("Finished {}/{}...".format(i+1, nr))
     
     return df_fit
+    
+    
+class Model(object):
+    """
+    Class of fitting curve models
+    """
+    
+    def __init__(self, func, xvar, name=None):
+        self.func = func
+        self.params, self.expr = func(feval=False)
+        if name is None and hasattr(self.func, '__name__'):
+            name = self.func.__name__
+        self.name = name
+        self.xvar = xvar
+    
+    
+    def __repr__(self):
+        return '<{}.{}: {}>'.format(self.__module__, \
+                self.__class__.__name__, self.name)
+    
+    
+    @staticmethod
+    def normalize(data):
+        """
+        Normalize n-dimensional data
+        """
+        return data/np.max(np.abs(data))
+    
+    
+    def model_eval(self, params):
+        """
+        Evaluate the fitting model with given parameters
+        """
+        return self.func(feval=True, vals=params, xvar=self.xvar)
+    
+    
+    def partial_eval(self, params, part=0):
+        """
+        Evaluate parts of a composite fitting model
+        """
+        pass
+    
+    
+    def _costfunc(self, inits, xv, form='original'):
+        """
+        Define the cost function of the optimization process
+        """
+        self.model = self.func(feval=True, vals=inits, xvar=xv)
+        if form == 'original':
+            cf = self.data - self.model
+        elif form == 'norm':
+            cf = self.norm_data - self.model
+        
+        return cf.ravel()
+    
+    
+    def fit(self, data, inits, method='leastsq', **fitkwds):
+        """
+        Run the optimization
+        """
+        self.data = data
+        self.norm_data = self.normalize(data)
+        self.inits = inits
+        
+        if method == 'leastsq':
+            fitout = opt.leastsq(self._costfunc, self.inits, args=self.xvar, \
+            xtol=1e-8, gtol=1e-6, full_output=True, **fitkwds)
+        
+        return fitout
