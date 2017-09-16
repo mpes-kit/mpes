@@ -613,5 +613,9 @@ class Model(object):
         if method == 'leastsq':
             fitout = opt.leastsq(self._costfunc, self.inits, args=self.xvar, \
             xtol=1e-8, gtol=1e-6, full_output=True, **fitkwds)
+        elif 'minimize' in method:
+            method_str = method.split('_')[1]
+            fitout = opt.minimize(self._costfunc, self.inits, args=self.xvar,\
+            method=method_str, **fitkwds)
         
         return fitout
