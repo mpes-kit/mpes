@@ -17,6 +17,7 @@ import matplotlib.tri as mtri
 from mayavi import mlab
 import matplotlib.colors as colors
 from . import utils as u
+from copy import copy
 import re
 
 
@@ -30,7 +31,7 @@ def initmpl():
     mpl.rcParams['axes.labelsize'] = 20
     mpl.rcParams['text.latex.preamble'] = [r'\usepackage{helvet}']
     mpl.rcParams['axes.edgecolor'] = 'black'
-    mpl.rcParams['savefig.dpi'] = 100
+    mpl.rcParams['savefig.dpi'] = 300
     mpl.rcParams['xtick.major.pad'] = 5
     mpl.rcParams['ytick.major.pad'] = 5
     mpl.rcParams['xtick.major.width'] = 2
@@ -266,9 +267,70 @@ def colormesh2d(data, **kwds):
     return p, ax
 
 
+def fit_parameter_plot(data, ncol, axis=(0, 1), **kwds):
+    """
+    Plot of actual value, absolute and relative changes of the fitting parameters
+    
+    ***Parameters***
+    
+    data : 2D numeric array
+        data for plotting
+    ncol : int
+        number of columns
+    axis : tuple | (0, 1)
+        axes for positioning the subplot grid
+    **kwds : keyword arguments
+        =============  ============  ===================================
+        keyword        data type     meaning
+        =============  ============  ===================================
+        mainfigsize    tuple/list    (horizontal_size, vertical_size)
+        cmaps          list of str   `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
+        cscales        mixed list    specification of color scaling for each plot
+        cbars          list of bool  specification of colorbars
+        ncontours      list of int   number of contours for each subplot
+        plottypes      list of str   plottype for each subplot
+        =============  ============  ===================================
+    
+    ***Returns***
+    
+    f : figure object
+        figure handle
+    ims : list
+        list of plot objects
+    axs : list
+        list of axes objects
+    """
+    
+    # Retrieve input parameters
+    mainfigsize = kwds.pop('mainfigsize', (18,32))
+    npl = np.prod([data.shape[idx] for idx in axis]) # total number of plots
+    nrow = int(npl/ncol)
+    cmaps = kwds.pop('cmaps', u.replist('terrain_r', ncol, nrow))
+    cscales = kwds.pop('cscales', u.replist('linear', ncol, nrow))
+    ptypes = kwds.pop('plottypes', u.replist('pcolormesh', ncol, nrow))
+    cbars = kwds.pop('cbars', u.replist(False, ncol, nrow))
+    ncontours = kwds.pop('ncontours', u.replist(20, ncol, nrow))
+    
+    rdata = u.shuffleaxis(data, axis, direction='front')
+    
+    f, axs = plt.subplots(nrow, ncol, figsize=mainfigsize)
+    ims = copy(axs)
+    
+    # Make plots and apply plotting conditions to each
+    for r in range(nrow):
+        for c in range(ncol):
+            ims[r][c], _ = colormesh2d(rdata[r,c,...], plotaxes=axs[r,c], \
+                        colormap=cmaps[r][c], cscale=cscales[r][c], \
+                        plottype=ptypes[r][c], cbar=cbars[r][c], \
+                        ncontour=ncontours[r][c], **kwds)
+            
+    return f, ims, axs
+
+
 def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
     """
-    Split-screen plot of an ARPES spectrum (intensity scaled differently for valence and conduction bands)
+    Split-screen plot of an ARPES spectrum
+    (intensity scaled differently for valence and conduction bands)
 
     **Parameters**
 

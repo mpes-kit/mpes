@@ -1,5 +1,8 @@
 ### History of major changes to mpes since the first pip-installable version
 
+#### 2017.09.17
+1. Added fit_parameter_plot() to mpes.visualization
+
 #### 2017.09.16
 1. Added readtsv() to mpes.fprocessing
 2. Added Model class to mpes.segmentation
@@ -14,7 +17,6 @@
 #### 2017.08.31
 1. Now axes handle can be passed to colormesh2d()
 2. Added replist, shuffleaxis to mpes.utils
-3. Added fit_parameter_plot() to mpes.visualization (built on top of colormesh2d)
 
 #### 2017.08.29
 1. Added colormap normalization
