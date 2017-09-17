@@ -16,6 +16,7 @@ from scipy.special import wofz
 from functools import reduce
 import operator as op
 
+
 def to_odd(num):
     """
     Convert a single number to its nearest odd number
@@ -56,6 +57,73 @@ def revaxis(arr, axis=-1):
     revarr = arr.swapaxes(0, axis)
     return revarr
 
+
+def sortByAxes(arr, axes):
+    """
+    Sort n-dimensional array into ascending order
+    based on the corresponding axes order
+    
+    **Parameters**
+    
+    arr : numeric nD array
+        the nD array to be sorted
+    axes : tuple/list
+        list of axes
+
+    **Return**
+    if no sorting is needed, returns None
+    
+    if the ndarray and axes are sorted,
+    return the sorted values
+    """
+    
+    arr = np.asarray(arr)
+    dim = np.ndim(arr)
+    if np.ndim(axes) == 1:
+        dimax = 1
+    else:
+        dimax = len(axes)
+    if dim != dimax:
+        raise Exception('The number of axes should match the dimenison of arr!')
+    
+    sortseq = np.zeros(dim)
+    # Sort the axes vectors in ascending order
+    if dimax == 1:
+        sortedaxes = np.sort(axes)
+        if np.prod(sortedaxes == axes) == 1:
+            seq = 0
+        elif np.prod(sortedaxes == axes[::-1]) == 1:
+            seq = 1
+            arr = arr[::-1]
+        sortseq[0] = seq
+    else:
+        sortedaxes = list(map(np.sort, axes))
+    
+        # Check which axis changed, sort the array accordingly
+        for i in range(dim):
+            
+            seq = None
+            # if an axis is in ascending order 
+            if np.prod(sortedaxes[i] == axes[i]) == 1:
+                seq = 0
+            
+            # if an axis is in descending order
+            elif np.prod(sortedaxes[i] == axes[i][::-1]) == 1:
+                seq = 1
+                arr = revaxis(arr, axis=i)
+                
+            sortseq[i] = seq
+        
+    # Return sorted arrays or None if sorting is not needed
+    if np.any(sortseq == 1):
+        return arr, sortedaxes
+    else:
+        return
+
+
+#====================#
+# Background removal #
+#====================#
 
 def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
     """
@@ -154,7 +222,11 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
     else:
         return yr + B
 
-        
+
+#====================#
+# Image segmentation #
+#====================#
+
 def segment2d(img, nbands=1, **kwds):
     """
     Electronic band segmentation using local thresholding
@@ -301,73 +373,12 @@ def regionExpand(mask, **kwds):
             print('Please specify a structuring element for dilation!')
             
     return mask
-    
-    
-def sortByAxes(arr, axes):
-    """
-    Sort n-dimensional array into ascending order
-    based on the corresponding axes order
-    
-    **Parameters**
-    
-    arr : numeric nD array
-        the nD array to be sorted
-    axes : tuple/list
-        list of axes
 
-    **Return**
-    if no sorting is needed, returns None
-    
-    if the ndarray and axes are sorted,
-    return the sorted values
-    """
-    
-    arr = np.asarray(arr)
-    dim = np.ndim(arr)
-    if np.ndim(axes) == 1:
-        dimax = 1
-    else:
-        dimax = len(axes)
-    if dim != dimax:
-        raise Exception('The number of axes should match the dimenison of arr!')
-    
-    sortseq = np.zeros(dim)
-    # Sort the axes vectors in ascending order
-    if dimax == 1:
-        sortedaxes = np.sort(axes)
-        if np.prod(sortedaxes == axes) == 1:
-            seq = 0
-        elif np.prod(sortedaxes == axes[::-1]) == 1:
-            seq = 1
-            arr = arr[::-1]
-        sortseq[0] = seq
-    else:
-        sortedaxes = list(map(np.sort, axes))
-    
-        # Check which axis changed, sort the array accordingly
-        for i in range(dim):
-            
-            seq = None
-            # if an axis is in ascending order 
-            if np.prod(sortedaxes[i] == axes[i]) == 1:
-                seq = 0
-            
-            # if an axis is in descending order
-            elif np.prod(sortedaxes[i] == axes[i][::-1]) == 1:
-                seq = 1
-                arr = revaxis(arr, axis=i)
-                
-            sortseq[i] = seq
-        
-    # Return sorted arrays or None if sorting is not needed
-    if np.any(sortseq == 1):
-        return arr, sortedaxes
-    else:
-        return
 
-#################
+#===============#
 # Model fitting #
-#################
+#===============#
+
 SQ2 = np.sqrt(2.0)
 SQ2PI = np.sqrt(2*np.pi)
 
@@ -619,3 +630,51 @@ class Model(object):
             method=method_str, **fitkwds)
         
         return fitout
+
+
+#====================================#
+# Fitting result parsing and testing #
+#====================================#
+
+def build_dynamic_matrix(fitparams, display_range=slice(None, None, None), pre_t0_range=slice(None, 1, None)):
+    """
+    Construct the dynamic matrix from the fitting results:
+    for each fitting parameter, construct time-dependent value,
+    time-dependent absolute and relative changes 
+    
+    ***Parameters***
+    
+    fitparams : 3D ndarray
+        fitting output
+    display_range : slice object | slice(None, None, None)
+        display time range of the fitting parameters (default = full range)
+    pre_t0_range : slice object | slice(None, 1, None)
+        time range regarded as before time-zero
+    
+    ***Returns***
+    
+    dyn_matrix : 4D ndarray
+        calculated dynamic matrix
+    """
+    
+    if np.ndim(fitparams) != 3:
+        raise Exception('Fitting results input need to be a 3D array!')
+    else:
+        nt, nparam, nk = fitparams.shape
+        ncol = 3
+        ndisp = len(range(*display_range.indices(nt))) # length of remaining time points
+        reduced_fitparams = fitparams[display_range,...]
+        dyn_matrix = np.zeros((nk, ndisp, nparam, ncol))
+
+        # Fill the dynamic matrix by values from each change parameters
+        for idx, i in enumerate(range(nparam)):
+
+            # Calculate the k-dependent pre-t0 values       
+            I0 = np.mean(fitparams[pre_t0_range, i, :], axis=0)
+
+            # Calculate the k-dependent absolute and relative changes
+            dyn_matrix[..., idx, 0] = np.transpose(reduced_fitparams[:, i, :])
+            dyn_matrix[..., idx, 1] = np.transpose(reduced_fitparams[:, i, :] - I0)
+            dyn_matrix[..., idx, 2] = np.transpose((reduced_fitparams[:, i, :] - I0) / I0)
+
+        return dyn_matrix
