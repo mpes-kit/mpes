@@ -4,6 +4,13 @@
 """
 @author: R. Patrick Xian
 """
+# =======================
+# Sections:
+# 1.  Utility functions
+# 2.  1D plots
+# 3.  2D plots
+# 4.  3D-rendered plots
+# =======================
 
 from __future__ import print_function, division
 import numpy as np
@@ -20,6 +27,10 @@ from . import utils as u
 from copy import copy
 import re
 
+
+# =================== #
+#  Utility functions  #
+# =================== #
 
 def initmpl():
     """
@@ -56,9 +67,10 @@ class MidpointNormalize(colors.Normalize):
         x, y = [self.vmin, self.midpoint, self.vmax], [0, 0.5, 1]
         return np.ma.masked_array(np.interp(value, x, y))
 
-#==========#
-# 1D plots #
-#==========#
+
+# ========== #
+#  1D plots  #
+# ========== #
 
 def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     """
@@ -138,9 +150,9 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     return ax
 
 
-#==========#
-# 2D plots #
-#==========#
+# ========== #
+#  2D plots  #
+# ========== #
 
 def colormesh2d(data, **kwds):
     """
@@ -612,9 +624,9 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         return ims, ax.ravel()
 
 
-#======================#
-# Plots rendered in 3D #
-#======================#
+# ================== #
+#  3D-rendered plots #
+# ================== #
 
 def surf2d(datamat, frame=True, miniaxes=False, **kwds):
     """

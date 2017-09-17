@@ -4,6 +4,12 @@
 """
 @author: R. Patrick Xian
 """
+# =========================
+# Sections:
+# 1.  Utility functions
+# 2.  File I/O and parsing
+# 3.  Data transformation
+# =========================
 
 from __future__ import print_function, division
 import numpy as np
@@ -103,9 +109,42 @@ def rot2d(th, angle_unit):
         return np.array([[np.cos(th), -np.sin(th)], [np.sin(th), np.cos(th)]])
 
 
-# ========= #
-# Files I/O #
-# ========= #
+def binarysearch(arr, val):
+    """
+    Equivalent to BinarySearch(waveName, val) in Igor Pro, the sorting order is determined automatically
+    """
+
+    sortedarr = np.sort(arr)
+    if np.array_equal(arr, sortedarr):
+        return np.searchsorted(arr, val, side='left') - 1
+    elif np.array_equal(arr, sortedarr[::-1]):
+        return np.size(arr) - np.searchsorted(arr[::-1], val, side='left') - 1
+
+
+def searchinterp(arr, val):
+    """
+    Equivalent to BinarySearchInterp(waveName, val) in Igor Pro, the sorting order is determined automatically
+    """
+
+    indstart = binarysearch(arr, val)
+    indstop = indstart + 1
+    indarray = np.array([indstart, indstop])
+    finterp = interp1d(arr[indstart:indstop + 1], indarray, kind='linear')
+
+    return finterp(val) + 0  # +0 because of data type conversion
+
+
+def linterp(xind, yarr, frac):
+    """
+    Linear interpolation
+    """
+
+    return yarr[xind] * (1 - frac) + yarr[xind + 1] * frac
+
+
+# ====================== #
+#  File I/O and parsing  #
+# ====================== #
 
 def readtsv(fdir, header=None, dtype='float', **kwds):
     """
@@ -345,38 +384,9 @@ def readLensModeParameters(calibfiledir, lensmode='WideAngleMode'):
         print('This mode is currently not supported!')
 
 
-def binarysearch(arr, val):
-    """
-    Equivalent to BinarySearch(waveName, val) in Igor Pro, the sorting order is determined automatically
-    """
-
-    sortedarr = np.sort(arr)
-    if np.array_equal(arr, sortedarr):
-        return np.searchsorted(arr, val, side='left') - 1
-    elif np.array_equal(arr, sortedarr[::-1]):
-        return np.size(arr) - np.searchsorted(arr[::-1], val, side='left') - 1
-
-
-def searchinterp(arr, val):
-    """
-    Equivalent to BinarySearchInterp(waveName, val) in Igor Pro, the sorting order is determined automatically
-    """
-
-    indstart = binarysearch(arr, val)
-    indstop = indstart + 1
-    indarray = np.array([indstart, indstop])
-    finterp = interp1d(arr[indstart:indstop + 1], indarray, kind='linear')
-
-    return finterp(val) + 0  # +0 because of data type conversion
-
-
-def linterp(xind, yarr, frac):
-    """
-    Linear interpolation
-    """
-
-    return yarr[xind] * (1 - frac) + yarr[xind + 1] * frac
-
+# =================== #
+# Data transformation #
+# =================== #
 
 def MCP_Position_mm(Ek, Ang, aInner, Da):
     """
@@ -422,10 +432,6 @@ def zInner_Diff(Ek, Ang, Da):
     return poly(D1, Ek) + 3*10**(-2)*poly(D3, Ek)*(Ang)**2 + \
         5*10**(-4)*poly(D5, Ek)*(Ang)**4 + 7*10**(-6)*poly(D7,Ek)*(Ang)**6
 
-
-# =================== #
-# Data transformation #
-# =================== #
 
 def slice2d(datamat, xaxis, yaxis, xmin, xmax, ymin, ymax):
     """

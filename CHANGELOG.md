@@ -3,6 +3,7 @@
 #### 2017.09.17
 1. Added fit_parameter_plot() to mpes.visualization
 2. Added build_dynamic_matrix() to mpes.segmentation
+3. Organized the code section names in major submodules (list of sections in the beginning)
 
 #### 2017.09.16
 1. Added readtsv() to mpes.fprocessing

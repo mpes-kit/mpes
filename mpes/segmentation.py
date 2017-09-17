@@ -4,6 +4,14 @@
 """
 @author: R. Patrick Xian
 """
+# =======================================
+# Sections:
+# 1.  Utility functions
+# 2.  Background removal
+# 3.  Image segmentation
+# 4.  Fitting routines
+# 5.  Fitting result parsing and testing
+# =======================================
 
 from __future__ import print_function, division
 from . import utils as u
@@ -17,6 +25,10 @@ from scipy.special import wofz
 from functools import reduce
 import operator as op
 
+
+# =================== #
+#  Utility functions  #
+# =================== #
 
 def sortByAxes(arr, axes):
     """
@@ -81,9 +93,9 @@ def sortByAxes(arr, axes):
         return
 
 
-#====================#
-# Background removal #
-#====================#
+# ==================== #
+#  Background removal  #
+# ==================== #
 
 def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
     """
@@ -183,9 +195,9 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
         return yr + B
 
 
-#====================#
-# Image segmentation #
-#====================#
+# ==================== #
+#  Image segmentation  #
+# ==================== #
 
 def segment2d(img, nbands=1, **kwds):
     """
@@ -335,9 +347,9 @@ def regionExpand(mask, **kwds):
     return mask
 
 
-#===============#
-# Model fitting #
-#===============#
+# ================ #
+# Fitting routines #
+# ================ #
 
 SQ2 = np.sqrt(2.0)
 SQ2PI = np.sqrt(2*np.pi)
