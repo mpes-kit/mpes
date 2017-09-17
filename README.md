@@ -19,6 +19,15 @@ PyPI installation coming soon...
 
 Documentation and examples are posted [here](http://mpes.readthedocs.io/)
 
+Dependencies
+```
+numpy = 0.12.0 +
+scipy = 0.18.0 +
+scikit-image = 0.13.0 +
+pandas = 0.19.2 +
+mayavi = 4.5.0 +
+```
+
 ### Overview of submodules  
 The mpes package contains the following submodules. They are listed here along with suggested import conventions
 ```
