@@ -24,7 +24,7 @@ Contents:
    
    installation
    file_io
-   segmentation
+   analysis
    visualization
 
 

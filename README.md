@@ -32,7 +32,7 @@ mayavi = 4.5.0 +
 The mpes package contains the following submodules. They are listed here along with suggested import conventions
 ```
 import mpes.fprocessing as fp  
-import mpes.segmentation as sg
+import mpes.analysis as aly
 import mpes.visualization as vis
 ```
 
