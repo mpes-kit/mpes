@@ -6,6 +6,7 @@
 """
 
 from __future__ import print_function, division
+from . import utils as u
 import numpy as np
 from numpy.linalg import norm
 import pandas as pd
@@ -15,47 +16,6 @@ import scipy.optimize as opt
 from scipy.special import wofz
 from functools import reduce
 import operator as op
-
-
-def to_odd(num):
-    """
-    Convert a single number to its nearest odd number
-    
-    **Parameters**
-    
-    num : float/int
-    
-    **Return**
-    
-    oddnum : int
-        the nearest odd number
-    """
-
-    rem = round(num) % 2
-    oddnum = num + int(cos(rem*pi/2))
-    
-    return oddnum
-
-
-def revaxis(arr, axis=-1):
-    """
-    Reverse an ndarray along certain axis
-    
-    **Parameters**
-    arr : nD numeric array
-        array to invert
-    axis : int | -1
-        the axis along which to invert
-    
-    **Return**
-    revarr : nD numeric array
-        axis-inverted nD array
-    """
-    
-    arr = np.asarray(arr).swapaxes(axis, 0)
-    arr = arr[::-1,...]
-    revarr = arr.swapaxes(0, axis)
-    return revarr
 
 
 def sortByAxes(arr, axes):
@@ -110,7 +70,7 @@ def sortByAxes(arr, axes):
             # if an axis is in descending order
             elif np.prod(sortedaxes[i] == axes[i][::-1]) == 1:
                 seq = 1
-                arr = revaxis(arr, axis=i)
+                arr = u.revaxis(arr, axis=i)
                 
             sortseq[i] = seq
         
@@ -249,7 +209,7 @@ def segment2d(img, nbands=1, **kwds):
     ofs = kwds.pop('offset', 0)
     
     nlabel  =  0
-    dmax = to_odd(max(img.shape))
+    dmax = u.to_odd(max(img.shape))
     i = 0
     blocksize = dmax - 2 * i
     
