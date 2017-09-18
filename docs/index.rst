@@ -26,6 +26,7 @@ Contents:
    file_io
    analysis
    visualization
+   utils
 
 
 General data processing pipeline:
