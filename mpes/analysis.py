@@ -475,6 +475,9 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
                                    False (default) = no concatenation, use an empty DataFrame to start
                                    True = with concatenation to input DataFrame
         verbose        bool        toggle for output message (default = False)
+        bgremove       bool        toggle for background removal (default = True)
+        flipped        bool        toggle for fitting start position
+                                   (if flipped, fitting start from the last line)
         =============  ==========  ===================================
     
     ***Returns***
@@ -484,11 +487,19 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
     """
     
     # Retrieve values from input arguments
-    data = np.rollaxis(data, axis)
-    nr, nc = data.shape
     vb = kwds.pop('verbose', False)
     maxiter = kwds.pop('maxiter', 20)
     concat = kwds.pop('concat', False)
+    bgremove = kwds.pop('bgremove', True)
+    cond_flip = int(kwds.pop('flipped', False))
+    
+    data = np.rollaxis(data, axis)
+    # Flip axis if the conditional is True
+    data = cond_flip*np.flip(data, axis=0) + (1-cond_flip)*data
+    nr, nc = data.shape
+    
+    # Save background-removed data
+    data_nobg = np.zeros_like(data)
     
     # Construct container for fitting parameters
     if dfcontainer is None:
@@ -505,10 +516,14 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
     # Fitting every line in data matrix
     for i in range(nr):
         
+        # Remove shirley background (nobg = no background)
         line = data[i,:]
-        # Remove shirley background
-        sbg = shirley(axval, line, maxiter=maxiter, warning=False, **kwds)
-        line_nobg = line - sbg
+        if bgremove == True:
+            sbg = shirley(axval, line, maxiter=maxiter, warning=False, **kwds)
+            line_nobg = line - sbg
+        else:
+            line_nobg = line
+        data_nobg[i,:] = line_nobg
         out = model.fit(line_nobg, params, x=axval)
         
         # Unpacking dictionary
@@ -528,7 +543,11 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
         if vb == True:
             print("Finished {}/{}...".format(i+1, nr))
     
-    return df_fit
+    # Flip the rows if fitting is conducted in the reverse direction
+    if cond_flip == 1:
+        df_fit = df_fit.iloc[::-1]
+    
+    return df_fit, data_nobg
     
     
 class Model(object):

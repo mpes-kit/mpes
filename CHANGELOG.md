@@ -1,5 +1,8 @@
 ### History of major changes to mpes since the first pip-installable version
 
+#### 2017.09.20
+1. Modified mpes.analysis.bootstrapfit() to include fitting in the reverse direction
+
 #### 2017.09.17
 1. Added fit_parameter_plot() to mpes.visualization
 2. Added build_dynamic_matrix() to mpes.segmentation
