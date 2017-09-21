@@ -471,10 +471,10 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
         concat         bool        concatenate the fit parameters to DataFrame input
                                    False (default) = no concatenation, use an empty DataFrame to start
                                    True = with concatenation to input DataFrame
-        verbose        bool        toggle for output message (default = False)
         bgremove       bool        toggle for background removal (default = True)
         flipped        bool        toggle for fitting start position
                                    (if flipped, fitting start from the last line)
+        verbose        bool        toggle for output message (default = False)
         =============  ==========  ===================================
     
     ***Returns***
@@ -513,7 +513,7 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
     # Fitting every line in data matrix
     for i in range(nr):
         
-        # Remove shirley background (nobg = no background)
+        # Remove Shirley background (nobg = no background)
         line = data[i,:]
         if bgremove == True:
             sbg = shirley(axval, line, maxiter=maxiter, warning=False, **kwds)
@@ -538,11 +538,13 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
             params[k].set(v)
         
         if vb == True:
-            print("Finished {}/{}...".format(i+1, nr))
+            print("Finished line {}/{}...".format(i+1, nr))
     
     # Flip the rows if fitting is conducted in the reverse direction
     if cond_flip == 1:
         df_fit = df_fit.iloc[::-1]
+        df_fit.reset_index(drop=True, inplace=True)
+        data_nobg = np.flip(data_nobg, axis=0)
     
     return df_fit, data_nobg
     
