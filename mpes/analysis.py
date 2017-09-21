@@ -51,10 +51,7 @@ def sortByAxes(arr, axes):
     
     arr = np.asarray(arr)
     dim = np.ndim(arr)
-    if np.ndim(axes) == 1:
-        dimax = 1
-    else:
-        dimax = len(axes)
+    dimax = len(axes)
     if dim != dimax:
         raise Exception('The number of axes should match the dimenison of arr!')
     
