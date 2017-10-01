@@ -196,6 +196,35 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
 #  Image segmentation  #
 # ==================== #
 
+def blocknorm(data, mavg_axis=0, blockwidth=1):
+    """
+    Block-thresholding 2D data
+    
+    ***Parameters***
+    
+    data : ndarray
+        data to normalize
+    mavg_axis : int | 0
+        axis to move the block along
+    blockwidth : int | 1
+        width of the moving block
+    
+    ***Returns***
+    
+    datanorm : ndarray
+        block-normalized data
+    """
+    
+    datar = np.rollaxis(data, mavg_axis)
+    nr, nc = datar.shape
+    datanorm = np.zeros_like(datar)
+    for bst in range(nr):
+        bnd = bst + blockwidth
+        datanorm[bst:bnd] = datar[bst:bnd,:]/np.max(datar[bst:bnd,:])
+    
+    return np.rollaxis(datanorm, mavg_axis)
+
+
 def segment2d(img, nbands=1, **kwds):
     """
     Electronic band segmentation using local thresholding

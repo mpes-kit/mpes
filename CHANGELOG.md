@@ -1,5 +1,8 @@
 ### History of major changes to mpes since the first pip-installable version
 
+#### 2017.10.01
+1. Added blocknorm() to mpes.analysis
+
 #### 2017.09.20
 1. Modified mpes.analysis.bootstrapfit() to include fitting in the reverse direction
 
