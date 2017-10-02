@@ -1,7 +1,7 @@
 ### History of major changes to mpes since the first pip-installable version
 
 #### 2017.10.03
-1. Added imrescale() to mpes.fprocessing
+1. Added mat2im() and im2mat() to mpes.fprocessing
 
 #### 2017.10.01
 1. Added blocknorm() to mpes.analysis

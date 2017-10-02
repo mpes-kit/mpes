@@ -385,7 +385,7 @@ def readLensModeParameters(calibfiledir, lensmode='WideAngleMode'):
         print('This mode is currently not supported!')
 
 
-def imrescale(datamat, dtype='uint8', savename=None):
+def mat2im(datamat, dtype='uint8', savename=None):
     """
     Convert data matrix to image
     """
@@ -399,6 +399,15 @@ def imrescale(datamat, dtype='uint8', savename=None):
     if savename:
         im.save(savename)
     return im
+
+    
+def im2mat(fdir):
+    """
+    Convert image to numpy ndarray
+    """
+    
+    mat = np.asarray(pim.open(fdir))
+    return mat
 
 
 # =================== #
