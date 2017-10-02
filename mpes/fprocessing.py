@@ -22,6 +22,7 @@ from numpy import polyval as poly
 from scipy.signal import savgol_filter
 import igor.igorpy as igor
 from .igoribw  import loadibw
+from PIL import Image as pim
 
 
 # ================= #
@@ -382,6 +383,22 @@ def readLensModeParameters(calibfiledir, lensmode='WideAngleMode'):
 
     else:
         print('This mode is currently not supported!')
+
+
+def imrescale(datamat, dtype='uint8', savename=None):
+    """
+    Convert data matrix to image
+    """
+    
+    datamat = np.asarray(datamat)
+    imrsc = (255.0 / datamat.max() * (datamat - datamat.min()))
+    if dtype == 'uint8':
+        imrsc = imrsc.astype(np.uint8)
+    im = pim.fromarray(imrsc)
+    
+    if savename:
+        im.save(savename)
+    return im
 
 
 # =================== #
