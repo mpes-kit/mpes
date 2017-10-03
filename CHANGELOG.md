@@ -2,6 +2,7 @@
 
 #### 2017.10.03
 1. Added mat2im() and im2mat() to mpes.fprocessing
+2. Added toggle3d() to mpes.visualization to enable/disable loading of mayavi
 
 #### 2017.10.01
 1. Added blocknorm() to mpes.analysis

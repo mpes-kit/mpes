@@ -21,11 +21,13 @@ from matplotlib.font_manager import FontProperties
 import matplotlib.gridspec as matgrid
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.tri as mtri
-from mayavi import mlab
 import matplotlib.colors as colors
 from . import utils as u
 from copy import copy
 import re
+
+global PLOT3D
+PLOT3D = False
 
 
 # =================== #
@@ -627,6 +629,21 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
 # ================== #
 #  3D-rendered plots #
 # ================== #
+
+def toggle3d(state=True, nb_backend=None, **kwds):
+    global PLOT3D
+    PLOT3D = state
+    if PLOT3D == True:
+        global mlab
+        from mayavi import mlab
+        if nb_backend:
+            mlab.init_notebook(nb_backend, **kwds)
+    else:
+        try:
+            mlab = None
+        except:
+            pass
+
 
 def surf2d(datamat, frame=True, miniaxes=False, **kwds):
     """
