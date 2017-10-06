@@ -14,8 +14,7 @@
 from __future__ import print_function, division
 import numpy as np
 import pandas as pd
-import re
-import glob2
+import re, glob2
 import numpy.fft as nft
 from scipy.interpolate import interp1d
 from numpy import polyval as poly
@@ -385,15 +384,25 @@ def readLensModeParameters(calibfiledir, lensmode='WideAngleMode'):
         print('This mode is currently not supported!')
 
 
-def mat2im(datamat, dtype='uint8', savename=None):
+def mat2im(datamat, dtype='uint8', scaling=['normal'], savename=None):
     """
     Convert data matrix to image
     """
     
-    datamat = np.asarray(datamat)
-    imrsc = (255.0 / datamat.max() * (datamat - datamat.min()))
+    dataconv = np.abs(np.asarray(datamat))
+    for scstr in scaling:
+        if 'gamma' in scstr:
+            gfactors = re.split('gamma|-', scstr)[1:]
+            gfactors = u.numFormatConversion(gfactors, form='float', length=2)
+            dataconv = gfactors[0]*(dataconv**gfactors[1])
+    
+    if 'normal' in scaling:
+        dataconv = (255 / dataconv.max()) * (dataconv - dataconv.min())
+    elif 'inv' in scaling and 'normal' not in scaling:
+        dataconv = 255 - (255 / dataconv.max()) * (dataconv - dataconv.min())
+        
     if dtype == 'uint8':
-        imrsc = imrsc.astype(np.uint8)
+        imrsc = dataconv.astype(np.uint8)
     im = pim.fromarray(imrsc)
     
     if savename:
