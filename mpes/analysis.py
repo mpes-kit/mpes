@@ -96,8 +96,9 @@ def sortByAxes(arr, axes):
 
 def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
     """
-    Calculate the 1D best auto-Shirley background S for a dataset (x, y).
-    Adapted from Kane O'Donnell's routine
+    Calculate the 1D best Shirley-Proctor-Sherwood background S for a dataset (x, y).
+    A. Proctor, P. M. A. Sherwood, Anal. Chem. 54 13 (1982).
+    The function is adapted from Kane O'Donnell's routine
     1. Finds the biggest peak
     2. Use the minimum value on either side of this peak as the terminal points
     of the Shirley background.
@@ -133,11 +134,11 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
     else:
         is_reversed = False
 
-    # Locate the biggest peak.
+    # Locate the biggest peak
     maxidx = abs(y - np.amax(y)).argmin()
 
-    # It's possible that maxidx will be 0 or -1. If that is the case,
-    # we can't use this algorithm, we return a zero background.
+    # If maxidx is either end of the spectrum, this algorithm cannot be
+    # used, return a zero background instead
     if maxidx == 0 or maxidx >= len(y) - 1:
         if warning == True:
             print("Boundaries too high for algorithm: returning a zero background.")
@@ -153,7 +154,7 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
     imax = rmidx - 1
 
     # Initial value of the background shape B. The total background S = yr + B,
-    # and B is equal to (yl - yr) below lmidx and initially zero above.
+    # and B is equal to (yl - yr) below lmidx and initially zero above
     B = np.zeros(x.shape)
     B[:lmidx] = yl - yr
     Bnew = B.copy()
@@ -161,21 +162,24 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
     niter = 0
     while niter < maxiter:
         if explicit:
-            print("Shirley iteration: " + str(it))
-        # Calculate new k = (yl - yr) / (int_(xl)^(xr) J(x') - yr - B(x') dx')
+            print("Iteration = " + str(it))
+        
+        # Calculate the new k factor (background strength)
         ksum = 0.0
         for i in range(lmidx, imax):
             ksum += (x[i] - x[i + 1]) * 0.5 * (y[i] + y[i + 1]
                                                - 2 * yr - B[i] - B[i + 1])
         k = (yl - yr) / ksum
-        # Calculate new B
+        
+        # Calculate the new B (background shape) at every x position
         for i in range(lmidx, rmidx):
             ysum = 0.0
             for j in range(i, imax):
-                ysum += (x[j] - x[j + 1]) * 0.5 * (y[j] +
-                                                   y[j + 1] - 2 * yr - B[j] - B[j + 1])
+                ysum += (x[j] - x[j + 1]) * 0.5 * (y[j] + y[j + 1]
+                                                   - 2 * yr - B[j] - B[j + 1])
             Bnew[i] = k * ysum
-        # If Bnew is close to B, exit.
+        
+        # Test convergence criterion
         if norm(Bnew - B) < tol:
             B = Bnew.copy()
             break
@@ -184,7 +188,7 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
         niter += 1
 
     if niter >= maxiter and warning == True:
-        print("Max iterations exceeded before convergence.")
+        print("Maximal iterations exceeded before convergence.")
 
     if is_reversed:
         return (yr + B)[::-1]
