@@ -1,5 +1,8 @@
 ### History of major changes to mpes since the first pip-installable version
 
+#### 2017.11.03
+1. Added shirley2d() to mpes.analysis
+
 #### 2017.10.03
 1. Added mat2im() and im2mat() to mpes.fprocessing
 2. Added toggle3d() to mpes.visualization to enable/disable loading of mayavi

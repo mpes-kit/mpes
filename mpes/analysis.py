@@ -196,6 +196,88 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
         return yr + B
 
 
+def shirley2d(x, y, tol=1e-5, maxiter=20, explicit=False, 
+            warning=False):
+    """
+    2D Shirley background removal
+    """
+    
+    nx = y.shape[0]
+    x = np.asarray(x, dtype='float64')
+    y = np.asarray(y, dtype='float64')
+
+    # Set the energy values in decreasing order
+    if x[0] < x[-1]:
+        is_reversed = True
+        x = x[::-1]
+        y = y[:, ::-1]
+    else:
+        is_reversed = False
+
+    # Locate the biggest peak
+    maxidx = abs(y - np.atleast_2d(np.amax(y, axis=1)).T).argmin(axis=1)
+    maxex = maxidx.max()
+
+    lmidx = abs(y[:, 0:maxex] - np.atleast_2d(np.amin(y[:, 0:maxex], axis=1)).T).argmin(axis=1)
+    rmidx = abs(y[:, maxex:] - np.atleast_2d(np.amin(y[:, maxex:], axis=1)).T).argmin(axis=1) + maxex
+
+    lmex, rmex = lmidx.min(), rmidx.max()
+
+    xl, yl = x[lmidx], y[np.arange(nx, dtype='int64'), lmidx]
+    xr, yr = x[rmidx], y[np.arange(nx, dtype='int64'), rmidx]
+
+    # Max integration index
+    imax = rmidx - 1
+    mx = imax.max()
+
+    # Initial value of the background shape B. The total background S = yr + B,
+    # and B is equal to (yl - yr) below lmidx and initially zero above
+    B = np.zeros(y.shape, dtype='float64')
+    for i in range(nx):
+        B[i, :lmidx[i]] = yl[i] - yr[i]
+    Bnew = B.copy()
+
+    niter = 0
+    while niter < maxiter:
+
+        if explicit:
+            print("Iteration = " + str(it))
+
+        # Calculate the new k factor (background strength)
+        ksum = np.zeros_like(yl)
+        #int(lmidx.mean())
+        for i in range(lmex, mx):
+            ksum += (x[i] - x[i + 1]) * 0.5 * (y[:, i] + y[:, i + 1]\
+                                               - 2 * yr - B[:, i] - B[:, i + 1])
+        k = (yl - yr) / ksum
+
+        # Calculate the new B (background shape) at every x position
+        for i in range(lmex, rmex):
+            ysum = np.zeros_like(yl)
+            for j in range(i, mx):
+                ysum += (x[j] - x[j + 1]) * 0.5 * (y[:, j] + y[:, j + 1]\
+                                                   - 2 * yr - B[:, j] - B[:, j + 1])
+            Bnew[:, i] = k * ysum
+
+        dev = norm(Bnew - B)
+
+        # Update B values
+        B = Bnew.copy()
+
+        # Test convergence criterion
+        if dev < tol:
+            break
+        niter += 1
+        
+    if niter >= maxiter and warning == True:
+        print("Maximal iterations exceeded before convergence.")
+
+    if is_reversed:
+        return (yr[:,np.newaxis] + B)[::-1]
+    else:
+        return yr[:,np.newaxis] + B
+        
+        
 # ==================== #
 #  Image segmentation  #
 # ==================== #
