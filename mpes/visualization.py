@@ -631,6 +631,18 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
 # ================== #
 
 def toggle3d(state=True, nb_backend=None, **kwds):
+    """
+    Switch on/off the mayavi backend
+    **Parameters**
+    
+    state : bool | True
+        on/off state of the mayavi backend
+    nb_backend : | None
+        type of rendering engine choose from 'x3d' (interactive) and 'png' (static)
+    **kwds : keyword arguments
+        additional arguments to be passed into mayavi.mlab.init_notebook()
+    """
+    
     global PLOT3D
     PLOT3D = state
     if PLOT3D == True:

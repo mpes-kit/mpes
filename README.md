@@ -52,9 +52,15 @@ jupyter nbextension enable mayavi --user --py
 ```
 jupyter notebook --NotebookApp.iopub_data_rate_limit=1e10 --gui=qt
 ```
-5. Enable immediate display in Jupyter notebook
+5. Enable immediate display of mayavi figures explicitly in Jupyter notebook
 ```
 from mayavi import mlab
 mlab.init_notebook('x3d')  # Interactive rendering
 or mlab.init_notebook('png')  # Static rendering
 ```
+To reduce the installation requirements, mayavi is not loaded at start. Use mpes built-in functions to switch on/off mayavi display
+```
+import mpes.visualization as vis
+vis.toggle3d(state=True, nb_backend)  # Switch on, nb_backend can be 'x3d', 'png', or blank
+vis.toggle3d(state=False)  # Switch off
+``` 
