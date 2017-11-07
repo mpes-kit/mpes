@@ -1,5 +1,8 @@
 ### History of major changes to mpes since the first pip-installable version
 
+#### 2017.11.07
+1. Transported Sixten Bergman's peakdetect() code to mpes.analysis
+
 #### 2017.11.03
 1. Added shirley2d() to mpes.analysis
 
