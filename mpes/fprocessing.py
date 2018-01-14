@@ -59,7 +59,7 @@ def sgfltr2d(datamat, span, order, axis=0):
     r, c = np.shape(datamat)
     dmatfltr = np.copy(datamat)
     for rnum in range(r):
-        dmatfltr[rnum, :] = fp.savgol_filter(datamat[rnum, :], span, order)
+        dmatfltr[rnum, :] = savgol_filter(datamat[rnum, :], span, order)
 
     return np.rollaxis(dmatfltr, axis)
 
