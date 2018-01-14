@@ -48,17 +48,20 @@ def find_nearest(val, narray):
     return np.argmin(np.abs(narray - val))
 
 
-def sgfltr(dmat, span, order):
+def sgfltr2d(datamat, span, order, axis=0):
     """
     Savitzky-Golay filter for two dimensional data
+    Operated in a line-by-line fashion along one axis
+    Return filtered data
     """
-
-    r, c = np.shape(dmat)
-    dmatfltr = dmat
+    
+    dmat = np.rollaxis(datamat, axis)
+    r, c = np.shape(datamat)
+    dmatfltr = np.copy(datamat)
     for rnum in range(r):
-        dmatfltr[rnum, :] = savgol_filter(dmat[rnum, :], span, order)
+        dmatfltr[rnum, :] = fp.savgol_filter(datamat[rnum, :], span, order)
 
-    return dmatfltr
+    return np.rollaxis(dmatfltr, axis)
 
 
 def SortNamesBy(namelist, pattern):
