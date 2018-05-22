@@ -153,7 +153,7 @@ def readtsv(fdir, header=None, dtype='float', **kwds):
     """
     Read tsv file from hemispherical detector
     
-    ***Parameters***
+    **Parameters**
     
     fdir : str
         file directory
@@ -164,7 +164,7 @@ def readtsv(fdir, header=None, dtype='float', **kwds):
     **kwds : keyword arguments
         other keyword arguments for pandas.read_table()
         
-    ***Return***
+    **Return**
     
     data : numpy ndarray
         read and type-converted data

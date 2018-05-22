@@ -566,9 +566,11 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
                 elif cscale == 'linear':  # linear scale
                     im.set_norm(mpl.colors.Normalize())
                 elif 'midpoint' in cscale:
-                    mp = re.split('midpoint', cscale)[1]
-                    im.set_norm(MidpointNormalize(vmin=np.min(img), \
-                    vmax=np.max(img), midpoint=float(mp)))
+                    mp = cscale['midpoint']
+                    imin = cscale.pop('vmin', np.min(img))
+                    imax = cscale.pop('vmax', np.max(img))
+                    im.set_norm(MidpointNormalize(vmin=imin, \
+                    vmax=imax, midpoint=float(mp)))
                 elif 'gamma' in cscale:  # gamma scale
                     gfactors = re.split('gamma|-', cscale)[1:]
                     gfactors = u.numFormatConversion(gfactors, form='float', length=2)
