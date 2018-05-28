@@ -77,9 +77,9 @@ class MidpointNormalize(colors.Normalize):
 def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     """
     Stacked line plots (used for visualizing energy or momentum dispersion curves)
-    
+
     **Parameters**
-    
+
     data : numeric 2D array
         the 2D data to plot
     axis : int | 0
@@ -102,16 +102,16 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
         margins        tuple/list  (xmargin, ymargin), values between 0 and 1
         =============  ==========  ===================================
     **Return**
-    
+
     ax : axes object
         handle for the plot axes
     """
-    
+
     # Check binning input
     binning = int(round(binning))
     if binning < 1:
         binning = 1
-    
+
     # Determine figure size
     figuresize = kwds.pop('figsize', '')
     try:
@@ -119,7 +119,7 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     except:
         fw, fh = 2 * figaspect(datamat)
     f, ax = plt.subplots(figsize=(fw, fh))
-    
+
     datamat = np.rollaxis(np.asarray(datamat), axis)
     nr, nc = map(int, datamat.shape)
     x = kwds.pop('x', range(0, nc))
@@ -127,28 +127,28 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     ny = len(y)
     colormap = kwds.pop('cmap', '')
     lw = kwds.pop('linewidth', 2)
-    
+
     # Plot lines
     for ind, i in enumerate(y):
-        
+
         yval = np.mean(datamat[i:i+binning,:], axis=0)
         line = ax.plot(x, yval + i*interval, linewidth=lw)
         # Set line color
         if colormap:
             line[0].set_color(eval('plt.cm.' + colormap + '(ind/ny)'))
-    
+
     xlabel = kwds.pop('xlabel', '')
     ylabel = kwds.pop('ylabel', '')
     axislabelsize = kwds.pop('ax_labelsize', 12)
     ticklabelsize = kwds.pop('tk_labelsize', 10)
-    
+
     margins = kwds.pop('margins', (0.03, 0.03))
     plt.margins(x=margins[0], y=margins[1])
     ax.set_xlabel(xlabel, fontsize=axislabelsize)
     ax.set_ylabel(ylabel, fontsize=axislabelsize)
     ax.tick_params(labelsize=ticklabelsize)
     plt.tight_layout()
-    
+
     return ax
 
 
@@ -161,7 +161,7 @@ def colormesh2d(data, **kwds):
     Efficient one-line color mesh plot of a 2D data matrix
 
     **Parameters**
-    
+
     data : numeric 2D array
         the 2D data to plot
     **kwds : keyword arguments
@@ -187,7 +187,7 @@ def colormesh2d(data, **kwds):
         =============  ==========  ===================================
 
     **Return**
-    
+
     ax : axes object
         handle for the plot axes
     """
@@ -217,20 +217,20 @@ def colormesh2d(data, **kwds):
         fw, fh = u.numFormatConversion(figuresize)
     except:
         fw, fh = 2 * figaspect(data)
-    
+
     # Check if there is a given axes object
     try:
         ax = kwds.pop('plotaxes')
     except:
         figure, ax = plt.subplots(1, figsize=(fw, fh))
-    
+
     # Use pcolormesh or contourf to render 2D plot
     xgrid, ygrid = np.meshgrid(yaxis, xaxis)
-    
+
     if plottype == 'pcolormesh':
         p = ax.pcolormesh(xgrid, ygrid, data, \
     cmap=cmap, vmin=vmin, vmax=vmax, **kwds)
-        
+
     elif plottype == 'contourf':
         origin = kwds.pop('origin', 'upper')
         lvls = kwds.pop('levels', None)
@@ -246,10 +246,10 @@ def colormesh2d(data, **kwds):
         else:
             p = ax.contourf(xgrid, ygrid, data, \
     cmap=cmap, vmin=vmin, vmax=vmax, origin=origin, **kwds)
-    
+
     else:
         raise Exception('No such plot type.')
-        
+
     # Set color scaling for each image individually
     if isinstance(cscale, str):
         if cscale == 'log':  # log scale
@@ -266,16 +266,16 @@ def colormesh2d(data, **kwds):
         cvmin = cscale.pop('vmin', np.min(data))
         cvmax = cscale.pop('vmax', np.max(data))
         p.set_norm(MidpointNormalize(vmin=cvmin, vmax=cvmax, midpoint=mp))
-    
+
     # Set basic axis properties
     ax.set_xlabel(xlabel, fontsize=axislabelsize)
     ax.set_ylabel(ylabel, fontsize=axislabelsize)
     ax.tick_params(labelsize=ticklabelsize)
-    
+
     if cbar:
         cb = plt.colorbar(p, ax=ax)
-        cb.ax.tick_params(labelsize=ticklabelsize) 
-    
+        cb.ax.tick_params(labelsize=ticklabelsize)
+
     plt.tight_layout()
 
     return p, ax
@@ -284,9 +284,9 @@ def colormesh2d(data, **kwds):
 def fit_parameter_plot(data, ncol, axis=(0, 1), **kwds):
     """
     Plot of actual value, absolute and relative changes of the fitting parameters
-    
+
     ***Parameters***
-    
+
     data : 2D numeric array
         data for plotting
     ncol : int
@@ -304,9 +304,9 @@ def fit_parameter_plot(data, ncol, axis=(0, 1), **kwds):
         ncontours      list of int   number of contours for each subplot
         plottypes      list of str   plottype for each subplot
         =============  ============  ===================================
-    
+
     ***Returns***
-    
+
     f : figure object
         figure handle
     ims : list
@@ -314,7 +314,7 @@ def fit_parameter_plot(data, ncol, axis=(0, 1), **kwds):
     axs : list
         list of axes objects
     """
-    
+
     # Retrieve input parameters
     mainfigsize = kwds.pop('mainfigsize', (18,32))
     npl = np.prod([data.shape[idx] for idx in axis]) # total number of plots
@@ -324,12 +324,12 @@ def fit_parameter_plot(data, ncol, axis=(0, 1), **kwds):
     ptypes = kwds.pop('plottypes', u.replist('pcolormesh', ncol, nrow))
     cbars = kwds.pop('cbars', u.replist(False, ncol, nrow))
     ncontours = kwds.pop('ncontours', u.replist(20, ncol, nrow))
-    
+
     rdata = u.shuffleaxis(data, axis, direction='front')
-    
+
     f, axs = plt.subplots(nrow, ncol, figsize=mainfigsize)
     ims = copy(axs)
-    
+
     # Make plots and apply plotting conditions to each
     for r in range(nrow):
         for c in range(ncol):
@@ -337,7 +337,7 @@ def fit_parameter_plot(data, ncol, axis=(0, 1), **kwds):
                         colormap=cmaps[r][c], cscale=cscales[r][c], \
                         plottype=ptypes[r][c], cbar=cbars[r][c], \
                         ncontour=ncontours[r][c], **kwds)
-            
+
     return f, ims, axs
 
 
@@ -358,7 +358,7 @@ def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
             the index of the split y position
 
     **Returns**
-    
+
     axu : axes object
         handle for the upper subplot axes
     axl : axes object
@@ -455,7 +455,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     """
     3D matrix slices displayed in a grid of subplots
     **Parameters**
-    
+
     datamat : numeric 3D array
             the 3D data to plot
     axis : int
@@ -471,67 +471,76 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         nrow        int          number of rows in subplot grid
         figsize     tuple/list   figure size, (vertical_size, horizontal_size)
         flipdir     str          flip up-down or left-right of the matrix ('ud', 'lr')
-        colormap    str          `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_ 
+        colormap    str          `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
         cscale      str          colormap scaling ('log', 'linear', 'midpointx', or 'gammaA-b', see below)
         vmin        numeric      minimum of the color scale
         vmax        numeric      maximum of the color scale
         numcolor    str          color code for subplot number
+        numpos      tuple        (Y, X) position of the text on the subplots
         numsize     int          fontsize of the subtitle within a subplot
+        numtext     str          subtitle text within a subplot
         wspace      float        width spacing between subplots
         hspace      float        height spacing betweens subplots
         plottype    str          'imshow' (default) or 'contourf'
         maintitle   str          main title of the plot
         axisreturn  str          'flattened' or 'nested', return format of axis object
         ==========  ==========   =====================================
-    
+
     **Return**
-    
+
     ims : AxesImage object
         handle for the images in each subplot
     ax : AxesSubplot object
         handle for the subplot axes
     """
-    
+
     # Mask pixels with NaN values
     datamat = np.ma.array(datamat.squeeze(), mask=np.isnan(datamat))
-    
+
     # Gather parameters from input
+    # Plot grid parameters
     cutdim = datamat.shape[axis]
     rdata = np.rollaxis(datamat, axis)
     nc = kwds.pop('ncol', 4)
     nr = kwds.pop('nrow', np.ceil(cutdim / nc).astype('int'))
+    ngrid = nr * nc
+
+    # Parameters at the subfigure level
     cmap = kwds.pop('colormap', 'Greys')
     cscale = kwds.pop('cscale', 'linear')
-    numcolor = kwds.pop('numcolor', 'black')
     figuresize = kwds.pop('figsize', '')
     flipdir = kwds.pop('flipdir', '')
-    numsize = kwds.pop('numsize', 15)
     vmin = kwds.pop('vmin', None)
     vmax = kwds.pop('vmax', None)
     asp = kwds.pop('aspect', 'auto')
     origin = kwds.pop('origin', 'lower')
     plottype = kwds.pop('plottype','imshow')
-    ngrid = nr * nc
+
+    # Text annotation on each plot, effective when numbered == True
+    numcolor = kwds.pop('numcolor', 'black')
+    numpos = kwds.pop('numpos', (0.03, 0.92))
+    numtext = kwds.pop('numtext', ['#{}'.format(i) for i in range(cutdim)])
+    numsize = kwds.pop('numsize', 15)
 
     # Construct a grid of subplots
     try:
         fw, fh = u.numFormatConversion(figuresize)
     except:
         fw, fh = 5 * figaspect(np.zeros((nr, nc)))
-    
+
     ims = []
     f, ax = plt.subplots(nrows=nr, ncols=nc, figsize=(fw, fh))
-    
+
     # Construct list of plottype for all subplots
     if isinstance(plottype, list):
         try:
             plottype = sum(plottype, [])
         except:
             pass
-    
+
     if isinstance(plottype, str):
         plottype = [plottype]*ngrid
-    
+
     if 'contourf' in plottype:
         imr, imc = rdata[0,...].shape
         lvls = kwds.pop('levels', None)
@@ -548,18 +557,18 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         if i <= cutdim - 1:
             # Roll the slicing axis to the start of the matrix before slicing
             img = rdata[i, :, :]
-            
+
             # Flip the image along an axis (if needed)
             if flipdir == 'ud':
                 img = np.flipud(img)
             elif flipdir == 'lr':
                 img = np.fliplr(img)
-            
+
             # Make subplot
             if plottype[i] == 'imshow':
                 im = axcurr.imshow(img, cmap=cmap, \
                     vmin=vmin, vmax=vmax, aspect=asp, origin=origin)
-            
+
                 # Set color scaling for each image individually
                 if cscale == 'log':  # log scale
                     im.set_norm(mpl.colors.LogNorm())
@@ -576,13 +585,13 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
                     gfactors = u.numFormatConversion(gfactors, form='float', length=2)
                     img = gfactors[0]*(img**gfactors[1])
                     im.set_data(img)
-            
+
             elif plottype[i] == 'contourf':
                 im = axcurr.contourf(xgrid, ygrid, img, cmap=cmap, \
                     levels=lvls, vmin=vmin, vmax=vmax, origin=origin)
-                
+
             ims.append(im)
-            
+
             # to do: set global color scaling for 3D matrix
 
             axcurr.get_xaxis().set_visible(False)
@@ -590,10 +599,9 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
 
             if numbered:
                 axcurr.text(
-                    0.03,
-                    0.92,
-                    '#%d' %
-                    i,
+                    numpos[0],
+                    numpos[1],
+                    numtext[i],
                     fontsize=numsize,
                     color=numcolor,
                     transform=axcurr.transAxes)
@@ -620,7 +628,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         top=0.95,
         wspace=wsp,
         hspace=hsp)
-    
+
     axisreturn = kwds.pop('axisreturn', 'flattened')
     if axisreturn == 'nested':
         return ims, ax
@@ -636,7 +644,7 @@ def toggle3d(state=True, nb_backend=None, **kwds):
     """
     Switch on/off the mayavi backend
     **Parameters**
-    
+
     state : bool | True
         on/off state of the mayavi backend
     nb_backend : | None
@@ -644,7 +652,7 @@ def toggle3d(state=True, nb_backend=None, **kwds):
     **kwds : keyword arguments
         additional arguments to be passed into mayavi.mlab.init_notebook()
     """
-    
+
     global PLOT3D
     PLOT3D = state
     if PLOT3D == True:
@@ -663,7 +671,7 @@ def surf2d(datamat, frame=True, miniaxes=False, **kwds):
     """
     2D surface plot
     **Parameters**
-    
+
     datamat : numeric 2D array
             the 2D data to plot
     frame : bool | True
@@ -682,11 +690,11 @@ def surf2d(datamat, frame=True, miniaxes=False, **kwds):
         warp_scale  float       warp scale value from 0 to 1
         ==========  ==========  =====================================
     **Return**
-    
+
     f : figure object
         handle for the figure
     """
-    
+
     colormap = kwds.pop('cmap', 'rainbow')
     ws = kwds.pop('warp_scale', 'auto')
     op = kwds.pop('alpha', 1.0)
@@ -696,61 +704,61 @@ def surf2d(datamat, frame=True, miniaxes=False, **kwds):
     ylabel = kwds.pop('ylabel', 'y')
     zlabel = kwds.pop('zlabel', 'z')
 #     labelsize = kwds.pop('labelsize', 10)
-    
+
     nr, nc = datamat.shape
     y, x = np.meshgrid(np.arange(nc), np.arange(nr))
     mlab.figure(bgcolor=bgc, fgcolor=(0.,0.,0.))
-    f = mlab.surf(x, y, datamat/np.max(datamat), warp_scale=ws, 
+    f = mlab.surf(x, y, datamat/np.max(datamat), warp_scale=ws,
                   colormap=colormap, opacity=op, representation=rep)
-    
+
     az = kwds.pop('azimuth', 0)
     elev = kwds.pop('elevation', 0)
     mlab.view(azimuth=0, elevation=0, distance='auto', focalpoint='auto')
-    
+
     # Display the miniature orientation axes
     if miniaxes == True:
         mlab.orientation_axes(xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
-    
+
     # Display the figure frame
     if frame == True:
         frc = kwds.pop('framecolor', (0,0,0))
         mlab.outline(f, color=frc, line_width=2)
 #     mlab.axes(f, color=(0,0,0), xlabel=xlabel, ylabel=ylabel, zlabel=zlabel)
-    
+
     return f
-    
+
 
 def trisurf2d(datamat, **kwds):
     """
     2D triangulated surface plot rendered using mplot3d
-    
+
     **Parameters**
-    
+
     datamat : numeric 2d array
         2D data for plotting
-        
+
     **Returns**
-    
+
     sf : Poly3DCollection object
         handle for objects in the plot
     ax : Axes object
         handle for the axes of the plot
     """
-    
+
     data = np.ma.array(datamat.squeeze(), mask=np.isnan(datamat))
     rval, cval = datamat.shape
     xaxis = kwds.pop('x', np.arange(0, rval))
     yaxis = kwds.pop('y', np.arange(0, cval))
     colormap = kwds.pop('cmap', 'viridis_r')
-    
+
     f = plt.figure()
     ax = f.add_subplot(111, projection='3d')
-    
+
     ygrid, xgrid = np.meshgrid(yaxis, xaxis)
     tri = mtri.Triangulation(ygrid.flatten(), xgrid.flatten())
     sf = ax.plot_trisurf(xgrid.flatten(), ygrid.flatten(), datamat.flatten(),
                     triangles=tri.triangles, cmap=colormap, antialiased=False)
-    
+
     xlabel = kwds.pop('xlabel', '')
     ylabel = kwds.pop('ylabel', '')
     zlabel = kwds.pop('zlabel', '')
@@ -758,5 +766,5 @@ def trisurf2d(datamat, **kwds):
     ax.set_xlabel(xlabel, labelpad=lblpad)
     ax.set_ylabel(ylabel, labelpad=lblpad)
     ax.set_zlabel(zlabel, labelpad=lblpad)
-    
+
     return sf, ax
