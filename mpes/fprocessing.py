@@ -22,6 +22,7 @@ from scipy.signal import savgol_filter
 import igor.igorpy as igor
 from .igoribw  import loadibw
 from PIL import Image as pim
+from h5py import File
 
 
 # ================= #
@@ -420,6 +421,147 @@ def im2mat(fdir):
     
     mat = np.asarray(pim.open(fdir))
     return mat
+
+
+class hdf5Reader(File):
+    """ HDF5 reader class
+    """
+    
+    def __init__(self, f_addr, **kwds):
+        
+        self.faddress = f_addr
+        super().__init__(name=self.faddress, mode='r', **kwds)
+        
+        self.groupNames = list(self)
+        self.attributeNames = list(self.attrs)
+        
+    def getGroupNames(self, wexpr=None, woexpr=None):
+        """ Retrieve group names from the loaded hdf5 file with string filtering
+        """
+        
+        if (wexpr is None) and (woexpr is None):
+            filteredGroupNames = self.groupNames
+        elif wexpr:
+            filteredGroupNames = [i for i in self.groupNames if wexpr in i]
+        elif woexpr:
+            filteredGroupNames = [i for i in self.groupNames if woexpr not in i]
+            
+        return filteredGroupNames
+    
+    def getAttributeNames(self, wexpr=None, woexpr=None):
+        """ Retrieve attribute names from the loaded hdf5 file with string filtering
+        """
+        
+        if (wexpr is None) and (woexpr is None):
+            filteredAttributeNames = self.attributeNames
+        elif wexpr:
+            filteredAttributeNames = [i for i in self.attributeNames if wexpr in i]
+        elif woexpr:
+            filteredAttributeNames = [i for i in self.attributeNames if woexpr not in i]
+        
+        return filteredAttributeNames            
+    
+    def readGroup(self, *group):
+        """ Retrieve the content of the group(s) in the loaded hdf5 file
+        """
+        
+        groupContent = []
+        for g in group:
+            groupContent.append(self.get(g))
+        
+        return groupContent
+    
+    def readAttribute(self, *attribute):
+        """ Retrieve the content of the attribute(s) in the loaded hdf5 file
+        """
+        
+        attributeContent = []
+        for ab in attribute:
+            try:
+                attributeContent.append(self.attrs[ab].decode('utf-8'))
+            except:
+                attributeContent.append(self.attrs[ab])
+        
+        return attributeContent
+    
+    @staticmethod
+    def readStrAttribute(element, attributeName, nullval='None'):
+        """ Retrieve the value of a string attribute
+        """
+
+        try:
+            attr_val = element.attrs[attributeName].decode('utf-8')
+        except KeyError:
+            attr_val = nullval
+        
+        return attr_val
+    
+    def summarize(self, output='text', use_alias=True):
+        """ Print out a summary of the content of the hdf5 file (names of the groups, 
+        attributes and the first few elements of their contents)
+        """
+        
+        if output == 'text':
+            # Output as printed text
+            print('*** HDF5 file info ***\n', \
+                  'File address = ' + self.faddress + '\n')
+
+            # Output info on attributes
+            print('\n>>> Attributes <<<\n')
+            for an in self.attributeNames:
+                print(an + ' = {}'.format(self.readAttribute(an)[0]))
+            
+            # Output info on groups
+            print('\n>>> Groups <<<\n')
+            for gn in self.groupNames:
+                
+                g_dataset = self.readGroup(gn)[0]
+                g_shape = g_dataset.shape
+                g_alias = self.readStrAttribute(g_dataset, 'Name')
+                
+                print(gn + ', Shape = {}, Alias = {}'.format(g_shape, g_alias))
+                
+        elif output == 'dict':
+            # Output as a dictionary
+            # Attribute name stays, stream_x rename as their corresponding attribute name
+            hdfdict = {}
+            
+            # Add attributes to dictionary
+            for an in self.attributeNames:
+                
+                hdfdict[an] = self.readAttribute(an)[0]
+                
+            # Add groups to dictionary
+            for gn in self.groupNames:
+                
+                g_dataset = self.readGroup(gn)[0]
+                if use_alias == True:
+                    g_name = self.readStrAttribute(g_dataset, 'Name', nullval=gn)
+                    hdfdict[g_name] = g_dataset.value
+                else:
+                    hdfdict[gn] = g_dataset.value
+                
+            return hdfdict
+        
+    def convert(self, form, save_addr=None):
+        """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor)
+        """
+        
+        if form == 'mat':
+            hdfdict = self.summarize(output='dict')
+            
+            if save_addr:
+                if not save_addr.endswith('.mat'):
+                    save_addr = save_addr + '.mat'
+                
+                sio.savemat(save_addr, hdfdict)
+        
+        elif form == 'ibw':
+        # TODO: Save in igor ibw format
+            raise NotImplementedError
+            
+        else:
+            raise NotImplementedError
 
 
 # =================== #

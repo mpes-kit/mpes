@@ -12,3 +12,4 @@ coverage
 pypi-publisher
 igor
 lmfit
+h5py
