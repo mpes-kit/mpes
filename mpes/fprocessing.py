@@ -437,6 +437,16 @@ class hdf5Reader(File):
 
     def getGroupNames(self, wexpr=None, woexpr=None):
         """ Retrieve group names from the loaded hdf5 file with string filtering
+
+        :Parameters:
+            wexpr : str | None
+                Expression in a name to leave in the group name list (w = with).
+            woexpr : str | None
+                Expression in a name to leave out of the group name list (wo = without).
+
+        :Return:
+            filteredGroupNames : list
+                List of filtered group names
         """
 
         if (wexpr is None) and (woexpr is None):
@@ -450,6 +460,16 @@ class hdf5Reader(File):
 
     def getAttributeNames(self, wexpr=None, woexpr=None):
         """ Retrieve attribute names from the loaded hdf5 file with string filtering
+
+        :Parameters:
+            wexpr : str | None
+                Expression in a name to leave in the attribute name list (w = with).
+            woexpr : str | None
+                Expression in a name to leave out of the attribute name list (wo = without).
+
+        :Return:
+            filteredAttrbuteNames : list
+                List of filtered attribute names
         """
 
         if (wexpr is None) and (woexpr is None):
@@ -463,6 +483,14 @@ class hdf5Reader(File):
 
     def readGroup(self, *group):
         """ Retrieve the content of the group(s) in the loaded hdf5 file
+
+        :Parameter:
+            group : list/tuple
+                Collection of group names
+
+        :Return:
+            groupContent : list/tuple
+                Collection of values of the corresponding groups
         """
 
         groupContent = []
@@ -473,6 +501,14 @@ class hdf5Reader(File):
 
     def readAttribute(self, *attribute):
         """ Retrieve the content of the attribute(s) in the loaded hdf5 file
+
+        :Parameter:
+            attribute : list/tuple
+                Collection of attribute names
+
+        :Return:
+            attributeContent : list/tuple
+                Collection of values of the corresponding attributes
         """
 
         attributeContent = []
@@ -486,7 +522,20 @@ class hdf5Reader(File):
 
     @staticmethod
     def readStrAttribute(element, attributeName, nullval='None'):
-        """ Retrieve the value of a string attribute
+        """ Retrieve the value of a string attribute. Returns the nullval if the
+        element doesn't contain the attribute
+
+        :Parameter:
+            element : class
+                A data structure with attributes (i.e. h5py.Group)
+            attributeName : str
+                Name of the attribute to retrieve
+            nullval : str | 'None'
+                Value to fill the place if attribute doesn't exist
+
+        :Return:
+            attr_val : str
+                String value of the attribute
         """
 
         try:
@@ -499,6 +548,16 @@ class hdf5Reader(File):
     def summarize(self, output='text', use_alias=True):
         """ Print out a summary of the content of the hdf5 file (names of the groups,
         attributes and the first few elements of their contents)
+
+        :Parameters:
+            output : str | 'text'
+                Output format, available options are 'text' and 'dict'.
+            use_alias : bool | True
+                Specify if to use the alias to rename the groups
+
+        :Return:
+            hdfdict : dict
+                Dictionary constructed if output format is set to 'dict'.
         """
 
         if output == 'text':
@@ -545,6 +604,12 @@ class hdf5Reader(File):
 
     def convert(self, form, save_addr=None):
         """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor)
+
+        :Parameters:
+            form : str
+                The format of the data to convert into.
+            save_addr : str | None
+                File address to save to.
         """
 
         if form == 'mat':
@@ -601,18 +666,42 @@ class hdf5Processor(hdf5Reader):
     def localBinning(self, axes, nbins, ranges, binDict=None, ret=True):
         """ Compute the histogram in the simple way. This binning procedure doesn't
         work if the self.method is set to 'local' at instantiation of the class.
+
+        :Paramters:
+            axes : (list of) strings
+                Names the axes to bin
+            nbins : (list of) int
+                Number of bins
+            ranges : (list of) tuples
+                Ranges of binning along every axis
+            binDict : dict | None
+                Dictionary with specifications of axes, nbins and ranges. If binDict
+                is not None. It will override the specifications from other arguments
+            ret : bool | True
+                :True: returns the dictionary containing binned data explicitly
+                :False: no explicit return of the binned data, the dictionary
+                generated in the binning is still retained as an instance attribute
+
+        :Return:
+            histdict : dict
+                Dictionary containing binned data and the axes values (if `ret = True`).
         """
 
         # Use the information (axes and ranges) specified in binDict, ignore others
         if binDict is not None:
-            axes, ranges = binDict['axes'], binDict['ranges']
+            try:
+                axes = binDict['axes']
+                nbins = binDict['nbins']
+                ranges = binDict['ranges']
+            except:
+                pass
 
         # Stack up data from unbinned axes
         data_unbinned = np.stack((self.hdfdict[ax] for ax in axes)).T
 
         # Compute binned data
         self.histdict['histogram'], ax_vals = \
-        np.histogramdd(data_unbinned, bins=nbins, range=ranges)
+        np.histogramdd(data_unbinned, bins=int(nbins), range=ranges)
 
         for iax, ax in enumerate(axes):
             self.histdict[ax] = ax_vals[iax]
@@ -622,6 +711,12 @@ class hdf5Processor(hdf5Reader):
 
     def saveHistogram(self, form='mat', save_addr=None):
         """ Save the binning results, the histogram and axes values.
+
+        :Parameters:
+            form : str | 'mat'
+                mat format (Matlab/Python)
+            save_addr : str | None
+                File path to save the binning result
         """
 
         if form == 'mat':
