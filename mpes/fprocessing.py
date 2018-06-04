@@ -22,6 +22,7 @@ from scipy.signal import savgol_filter
 import igor.igorpy as igor
 from .igoribw  import loadibw
 from PIL import Image as pim
+import skimage.io as skio
 from h5py import File
 
 
@@ -149,6 +150,14 @@ def linterp(xind, yarr, frac):
 # ====================== #
 #  File I/O and parsing  #
 # ====================== #
+
+def readimg(f_addr):
+    """
+    Read images (jpg, png, 2D/3D tiff)
+    """
+
+    return skio.imread(f_addr)
+
 
 def readtsv(fdir, header=None, dtype='float', **kwds):
     """
