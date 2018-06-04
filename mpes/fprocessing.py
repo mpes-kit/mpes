@@ -34,7 +34,7 @@ def find_nearest(val, narray):
     Find the value closest to a given one in a 1D array
 
     **Parameters**
-    
+
     val : float
         Value of interest
     narray : 1D numeric array
@@ -55,7 +55,7 @@ def sgfltr2d(datamat, span, order, axis=0):
     Operated in a line-by-line fashion along one axis
     Return filtered data
     """
-    
+
     dmat = np.rollaxis(datamat, axis)
     r, c = np.shape(datamat)
     dmatfltr = np.copy(datamat)
@@ -79,7 +79,7 @@ def SortNamesBy(namelist, pattern):
     Returns
 
     orderedseq : array
-        Ordered sequence from sorting 
+        Ordered sequence from sorting
     sortednamelist : str
         Sorted list of name strings
     """
@@ -153,9 +153,9 @@ def linterp(xind, yarr, frac):
 def readtsv(fdir, header=None, dtype='float', **kwds):
     """
     Read tsv file from hemispherical detector
-    
+
     **Parameters**
-    
+
     fdir : str
         file directory
     header : int | None
@@ -164,44 +164,44 @@ def readtsv(fdir, header=None, dtype='float', **kwds):
         data type of the return numpy.ndarray
     **kwds : keyword arguments
         other keyword arguments for pandas.read_table()
-        
+
     **Return**
-    
+
     data : numpy ndarray
         read and type-converted data
     """
-    
+
     data = np.asarray(pd.read_table(fdir, delim_whitespace=True, \
                       header=None, **kwds), dtype=dtype)
     return data
 
-    
+
 def readIgorBinFile(fdir, **kwds):
     """
     Read Igor binary formats (pxp and ibw)
     """
-    
+
     ftype = kwds.pop('ftype', fdir[-3:])
     errmsg = "Error in file loading, please check the file format."
-    
+
     if ftype == 'pxp':
-        
+
         try:
             igfile = igor.load(fdir)
         except IOError:
             print(errmsg)
-            
+
     elif ftype == 'ibw':
-        
+
         try:
             igfile = loadibw(fdir)
         except IOError:
             print(errmsg)
-            
+
     else:
-        
+
         raise IOError(errmsg)
-    
+
     return igfile
 
 
@@ -392,33 +392,33 @@ def mat2im(datamat, dtype='uint8', scaling=['normal'], savename=None):
     """
     Convert data matrix to image
     """
-    
+
     dataconv = np.abs(np.asarray(datamat))
     for scstr in scaling:
         if 'gamma' in scstr:
             gfactors = re.split('gamma|-', scstr)[1:]
             gfactors = u.numFormatConversion(gfactors, form='float', length=2)
             dataconv = gfactors[0]*(dataconv**gfactors[1])
-    
+
     if 'normal' in scaling:
         dataconv = (255 / dataconv.max()) * (dataconv - dataconv.min())
     elif 'inv' in scaling and 'normal' not in scaling:
         dataconv = 255 - (255 / dataconv.max()) * (dataconv - dataconv.min())
-        
+
     if dtype == 'uint8':
         imrsc = dataconv.astype(np.uint8)
     im = pim.fromarray(imrsc)
-    
+
     if savename:
         im.save(savename)
     return im
 
-    
+
 def im2mat(fdir):
     """
     Convert image to numpy ndarray
     """
-    
+
     mat = np.asarray(pim.open(fdir))
     return mat
 
@@ -426,64 +426,64 @@ def im2mat(fdir):
 class hdf5Reader(File):
     """ HDF5 reader class
     """
-    
+
     def __init__(self, f_addr, **kwds):
-        
+
         self.faddress = f_addr
         super().__init__(name=self.faddress, mode='r', **kwds)
-        
+
         self.groupNames = list(self)
         self.attributeNames = list(self.attrs)
-        
+
     def getGroupNames(self, wexpr=None, woexpr=None):
         """ Retrieve group names from the loaded hdf5 file with string filtering
         """
-        
+
         if (wexpr is None) and (woexpr is None):
             filteredGroupNames = self.groupNames
         elif wexpr:
             filteredGroupNames = [i for i in self.groupNames if wexpr in i]
         elif woexpr:
             filteredGroupNames = [i for i in self.groupNames if woexpr not in i]
-            
+
         return filteredGroupNames
-    
+
     def getAttributeNames(self, wexpr=None, woexpr=None):
         """ Retrieve attribute names from the loaded hdf5 file with string filtering
         """
-        
+
         if (wexpr is None) and (woexpr is None):
             filteredAttributeNames = self.attributeNames
         elif wexpr:
             filteredAttributeNames = [i for i in self.attributeNames if wexpr in i]
         elif woexpr:
             filteredAttributeNames = [i for i in self.attributeNames if woexpr not in i]
-        
-        return filteredAttributeNames            
-    
+
+        return filteredAttributeNames
+
     def readGroup(self, *group):
         """ Retrieve the content of the group(s) in the loaded hdf5 file
         """
-        
+
         groupContent = []
         for g in group:
             groupContent.append(self.get(g))
-        
+
         return groupContent
-    
+
     def readAttribute(self, *attribute):
         """ Retrieve the content of the attribute(s) in the loaded hdf5 file
         """
-        
+
         attributeContent = []
         for ab in attribute:
             try:
                 attributeContent.append(self.attrs[ab].decode('utf-8'))
             except:
                 attributeContent.append(self.attrs[ab])
-        
+
         return attributeContent
-    
+
     @staticmethod
     def readStrAttribute(element, attributeName, nullval='None'):
         """ Retrieve the value of a string attribute
@@ -493,14 +493,14 @@ class hdf5Reader(File):
             attr_val = element.attrs[attributeName].decode('utf-8')
         except KeyError:
             attr_val = nullval
-        
+
         return attr_val
-    
+
     def summarize(self, output='text', use_alias=True):
-        """ Print out a summary of the content of the hdf5 file (names of the groups, 
+        """ Print out a summary of the content of the hdf5 file (names of the groups,
         attributes and the first few elements of their contents)
         """
-        
+
         if output == 'text':
             # Output as printed text
             print('*** HDF5 file info ***\n', \
@@ -510,56 +510,127 @@ class hdf5Reader(File):
             print('\n>>> Attributes <<<\n')
             for an in self.attributeNames:
                 print(an + ' = {}'.format(self.readAttribute(an)[0]))
-            
+
             # Output info on groups
             print('\n>>> Groups <<<\n')
             for gn in self.groupNames:
-                
+
                 g_dataset = self.readGroup(gn)[0]
                 g_shape = g_dataset.shape
                 g_alias = self.readStrAttribute(g_dataset, 'Name')
-                
+
                 print(gn + ', Shape = {}, Alias = {}'.format(g_shape, g_alias))
-                
+
         elif output == 'dict':
             # Output as a dictionary
             # Attribute name stays, stream_x rename as their corresponding attribute name
             hdfdict = {}
-            
+
             # Add attributes to dictionary
             for an in self.attributeNames:
-                
+
                 hdfdict[an] = self.readAttribute(an)[0]
-                
+
             # Add groups to dictionary
             for gn in self.groupNames:
-                
+
                 g_dataset = self.readGroup(gn)[0]
                 if use_alias == True:
                     g_name = self.readStrAttribute(g_dataset, 'Name', nullval=gn)
                     hdfdict[g_name] = g_dataset.value
                 else:
                     hdfdict[gn] = g_dataset.value
-                
+
             return hdfdict
-        
+
     def convert(self, form, save_addr=None):
         """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor)
         """
-        
+
         if form == 'mat':
             hdfdict = self.summarize(output='dict')
-            
+
             if save_addr:
                 if not save_addr.endswith('.mat'):
                     save_addr = save_addr + '.mat'
-                
+
                 sio.savemat(save_addr, hdfdict)
-        
+
         elif form == 'ibw':
         # TODO: Save in igor ibw format
             raise NotImplementedError
-            
+
+        else:
+            raise NotImplementedError
+
+
+class hdf5Processor(hdf5Reader):
+    """ Class for generating multidimensional histogram from hdf5 files
+    """
+
+    def __init__(self, f_addr, method='local', ncores=None, **kwds):
+
+        self.faddress = f_addr
+        self.ua = kwds.pop('use_alias', True)
+        super().__init__(f_addr=self.faddress, **kwds)
+        self.histdict = {}
+
+        # Specify binning method
+        if method == 'local':
+            self.hdfdict = self.summarize(output='dict', use_alias=self.ua)
+        elif method == 'distributed':
+            self.hdfdict = {}
+
+        if ncores is None:
+            self.ncores = 4
+        else:
+            self.ncores = ncores
+
+    def addBinners(self, *axes):
+        """ Add a list of binning axes
+        """
+
+        raise NotImplementedError
+
+    def distributedBinning(self):
+        """ Compute the histogram in the distributed way.
+        """
+
+        return self.histdict
+
+    def localBinning(self, axes, nbins, ranges, binDict=None, ret=True):
+        """ Compute the histogram in the simple way. This binning procedure doesn't
+        work if the self.method is set to 'local' at instantiation of the class.
+        """
+
+        # Use the information (axes and ranges) specified in binDict, ignore others
+        if binDict is not None:
+            axes, ranges = binDict['axes'], binDict['ranges']
+
+        # Stack up data from unbinned axes
+        data_unbinned = np.stack((self.hdfdict[ax] for ax in axes)).T
+
+        # Compute binned data
+        self.histdict['histogram'], ax_vals = \
+        np.histogramdd(data_unbinned, bins=nbins, range=ranges)
+
+        for iax, ax in enumerate(axes):
+            self.histdict[ax] = ax_vals[iax]
+
+        if ret:
+            return self.histdict
+
+    def saveHistogram(self, form='mat', save_addr=None):
+        """ Save the binning results, the histogram and axes values.
+        """
+
+        if form == 'mat':
+
+            if save_addr:
+                if not save_addr.endswith('.mat'):
+                    save_addr = save_addr + '.mat'
+                sio.savemat(save_addr, self.histdict)
+
         else:
             raise NotImplementedError
 
