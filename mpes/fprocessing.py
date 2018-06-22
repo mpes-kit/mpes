@@ -66,7 +66,7 @@ def sgfltr2d(datamat, span, order, axis=0):
     return np.rollaxis(dmatfltr, axis)
 
 
-def SortNamesBy(namelist, pattern):
+def SortNamesBy(namelist, pattern, gp=0):
     """
     Sort a list of names according to a particular sequence of numbers (specified by a regular expression search pattern)
 
@@ -76,6 +76,8 @@ def SortNamesBy(namelist, pattern):
         List of name strings
     pattern : str
         Regular expression of the pattern
+    gp : int
+        Grouping number
 
     Returns
 
@@ -85,8 +87,9 @@ def SortNamesBy(namelist, pattern):
         Sorted list of name strings
     """
 
+    gp = int(gp)
     # Extract a sequence of numbers from the names in the list
-    seqnum = np.array([re.search(pattern, namelist[i]).group(1)
+    seqnum = np.array([re.search(pattern, namelist[i]).group(gp)
                        for i in range(len(namelist))])
     seqnum = seqnum.astype(np.float)
 
@@ -534,7 +537,7 @@ class hdf5Reader(File):
         """ Retrieve the value of a string attribute. Returns the nullval if the
         element doesn't contain the attribute
 
-        :Parameter:
+        :Parameters:
             element : class
                 A data structure with attributes (i.e. h5py.Group)
             attributeName : str
@@ -555,8 +558,8 @@ class hdf5Reader(File):
         return attr_val
 
     def summarize(self, output='text', use_alias=True):
-        """ Print out a summary of the content of the hdf5 file (names of the groups,
-        attributes and the first few elements of their contents)
+        """ Summarize the content of the hdf5 file (names of the groups,
+        attributes and the selected contents. Output by print or as a dictionary.)
 
         :Parameters:
             output : str | 'text'
