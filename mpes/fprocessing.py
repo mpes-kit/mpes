@@ -726,7 +726,7 @@ class hdf5Processor(hdf5Reader):
 
         :Parameters:
             form : str | 'mat'
-                mat format (Matlab/Python)
+                Save format ('mat' or 'h5')
             save_addr : str | None
                 File path to save the binning result
         """
@@ -737,6 +737,18 @@ class hdf5Processor(hdf5Reader):
                 if not save_addr.endswith('.mat'):
                     save_addr = save_addr + '.mat'
                 sio.savemat(save_addr, self.histdict)
+
+        elif form == 'h5':
+
+            if save_addr:
+                if not save_addr.endswith('.h5'):
+                    save_addr = save_addr + '.h5'
+
+            hdf = File(save_addr, 'w')
+            for k in self.histdict.keys():
+                hdf.create_dataset(k, data=self.histdict[k])
+
+            hdf.close()
 
         else:
             raise NotImplementedError
