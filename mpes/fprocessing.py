@@ -24,7 +24,10 @@ from .igoribw  import loadibw
 from PIL import Image as pim
 import skimage.io as skio
 from h5py import File
+import psutil as ps
+import dask as d, dask.array as da
 
+N_CPU = ps.cpu_count()
 
 # ================= #
 # Utility functions #
@@ -650,34 +653,57 @@ class hdf5Processor(hdf5Reader):
         self.faddress = f_addr
         self.ua = kwds.pop('use_alias', True)
         super().__init__(f_addr=self.faddress, **kwds)
+        self.hdfdict = {}
+        self.binlist = [] # The names of the binning axes
         self.histdict = {}
 
-        # Specify binning method
-        if method == 'local':
-            self.hdfdict = self.summarize(output='dict', use_alias=self.ua)
-        elif method == 'distributed':
-            self.hdfdict = {}
-
         if ncores is None:
-            self.ncores = 4
+            self.ncores = N_CPU
         else:
             self.ncores = ncores
 
-    def addBinners(self, *axes):
-        """ Add a list of binning axes
-        """
-
-        raise NotImplementedError
-
-    def distributedBinning(self):
+    def distributedBinning(self, axes, nbins, ranges, nchunk=100, ret=True):
         """ Compute the histogram in the distributed way.
         """
 
-        return self.histdict
+        #self._addBinners()
+        # for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
+        #     resultsToCalculate = []
+        #     # process the data in blocks of n partitions (given by the number
+        #     # of cores):
+        #     for j in range(0, self.N_CORES):
+        #         if (i + j) >= self.dd.npartitions:
+        #             break
+        #         part = self.dd.get_partition(i + j)
+        #         resultsToCalculate.append(dask.delayed(analyzePartNumpy)(part))
+        #
+        #     # now do the calculation on each partition (using the dask framework):
+        #     if len(resultsToCalculate) > 0:
+        #
+        #         results = dask.compute(*resultsToCalculate)
+        #         total = np.zeros_like(results[0])
+        #         for result in results:
+        #             total = total + result
+        #         calculatedResults.append(total)
+        #         del total
+        #     del resultsToCalculate
+
+        # Collect the number of bins
+        try: # To have the same number of bins on all axes
+            bincount = int(nbins)
+        except: # To have different number of bins on each axis
+            bincount = list(map(int, nbins))
+
+        data_unbinned = da.from_array(np.asarray(self.readGroup(axes)), chunks=(nchunk))
+        self.histdict['binned'], ax_vals = np.histogramdd(data_unbinned, \
+        bins=bincount, range=ranges)
+
+        if ret:
+            return self.histdict
 
     def localBinning(self, axes, nbins, ranges, binDict=None, ret=True):
         """ Compute the histogram in the simple way. This binning procedure doesn't
-        work if the self.method is set to 'local' at instantiation of the class.
+        work unless the self.method is set to 'local' at instantiation of the class.
 
         :Paramters:
             axes : (list of) strings
@@ -699,21 +725,34 @@ class hdf5Processor(hdf5Reader):
                 Dictionary containing binned data and the axes values (if `ret = True`).
         """
 
+        # Assume data can be completely loaded into RAM
+        self.hdfdict = self.summarize(output='dict', use_alias=self.ua)
+
         # Use the information (axes and ranges) specified in binDict, ignore others
         if binDict is not None:
             try:
+                self.binlist = sorted(list(binDict.keys()))
                 axes = binDict['axes']
                 nbins = binDict['nbins']
                 ranges = binDict['ranges']
             except:
                 pass
+        else:
+            self.binlist += axes
+            self.binlist = sorted(list(set(self.binlist))) # todo: sort in original way
 
         # Stack up data from unbinned axes
         data_unbinned = np.stack((self.hdfdict[ax] for ax in axes)).T
 
+        # Collect the number of bins
+        try: # To have the same number of bins on all axes
+            bincount = int(nbins)
+        except: # To have different number of bins on each axis
+            bincount = list(map(int, nbins))
+
         # Compute binned data
-        self.histdict['histogram'], ax_vals = \
-        np.histogramdd(data_unbinned, bins=int(nbins), range=ranges)
+        self.histdict['binned'], ax_vals = \
+        np.histogramdd(data_unbinned, bins=bincount, range=ranges)
 
         for iax, ax in enumerate(axes):
             self.histdict[ax] = ax_vals[iax]
