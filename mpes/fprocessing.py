@@ -649,7 +649,7 @@ class hdf5Processor(hdf5Reader):
     """ Class for generating multidimensional histogram from hdf5 files
     """
 
-    def __init__(self, f_addr, method='local', ncores=None, **kwds):
+    def __init__(self, f_addr, ncores=None, **kwds):
 
         self.faddress = f_addr
         self.ua = kwds.pop('use_alias', True)
@@ -657,10 +657,10 @@ class hdf5Processor(hdf5Reader):
         self.hdfdict = {}
         self.histdict = {}
 
-        if ncores is None:
+        if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
             self.ncores = N_CPU
         else:
-            self.ncores = ncores
+            self.ncores = int(ncores)
 
     def _addBinners(self, axes=None, nbins=None, ranges=None, binDict=None):
         """
@@ -695,45 +695,32 @@ class hdf5Processor(hdf5Reader):
         return hist, edges
 
     def distributedBinning(self, axes=None, nbins=None, ranges=None, \
-                            binDict=None, nchunk=100, ret=True):
+                            binDict=None, chunksz=1000000, ret=True):
         """ Compute the histogram in the distributed way.
         """
 
         # Set up the binning parameters
         self._addBinners(axes, nbins, ranges, binDict)
 
-        data_unbinned = da.from_array(np.asarray(self.readGroup(axes)), chunks=(nchunk))
-        self.histdict['binned'], ax_vals = self._delayedBinning(data_unbinned).compute()
-        # for i in tqdm(range(0, self.dd.npartitions, self.N_CORES)):
-        #     resultsToCalculate = []
-        #     # process the data in blocks of n partitions (given by the number
-        #     # of cores):
-        #     for j in range(0, self.N_CORES):
-        #         if (i + j) >= self.dd.npartitions:
-        #             break
-        #         part = self.dd.get_partition(i + j)
-        #         resultsToCalculate.append(dask.delayed(analyzePartNumpy)(part))
-        #
-        #     # now do the calculation on each partition (using the dask framework):
-        #     if len(resultsToCalculate) > 0:
-        #
-        #         results = dask.compute(*resultsToCalculate)
-        #         total = np.zeros_like(results[0])
-        #         for result in results:
-        #             total = total + result
-        #         calculatedResults.append(total)
-        #         del total
-        #     del resultsToCalculate
+        # Assemble the data to bin in a distributed way
+        dsets = [self[ax] for ax in axes]
+        dsets_distributed = [da.from_array(ds, chunks=(chunksz)) for ds in dsets]
+        data_unbinned = da.stack(dsets_distributed, axis=1)
+        # if rechunk:
+        #     data_unbineed = data_unbinned.rechunk('auto')
 
-        # Compute the binned histogram in a distributed way
-        # restocalc.append(d.delayed(func)(part))
-        # res = d.compute(*restocalc)
+        # Compute binned data
+        bintask = self._delayedBinning(self, data_unbinned)
+        self.histdict['binned'], ax_vals = bintask.compute()
+
+        for iax, ax in enumerate(axes):
+            self.histdict[ax] = ax_vals[iax]
 
         if ret:
             return self.histdict
 
     def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None, ret=True):
-        """ Compute the histogram in the simple way. This binning procedure doesn't
+        """ Compute the histogram locally after loading all data into RAM. This binning procedure doesn't
         work unless the self.method is set to 'local' at instantiation of the class.
 
         :Paramters:
