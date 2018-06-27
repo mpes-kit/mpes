@@ -11,5 +11,5 @@ coverage
 igor
 lmfit
 h5py
-tiffile
+tifffile
 dask
