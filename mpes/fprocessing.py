@@ -708,6 +708,16 @@ class hdf5Processor(hdf5Reader):
     def _delayedBinning(self, data):
         """
         Lazily evaluated multidimensional binning
+
+        :Parameters:
+            data : numpy array
+                Data to bin.
+
+        :Returns:
+            hist : numpy array
+                Binned histogram.
+            edges : list of numpy array
+                Bins along each axis of the histogram.
         """
 
         hist, edges = np.histogramdd(data, bins=self.bincounts, range=self.binranges)
@@ -716,7 +726,30 @@ class hdf5Processor(hdf5Reader):
 
     def distributedBinning(self, axes=None, nbins=None, ranges=None, \
                             binDict=None, chunksz=100000, ret=True):
-        """ Compute the histogram in the distributed way.
+        """
+        Compute the photoelectron intensity histogram in the distributed way.
+
+        :Paramters:
+            axes : (list of) strings | None
+                Names the axes to bin.
+            nbins : (list of) int | None
+                Number of bins along each axis.
+            ranges : (list of) tuples | None
+                Ranges of binning along every axis.
+            binDict : dict | None
+                Dictionary with specifications of axes, nbins and ranges. If binDict
+                is not None. It will override the specifications from other arguments.
+            chunksz : numeric (single numeric or tuple)
+                Size of the chunk to distribute.
+            ret : bool | True
+                :True: returns the dictionary containing binned data explicitly
+                :False: no explicit return of the binned data, the dictionary
+                generated in the binning is still retained as an instance attribute.
+
+        :Return:
+            histdict : dict
+                Dictionary containing binned data and the axes values (if `ret = True`).
+
         """
 
         # Set up the binning parameters
@@ -740,23 +773,23 @@ class hdf5Processor(hdf5Reader):
             return self.histdict
 
     def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None, ret=True):
-        """ Compute the histogram locally after loading all data into RAM. This binning procedure doesn't
-        work unless the self.method is set to 'local' at instantiation of the class.
+        """
+        Compute the photoelectron intensity histogram locally after loading all data into RAM.
 
         :Paramters:
             axes : (list of) strings | None
-                Names the axes to bin
+                Names the axes to bin.
             nbins : (list of) int | None
-                Number of bins
+                Number of bins along each axis.
             ranges : (list of) tuples | None
-                Ranges of binning along every axis
+                Ranges of binning along every axis.
             binDict : dict | None
                 Dictionary with specifications of axes, nbins and ranges. If binDict
-                is not None. It will override the specifications from other arguments
+                is not None. It will override the specifications from other arguments.
             ret : bool | True
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
-                generated in the binning is still retained as an instance attribute
+                generated in the binning is still retained as an instance attribute.
 
         :Return:
             histdict : dict
