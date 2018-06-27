@@ -6,10 +6,10 @@ matplotlib
 scikit-image
 glob2
 sphinx
-sphinx_rtd_theme
 nose
 coverage
-pypi-publisher
 igor
 lmfit
 h5py
+tiffile
+dask

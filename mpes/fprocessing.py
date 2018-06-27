@@ -25,6 +25,7 @@ from PIL import Image as pim
 import skimage.io as skio
 import scipy.io as sio
 from h5py import File
+import tifffile as ti
 import psutil as ps
 import dask as d, dask.array as da
 
@@ -260,6 +261,25 @@ def txtlocate(ffolder, keytext):
             txtfile = txtfiles[ind]
 
     return txtfile
+
+
+def appendformat(filepath, form):
+    """
+    Append a format string to the end of a file path
+
+    :Parameters:
+        filepath : str
+            File path of interest
+        form : str
+            File format of interest
+    """
+
+    format_string = '.'+form
+    if filepath:
+        if not filepath.endswith(format_string):
+            filepath += format_string
+
+    return filepath
 
 
 def parsenum(
@@ -618,24 +638,21 @@ class hdf5Reader(File):
 
             return hdfdict
 
-    def convert(self, form, save_addr=None):
+    def convert(self, form, save_addr='./summary'):
         """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor)
 
         :Parameters:
             form : str
                 The format of the data to convert into.
-            save_addr : str | None
+            save_addr : str | './summary'
                 File address to save to.
         """
 
-        if form == 'mat':
+        save_addr = appendformat(save_addr, form)
+
+        if form == 'mat': # Save as mat file
             hdfdict = self.summarize(output='dict')
-
-            if save_addr:
-                if not save_addr.endswith('.mat'):
-                    save_addr = save_addr + '.mat'
-
-                sio.savemat(save_addr, hdfdict)
+            sio.savemat(save_addr, hdfdict)
 
         elif form == 'ibw':
         # TODO: Save in igor ibw format
@@ -689,13 +706,16 @@ class hdf5Processor(hdf5Reader):
 
     @d.delayed
     def _delayedBinning(self, data):
+        """
+        Lazily evaluated multidimensional binning
+        """
 
         hist, edges = np.histogramdd(data, bins=self.bincounts, range=self.binranges)
 
         return hist, edges
 
     def distributedBinning(self, axes=None, nbins=None, ranges=None, \
-                            binDict=None, chunksz=1000000, ret=True):
+                            binDict=None, chunksz=100000, ret=True):
         """ Compute the histogram in the distributed way.
         """
 
@@ -761,34 +781,34 @@ class hdf5Processor(hdf5Reader):
         if ret:
             return self.histdict
 
-    def saveHistogram(self, form='mat', save_addr=None):
+    def saveHistogram(self, form='h5', save_addr='./histogram', **kwds):
         """ Save the binning results, the histogram and axes values.
 
         :Parameters:
-            form : str | 'mat'
-                Save format ('mat' or 'h5')
-            save_addr : str | None
+            form : str | 'h5'
+                Save format ('mat', 'h5' or 'tiff')
+            save_addr : str | './histogram'
                 File path to save the binning result
         """
 
-        if form == 'mat':
+        dtyp = kwds.pop('dtyp', 'float8')
+        save_addr = appendformat(save_addr, form)
 
-            if save_addr:
-                if not save_addr.endswith('.mat'):
-                    save_addr = save_addr + '.mat'
-                sio.savemat(save_addr, self.histdict)
+        if form == 'mat': # Save as mat file
 
-        elif form == 'h5':
+            sio.savemat(save_addr, self.histdict)
 
-            if save_addr:
-                if not save_addr.endswith('.h5'):
-                    save_addr = save_addr + '.h5'
+        elif form == 'h5': # Save as hdf5 file
 
             hdf = File(save_addr, 'w')
             for k in self.histdict.keys():
                 hdf.create_dataset(k, data=self.histdict[k])
 
             hdf.close()
+
+        elif form == 'tiff': # Save as tiff stack
+
+            ti.imsave(save_addr, data=self.histdict['binned'], dtype=dtyp)
 
         else:
             raise NotImplementedError
