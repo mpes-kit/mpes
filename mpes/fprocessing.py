@@ -25,7 +25,6 @@ from PIL import Image as pim
 import skimage.io as skio
 import scipy.io as sio
 from h5py import File
-import tifffile as ti
 import psutil as ps
 import dask as d, dask.array as da
 
@@ -841,7 +840,11 @@ class hdf5Processor(hdf5Reader):
 
         elif form == 'tiff': # Save as tiff stack
 
-            ti.imsave(save_addr, data=self.histdict['binned'], dtype=dtyp)
+            try:
+                import tifffile as ti
+                ti.imsave(save_addr, data=self.histdict['binned'], dtype=dtyp)
+            except ImportError:
+                raise ImportError('tifffile package is not installed locally!')
 
         else:
             raise NotImplementedError

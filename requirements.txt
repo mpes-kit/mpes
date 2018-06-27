@@ -11,5 +11,6 @@ coverage
 igor
 lmfit
 h5py
-tifffile
+#tifffile
 dask
+msgpack
