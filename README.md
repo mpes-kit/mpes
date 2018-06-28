@@ -26,6 +26,7 @@ scipy = 0.19.0 +
 scikit-image = 0.13.0 +
 pandas = 0.19.2 +
 mayavi = 4.5.0 +
+dask >= 0.18.0
 ```
 
 ### Overview of submodules  

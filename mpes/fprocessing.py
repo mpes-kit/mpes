@@ -468,6 +468,8 @@ class hdf5Reader(File):
         super().__init__(name=self.faddress, mode='r', **kwds)
 
         self.groupNames = list(self)
+        self.groupAliases = [self.readStrAttribute(self[gn], 'Name', nullval=gn) for gn in self.groupNames]
+        self.nameLookupDict = dict(zip(self.groupAliases, self.groupNames))
         self.attributeNames = list(self.attrs)
 
     def getGroupNames(self, wexpr=None, woexpr=None):
@@ -755,7 +757,7 @@ class hdf5Processor(hdf5Reader):
         self._addBinners(axes, nbins, ranges, binDict)
 
         # Assemble the data to bin in a distributed way
-        dsets = [self[ax] for ax in axes]
+        dsets = [self[self.nameLookupDict[ax]] for ax in axes]
         dsets_distributed = [da.from_array(ds, chunks=(chunksz)) for ds in dsets]
         data_unbinned = da.stack(dsets_distributed, axis=1)
         # if rechunk:

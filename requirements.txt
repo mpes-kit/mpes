@@ -13,4 +13,4 @@ lmfit
 h5py
 #tifffile
 dask
-msgpack
+#msgpack
