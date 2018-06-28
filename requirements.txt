@@ -12,5 +12,4 @@ igor
 lmfit
 h5py
 #tifffile
-dask
-#msgpack
+dask[complete]

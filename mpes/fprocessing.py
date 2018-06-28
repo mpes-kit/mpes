@@ -469,6 +469,7 @@ class hdf5Reader(File):
 
         self.groupNames = list(self)
         self.groupAliases = [self.readStrAttribute(self[gn], 'Name', nullval=gn) for gn in self.groupNames]
+        # Initialize the look-up dictionary between group aliases and group names
         self.nameLookupDict = dict(zip(self.groupAliases, self.groupNames))
         self.attributeNames = list(self.attrs)
 
@@ -820,12 +821,18 @@ class hdf5Processor(hdf5Reader):
 
         :Parameters:
             form : str | 'h5'
-                Save format ('mat', 'h5' or 'tiff')
+                Save format, supporting 'mat', 'h5' or 'tiff' (need tifffile.py)
             save_addr : str | './histogram'
                 File path to save the binning result
+            **kwds : keyword arguments
+                =========  ===========  ==============================================
+                 keyword    data type    meaning
+                =========  ===========  ==============================================
+                  dtyp       string      data type of the histogram (default float32)
+                =========  ===========  ==============================================
         """
 
-        dtyp = kwds.pop('dtyp', 'float8')
+        dtyp = kwds.pop('dtyp', 'float32')
         save_addr = appendformat(save_addr, form)
 
         if form == 'mat': # Save as mat file
@@ -844,7 +851,7 @@ class hdf5Processor(hdf5Reader):
 
             try:
                 import tifffile as ti
-                ti.imsave(save_addr, data=self.histdict['binned'], dtype=dtyp)
+                ti.imsave(save_addr, data=self.histdict['binned'].astype(dtyp))
             except ImportError:
                 raise ImportError('tifffile package is not installed locally!')
 
