@@ -697,6 +697,7 @@ class hdf5Processor(hdf5Reader):
         # Use information from other specified parameters if binDict is not given
         else:
             self.binaxes = axes
+            self.nbinaxes = len(self.binaxes)
 
             # Collect the number of bins
             try: # To have the same number of bins on all axes
@@ -825,14 +826,18 @@ class hdf5Processor(hdf5Reader):
             save_addr : str | './histogram'
                 File path to save the binning result
             **kwds : keyword arguments
-                =========  ===========  ==============================================
-                 keyword    data type    meaning
-                =========  ===========  ==============================================
-                  dtyp       string      data type of the histogram (default float32)
-                =========  ===========  ==============================================
+                =========  ===========  ===========  ========================================
+                 keyword    data type     default     meaning
+                =========  ===========  ===========  ========================================
+                  dtyp       string      'float32'    data type of the histogram
+                 cutaxis      int            3        the axis to cut the 4D data in
+                slicename    string         'V'       the shared namestring for the 3D slice
+                =========  ===========  ===========  ========================================
         """
 
         dtyp = kwds.pop('dtyp', 'float32')
+        cutaxis = kwds.pop('cutaxis', 3)
+        sln = kwds.pop('slicename', 'V')
         save_addr = appendformat(save_addr, form)
 
         if form == 'mat': # Save as mat file
@@ -842,8 +847,19 @@ class hdf5Processor(hdf5Reader):
         elif form == 'h5': # Save as hdf5 file
 
             hdf = File(save_addr, 'w')
-            for k in self.histdict.keys():
-                hdf.create_dataset(k, data=self.histdict[k])
+            # Save the binned data (3D or 4D)
+            if self.nbinaxes == 3:
+                hdf.create_dataset('binned/'+sln, data=self.histdict['binned'])
+            # Save 4D data as a list of separated 3D data
+            elif self.nbinaxes == 4:
+                nddata = np.rollaxis(self.histdict['binned'], cutaxis)
+                n = nddata.shape[0]
+                for i in range(n):
+                    hdf.create_dataset('binned/'+sln+str(i), data=nddata[i,...])
+
+            # Save the axes in the same group
+            for k in self.binaxes:
+                hdf.create_dataset('axes/'+k, data=self.histdict[k])
 
             hdf.close()
 
