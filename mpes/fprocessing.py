@@ -29,6 +29,7 @@ import psutil as ps
 import dask as d, dask.array as da
 from dask.diagnostics import ProgressBar
 import warnings as wn
+from tqdm import tqdm
 
 N_CPU = ps.cpu_count()
 
@@ -933,7 +934,8 @@ class hdf5Splitter(hdf5Reader):
         self.splitFilepaths = []
         super().__init__(f_addr=self.faddress, **kwds)
 
-    def split(self, nsplit, save_addr='./', namestr='split_', split_group='Stream_0'):
+    def split(self, nsplit, save_addr='./', namestr='split_', \
+    split_group='Stream_0', pbar=False):
         """
         Split and save an hdf5 file
 
@@ -946,6 +948,8 @@ class hdf5Splitter(hdf5Reader):
                 Additional namestring attached to the front of the filename
             split_group : str | 'Stream_0'
                 Name of the example group to split for file length reference
+            pbar : bool | False
+                Enable (when True)/Disable (when False) the progress bar
         """
 
         nsplit = int(nsplit)
@@ -953,7 +957,7 @@ class hdf5Splitter(hdf5Reader):
         self.eventLen = self[split_group].size
         self.eventList = np.linspace(0, self.eventLen, nsplit+1, dtype='int')
 
-        for i in range(nsplit):
+        for i in tqdm(range(nsplit), disable=not(pbar)):
 
             evmin, evmax = self.eventList[i], self.eventList[i+1]
             fpath = save_addr + namestr + str(i+1) + '.h5'

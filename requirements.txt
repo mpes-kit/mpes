@@ -13,3 +13,4 @@ lmfit
 h5py
 #tifffile
 dask[complete]
+tqdm
