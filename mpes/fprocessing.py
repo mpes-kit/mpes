@@ -27,6 +27,7 @@ import scipy.io as sio
 from h5py import File
 import psutil as ps
 import dask as d, dask.array as da
+from dask.diagnostics import ProgressBar
 
 N_CPU = ps.cpu_count()
 
@@ -767,7 +768,8 @@ class hdf5Processor(hdf5Reader):
 
         # Compute binned data
         bintask = self._delayedBinning(self, data_unbinned)
-        self.histdict['binned'], ax_vals = bintask.compute()
+        with ProgressBar():
+            self.histdict['binned'], ax_vals = bintask.compute()
 
         for iax, ax in enumerate(axes):
             self.histdict[ax] = ax_vals[iax]
