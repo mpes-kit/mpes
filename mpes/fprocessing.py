@@ -689,9 +689,9 @@ class hdf5Processor(hdf5Reader):
 
         self.faddress = f_addr
         self.ua = kwds.pop('use_alias', True)
-        super().__init__(f_addr=self.faddress, **kwds)
         self.hdfdict = {}
         self.histdict = {}
+        super().__init__(f_addr=self.faddress, **kwds)
 
         if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
             self.ncores = N_CPU
@@ -929,12 +929,56 @@ class hdf5Splitter(hdf5Reader):
 
     def __init__(self, f_addr, **kwds):
 
+        self.faddress = f_addr
+        self.splitFilepaths = []
         super().__init__(f_addr=self.faddress, **kwds)
-        self.splitFileNames = []
 
-    def split(self, n, save_addr='./split'):
+    def split(self, nsplit, save_addr='./', namestr='split_', split_group='Stream_0'):
+        """
+        Split and save an hdf5 file
 
-        pass
+        :Parameters:
+            nsplit : int
+                Number of split files
+            save_addr : str | './'
+                Directory to store the split files
+            namestr : str | 'split_'
+                Additional namestring attached to the front of the filename
+            split_group : str | 'Stream_0'
+                Name of the example group to split for file length reference
+        """
+
+        nsplit = int(nsplit)
+        self.splitFilepaths = []
+        self.eventLen = self[split_group].size
+        self.eventList = np.linspace(0, self.eventLen, nsplit+1, dtype='int')
+
+        for i in range(nsplit):
+
+            evmin, evmax = self.eventList[i], self.eventList[i+1]
+            fpath = save_addr + namestr + str(i+1) + '.h5'
+            self.splitFilepaths.append(fpath)
+
+            try:
+                fsp = File(fpath, 'w')
+
+                # Copy the attributes
+                for attr, attrval in self.attrs.items():
+                    fsp.attrs[attr] = attrval
+
+                # Copy the segmented groups and their attributes
+                for gp in self.groupNames:
+                    #self.copy(gn, fsp[gn])
+                    fsp.create_dataset(gp, data=self.readGroup(gp, amin=evmin, amax=evmax)[0])
+                    for gattr, gattrval in self[gp].attrs.items():
+                        fsp[gp].attrs[gattr] = gattrval
+
+            except:
+                pass
+
+            # Save and close the file
+            finally:
+                fsp.close()
 
 
 # =================== #
