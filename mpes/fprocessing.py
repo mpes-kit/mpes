@@ -28,6 +28,7 @@ from h5py import File
 import psutil as ps
 import dask as d, dask.array as da
 from dask.diagnostics import ProgressBar
+import warnings as wn
 
 N_CPU = ps.cpu_count()
 
@@ -520,7 +521,7 @@ class hdf5Reader(File):
 
         return filteredAttributeNames
 
-    def readGroup(self, *group):
+    def readGroup(self, *group, amin=None, amax=None, sliced=True):
         """ Retrieve the content of the group(s) in the loaded hdf5 file
 
         :Parameter:
@@ -534,7 +535,13 @@ class hdf5Reader(File):
 
         groupContent = []
         for g in group:
-            groupContent.append(self.get(g))
+            try:
+                if sliced:
+                    groupContent.append(self.get(g)[slice(amin, amax)])
+                else:
+                    groupContent.append(self.get(g))
+            except:
+                raise ValueError("Group '"+g+"' doesn't have sufficient length!")
 
         return groupContent
 
@@ -584,7 +591,7 @@ class hdf5Reader(File):
 
         return attr_val
 
-    def summarize(self, output='text', use_alias=True):
+    def summarize(self, output='text', use_alias=True, **kwds):
         """ Summarize the content of the hdf5 file (names of the groups,
         attributes and the selected contents. Output by print or as a dictionary.)
 
@@ -613,13 +620,18 @@ class hdf5Reader(File):
             print('\n>>> Groups <<<\n')
             for gn in self.groupNames:
 
-                g_dataset = self.readGroup(gn)[0]
+                g_dataset = self.readGroup(gn, sliced=False)[0]
                 g_shape = g_dataset.shape
                 g_alias = self.readStrAttribute(g_dataset, 'Name')
 
                 print(gn + ', Shape = {}, Alias = {}'.format(g_shape, g_alias))
 
         elif output == 'dict':
+
+            # Retrieve the range of acquired events
+            amin = kwds.pop('amin', None)
+            amax = kwds.pop('amax', None)
+
             # Output as a dictionary
             # Attribute name stays, stream_x rename as their corresponding attribute name
             hdfdict = {}
@@ -632,16 +644,20 @@ class hdf5Reader(File):
             # Add groups to dictionary
             for gn in self.groupNames:
 
-                g_dataset = self.readGroup(gn)[0]
+                g_dataset = self.readGroup(gn, sliced=False)[0]
+                g_values = g_dataset[slice(amin, amax)]
+
+                # Use the group alias as the dictionary key
                 if use_alias == True:
                     g_name = self.readStrAttribute(g_dataset, 'Name', nullval=gn)
-                    hdfdict[g_name] = g_dataset.value
+                    hdfdict[g_name] = g_values
+                # Use the group name as the dictionary key
                 else:
-                    hdfdict[gn] = g_dataset.value
+                    hdfdict[gn] = g_values
 
             return hdfdict
 
-    def convert(self, form, save_addr='./summary'):
+    def convert(self, form, save_addr='./summary', **kwds):
         """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor)
 
         :Parameters:
@@ -654,7 +670,7 @@ class hdf5Reader(File):
         save_addr = appendformat(save_addr, form)
 
         if form == 'mat': # Save as mat file
-            hdfdict = self.summarize(output='dict')
+            hdfdict = self.summarize(output='dict', **kwds)
             sio.savemat(save_addr, hdfdict)
 
         elif form == 'ibw':
@@ -729,7 +745,7 @@ class hdf5Processor(hdf5Reader):
         return hist, edges
 
     def distributedBinning(self, axes=None, nbins=None, ranges=None, \
-                            binDict=None, chunksz=100000, ret=True):
+                           binDict=None, chunksz=100000, ret=True, **kwds):
         """
         Compute the photoelectron intensity histogram in the distributed way.
 
@@ -756,11 +772,18 @@ class hdf5Processor(hdf5Reader):
 
         """
 
+        # Retrieve the range of acquired events
+        amin = kwds.pop('amin', None)
+        amax = kwds.pop('amax', None)
+
         # Set up the binning parameters
         self._addBinners(axes, nbins, ranges, binDict)
 
         # Assemble the data to bin in a distributed way
-        dsets = [self[self.nameLookupDict[ax]] for ax in axes]
+        if (amin is None) and (amax is None):
+            dsets = [self[self.nameLookupDict[ax]] for ax in axes]
+        else:
+            dsets = [self[self.nameLookupDict[ax]][slice(amin, amax)] for ax in axes]
         dsets_distributed = [da.from_array(ds, chunks=(chunksz)) for ds in dsets]
         data_unbinned = da.stack(dsets_distributed, axis=1)
         # if rechunk:
@@ -777,7 +800,8 @@ class hdf5Processor(hdf5Reader):
         if ret:
             return self.histdict
 
-    def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None, ret=True):
+    def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None, \
+                     ret=True, **kwds):
         """
         Compute the photoelectron intensity histogram locally after loading all data into RAM.
 
@@ -801,8 +825,12 @@ class hdf5Processor(hdf5Reader):
                 Dictionary containing binned data and the axes values (if `ret = True`).
         """
 
+        # Retrieve the range of acquired events
+        amin = kwds.pop('amin', None)
+        amax = kwds.pop('amax', None)
+
         # Assemble the data for binning, assuming they can be completely loaded into RAM
-        self.hdfdict = self.summarize(output='dict', use_alias=self.ua)
+        self.hdfdict = self.summarize(output='dict', use_alias=self.ua, amin=amin, amax=amax)
         # Stack up data from unbinned axes
         data_unbinned = np.stack((self.hdfdict[ax] for ax in axes), axis=1)
 
@@ -824,7 +852,7 @@ class hdf5Processor(hdf5Reader):
 
         :Parameters:
             form : str | 'h5'
-                Save format, supporting 'mat', 'h5' or 'tiff' (need tifffile.py)
+                Save format, supporting 'mat', 'h5', 'tiff' (need tifffile) or 'png' (need imageio)
             save_addr : str | './histogram'
                 File path to save the binning result
             **kwds : keyword arguments
@@ -838,7 +866,6 @@ class hdf5Processor(hdf5Reader):
         """
 
         dtyp = kwds.pop('dtyp', 'float32')
-        cutaxis = kwds.pop('cutaxis', 3)
         sln = kwds.pop('slicename', 'V')
         save_addr = appendformat(save_addr, form)
 
@@ -847,6 +874,8 @@ class hdf5Processor(hdf5Reader):
             sio.savemat(save_addr, self.histdict)
 
         elif form == 'h5': # Save as hdf5 file
+
+            cutaxis = kwds.pop('cutaxis', 3)
 
             hdf = File(save_addr, 'w')
             # Save the binned data (3D or 4D)
@@ -873,8 +902,39 @@ class hdf5Processor(hdf5Reader):
             except ImportError:
                 raise ImportError('tifffile package is not installed locally!')
 
+        elif form == 'png':
+
+            cutaxis = kwds.pop('cutaxis', 2)
+
+            nddata = np.rollaxis(self.histdict['binned'], cutaxis)
+            n = nddata.shape[0]
+
+            if self.nbinaxes == 3:
+                import imageio as imio
+                for i in range(n):
+                    wn.simplefilter('ignore', UserWarning)
+                    imio.imwrite('./cut'+str(i)+'.png', nddata[i,...], format='png')
+
+            elif self.nbinaxes >= 4:
+                raise NotImplementedError
+
         else:
             raise NotImplementedError
+
+
+class hdf5Splitter(hdf5Reader):
+    """
+    Class to split large hdf5 files
+    """
+
+    def __init__(self, f_addr, **kwds):
+
+        super().__init__(f_addr=self.faddress, **kwds)
+        self.splitFileNames = []
+
+    def split(self, n, save_addr='./split'):
+
+        pass
 
 
 # =================== #
