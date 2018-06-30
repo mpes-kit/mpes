@@ -471,7 +471,7 @@ class hdf5Reader(File):
         super().__init__(name=self.faddress, mode='r', **kwds)
 
         self.groupNames = list(self)
-        self.groupAliases = [self.readStrAttribute(self[gn], 'Name', nullval=gn) for gn in self.groupNames]
+        self.groupAliases = [self.readAttribute(self[gn], 'Name', nullval=gn) for gn in self.groupNames]
         # Initialize the look-up dictionary between group aliases and group names
         self.nameLookupDict = dict(zip(self.groupAliases, self.groupNames))
         self.attributeNames = list(self.attrs)
@@ -522,7 +522,8 @@ class hdf5Reader(File):
 
         return filteredAttributeNames
 
-    def readGroup(self, *group, amin=None, amax=None, sliced=True):
+    @staticmethod
+    def readGroup(element, *group, amin=None, amax=None, sliced=True):
         """ Retrieve the content of the group(s) in the loaded hdf5 file
 
         :Parameter:
@@ -534,19 +535,24 @@ class hdf5Reader(File):
                 Collection of values of the corresponding groups
         """
 
+        ngroup = len(group)
         groupContent = []
         for g in group:
             try:
                 if sliced:
-                    groupContent.append(self.get(g)[slice(amin, amax)])
+                    groupContent.append(element.get(g)[slice(amin, amax)])
                 else:
-                    groupContent.append(self.get(g))
+                    groupContent.append(element.get(g))
             except:
-                raise ValueError("Group '"+g+"' doesn't have sufficient length!")
+                raise ValueError("Group '"+g+"' doesn't have sufficient length for slicing!")
+
+        if ngroup == 1: # Singleton case
+            groupContent = groupContent[0]
 
         return groupContent
 
-    def readAttribute(self, *attribute):
+    @staticmethod
+    def readAttribute(element, *attribute, nullval='None'):
         """ Retrieve the content of the attribute(s) in the loaded hdf5 file
 
         :Parameter:
@@ -558,39 +564,20 @@ class hdf5Reader(File):
                 Collection of values of the corresponding attributes
         """
 
+        nattr = len(attribute)
         attributeContent = []
         for ab in attribute:
             try:
-                attributeContent.append(self.attrs[ab].decode('utf-8'))
-            except:
-                attributeContent.append(self.attrs[ab])
+                attributeContent.append(element.attrs[ab].decode('utf-8'))
+            except AttributeError: # No need to decode
+                attributeContent.append(element.attrs[ab])
+            except KeyError: # No such an attribute
+                attributeContent.append(nullval)
+
+        if nattr == 1:
+            attributeContent = attributeContent[0]
 
         return attributeContent
-
-    @staticmethod
-    def readStrAttribute(element, attributeName, nullval='None'):
-        """ Retrieve the value of a string attribute. Returns the nullval if the
-        element doesn't contain the attribute
-
-        :Parameters:
-            element : class
-                A data structure with attributes (i.e. h5py.Group)
-            attributeName : str
-                Name of the attribute to retrieve
-            nullval : str | 'None'
-                Value to fill the place if attribute doesn't exist
-
-        :Return:
-            attr_val : str
-                String value of the attribute
-        """
-
-        try:
-            attr_val = element.attrs[attributeName].decode('utf-8')
-        except KeyError:
-            attr_val = nullval
-
-        return attr_val
 
     def summarize(self, output='text', use_alias=True, **kwds):
         """ Summarize the content of the hdf5 file (names of the groups,
@@ -615,15 +602,15 @@ class hdf5Reader(File):
             # Output info on attributes
             print('\n>>> Attributes <<<\n')
             for an in self.attributeNames:
-                print(an + ' = {}'.format(self.readAttribute(an)[0]))
+                print(an + ' = {}'.format(self.readAttribute(self, an)))
 
             # Output info on groups
             print('\n>>> Groups <<<\n')
             for gn in self.groupNames:
 
-                g_dataset = self.readGroup(gn, sliced=False)[0]
+                g_dataset = self.readGroup(self, gn, sliced=False)
                 g_shape = g_dataset.shape
-                g_alias = self.readStrAttribute(g_dataset, 'Name')
+                g_alias = self.readAttribute(g_dataset, 'Name')
 
                 print(gn + ', Shape = {}, Alias = {}'.format(g_shape, g_alias))
 
@@ -640,17 +627,17 @@ class hdf5Reader(File):
             # Add attributes to dictionary
             for an in self.attributeNames:
 
-                hdfdict[an] = self.readAttribute(an)[0]
+                hdfdict[an] = self.readAttribute(self, an)
 
             # Add groups to dictionary
             for gn in self.groupNames:
 
-                g_dataset = self.readGroup(gn, sliced=False)[0]
+                g_dataset = self.readGroup(self, gn, sliced=False)
                 g_values = g_dataset[slice(amin, amax)]
 
                 # Use the group alias as the dictionary key
                 if use_alias == True:
-                    g_name = self.readStrAttribute(g_dataset, 'Name', nullval=gn)
+                    g_name = self.readAttribute(g_dataset, 'Name', nullval=gn)
                     hdfdict[g_name] = g_values
                 # Use the group name as the dictionary key
                 else:
@@ -973,7 +960,7 @@ class hdf5Splitter(hdf5Reader):
                 # Copy the segmented groups and their attributes
                 for gp in self.groupNames:
                     #self.copy(gn, fsp[gn])
-                    fsp.create_dataset(gp, data=self.readGroup(gp, amin=evmin, amax=evmax)[0])
+                    fsp.create_dataset(gp, data=self.readGroup(self, gp, amin=evmin, amax=evmax))
                     for gattr, gattrval in self[gp].attrs.items():
                         fsp[gp].attrs[gattr] = gattrval
 
@@ -983,6 +970,43 @@ class hdf5Splitter(hdf5Reader):
             # Save and close the file
             finally:
                 fsp.close()
+
+
+def readBinnedhdf5(fpath, combined=True):
+    """
+    Read binned hdf5 file (3D/4D data) into a dictionary.
+
+    :Parameters:
+        fpath : str
+            File path
+        combined : bool | True
+            Specify if the volume slices are combined.
+
+    :Return:
+        out : dict
+            Dictionary with keys being the axes and the volume (slices).
+    """
+
+    f = File(fpath, 'r')
+    out = {}
+
+    # Read the axes group
+    for ax, axval in f['axes'].items():
+        out[ax] = axval[...]
+
+    # Read the binned group
+    nbinned = len(f['binned'].items())
+    if (nbinned == 1) or (combined == False):
+        for it, itval in f['binned'].items():
+            out[it] = itval[...]
+
+    elif (nbinned > 1) or (comnbined == True):
+        val = []
+        for it, itval in f['binned'].items():
+            val.append(itval.tolist())
+        out['V'] = np.array(val)
+
+    return out
 
 
 # =================== #
