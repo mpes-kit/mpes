@@ -857,7 +857,7 @@ class hdf5Processor(hdf5Reader):
         sln = kwds.pop('slicename', 'V')
         save_addr = appendformat(save_addr, form)
 
-        if form == 'mat': # Save as mat file
+        if form == 'mat': # Save as mat file (for Matlab)
 
             sio.savemat(save_addr, self.histdict)
 
@@ -890,7 +890,7 @@ class hdf5Processor(hdf5Reader):
             except ImportError:
                 raise ImportError('tifffile package is not installed locally!')
 
-        elif form == 'png':
+        elif form == 'png': # Save as png for slices
 
             cutaxis = kwds.pop('cutaxis', 2)
 
@@ -901,10 +901,16 @@ class hdf5Processor(hdf5Reader):
                 import imageio as imio
                 for i in range(n):
                     wn.simplefilter('ignore', UserWarning)
-                    imio.imwrite('./cut'+str(i)+'.png', nddata[i,...], format='png')
+                    imio.imwrite(save_addr[:-3]+'_'+str(i)+'.png', nddata[i,...], format='png')
 
             elif self.nbinaxes >= 4:
                 raise NotImplementedError
+
+        elif form == 'ibw': # Save as Igor wave
+
+            from igorwriter import IgorWave
+            wave = IgorWave(self.histdict['binned'], name='binned')
+            wave.save(save_addr)
 
         else:
             raise NotImplementedError
