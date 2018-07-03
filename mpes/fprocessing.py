@@ -73,9 +73,10 @@ def sgfltr2d(datamat, span, order, axis=0):
     return np.rollaxis(dmatfltr, axis)
 
 
-def SortNamesBy(namelist, pattern, gp=0):
+def sortNamesBy(namelist, pattern, gp=0, slicerange=(None, None)):
     """
-    Sort a list of names according to a particular sequence of numbers (specified by a regular expression search pattern)
+    Sort a list of names according to a particular sequence of numbers
+    (specified by a regular expression search pattern)
 
     Parameters
 
@@ -95,8 +96,10 @@ def SortNamesBy(namelist, pattern, gp=0):
     """
 
     gp = int(gp)
+    sa, sb = slicerange
+
     # Extract a sequence of numbers from the names in the list
-    seqnum = np.array([re.search(pattern, namelist[i]).group(gp)
+    seqnum = np.array([re.search(pattern, namelist[i][sa:sb]).group(gp)
                        for i in range(len(namelist))])
     seqnum = seqnum.astype(np.float)
 
