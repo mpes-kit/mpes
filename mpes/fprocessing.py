@@ -981,6 +981,27 @@ class hdf5Splitter(hdf5Reader):
                 fsp.close()
 
 
+class parallelHDF5Processor(object):
+    """
+    Class for parallel processing of hdf5 files
+    """
+
+    def __init__(self, files):
+
+        self.files = files
+
+    def parBinning(self, axes, nbins, ranges, scheduler='processes'):
+
+        binTasks = []
+        for f in self.files:
+            binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
+                                      (axes=axes, nbins=nbins, ranges=ranges))
+        if len(binTasks) > 0:
+            results = d.compute(*binTasks, scheduler=scheduler)
+
+        return results
+
+
 def readBinnedhdf5(fpath, combined=True):
     """
     Read binned hdf5 file (3D/4D data) into a dictionary.
