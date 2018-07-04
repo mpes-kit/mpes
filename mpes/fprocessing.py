@@ -869,15 +869,18 @@ class hdf5Processor(hdf5Reader):
             cutaxis = kwds.pop('cutaxis', 3)
 
             hdf = File(save_addr, 'w')
-            # Save the binned data (3D or 4D)
-            if self.nbinaxes == 3:
+            # Save the binned data
+            # Save 1-3D data as single datasets
+            if self.nbinaxes < 4:
                 hdf.create_dataset('binned/'+sln, data=self.histdict['binned'])
-            # Save 4D data as a list of separated 3D data
+            # Save 4D data as a list of separated 3D datasets
             elif self.nbinaxes == 4:
                 nddata = np.rollaxis(self.histdict['binned'], cutaxis)
                 n = nddata.shape[0]
                 for i in range(n):
                     hdf.create_dataset('binned/'+sln+str(i), data=nddata[i,...])
+            else:
+                raise NotImplementedError('High dimensional data format undefined!')
 
             # Save the axes in the same group
             for k in self.binaxes:
@@ -916,7 +919,7 @@ class hdf5Processor(hdf5Reader):
             wave.save(save_addr)
 
         else:
-            raise NotImplementedError
+            raise NotImplementedError('Not implemented output format!')
 
 
 class hdf5Splitter(hdf5Reader):
@@ -990,7 +993,6 @@ class parallelHDF5Processor(object):
 
         self.files = files
         self.nfiles = len(self.files)
-        #self.childInstances = []
         self.results = {}
         self.combinedresult = {}
 
