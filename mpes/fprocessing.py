@@ -996,10 +996,24 @@ class parallelHDF5Processor(object):
         self.results = {}
         self.combinedresult = {}
 
-    def parallelBinning(self, axes, nbins, ranges, scheduler='processes',\
+    def parallelBinning(self, axes, nbins, ranges, scheduler='threads',\
     ret=True, **kwds):
         """
         Parallel computation of the multidimensional histogram from file segments
+
+        :Parameters:
+            axes : (list of) strings | None
+                Names the axes to bin.
+            nbins : (list of) int | None
+                Number of bins along each axis.
+            ranges : (list of) tuples | None
+                Ranges of binning along every axis.
+            scheduler : str | 'threads'
+                Type of distributed scheduler ('threads', 'processes', 'synchronous')
+            ret : bool | True
+                :True: returns the dictionary containing binned data explicitly
+                :False: no explicit return of the binned data, the dictionary
+                generated in the binning is still retained as an instance attribute.
         """
 
         binTasks = []
@@ -1013,14 +1027,22 @@ class parallelHDF5Processor(object):
         if ret:
             return self.results
 
-    def combineResults(self, averaged=True, ret=True):
+    def combineResults(self, bin_accumulated=True, ret=True):
         """
         Combine the results from all segments
+
+        :Parameters:
+            bin_accumulated : bool | True
+                Accumulate the bins.
+            ret : bool | True
+                :True: returns the dictionary containing binned data explicitly
+                :False: no explicit return of the binned data, the dictionary
+                generated in the binning is still retained as an instance attribute.
         """
 
         binnedhist = np.stack([self.results[i]['binned'] for i in range(self.nfiles)], axis=0)
 
-        if averaged:
+        if bin_accumulated:
             binnedhist = np.sum(binnedhist, axis=0)
 
         # Transfer the results to combined result
