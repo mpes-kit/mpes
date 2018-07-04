@@ -989,17 +989,44 @@ class parallelHDF5Processor(object):
     def __init__(self, files):
 
         self.files = files
+        self.nfiles = len(self.files)
+        #self.childInstances = []
+        self.results = {}
+        self.combinedresult = {}
 
-    def parBinning(self, axes, nbins, ranges, scheduler='processes'):
+    def parallelBinning(self, axes, nbins, ranges, scheduler='processes',\
+    ret=True, **kwds):
+        """
+        Parallel computation of the multidimensional histogram from file segments
+        """
 
         binTasks = []
+        self.axes = axes
         for f in self.files:
             binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
                                       (axes=axes, nbins=nbins, ranges=ranges))
         if len(binTasks) > 0:
-            results = d.compute(*binTasks, scheduler=scheduler)
+            self.results = d.compute(*binTasks, scheduler=scheduler, **kwds)
 
-        return results
+        if ret:
+            return self.results
+
+    def combineResults(self, averaged=True, ret=True):
+        """
+        Combine the results from all segments
+        """
+
+        binnedhist = np.stack([self.results[i]['binned'] for i in range(self.nfiles)], axis=0)
+
+        if averaged:
+            binnedhist = np.sum(binnedhist, axis=0)
+
+        # Transfer the results to combined result
+        self.combinedresult = self.results[0]
+        self.combinedresult['binned'] = binnedhist
+
+        if ret:
+            return self.combinedresult
 
 
 def readBinnedhdf5(fpath, combined=True):
