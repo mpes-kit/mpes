@@ -715,6 +715,20 @@ class hdf5Processor(hdf5Reader):
 
             self.binranges = ranges
 
+    @staticmethod
+    def _int(*nums):
+        """ Safely convert to integer (avoiding None)
+        """
+
+        intnums = nums
+        for i, num in enumerate(nums):
+            try:
+                intnums[i] = int(num)
+            except TypeError:
+                pass
+
+        return intnums
+
     @d.delayed
     def _delayedBinning(self, data):
         """
@@ -766,6 +780,7 @@ class hdf5Processor(hdf5Reader):
         # Retrieve the range of acquired events
         amin = kwds.pop('amin', None)
         amax = kwds.pop('amax', None)
+        amin, amax = self._int(amin, amax)
 
         # Set up the binning parameters
         self._addBinners(axes, nbins, ranges, binDict)
@@ -792,7 +807,7 @@ class hdf5Processor(hdf5Reader):
             return self.histdict
 
     def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None, \
-                     ret=True, **kwds):
+                     jittered=False, histcoord='midpoint', ret=True, **kwds):
         """
         Compute the photoelectron intensity histogram locally after loading all data into RAM.
 
@@ -806,10 +821,27 @@ class hdf5Processor(hdf5Reader):
             binDict : dict | None
                 Dictionary with specifications of axes, nbins and ranges. If binDict
                 is not None. It will override the specifications from other arguments.
+            jittered : bool | False
+                Determines whether to add jitter to the data to avoid rebinning artefact.
+            histcoord : string | 'midpoint'
+                The coordinates of the histogram. Specify 'edge' to get the bar edges (every
+                dimension has one value more), specify 'midpoint' to get the midpoint of the
+                bars (same length as the histogram dimensions).
             ret : bool | True
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
                 generated in the binning is still retained as an instance attribute.
+            **kwds : keyword argument
+                ================  ==============  ===========  ========================================
+                     keyword         data type      default     meaning
+                ================  ==============  ===========  ========================================
+                     amin          numeric/None      None       minimum value of electron sequence
+                     amax          numeric/None      None       maximum value of electron sequence
+                 jitter_axes           list          axes       list of axes to jitter
+                 jitter_bins           list          nbins      list of the number of bins
+                jitter_amplitude       list       [0.5, ...]    list of the jitter amplitude
+                 jitter_ranges         list         ranges      list of the binning ranges
+                ================  ==============  ===========  ========================================
 
         :Return:
             histdict : dict
@@ -819,9 +851,31 @@ class hdf5Processor(hdf5Reader):
         # Retrieve the range of acquired events
         amin = kwds.pop('amin', None)
         amax = kwds.pop('amax', None)
+        amin, amax = self._int(amin, amax)
 
         # Assemble the data for binning, assuming they can be completely loaded into RAM
         self.hdfdict = self.summarize(output='dict', use_alias=self.ua, amin=amin, amax=amax)
+
+        # Add jitter to the data streams before binning
+        if jittered:
+
+            # Retrieve parameters for histogram jittering, the ordering of the jittering
+            # parameters is the same as that for the binning
+            jitter_axes = kwds.pop('jitter_axes', axes)
+            jitter_bins = kwds.pop('jitter_bins', nbins)
+            jitter_amplitude = kwds.pop('jitter_amplitude', 0.5*np.ones(self.nbinaxes))
+            jitter_ranges = kwds.pop('jitter_ranges', ranges)
+
+            # Add jitter to every dimension of the data
+            for jb, jax, jamp, jr in zip(jitter_bins, jitter_axes, jitter_amplitude, jitter_ranges):
+
+                sz = self.hdfdict[jax].size
+                jcoeff = abs(jr[0]-jr[1])/jb #
+
+                self.hdfdict[jax] = self.hdfdict[jax].astype('float32')
+                self.hdfdict[jax] += jcoeff * np.random.\
+                uniform(low=-jamp, high=jamp, size=sz).astype('float32')
+
         # Stack up data from unbinned axes
         data_unbinned = np.stack((self.hdfdict[ax] for ax in axes), axis=1)
 
@@ -833,7 +887,12 @@ class hdf5Processor(hdf5Reader):
         np.histogramdd(data_unbinned, bins=self.bincounts, range=self.binranges)
 
         for iax, ax in enumerate(axes):
-            self.histdict[ax] = ax_vals[iax]
+            if histcoord == 'midpoint':
+                ax_edge = ax_vals[iax]
+                ax_midpoint = (ax_edge[1:] - ax_edge[:-1])/2
+                self.histdict[ax] = ax_midpoint
+            elif histcoord == 'edge':
+                self.histdict[ax] = ax_vals[iax]
 
         if ret:
             return self.histdict
@@ -880,7 +939,8 @@ class hdf5Processor(hdf5Reader):
                 for i in range(n):
                     hdf.create_dataset('binned/'+sln+str(i), data=nddata[i,...])
             else:
-                raise NotImplementedError('High dimensional data format undefined!')
+                raise NotImplementedError('The output format is undefined for data\
+                with higher than four dimensions!')
 
             # Save the axes in the same group
             for k in self.binaxes:
@@ -898,19 +958,21 @@ class hdf5Processor(hdf5Reader):
 
         elif form == 'png': # Save as png for slices
 
+            import imageio as imio
             cutaxis = kwds.pop('cutaxis', 2)
 
-            nddata = np.rollaxis(self.histdict['binned'], cutaxis)
-            n = nddata.shape[0]
-
+            if self.nbaxes == 2:
+                imio.imwrite(save_addr[:-3]+'.png', self.histdict['binned'], format='png')
             if self.nbinaxes == 3:
-                import imageio as imio
+                nddata = np.rollaxis(self.histdict['binned'], cutaxis)
+                n = nddata.shape[0]
                 for i in range(n):
                     wn.simplefilter('ignore', UserWarning)
                     imio.imwrite(save_addr[:-3]+'_'+str(i)+'.png', nddata[i,...], format='png')
 
             elif self.nbinaxes >= 4:
-                raise NotImplementedError
+                raise NotImplementedError('The output format is undefined for data\
+                with higher than three dimensions!')
 
         elif form == 'ibw': # Save as Igor wave
 
@@ -976,8 +1038,8 @@ class hdf5Splitter(hdf5Reader):
                     for gattr, gattrval in self[gp].attrs.items():
                         fsp[gp].attrs[gattr] = gattrval
 
-            except:
-                pass
+            except Exception as e:
+                print(e)
 
             # Save and close the file
             finally:
@@ -997,7 +1059,7 @@ class parallelHDF5Processor(object):
         self.combinedresult = {}
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads',\
-    ret=True, **kwds):
+    ret=True, binning_kwds={}, compute_kwds={}):
         """
         Parallel computation of the multidimensional histogram from file segments
 
@@ -1014,15 +1076,20 @@ class parallelHDF5Processor(object):
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
                 generated in the binning is still retained as an instance attribute.
+            binning_kwds : dict | {}
+                keyword arguments to be included in hdf5Processor.localBinning()
+            compute_kwds : dict | {}
+                keyword arguments to specify in dask.computer()
+
         """
 
         binTasks = []
         self.axes = axes
         for f in self.files:
             binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
-                                      (axes=axes, nbins=nbins, ranges=ranges))
+                           (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
         if len(binTasks) > 0:
-            self.results = d.compute(*binTasks, scheduler=scheduler, **kwds)
+            self.results = d.compute(*binTasks, scheduler=scheduler, **compute_kwds)
 
         if ret:
             return self.results
