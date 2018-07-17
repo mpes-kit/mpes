@@ -870,11 +870,12 @@ class hdf5Processor(hdf5Reader):
             for jb, jax, jamp, jr in zip(jitter_bins, jitter_axes, jitter_amplitude, jitter_ranges):
 
                 sz = self.hdfdict[jax].size
-                jcoeff = abs(jr[0]-jr[1])/jb #
+                # Calculate the bar size of the histogram in every dimension
+                barsize = abs(jr[0]-jr[1])/jb
 
                 self.hdfdict[jax] = self.hdfdict[jax].astype('float32')
-                self.hdfdict[jax] += jcoeff * np.random.\
-                uniform(low=-jamp, high=jamp, size=sz).astype('float32')
+                self.hdfdict[jax] += jamp * barsize * np.random.\
+                uniform(low=-1, high=1, size=sz).astype('float32')
 
         # Stack up data from unbinned axes
         data_unbinned = np.stack((self.hdfdict[ax] for ax in axes), axis=1)
@@ -1105,6 +1106,10 @@ class parallelHDF5Processor(object):
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
                 generated in the binning is still retained as an instance attribute.
+
+        :Return:
+            combinedresult : dict
+                Return combined result dictionary (if `ret == True`).
         """
 
         binnedhist = np.stack([self.results[i]['binned'] for i in range(self.nfiles)], axis=0)
@@ -1148,7 +1153,7 @@ def readBinnedhdf5(fpath, combined=True):
         for it, itval in f['binned'].items():
             out[it] = itval[...]
 
-    elif (nbinned > 1) or (comnbined == True):
+    elif (nbinned > 1) or (combined == True):
         val = []
         for it, itval in f['binned'].items():
             val.append(itval.tolist())
