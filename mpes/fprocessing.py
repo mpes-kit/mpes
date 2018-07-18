@@ -720,7 +720,7 @@ class hdf5Processor(hdf5Reader):
         """ Safely convert to integer (avoiding None)
         """
 
-        intnums = nums
+        intnums = list(nums) # Make a copy of the to-be-converted list
         for i, num in enumerate(nums):
             try:
                 intnums[i] = int(num)
@@ -837,8 +837,8 @@ class hdf5Processor(hdf5Reader):
                 ================  ==============  ===========  ========================================
                      amin          numeric/None      None       minimum value of electron sequence
                      amax          numeric/None      None       maximum value of electron sequence
-                 jitter_axes           list          axes       list of axes to jitter
-                 jitter_bins           list          nbins      list of the number of bins
+                  jitter_axes          list          axes       list of axes to jitter
+                  jitter_bins          list          nbins      list of the number of bins
                 jitter_amplitude       list       [0.5, ...]    list of the jitter amplitude
                  jitter_ranges         list         ranges      list of the binning ranges
                 ================  ==============  ===========  ========================================
