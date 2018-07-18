@@ -871,10 +871,10 @@ class hdf5Processor(hdf5Reader):
 
                 sz = self.hdfdict[jax].size
                 # Calculate the bar size of the histogram in every dimension
-                barsize = abs(jr[0]-jr[1])/jb
+                binsize = abs(jr[0]-jr[1])/jb
 
                 self.hdfdict[jax] = self.hdfdict[jax].astype('float32')
-                self.hdfdict[jax] += jamp * barsize * np.random.\
+                self.hdfdict[jax] += jamp * binsize * np.random.\
                 uniform(low=-1, high=1, size=sz).astype('float32')
 
         # Stack up data from unbinned axes
@@ -890,7 +890,7 @@ class hdf5Processor(hdf5Reader):
         for iax, ax in enumerate(axes):
             if histcoord == 'midpoint':
                 ax_edge = ax_vals[iax]
-                ax_midpoint = (ax_edge[1:] - ax_edge[:-1])/2
+                ax_midpoint = (ax_edge[1:] + ax_edge[:-1])/2
                 self.histdict[ax] = ax_midpoint
             elif histcoord == 'edge':
                 self.histdict[ax] = ax_vals[iax]
