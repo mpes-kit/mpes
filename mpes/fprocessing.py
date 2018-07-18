@@ -698,6 +698,7 @@ class hdf5Processor(hdf5Reader):
         if binDict is not None:
             try:
                 self.binaxes = binDict['axes']
+                self.nbinaxes = len(self.binaxes)
                 self.bincounts = binDict['nbins']
                 self.binranges = binDict['ranges']
             except:
@@ -856,6 +857,9 @@ class hdf5Processor(hdf5Reader):
         # Assemble the data for binning, assuming they can be completely loaded into RAM
         self.hdfdict = self.summarize(output='dict', use_alias=self.ua, amin=amin, amax=amax)
 
+        # Set up binning parameters
+        self._addBinners(axes, nbins, ranges, binDict)
+
         # Add jitter to the data streams before binning
         if jittered:
 
@@ -879,9 +883,6 @@ class hdf5Processor(hdf5Reader):
 
         # Stack up data from unbinned axes
         data_unbinned = np.stack((self.hdfdict[ax] for ax in axes), axis=1)
-
-        # Set up binning parameters
-        self._addBinners(axes, nbins, ranges, binDict)
 
         # Compute binned data locally
         self.histdict['binned'], ax_vals = \
