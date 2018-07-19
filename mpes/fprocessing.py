@@ -1061,7 +1061,7 @@ class parallelHDF5Processor(object):
         self.combinedresult = {}
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads',\
-    ret=True, binning_kwds={}, compute_kwds={}):
+    pbar=True, ret=True, binning_kwds={}, compute_kwds={}):
         """
         Parallel computation of the multidimensional histogram from file segments
 
@@ -1074,6 +1074,8 @@ class parallelHDF5Processor(object):
                 Ranges of binning along every axis.
             scheduler : str | 'threads'
                 Type of distributed scheduler ('threads', 'processes', 'synchronous')
+            pbar : Bool | true
+                Whether to show the progress bar
             ret : bool | True
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
@@ -1091,7 +1093,11 @@ class parallelHDF5Processor(object):
             binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
                            (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
         if len(binTasks) > 0:
-            self.results = d.compute(*binTasks, scheduler=scheduler, **compute_kwds)
+            if pbar:
+                with ProgressBar():
+                    self.results = d.compute(*binTasks, scheduler=scheduler, **compute_kwds)
+            else:
+                self.results = d.compute(*binTasks, scheduler=scheduler, **compute_kwds)
 
         if ret:
             return self.results
