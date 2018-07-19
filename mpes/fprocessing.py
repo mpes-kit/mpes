@@ -672,6 +672,100 @@ class hdf5Reader(File):
             raise NotImplementedError
 
 
+def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
+    """ Save the binning result dictionary, including the histogram and the
+    axes values (edges or midpoints).
+
+    :Parameters:
+        processor : class
+            Class including all attributes
+        dictname : str
+            Namestring of the dictionary to save (such as the attribute name in a class)
+        form : str | 'h5'
+            Save format, supporting 'mat', 'h5', 'tiff' (need tifffile) or 'png' (need imageio)
+        save_addr : str | './histogram'
+            File path to save the binning result
+        **kwds : keyword arguments
+            =========  ===========  ===========  ========================================
+             keyword    data type     default     meaning
+            =========  ===========  ===========  ========================================
+              dtyp       string      'float32'    data type of the histogram
+             cutaxis      int            3        the axis to cut the 4D data in
+            slicename    string         'V'       the shared namestring for the 3D slice
+            =========  ===========  ===========  ========================================
+    """
+    histdict = getattr(processor, dictname)
+    dtyp = kwds.pop('dtyp', 'float32')
+    sln = kwds.pop('slicename', 'V')
+    save_addr = appendformat(save_addr, form)
+
+    if form == 'mat': # Save as mat file (for Matlab)
+
+        sio.savemat(save_addr, histdict)
+
+    elif form == 'h5': # Save as hdf5 file
+
+        cutaxis = kwds.pop('cutaxis', 3)
+
+        # Save the binned data
+        # Save 1-3D data as single datasets
+        try:
+            hdf = File(save_addr, 'w')
+            if processor.nbinaxes < 4:
+                hdf.create_dataset('binned/'+sln, data=histdict['binned'])
+            # Save 4D data as a list of separated 3D datasets
+            elif processor.nbinaxes == 4:
+                nddata = np.rollaxis(histdict['binned'], cutaxis)
+                n = nddata.shape[0]
+                for i in range(n):
+                    hdf.create_dataset('binned/'+sln+str(i), data=nddata[i,...])
+            else:
+                raise NotImplementedError('The output format is undefined for data\
+                with higher than four dimensions!')
+
+            # Save the axes in the same group
+            for k in processor.binaxes:
+                hdf.create_dataset('axes/'+k, data=histdict[k])
+
+        finally:
+            hdf.close()
+
+    elif form == 'tiff': # Save as tiff stack
+
+        try:
+            import tifffile as ti
+            ti.imsave(save_addr, data=histdict['binned'].astype(dtyp))
+        except ImportError:
+            raise ImportError('tifffile package is not installed locally!')
+
+    elif form == 'png': # Save as png for slices
+
+        import imageio as imio
+        cutaxis = kwds.pop('cutaxis', 2)
+
+        if processor.nbaxes == 2:
+            imio.imwrite(save_addr[:-3]+'.png', histdict['binned'], format='png')
+        if processor.nbinaxes == 3:
+            nddata = np.rollaxis(histdict['binned'], cutaxis)
+            n = nddata.shape[0]
+            for i in range(n):
+                wn.simplefilter('ignore', UserWarning)
+                imio.imwrite(save_addr[:-3]+'_'+str(i)+'.png', nddata[i,...], format='png')
+
+        elif processor.nbinaxes >= 4:
+            raise NotImplementedError('The output format is undefined for data\
+            with higher than three dimensions!')
+
+    elif form == 'ibw': # Save as Igor wave
+
+        from igorwriter import IgorWave
+        wave = IgorWave(histdict['binned'], name='binned')
+        wave.save(save_addr)
+
+    else:
+        raise NotImplementedError('Not implemented output format!')
+
+
 class hdf5Processor(hdf5Reader):
     """ Class for generating multidimensional histogram from hdf5 files
     """
@@ -875,7 +969,7 @@ class hdf5Processor(hdf5Reader):
 
                 sz = self.hdfdict[jax].size
                 # Calculate the bar size of the histogram in every dimension
-                binsize = abs(jr[0]-jr[1])/jb
+                binsize = abs(jr[0] - jr[1])/jb
 
                 self.hdfdict[jax] = self.hdfdict[jax].astype('float32')
                 self.hdfdict[jax] += jamp * binsize * np.random.\
@@ -900,90 +994,11 @@ class hdf5Processor(hdf5Reader):
             return self.histdict
 
     def saveHistogram(self, form='h5', save_addr='./histogram', **kwds):
-        """ Save the binning results, the histogram and axes values.
 
-        :Parameters:
-            form : str | 'h5'
-                Save format, supporting 'mat', 'h5', 'tiff' (need tifffile) or 'png' (need imageio)
-            save_addr : str | './histogram'
-                File path to save the binning result
-            **kwds : keyword arguments
-                =========  ===========  ===========  ========================================
-                 keyword    data type     default     meaning
-                =========  ===========  ===========  ========================================
-                  dtyp       string      'float32'    data type of the histogram
-                 cutaxis      int            3        the axis to cut the 4D data in
-                slicename    string         'V'       the shared namestring for the 3D slice
-                =========  ===========  ===========  ========================================
-        """
-
-        dtyp = kwds.pop('dtyp', 'float32')
-        sln = kwds.pop('slicename', 'V')
-        save_addr = appendformat(save_addr, form)
-
-        if form == 'mat': # Save as mat file (for Matlab)
-
-            sio.savemat(save_addr, self.histdict)
-
-        elif form == 'h5': # Save as hdf5 file
-
-            cutaxis = kwds.pop('cutaxis', 3)
-
-            hdf = File(save_addr, 'w')
-            # Save the binned data
-            # Save 1-3D data as single datasets
-            if self.nbinaxes < 4:
-                hdf.create_dataset('binned/'+sln, data=self.histdict['binned'])
-            # Save 4D data as a list of separated 3D datasets
-            elif self.nbinaxes == 4:
-                nddata = np.rollaxis(self.histdict['binned'], cutaxis)
-                n = nddata.shape[0]
-                for i in range(n):
-                    hdf.create_dataset('binned/'+sln+str(i), data=nddata[i,...])
-            else:
-                raise NotImplementedError('The output format is undefined for data\
-                with higher than four dimensions!')
-
-            # Save the axes in the same group
-            for k in self.binaxes:
-                hdf.create_dataset('axes/'+k, data=self.histdict[k])
-
-            hdf.close()
-
-        elif form == 'tiff': # Save as tiff stack
-
-            try:
-                import tifffile as ti
-                ti.imsave(save_addr, data=self.histdict['binned'].astype(dtyp))
-            except ImportError:
-                raise ImportError('tifffile package is not installed locally!')
-
-        elif form == 'png': # Save as png for slices
-
-            import imageio as imio
-            cutaxis = kwds.pop('cutaxis', 2)
-
-            if self.nbaxes == 2:
-                imio.imwrite(save_addr[:-3]+'.png', self.histdict['binned'], format='png')
-            if self.nbinaxes == 3:
-                nddata = np.rollaxis(self.histdict['binned'], cutaxis)
-                n = nddata.shape[0]
-                for i in range(n):
-                    wn.simplefilter('ignore', UserWarning)
-                    imio.imwrite(save_addr[:-3]+'_'+str(i)+'.png', nddata[i,...], format='png')
-
-            elif self.nbinaxes >= 4:
-                raise NotImplementedError('The output format is undefined for data\
-                with higher than three dimensions!')
-
-        elif form == 'ibw': # Save as Igor wave
-
-            from igorwriter import IgorWave
-            wave = IgorWave(self.histdict['binned'], name='binned')
-            wave.save(save_addr)
-
-        else:
-            raise NotImplementedError('Not implemented output format!')
+        try:
+            saveDict(self, dictname='histdict', form=form, save_addr=save_addr, **kwds)
+        except:
+            raise Exception('Saving histogram unsuccessful!')
 
 
 class hdf5Splitter(hdf5Reader):
@@ -1088,7 +1103,11 @@ class parallelHDF5Processor(object):
         """
 
         binTasks = []
-        self.axes = axes
+        self.binaxes = axes
+        self.nbinaxes = len(axes)
+        self.bincounts = nbins
+        self.binranges = ranges
+
         for f in self.files:
             binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
                            (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
@@ -1130,6 +1149,13 @@ class parallelHDF5Processor(object):
 
         if ret:
             return self.combinedresult
+
+    def saveHistogram(self, dictname='combinedresult', form='h5', save_addr='./histogram', **kwds):
+
+        try:
+            saveDict(self, dictname, form, save_addr, **kwds)
+        except:
+            raise Exception('Saving histogram unsuccessful!')
 
 
 def readBinnedhdf5(fpath, combined=True):
