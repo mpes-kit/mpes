@@ -1001,8 +1001,9 @@ class hdf5Processor(hdf5Reader):
 
         # Input axis order to binning axes order
         binaxes = np.asarray(self.binaxes)
+        seqs = [np.where(ax == binaxes)[0][0] for ax in axes]
 
-        for ax, rg in zip(axes, sliceranges):
+        for seq, ax, rg in zip(seqs, axes, sliceranges):
             # Update the lengths of binning axes
             seq = np.where(ax == binaxes)[0][0]
             self.histdict[ax] = self.histdict[ax][rg[0]:rg[1]]
@@ -1180,7 +1181,7 @@ class parallelHDF5Processor(object):
         binaxes = np.asarray(self.binaxes)
         seqs = [np.where(ax == binaxes)[0][0] for ax in axes]
 
-        for ax, rg in zip(axes, sliceranges):
+        for seq, ax, rg in zip(seqs, axes, sliceranges):
             # Update the lengths of binning axes
             self.combinedresult[ax] = self.combinedresult[ax][rg[0]:rg[1]]
 
@@ -1222,16 +1223,20 @@ def readBinnedhdf5(fpath, combined=True):
         out[ax] = axval[...]
 
     # Read the binned group
-    nbinned = len(f['binned'].items())
+    itemiter = f['binned'].items()
+    nbinned = len(itemiter)
+
+    # Binned 3D matrix
     if (nbinned == 1) or (combined == False):
-        for it, itval in f['binned'].items():
+        for it, itval in itemiter:
             out[it] = itval[...]
 
+    # Binned 4D matrix
     elif (nbinned > 1) or (combined == True):
         val = []
-        for it, itval in f['binned'].items():
-            val.append(itval.tolist())
-        out['V'] = np.array(val)
+        for it, itval in itemiter:
+            val.append(itval)
+        out['V'] = np.asarray(val)
 
     return out
 
