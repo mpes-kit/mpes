@@ -994,7 +994,7 @@ class hdf5Processor(hdf5Reader):
         if ret:
             return self.histdict
 
-    def updateHistogram(self, axes=None, sliceranges=None):
+    def updateHistogram(self, axes=None, sliceranges=None, ret=False):
         """
         Update the size of the binning results
         """
@@ -1010,6 +1010,9 @@ class hdf5Processor(hdf5Reader):
             # Update the binned histogram
             tempmat = np.moveaxis(self.histdict['binned'], seq, 0)[rg[0]:rg[1],...]
             self.histdict['binned'] = np.moveaxis(tempmat, 0, seq)
+
+        if ret:
+            return self.histdict
 
     def saveHistogram(self, form='h5', save_addr='./histogram', **kwds):
 
@@ -1168,22 +1171,25 @@ class parallelHDF5Processor(object):
         if ret:
             return self.combinedresult
 
-    def updateHistogram(self, axes=None, sliceranges=None):
+    def updateHistogram(self, axes=None, sliceranges=None, ret=False):
         """
         Update the size of the binning results
         """
 
         # Input axis order to binning axes order
         binaxes = np.asarray(self.binaxes)
+        seqs = [np.where(ax == binaxes)[0][0] for ax in axes]
 
         for ax, rg in zip(axes, sliceranges):
             # Update the lengths of binning axes
-            seq = np.where(ax == binaxes)[0][0]
             self.combinedresult[ax] = self.combinedresult[ax][rg[0]:rg[1]]
 
             # Update the binned histogram
             tempmat = np.moveaxis(self.combinedresult['binned'], seq, 0)[rg[0]:rg[1],...]
             self.combinedresult['binned'] = np.moveaxis(tempmat, 0, seq)
+
+        if ret:
+            return self.combinedresult
 
     def saveHistogram(self, dictname='combinedresult', form='h5', save_addr='./histogram', **kwds):
 
