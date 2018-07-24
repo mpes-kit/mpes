@@ -30,6 +30,7 @@ import dask as d, dask.array as da
 from dask.diagnostics import ProgressBar
 import warnings as wn
 from tqdm import tqdm
+import natsorted as nts
 
 N_CPU = ps.cpu_count()
 
@@ -1223,19 +1224,21 @@ def readBinnedhdf5(fpath, combined=True):
         out[ax] = axval[...]
 
     # Read the binned group
-    itemiter = f['binned'].items()
-    nbinned = len(itemiter)
+    group = f['binned']
+    itemkeys = group.keys()
+    nbinned = len(itemkeys)
 
     # Binned 3D matrix
     if (nbinned == 1) or (combined == False):
-        for it, itval in itemiter:
-            out[it] = itval[...]
+        for ik in itemkeys:
+            out[it] = np.asarray(group[ik])
 
     # Binned 4D matrix
     elif (nbinned > 1) or (combined == True):
         val = []
-        for it, itval in itemiter:
-            val.append(itval)
+        itemkeys_sorted = nts.natsorted(itemkeys)
+        for ik in itemkeys_sorted:
+            val.append(group[ik])
         out['V'] = np.asarray(val)
 
     return out
