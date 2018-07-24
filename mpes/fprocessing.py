@@ -30,7 +30,7 @@ import dask as d, dask.array as da
 from dask.diagnostics import ProgressBar
 import warnings as wn
 from tqdm import tqdm
-import natsorted as nts
+import natsort as nts
 
 N_CPU = ps.cpu_count()
 

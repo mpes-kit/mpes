@@ -14,3 +14,4 @@ h5py
 #tifffile
 dask[complete]
 tqdm
+natsort
