@@ -14,7 +14,7 @@
 from __future__ import print_function, division
 import numpy as np
 import pandas as pd
-import re, glob2
+import re, glob2 as g
 import numpy.fft as nft
 from scipy.interpolate import interp1d
 from numpy import polyval as poly
@@ -261,7 +261,7 @@ def txtlocate(ffolder, keytext):
     Locate specific txt files containing experimental parameters
     """
 
-    txtfiles = glob2.glob(ffolder + r'\*.txt')
+    txtfiles = g.glob(ffolder + r'\*.txt')
     for ind, fname in enumerate(txtfiles):
         if keytext in fname:
             txtfile = txtfiles[ind]
@@ -1201,7 +1201,7 @@ class parallelHDF5Processor(object):
             raise Exception('Saving histogram unsuccessful!')
 
 
-def readBinnedhdf5(fpath, combined=True):
+def readBinnedhdf5(fpath, combined=True, typ='float32'):
     """
     Read binned hdf5 file (3D/4D data) into a dictionary.
 
@@ -1210,6 +1210,8 @@ def readBinnedhdf5(fpath, combined=True):
             File path
         combined : bool | True
             Specify if the volume slices are combined.
+        typ : str | 'float32'
+            Data type of the numerical values in the output dictionary
 
     :Return:
         out : dict
@@ -1231,7 +1233,7 @@ def readBinnedhdf5(fpath, combined=True):
     # Binned 3D matrix
     if (nbinned == 1) or (combined == False):
         for ik in itemkeys:
-            out[it] = np.asarray(group[ik])
+            out[ik] = np.asarray(group[ik], dtype=typ)
 
     # Binned 4D matrix
     elif (nbinned > 1) or (combined == True):
@@ -1239,7 +1241,7 @@ def readBinnedhdf5(fpath, combined=True):
         itemkeys_sorted = nts.natsorted(itemkeys)
         for ik in itemkeys_sorted:
             val.append(group[ik])
-        out['V'] = np.asarray(val)
+        out['V'] = np.asarray(val, dtype=typ)
 
     return out
 

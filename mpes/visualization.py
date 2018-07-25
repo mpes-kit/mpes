@@ -10,6 +10,7 @@
 # 2.  1D plots
 # 3.  2D plots
 # 4.  3D-rendered plots
+# 5.  Movie generation
 # =======================
 
 from __future__ import print_function, division
@@ -22,9 +23,12 @@ import matplotlib.gridspec as matgrid
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.tri as mtri
 import matplotlib.colors as colors
-from . import utils as u
+from . import utils as u, fprocessing as fp
 from copy import copy
 import re
+import glob2 as g
+from PIL import Image
+import imageio as imio
 
 global PLOT3D
 PLOT3D = False
@@ -768,3 +772,26 @@ def trisurf2d(datamat, **kwds):
     ax.set_zlabel(zlabel, labelpad=lblpad)
 
     return sf, ax
+
+
+# ================== #
+#  Movie generation  #
+# ================== #
+
+def moviemaker(foldername, imform='png', movform='avi', namestr='movie', **kwds):
+    """ Generate a movie file from a stack of images
+    """
+
+    fps = kwds.pop('fps', 4)
+    loop = kwds.pop('loop', 1)
+
+    fnames = g.glob(foldername + r'\*.'+imform)
+    _, fnames_sorted = fp.sortNamesBy(fnames, pattern=r'\d+')
+    images = []
+
+    for fid, fn in enumerate(fnames_sorted):
+
+        im = Image.open(fn)
+        images.append(np.asarray(im))
+
+    imio.mimsave(namestr+'.'+movform, images, fps=fps)
