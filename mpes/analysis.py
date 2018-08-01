@@ -91,126 +91,6 @@ def sortByAxes(arr, axes):
         return
 
 
-def _signedmask(imr, imc, maskr, maskc, sign):
-    """ Generate a binary mask using the masked coordinates
-
-    :Parameters:
-        imr, imc : int
-            Row and column size of the image
-        maskr, maskc : 1D array
-            Row and column coordinates of the masked pixels
-        sign : int
-            Binary sign of the masked region, (0, 1)
-
-    :Return:
-        mask : 2D array
-            Mask matrix
-    """
-
-    if sign == 1:
-        mask = np.zeros((imr, imc))
-        mask[maskr, maskc] = 1
-
-    elif sign == 0:
-        mask = np.ones((imr, imc))
-        mask[maskr, maskc] = 0
-
-    return mask
-
-
-def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
-    """ Use a circular binary mask to cover an image
-
-    :Parameters:
-        img : 2D array
-            Input image to be masked
-        rcent : float
-            Row center position
-        ccent : float
-            Column center position
-        rad : float
-            Radius of circle
-        sign : int | 1
-            Binary sign of the masked region
-        ret : str | 'mask'
-            Return type ('mask', 'masked_image')
-        kwds : keyword arguments
-
-    :Return:
-        cmask or cmask*img : 2D array
-            Mask only or masked image
-    """
-
-    rim, cim = img.shape
-    shape = kwds.pop('shape', (rim, cim))
-
-    # Generate circular mask of the chosen sign
-    rr, cc = circle(rcent, ccent, rad, shape=shape)
-    cmask = _signedmask(rim, cim, rr, cc, sign=sign)
-
-    if ret == 'mask':
-        return cmask
-    elif ret == 'masked_image':
-        return cmask*img
-
-
-def rectmask(img, rcent, ccent, shift, direction='row', sign=1, ret='mask', **kwds):
-    """ Use a rectangular binary mask to cover an image
-
-    :Parameters:
-        img : 2D array
-            Input image to be masked
-        rcent : float
-            Row center position
-        ccent : float
-            Column center position
-        shift : int/list of int
-            Pixel shifts
-        direction : str | 'row'
-            Direction to apply the shift to, 'row' or 'column' indicates row-wise
-            or column-wise shift for generating the rectangular mask
-        sign : int | 1
-            Binary sign of the masked region
-        ret : str | 'mask'
-            Return type ('mask', 'masked_image')
-        kwds : keyword arguments
-
-    :Return:
-        cmask or cmask*img : 2D array
-            Mask only or masked image
-    """
-
-    rim, cim = img.shape
-    shape = kwds.pop('shape', (rim, cim))
-
-    shift = np.asarray([shift]).ravel()
-    if len(shift) == 1:
-        neg_shift, pos_shift = shift, shift
-    elif len(shift) == 2:
-        neg_shift, pos_shift = shift
-
-    # Calculate the vertices of the triangle
-    if direction == 'row':
-
-        # Along the row direction
-        rverts = [rcent-neg_shift, rcent+pos_shift, rcent+pos_shift, rcent-neg_shift]
-        cverts = [0, 0, cim, cim]
-
-    elif direction == 'column':
-
-        # Along the column direction
-        rverts = [0, 0, rim, rim]
-        cverts = [ccent-neg_shift, ccent+pos_shift, ccent+pos_shift, ccent-neg_shift]
-
-    rr, cc = polygon(rverts, cverts, shape=shape)
-    rmask = _signedmask(rim, cim, rr, cc, sign=sign)
-
-    if ret == 'mask':
-        return rmask
-    elif ret == 'masked_image':
-        return rmask*img
-
-
 # ==================== #
 #  Background removal  #
 # ==================== #
@@ -710,6 +590,163 @@ def regionExpand(mask, **kwds):
             print('Please specify a structuring element for dilation!')
 
     return mask
+
+
+def _signedmask(imr, imc, maskr, maskc, sign):
+    """ Generate a binary mask using the masked coordinates
+
+    :Parameters:
+        imr, imc : int
+            Row and column size of the image
+        maskr, maskc : 1D array
+            Row and column coordinates of the masked pixels
+        sign : int
+            Binary sign of the masked region, (0, 1)
+
+    :Return:
+        mask : 2D array
+            Mask matrix
+    """
+
+    if sign == 1:
+        mask = np.zeros((imr, imc))
+        mask[maskr, maskc] = 1
+
+    elif sign == 0:
+        mask = np.ones((imr, imc))
+        mask[maskr, maskc] = 0
+
+    return mask
+
+
+def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
+    """ Use a circular binary mask to cover an image
+
+    :Parameters:
+        img : 2D array
+            Input image to be masked
+        rcent : float
+            Row center position
+        ccent : float
+            Column center position
+        rad : float
+            Radius of circle
+        sign : int | 1
+            Binary sign of the masked region
+        ret : str | 'mask'
+            Return type ('mask', 'masked_image')
+        kwds : keyword arguments
+
+    :Return:
+        cmask or cmask*img : 2D array
+            Mask only or masked image
+    """
+
+    rim, cim = img.shape
+    shape = kwds.pop('shape', (rim, cim))
+
+    # Generate circular mask of the chosen sign
+    rr, cc = circle(rcent, ccent, rad, shape=shape)
+    cmask = _signedmask(rim, cim, rr, cc, sign=sign)
+
+    if ret == 'mask':
+        return cmask
+    elif ret == 'masked_image':
+        return cmask*img
+
+
+def rectmask(img, rcent, ccent, shift, direction='row', sign=1, ret='mask', **kwds):
+    """ Use a rectangular binary mask to cover an image
+
+    :Parameters:
+        img : 2D array
+            Input image to be masked
+        rcent : float
+            Row center position
+        ccent : float
+            Column center position
+        shift : int/list of int
+            Pixel shifts
+        direction : str | 'row'
+            Direction to apply the shift to, 'row' or 'column' indicates row-wise
+            or column-wise shift for generating the rectangular mask
+        sign : int | 1
+            Binary sign of the masked region
+        ret : str | 'mask'
+            Return type ('mask', 'masked_image')
+        kwds : keyword arguments
+
+    :Return:
+        cmask or cmask*img : 2D array
+            Mask only or masked image
+    """
+
+    rim, cim = img.shape
+    shape = kwds.pop('shape', (rim, cim))
+
+    shift = np.asarray([shift]).ravel()
+    if len(shift) == 1:
+        neg_shift, pos_shift = shift, shift
+    elif len(shift) == 2:
+        neg_shift, pos_shift = shift
+
+    # Calculate the vertices of the triangle
+    if direction == 'row':
+
+        # Along the row direction
+        rverts = [rcent-neg_shift, rcent+pos_shift, rcent+pos_shift, rcent-neg_shift]
+        cverts = [0, 0, cim, cim]
+
+    elif direction == 'column':
+
+        # Along the column direction
+        rverts = [0, 0, rim, rim]
+        cverts = [ccent-neg_shift, ccent+pos_shift, ccent+pos_shift, ccent-neg_shift]
+
+    rr, cc = polygon(rverts, cverts, shape=shape)
+    rmask = _signedmask(rim, cim, rr, cc, sign=sign)
+
+    if ret == 'mask':
+        return rmask
+    elif ret == 'masked_image':
+        return rmask*img
+
+
+def apply_mask_along(arr, mask, axes=None):
+    """
+    Apply a mask in a low dimensional slice throughout a high-dimensional array
+
+    :Parameters:
+        arr : nD array
+            Multidimensional array for masking.
+        mask : nD array
+            Mask to apply.
+        axes : list/tuple of int
+            The axes to apply the mask to.
+
+    :Return:
+        maskedarr : nD array
+            Masked multidimensional array.
+    """
+
+    ndimmask = mask.ndim
+    ndimarr = arr.ndim
+    maskshape = list(mask.shape)
+    maskedarr = arr.copy()
+
+    # Mask with the same dimension, just multiply
+    if ndimarr == ndimmask:
+        maskedarr *= mask
+
+    # Mask with lower dimension than matrix, broadcast first, then multiply
+    elif (ndimarr > ndimmask) and axes:
+        ndimaug = ndimarr - ndimmask # The number of dimensions that needs to be augmented
+        maskedarr = np.moveaxis(maskedarr, axes, list(range(ndimaug)))
+        maskaugdim = [1]*ndimaug + maskshape
+        maskaug = mask.reshape(maskaugdim)
+        maskedarr *= maskaug
+
+    return maskedarr
 
 
 # ================ #
