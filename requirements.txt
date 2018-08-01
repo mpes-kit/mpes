@@ -16,3 +16,4 @@ dask[complete]
 tqdm
 natsort
 imageio
+numba
