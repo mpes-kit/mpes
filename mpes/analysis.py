@@ -8,9 +8,10 @@
 # Sections:
 # 1.  Utility functions
 # 2.  Background removal
-# 3.  Image segmentation
-# 4.  Fitting routines
-# 5.  Fitting result parsing and testing
+# 3.  Coordinate calibration
+# 4.  Image segmentation
+# 5.  Fitting routines
+# 6.  Fitting result parsing and testing
 # =======================================
 
 from __future__ import print_function, division
@@ -408,7 +409,66 @@ def peakdetect(y_axis, x_axis = None, lookahead = 200, delta=0):
     except IndexError: # When no peaks have been found
         pass
 
-    return [max_peaks, min_peaks]
+    max_peaks = np.asarray(max_peaks)
+    min_peaks = np.asarray(min_peaks)
+
+    return max_peaks, min_peaks
+
+
+# ======================== #
+#  Coordinate calibration  #
+# ======================== #
+
+def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
+    """
+    Momentum axes calibration using the pixel positions of two critical points (a and b)
+    and the absolute coordinate of a single point (b).
+
+    :Parameters:
+        img : 2D array
+            An energy cut of the band structure.
+        pxla, pxlb : list/tuple/1D array
+            Pixel coordinates of the two critical points.
+        k_ab : float
+            The known momentum space distance of the two critical points.
+        coordb :
+        ret : str | 'axes'
+            Return type specification, options include 'axes', 'extent' and 'grid' (see below).
+
+    :Returns:
+        k_row, k_col : 1D array
+            Momentum coordinates of the row and column.
+        axis_extent : list
+            Extent of the two momentum axis (can be used directly in imshow).
+        k_rowgrid, k_colgrid : 2D array
+            Row and column mesh grid generated from the coordinates
+            (can be used directly in pcolormesh).
+    """
+
+    nr, nc = img.shape
+    pxla, pxlb = map(np.array, [pxla, pxlb])
+    d_ab = norm(pxla - pxlb)
+    ratio = k_ab / d_ab # Distance conversion factor
+
+    # Calculate the row-wise conversion factor
+    rowdist = range(nr) - pxlb[0]
+    k_row = rowdist * ratio + coordb[0]
+
+    # Calculate the column-wise conversion factor
+    coldist = range(nc) - pxlb[1]
+    k_col = coldist * ratio + coordb[1]
+
+    # Specify return options
+    if ret == 'axes':
+        return k_row, k_col
+
+    elif ret == 'extent':
+        axis_extent = [k_col[0], k_col[-1], k_row[0], k_row[-1]]
+        return axis_extent
+
+    elif ret == 'grid':
+        k_rowgrid, k_colgrid = np.meshgrid(k_row, k_col)
+        return k_rowgrid, k_colgrid
 
 
 # ==================== #
