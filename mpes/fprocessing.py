@@ -1021,7 +1021,7 @@ class hdf5Processor(hdf5Reader):
         try:
             saveDict(self, dictname='histdict', form=form, save_addr=save_addr, **kwds)
         except:
-            raise Exception('Saving histogram unsuccessful!')
+            raise Exception('Saving histogram was unsuccessful!')
 
 
 class hdf5Splitter(hdf5Reader):
@@ -1198,7 +1198,7 @@ class parallelHDF5Processor(object):
         try:
             saveDict(self, dictname, form, save_addr, **kwds)
         except:
-            raise Exception('Saving histogram unsuccessful!')
+            raise Exception('Saving histogram was unsuccessful!')
 
 
 def readBinnedhdf5(fpath, combined=True, typ='float32'):
@@ -1354,3 +1354,30 @@ def fftfilter2d(datamat):
     fltrmat = np.abs(nft.ifft2((1 - zm) * ftmat))
 
     return fltrmat
+
+
+def normspec(*specs, smooth=False, aligned=False, span=13, order=1):
+    """
+    Normalize a series of 1D spectra
+    """
+
+    nspec = len(specs)
+    specnorm = []
+
+    for i in range(nspec):
+
+        spec = specs[i]
+
+        if smooth:
+            spec = savgol_filter(spec, span, order)
+
+        if type(spec) in (list, tuple):
+            nsp = spec / max(spec)
+        else:
+            nsp = spec / spec.max()
+        specnorm.append(nsp)
+
+        # Align 1D spectrum
+        normalized_specs = np.asarray(specnorm)
+
+    return normalized_specs

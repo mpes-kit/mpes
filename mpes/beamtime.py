@@ -5,9 +5,9 @@
 @author: R. Patrick Xian
 """
 
-# =======================================
-# Beam time data analysis
-# =======================================
+# ======================================= #
+# Large facility beam time data analysis  #
+# ======================================= #
 
 from __future__ import print_function, division
 import numpy as np
