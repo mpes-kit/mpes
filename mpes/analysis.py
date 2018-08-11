@@ -10,12 +10,13 @@
 # 2.  Background removal
 # 3.  Coordinate calibration
 # 4.  Image segmentation
-# 5.  Fitting routines
-# 6.  Fitting result parsing and testing
+# 5.  Image correction
+# 6.  Fitting routines
+# 7.  Fitting result parsing and testing
 # =======================================
 
 from __future__ import print_function, division
-from . import utils as u
+from . import utils as u, ellipsefit as elf
 import numpy as np
 from numpy.linalg import norm
 import pandas as pd
@@ -807,6 +808,29 @@ def apply_mask_along(arr, mask, axes=None):
         maskedarr *= maskaug
 
     return maskedarr
+
+
+# ================ #
+# Image correction #
+# ================ #
+
+def fitEllipseParams(*coords, plot=False):
+    """
+    Direct least-squares method for fitting ellipse from scattered points
+    """
+
+    rcoords, ccoords = coords
+    pvec = elf.fitEllipse(rcoords, ccoords)
+
+    # Calculate the ellipse parameters
+    center = elf.ellipse_center(pvec)
+    phi = elf.ellipse_angle_of_rotation(pvec)
+    axes = elf.ellipse_axis_length(pvec)
+
+    if plot:
+        pass
+
+    return center, phi, axes
 
 
 # ================ #
