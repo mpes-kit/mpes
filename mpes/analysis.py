@@ -27,6 +27,7 @@ import scipy.optimize as opt
 from scipy.special import wofz
 from functools import reduce
 import operator as op
+import matplotlib.pyplot as plt
 
 
 # =================== #
@@ -814,21 +815,33 @@ def apply_mask_along(arr, mask, axes=None):
 # Image correction #
 # ================ #
 
-def fitEllipseParams(*coords, plot=False):
+def fitEllipseParams(*coords, plot=False, img=None, **kwds):
     """
     Direct least-squares method for fitting ellipse from scattered points
     """
 
     rcoords, ccoords = coords
-    pvec = elf.fitEllipse(rcoords, ccoords)
+    fitvec = elf.fitEllipse(rcoords, ccoords)
 
     # Calculate the ellipse parameters
-    center = elf.ellipse_center(pvec)
-    phi = elf.ellipse_angle_of_rotation(pvec)
-    axes = elf.ellipse_axis_length(pvec)
+    center = elf.ellipse_center(fitvec)
+    phi = elf.ellipse_angle_of_rotation(fitvec)
+    axes = elf.ellipse_axis_length(fitvec)
 
-    if plot:
-        pass
+    if plot:    # Generate a diagnostic plot of the fitting result
+        a, b = axes
+        R = np.arange(0, 2*np.pi, 0.01)
+        x = center[0] + a*np.cos(R)*np.cos(phi) - b*np.sin(R)*np.sin(phi)
+        y = center[1] + a*np.cos(R)*np.sin(phi) + b*np.sin(R)*np.cos(phi)
+
+        fsize = kwds.pop('figsize', (6, 6))
+        f, ax = plt.subplots(figsize=fsize)
+        try:
+            ax.imshow(img, origin='lower', cmap='terrain_r')
+        except:
+            raise ValueError('Need to supply an image for plotting!')
+        ax.scatter(rcoords, ccoords, 15, 'k')
+        ax.plot(x, y, color = 'red')
 
     return center, phi, axes
 
