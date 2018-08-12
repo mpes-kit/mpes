@@ -455,6 +455,43 @@ def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
     return [axu, axl]
 
 
+def plot_overlay(imbot, imtop, origin='lower', **kwds):
+    """
+    Make an overlay plot of two images
+
+    :Parameters:
+        imbot : 2D array
+            Image at the lower layer.
+        imtop : 2D array
+            Image at the top layer.
+        origin : str | 'lower'
+            Origin of the image ('lower' or 'upper'), following imshow convention
+
+    :Returns:
+        f : fig
+            Figure handle
+        ax : axes
+            Figure axes object
+        ims : list
+            List of image objects
+    """
+
+    fsize = kwds.pop('figsize', (6, 6))
+    cmapbot, cmaptop = kwds.pop('cmaps', ['terrain_r', 'Blues_r'])
+    atop = kwds.pop('alphatop', 0.8)
+    axisoff = kwds.pop('axoff', False)
+
+    f, ax = plt.subplots(figsize=fsize)
+    imb = ax.imshow(imbot, cmap=cmapbot, origin=origin)
+    imt = ax.imshow(imtop, cmap=cmaptop, alpha=atop, origin=origin)
+    ims = [imb, imt]
+
+    if axisoff:
+        plt.axis('off')
+
+    return f, ax, ims
+
+
 def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     """
     3D matrix slices displayed in a grid of subplots
