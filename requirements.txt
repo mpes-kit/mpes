@@ -17,3 +17,5 @@ tqdm
 natsort
 imageio
 numba
+opencv-python
+opencv-contrib-python
