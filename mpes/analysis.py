@@ -426,16 +426,18 @@ def peakdetect(y_axis, x_axis = None, lookahead = 200, delta=0):
 def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
     """
     Momentum axes calibration using the pixel positions of two critical points (a and b)
-    and the absolute coordinate of a single point (b).
+    and the absolute coordinate of a single point (b). All coordinates should be specified
+    in the (row_index, column_index) format.
 
     :Parameters:
         img : 2D array
             An energy cut of the band structure.
         pxla, pxlb : list/tuple/1D array
-            Pixel coordinates of the two critical points.
+            Pixel coordinates of the two critical points (a and b).
         k_ab : float
-            The known momentum space distance of the two critical points.
-        coordb :
+            The known momentum space distance between the two critical points.
+        coordb : list/tuple/1D array
+            Actual coordinate of the critical point b.
         ret : str | 'axes'
             Return type specification, options include 'axes', 'extent' and 'grid' (see below).
 
@@ -572,7 +574,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
         refid : int | 0
             Reference data point index, varies from 0 to vals.size - 1.
         ret : str | 'func'
-            Return type, including 'func', 'coeffs', 'full', and 'eVscale'.
+            Return type, including 'func', 'coeffs', 'full', and 'eVscale' (see below).
         E0 : float | None
             Constant energy offset.
         t : numeric array | None
