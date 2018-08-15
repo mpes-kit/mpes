@@ -17,14 +17,14 @@
 
 from __future__ import print_function, division
 from . import utils as u, ellipsefit as elf
+from math import cos, pi
 import numpy as np
 from numpy.linalg import norm
+import scipy.optimize as opt
+from scipy.special import wofz
 import pandas as pd
 from skimage import measure, filters, morphology
 from skimage.draw import circle, polygon
-from math import cos, pi
-import scipy.optimize as opt
-from scipy.special import wofz
 from functools import reduce
 import operator as op
 import matplotlib.pyplot as plt

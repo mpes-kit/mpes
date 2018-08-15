@@ -14,6 +14,7 @@
 # =======================
 
 from __future__ import print_function, division
+from . import utils as u, fprocessing as fp
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -23,10 +24,8 @@ import matplotlib.gridspec as matgrid
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.tri as mtri
 import matplotlib.colors as colors
-from . import utils as u, fprocessing as fp
 from copy import copy
-import re
-import glob2 as g
+import re, glob2 as g
 from PIL import Image
 import imageio as imio
 

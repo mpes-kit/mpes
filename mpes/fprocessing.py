@@ -12,15 +12,15 @@
 # =========================
 
 from __future__ import print_function, division
-import numpy as np
+from .igoribw  import loadibw
+import igor.igorpy as igor
 import pandas as pd
 import re, glob2 as g
+import numpy as np
 import numpy.fft as nft
-from scipy.interpolate import interp1d
 from numpy import polyval as poly
+from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
-import igor.igorpy as igor
-from .igoribw  import loadibw
 from PIL import Image as pim
 import skimage.io as skio
 import scipy.io as sio
