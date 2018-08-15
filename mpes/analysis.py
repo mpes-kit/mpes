@@ -25,10 +25,11 @@ from scipy.special import wofz
 import pandas as pd
 from skimage import measure, filters, morphology
 from skimage.draw import circle, polygon
+import cv2
 from functools import reduce
+import warnings as wn
 import operator as op
 import matplotlib.pyplot as plt
-import cv2
 
 
 # =================== #
@@ -502,7 +503,7 @@ def tof2evpoly(a, E0, t):
     return E
 
 
-def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3):
+def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plot=False):
     """
     Detect a list of peaks in the corresponding regions of multiple EDCs
 
@@ -517,6 +518,8 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3):
             Method for peak-finding ('range-limited' and 'alignment').
         pkwindow : int | 3
             Window width of a peak(amounts to lookahead in mpes.analysis.peakdetect).
+        plot : bool | False
+            Specify whether to display a custom plot of the peak search results.
 
     :Returns:
         pkmaxs : 1D array
@@ -524,6 +527,9 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3):
     """
 
     pkmaxs = []
+
+    if plot:
+        plt.figure(figsize=(10, 4))
 
     if method == 'range-limited':
         for rg, trace in zip(ranges, traces.tolist()):
@@ -533,6 +539,11 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3):
             tofseg, trseg = tof[cond], trace[cond]
             maxs, _ = aly.peakdetect(trseg, tofseg, lookahead=pkwindow)
             pkmaxs.append(maxs[0, 0])
+
+            if plot:
+                plt.plot(tof, trace, '--k', linewidth=1)
+                plt.plot(tofseg, trseg, linewidth=2)
+                plt.scatter(maxs[0, 0], maxs[0, 1], s=30)
 
     elif method == 'alignment':
         raise NotImplementedError
@@ -559,31 +570,48 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
         order : int | 3
             Polynomial order of the fitting function.
         refid : int | 0
-            Reference data point index.
+            Reference data point index, varies from 0 to vals.size - 1.
         ret : str | 'func'
-            Return type, including 'func' or 'eVscale'.
+            Return type, including 'func', 'coeffs', 'full', and 'eVscale'.
+        E0 : float | None
+            Constant energy offset.
+        t : numeric array | None
+            Drift time.
 
     :Returns:
         pfunc : partial function
-            Calibrating function with determined polynomial coefficients.
+            Calibrating function with determined polynomial coefficients (except the constant offset).
+        coeffs : 1D array
+            Fitted polynomial coefficients.
+        sol : tuple
+            Full solution output of the least squares (see numpy.linalg.lstsq).
         eVscale : numpy array
             Calibrated energy scale in eV.
     """
 
     vals = np.array(vals)
-    orderlist = np.delete(range(vals.size), refid)
-    polyorder = np.linspace(1, order, order, dtype='int')
+    nvals = vals.size
 
-    # Construct the T (differential drift time) matrix, T = Tmain - Tsec
-    Tmain = np.array([pos[refid]**i for i in orderlist])
+    if refid >= nvals:
+        wn.warn('Reference index (refid) cannot be larger than the number of traces!\
+                Reset to the largest allowed number.')
+        refid = nvals - 1
+
+    # Top-to-bottom ordering of terms in the T matrix
+    termorder = np.delete(range(0, nvals, 1), refid)
+    # Left-to-right ordering of polynomials in the T matrix
+    polyorder = np.linspace(order, 1, order, dtype='int')
+
+    # Construct the T (differential drift time) matrix, Tmat = Tmain - Tsec
+    Tmain = np.array([pos[refid]**p for p in polyorder])
+    # Duplicate to the same order as the polynomials
     Tmain = np.tile(Tmain, (order, 1))
 
     Tsec = []
 
-    for p in polyorder:
-        Tsec.append([pos[p]**i for i in orderlist])
+    for to in termorder:
+        Tsec.append([pos[to]**p for p in polyorder])
     Tsec = np.asarray(Tsec)
-
     Tmat = Tmain - Tsec
 
     # Construct the b vector (differential bias)
@@ -593,11 +621,16 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
     sol = lstsq(Tmat, bvec, rcond=None)
     a = sol[0]
 
-    # Construct return array/function
+    # Construct the calibrating function
     pfunc = partial(tof2evpoly, a)
 
+    # Return results according to specification
     if ret == 'func':
         return pfunc
+    elif ret == 'coeffs':
+        return a
+    elif ret == 'full':
+        return pfunc, a, sol[1:]
     elif ret == 'eVscale':
         eVscale = pfunc(E0, t)
         return eVscale
