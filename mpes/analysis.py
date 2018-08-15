@@ -537,7 +537,7 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
             cond = (tof >= rg[0]) & (tof <= rg[1])
             trace = np.array(trace).ravel()
             tofseg, trseg = tof[cond], trace[cond]
-            maxs, _ = aly.peakdetect(trseg, tofseg, lookahead=pkwindow)
+            maxs, _ = peakdetect(trseg, tofseg, lookahead=pkwindow)
             pkmaxs.append(maxs[0, 0])
 
             if plot:
@@ -563,7 +563,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
     E = sum (a_n * t**n) + E0
 
     :Parameters:
-        pos : list
+        pos : list/array
             Positions of the spectral landmarks (e.g. peaks) in the EDCs.
         vals : list/array
             Bias voltage value associated with each EDC.
