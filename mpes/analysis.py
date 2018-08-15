@@ -474,6 +474,135 @@ def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
         return k_rowgrid, k_colgrid
 
 
+def tof2evpoly(a, E0, t):
+    """
+    Polynomial approximation of the time-of-flight to electron volt
+    conversion formula.
+
+    :Parameters:
+        a : 1D array
+            Polynomial coefficients.
+        E0 : float
+            Energy offset.
+        t : numeric array
+            Drift time of electron.
+
+    :Return:
+        E : numeric array
+            Converted energy
+    """
+
+    odr = len(a)
+    a = a[::-1]
+    E = 0
+    for i, d in enumerate(range(1, odr+1)):
+        E += a[i]*t**d
+    E += E0
+
+    return E
+
+
+def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3):
+    """
+    Detect a list of peaks in the corresponding regions of multiple EDCs
+
+    :Parameters:
+        traces : 2D array
+            Collection of EDCs.
+        tof : 1D array
+            Time-of-flight values.
+        ranges : list of tuples | None
+            List of ranges for peak detection.
+        method : str | 'range-limited'
+            Method for peak-finding ('range-limited' and 'alignment').
+        pkwindow : int | 3
+            Window width of a peak(amounts to lookahead in mpes.analysis.peakdetect).
+
+    :Returns:
+        pkmaxs : 1D array
+            Collection of peak positions
+    """
+
+    pkmaxs = []
+
+    if method == 'range-limited':
+        for rg, trace in zip(ranges, traces.tolist()):
+
+            cond = (tof >= rg[0]) & (tof <= rg[1])
+            trace = np.array(trace).ravel()
+            tofseg, trseg = tof[cond], trace[cond]
+            maxs, _ = aly.peakdetect(trseg, tofseg, lookahead=pkwindow)
+            pkmaxs.append(maxs[0, 0])
+
+    elif method == 'alignment':
+        raise NotImplementedError
+
+    pkmaxs = np.asarray(pkmaxs)
+
+    return pkmaxs
+
+
+def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
+    """
+    Energy calibration by nonlinear least squares fitting of spectral landmarks on
+    a set of (energy dispersion curves (EDCs). This amounts to solving for the
+    coefficient vector, a, in the system of equations T.a = b. Here T is the
+    differential drift time matrix and b the differential bias vector, and
+    assuming that the energy-drift-time relationship can be written in the form,
+    E = sum (a_n * t**n) + E0
+
+    :Parameters:
+        pos : list
+            Positions of the spectral landmarks (e.g. peaks) in the EDCs.
+        vals : list/array
+            Bias voltage value associated with each EDC.
+        order : int | 3
+            Polynomial order of the fitting function.
+        refid : int | 0
+            Reference data point index.
+        ret : str | 'func'
+            Return type, including 'func' or 'eVscale'.
+
+    :Returns:
+        pfunc : partial function
+            Calibrating function with determined polynomial coefficients.
+        eVscale : numpy array
+            Calibrated energy scale in eV.
+    """
+
+    vals = np.array(vals)
+    orderlist = np.delete(range(vals.size), refid)
+    polyorder = np.linspace(1, order, order, dtype='int')
+
+    # Construct the T (differential drift time) matrix, T = Tmain - Tsec
+    Tmain = np.array([pos[refid]**i for i in orderlist])
+    Tmain = np.tile(Tmain, (order, 1))
+
+    Tsec = []
+
+    for p in polyorder:
+        Tsec.append([pos[p]**i for i in orderlist])
+    Tsec = np.asarray(Tsec)
+
+    Tmat = Tmain - Tsec
+
+    # Construct the b vector (differential bias)
+    bvec = vals[refid] - np.delete(vals, refid)
+
+    # Solve for the a vector (polynomial coefficients) using least squares
+    sol = lstsq(Tmat, bvec, rcond=None)
+    a = sol[0]
+
+    # Construct return array/function
+    pfunc = partial(tof2evpoly, a)
+
+    if ret == 'func':
+        return pfunc
+    elif ret == 'eVscale':
+        eVscale = pfunc(E0, t)
+        return eVscale
+
+
 # ==================== #
 #  Image segmentation  #
 # ==================== #
