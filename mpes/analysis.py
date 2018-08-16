@@ -425,7 +425,7 @@ def peakdetect(y_axis, x_axis = None, lookahead = 200, delta=0):
 
 def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
     """
-    Momentum axes calibration using the pixel positions of two critical points (a and b)
+    Momentum axes calibration using the pixel positions of two symmetry points (a and b)
     and the absolute coordinate of a single point (b). All coordinates should be specified
     in the (row_index, column_index) format.
 
@@ -433,11 +433,11 @@ def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
         img : 2D array
             An energy cut of the band structure.
         pxla, pxlb : list/tuple/1D array
-            Pixel coordinates of the two critical points (a and b).
+            Pixel coordinates of the two symmetry points (a and b).
         k_ab : float
-            The known momentum space distance between the two critical points.
+            The known momentum space distance between the two symmetry points.
         coordb : list/tuple/1D array
-            Actual coordinate of the critical point b.
+            Actual coordinate of the symmetry point b.
         ret : str | 'axes'
             Return type specification, options include 'axes', 'extent' and 'grid' (see below).
 
@@ -607,7 +607,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
     # Construct the T (differential drift time) matrix, Tmat = Tmain - Tsec
     Tmain = np.array([pos[refid]**p for p in polyorder])
     # Duplicate to the same order as the polynomials
-    Tmain = np.tile(Tmain, (order, 1))
+    Tmain = np.tile(Tmain, (nvals-1, 1))
 
     Tsec = []
 
