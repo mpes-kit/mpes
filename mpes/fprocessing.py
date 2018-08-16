@@ -13,6 +13,7 @@
 
 from __future__ import print_function, division
 from .igoribw  import loadibw
+from . import utils as u
 import igor.igorpy as igor
 import pandas as pd
 import re, glob2 as g
@@ -649,6 +650,10 @@ class hdf5Reader(File):
 
             return hdfdict
 
+        elif output == 'dataframe':
+
+            raise NotImplementedError
+
     def convert(self, form, save_addr='./summary', **kwds):
         """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor)
 
@@ -690,16 +695,22 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
             =========  ===========  ===========  ========================================
              keyword    data type     default     meaning
             =========  ===========  ===========  ========================================
-              dtyp       string      'float32'    data type of the histogram
-             cutaxis      int            3        the axis to cut the 4D data in
-            slicename    string         'V'       the shared namestring for the 3D slice
+              dtyp       string      'float32'    Data type of the histogram
+             cutaxis      int            3        The axis to cut the 4D data in
+            slicename    string         'V'       The shared namestring for the 3D slice
+            otheraxes     dict         None       Values along other or converted axes
             =========  ===========  ===========  ========================================
     """
 
-    histdict = getattr(processor, dictname)
     dtyp = kwds.pop('dtyp', 'float32')
     sln = kwds.pop('slicename', 'V')
     save_addr = appendformat(save_addr, form)
+    otheraxes = kwds.pop('otheraxes', None)
+
+    histdict = getattr(processor, dictname)
+    # Include other axes values in the binning dictionary
+    if otheraxes:
+        histdict = u.dictmerge(histdict, otheraxes)
 
     if form == 'mat': # Save as mat file (for Matlab)
 
@@ -1016,10 +1027,10 @@ class hdf5Processor(hdf5Reader):
         if ret:
             return self.histdict
 
-    def saveHistogram(self, form='h5', save_addr='./histogram', **kwds):
+    def saveHistogram(self, dictname='histdict', form='h5', save_addr='./histogram', **kwds):
 
         try:
-            saveDict(self, dictname='histdict', form=form, save_addr=save_addr, **kwds)
+            saveDict(self, dictname, form, save_addr, **kwds)
         except:
             raise Exception('Saving histogram was unsuccessful!')
 
