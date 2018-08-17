@@ -541,6 +541,8 @@ class hdf5Reader(File):
         """
 
         ngroup = len(group)
+        amin, amax = u.intify(amin, amax)
+
         groupContent = []
         for g in group:
             try:
@@ -624,6 +626,7 @@ class hdf5Reader(File):
             # Retrieve the range of acquired events
             amin = kwds.pop('amin', None)
             amax = kwds.pop('amax', None)
+            amin, amax = u.intify(amin, amax)
 
             # Output as a dictionary
             # Attribute name stays, stream_x rename as their corresponding attribute name
@@ -823,20 +826,6 @@ class hdf5Processor(hdf5Reader):
 
             self.binranges = ranges
 
-    @staticmethod
-    def _int(*nums):
-        """ Safely convert to integer (avoiding None)
-        """
-
-        intnums = list(nums) # Make a copy of the to-be-converted list
-        for i, num in enumerate(nums):
-            try:
-                intnums[i] = int(num)
-            except TypeError:
-                pass
-
-        return intnums
-
     @d.delayed
     def _delayedBinning(self, data):
         """
@@ -888,7 +877,7 @@ class hdf5Processor(hdf5Reader):
         # Retrieve the range of acquired events
         amin = kwds.pop('amin', None)
         amax = kwds.pop('amax', None)
-        amin, amax = self._int(amin, amax)
+        amin, amax = u.intify(amin, amax)
 
         # Set up the binning parameters
         self._addBinners(axes, nbins, ranges, binDict)
@@ -959,7 +948,7 @@ class hdf5Processor(hdf5Reader):
         # Retrieve the range of acquired events
         amin = kwds.pop('amin', None)
         amax = kwds.pop('amax', None)
-        amin, amax = self._int(amin, amax)
+        amin, amax = u.intify(amin, amax)
 
         # Assemble the data for binning, assuming they can be completely loaded into RAM
         self.hdfdict = self.summarize(output='dict', use_alias=self.ua, amin=amin, amax=amax)

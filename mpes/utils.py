@@ -67,6 +67,20 @@ def to_odd(num):
     return oddnum
 
 
+def intify(*nums):
+    """ Safely convert to integer (avoiding None)
+    """
+
+    intnums = list(nums) # Make a copy of the to-be-converted list
+    for i, num in enumerate(nums):
+        try:
+            intnums[i] = int(num)
+        except TypeError:
+            pass
+
+    return intnums
+
+
 def revaxis(arr, axis=-1):
     """
     Reverse an ndarray along certain axis
