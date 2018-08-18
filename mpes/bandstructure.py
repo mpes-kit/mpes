@@ -20,9 +20,13 @@ class BandStructure(DataArray):
     or by separately specify the data, the axes values and their names.
     """
 
+    keypair = {'X':'kx', 'Y':'ky', 't':'E'}
+
     def __init__(self, data=None, coords=None, dims=None, datakey='V', faddr=None, typ='float32', **kwds):
 
         self.faddr = faddr
+        self.axesdict = OrderedDict()
+
         # Specify the symmetries of the band structure
         self.rot_sym_order = kwds.pop('rot_sym_order', 1) # Lowest rotational symmetry
         self.mir_sym_order = kwds.pop('mir_sym_order', 0) # No mirror symmetry
@@ -31,7 +35,15 @@ class BandStructure(DataArray):
         if self.faddr is not None:
             hdfdict = fp.readBinnedhdf5(self.faddr, typ=typ)
             data = hdfdict.pop(datakey)
-            self.axesdict = hdfdict
+
+            for k, v in self.keypair.items():
+                # When the file already contains the converted axes, read in directly
+                try:
+                    self.axesdict[v] = hdfdict[v]
+                # When the file contains no converted axes, rename coordinates according to the keypair correspondence
+                except:
+                    self.axesdict[v] = hdfdict[k]
+
             super().__init__(data, coords=hdfdict, dims=hdfdict.keys(), **kwds)
 
         # Initialization by direct connection to existing data
@@ -42,7 +54,7 @@ class BandStructure(DataArray):
         #setattr(self.data, 'datadim', self.data.ndim)
         #self['datadim'] = self.data.ndim
 
-    def kcenter_estimate(self, threshold, dimname='E', view=False):
+    def kcenter_estimate(self, threshold, dimname='E', method='centroid', view=False):
         """
         Estimate the momentum center (Gamma point) of the isoenergetic plane.
         """
@@ -50,6 +62,11 @@ class BandStructure(DataArray):
         if dimname not in self.coords.keys():
             raise ValueError('Need to specify the name of the energy dimension if different from default (E)!')
         else:
+            if method == 'centroid':
+                pass
+            elif method == 'peakfind':
+                pass
+
             center = (0, 0)
 
             if view:
@@ -83,6 +100,25 @@ class BandStructure(DataArray):
 
         if ret:
             return scdata
+
+    def update_axis(self, axes=None, vals=None, axesdict=None):
+        """
+        Update the values of multiple axes.
+
+        :Parameters:
+            axes : list/tuple | None
+                Collection of axis names.
+            vals : list/tuple | None
+                Collection of axis values.
+            axesdict : dict | None
+                Axis-value pair for update.
+        """
+
+        if axesdict:
+            self.coords.update(axesdict)
+        else:
+            axesdict = dict(zip(axes, vals))
+            self.coords.update(axesdict)
 
     @classmethod
     def resize(cls, data, axes, factor, method='mean', ret=True, **kwds):
@@ -170,6 +206,7 @@ class BandStructure(DataArray):
 
         pass
 
+
 class MPESDataset(BandStructure):
     """
     Data structure for storage and manipulation of a multidimensional photoemission
@@ -184,7 +221,20 @@ class MPESDataset(BandStructure):
         if self.faddr is not None:
             hdfdict = fp.readBinnedhdf5(self.faddr, combined=True, typ=typ)
             data = hdfdict.pop(datakey)
-            self.axesdict = hdfdict
+
+            # Add other key pairs to the instance
+            otherkp = kwds.pop('other_keypair', None)
+            if otherkp:
+                self.keypair = u.dictmerge(self.keypair, otherkp)
+
+            for k, v in self.keypair.items():
+                # When the file already contains the converted axes, read in directly
+                try:
+                    self.axesdict[v] = hdfdict[v]
+                # When the file contains no converted axes, rename coordinates according to the keypair correspondence
+                except:
+                    self.axesdict[v] = hdfdict[k]
+
             super().__init__(data, coords=hdfdict, dims=hdfdict.keys(), **kwds)
 
         # Initialization by direct connection to existing data
