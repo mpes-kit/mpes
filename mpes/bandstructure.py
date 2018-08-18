@@ -19,16 +19,16 @@ class BandStructure(DataArray):
     or by separately specify the data, the axes values and their names.
     """
 
-    def __init__(self, data=None, coords=None, dims=None, datakey='V', faddr=None, **kwds):
+    def __init__(self, data=None, coords=None, dims=None, datakey='V', faddr=None, typ='float32', **kwds):
 
         self.faddr = faddr
-        # Specify the symmetry of band structure
+        # Specify the symmetries of the band structure
         self.rot_sym_order = kwds.pop('rot_sym_order', 1) # Lowest rotational symmetry
         self.mir_sym_order = kwds.pop('mir_sym_order', 0) # No mirror symmetry
 
         # Initialization by loading data from an hdf5 file (details see mpes.fprocessing)
         if self.faddr is not None:
-            hdfdict = fp.readBinnedhdf5(self.faddr)
+            hdfdict = fp.readBinnedhdf5(self.faddr, typ=typ)
             data = hdfdict.pop(datakey)
             self.axesdict = hdfdict
             super().__init__(data, coords=hdfdict, dims=hdfdict.keys(), **kwds)
@@ -41,7 +41,22 @@ class BandStructure(DataArray):
         #setattr(self.data, 'datadim', self.data.ndim)
         #self['datadim'] = self.data.ndim
 
-    def intensityTransform(self, axis, scale_array, update=True, ret=False):
+    def kcenter_estimate(self, threshold, dimname='E', view=False):
+        """
+        Estimate the momentum center of the isoenergetic plane.
+        """
+
+        if dimname not in self.coords.keys():
+            raise ValueError('Need to specify the name of the energy dimension if different from default (E)!')
+        else:
+            center = (0, 0)
+
+            if view:
+                pass
+
+            return center
+
+    def scale(self, axis, scale_array, update=True, ret=False):
         """
         Scaling and masking of band structure data.
 
@@ -113,7 +128,35 @@ class BandStructure(DataArray):
         if ret:
             return rdata
 
-    def symmetrize(self, symtype):
+    def orthogonalize(self, center, update=True, ret=False):
+        """
+        Align the high symmetry axes in the isoenergetic plane to the row and
+        column directions of the image coordinate system.
+        """
+
+        pass
+
+    def symmetrize(self, center, symtype, update=True, ret=False):
+        """
+        Symmetrize data within isoenergetic planes. Supports rotational and
+        mirror symmetries.
+        """
+
+        if symtype == 'mirror':
+            pass
+        elif symtype == 'rotational':
+            pass
+
+        if update:
+            pass
+
+        if ret:
+            return
+
+    def _view_result(self):
+        """
+        2D visualization of temporary result.
+        """
 
         pass
 
@@ -124,13 +167,13 @@ class MPESDataset(BandStructure):
     spectroscopy (MPES) dataset (4D and above).
     """
 
-    def __init__(self, data=None, coords=None, dims=None, datakey='V', faddr=None, **kwds):
+    def __init__(self, data=None, coords=None, dims=None, datakey='V', faddr=None, typ='float32', **kwds):
 
         self.faddr = faddr
 
         # Initialization by loading data from an hdf5 file
         if self.faddr is not None:
-            hdfdict = fp.readBinnedhdf5(self.faddr)
+            hdfdict = fp.readBinnedhdf5(self.faddr, combined=True, typ=typ)
             data = hdfdict.pop(datakey)
             self.axesdict = hdfdict
             super().__init__(data, coords=hdfdict, dims=hdfdict.keys(), **kwds)
@@ -140,14 +183,25 @@ class MPESDataset(BandStructure):
             self.axesdict = coords
             super().__init__(data, coords=coords, dims=dims, **kwds)
 
+    def gradient(self):
+
+        pass
+
+    def maxdiff(self):
+        """
+        Find the hyperslice with maximum difference from the specified one.
+        """
+
+        pass
+
     def subset(self, axis, axisrange):
         """
         Spawn instances of BandStructure class from axis slicing
         """
 
-        if axis == 'n':
+        if axis == 'tpp':
 
-            axid = self.get_axis_num('n')
+            axid = self.get_axis_num('tpp')
             subdata = np.moveaxis(self.data, axid, 0)
 
             try:
@@ -155,6 +209,7 @@ class MPESDataset(BandStructure):
             except:
                 subdata = subdata[axisrange,...]
 
+            # Copy the correct axes values after slicing
             tempdict = deepcopy(self.axesdict)
             tempdict.pop(axis)
 
