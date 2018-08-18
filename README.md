@@ -1,6 +1,6 @@
 # mpes
 
-Python-based data processing routines for static and time- and angle-resolved photoemission spectroscopy (ARPES &amp; trARPES)
+Python-based data processing routines for multidimensional photoemission spectroscopy (MPES). An upgrade of the time- and angle-resolved photoemission spectroscopy (trARPES).
 
 
 In a photoemission process, an extreme UV or X-ray photon liberates an electron from the confines of the electronic potential within the material. [ARPES](https://en.wikipedia.org/wiki/Angle-resolved_photoemission_spectroscopy) directly measures the electronic energy and momentum parallel to the surface of the sample under study to infer the electronic states of the material. For a tutorial review on ARPES and its applications in physics and material science, see [here](http://www.phas.ubc.ca/~damascel/ARPES_Intro.pdf). The data structure of ARPES is a stack of 2D images measured at different sample geometries, which are used to reconstruct the full static 3D band structure of the material.
@@ -12,14 +12,26 @@ In a photoemission process, an extreme UV or X-ray photon liberates an electron 
 The package supports file I/O of standard file formats (.pxp and .ibw) from [Igor Pro](https://www.wavemetrics.com/products/igorpro/igorpro.htm), the "native language" of photoemission data analysis. Recently, the support for hdf5 files is added.
 
 ### Installation
+
+1. Install from scratch
+
 ```
 pip install git+https://github.com/RealPolitiX/mpes.git
 ```
+2. Upgrade existing installation
+
+```
+pip install --upgrade git+https://github.com/RealPolitiX/mpes.git
+```
+
 PyPI installation coming soon...
 
-Documentation and examples are posted [here](http://mpes.readthedocs.io/)
+### Documentation
 
-Dependencies
+Documentation and examples are posted [here](http://mpes.readthedocs.io/).
+
+### Dependencies
+
 ```
 numpy = 0.13.0 +
 scipy = 0.19.0 +
@@ -27,10 +39,12 @@ scikit-image = 0.13.0 +
 pandas = 0.19.2 +
 mayavi = 4.5.0 +
 dask >= 0.18.0
+xarray
+opencv
 ```
 
 ### Overview of submodules  
-The mpes package contains the following submodules. They are listed here along with suggested import conventions
+The mpes package contains the following major submodules. They are listed here along with suggested import conventions
 ```
 import mpes.fprocessing as fp  
 import mpes.analysis as aly
