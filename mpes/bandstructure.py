@@ -10,6 +10,7 @@ import cv2
 from copy import deepcopy
 from xarray import DataArray
 from mpes import fprocessing as fp, analysis as aly, utils as u
+from collections import OrderedDict
 
 
 class BandStructure(DataArray):
@@ -43,7 +44,7 @@ class BandStructure(DataArray):
 
     def kcenter_estimate(self, threshold, dimname='E', view=False):
         """
-        Estimate the momentum center of the isoenergetic plane.
+        Estimate the momentum center (Gamma point) of the isoenergetic plane.
         """
 
         if dimname not in self.coords.keys():
@@ -71,29 +72,32 @@ class BandStructure(DataArray):
                 Options to return the intensity-transformed data.
 
         :Return:
-            itdata : nD array
-                Intensity-transformed data.
+            scdata : nD array
+                Data after intensity scaling.
         """
 
-        itdata = aly.apply_mask_along(self.data, mask=scale_array, axes=axis)
+        scdata = aly.apply_mask_along(self.data, mask=scale_array, axes=axis)
 
         if update:
-            self.data = itdata
+            self.data = scdata
 
         if ret:
-            return itdata
+            return scdata
 
-    def resize(self, factor, method='mean', update=True, ret=False):
+    @classmethod
+    def resize(cls, data, axes, factor, method='mean', ret=True, **kwds):
         """
-        Reduce the size of the axis through rebinning.
+        Reduce the size (shape-changing operation) of the axis through rebinning.
 
         :Parameters:
+            data : nD array
+                Data to resize (e.g. self.data).
+            axes : dict
+                Axis values of the original data structure (e.g. self.coords).
             factor : list/tuple of int
                 Resizing factor for each dimension (e.g. 2 means reduce by a factor of 2).
             method : str | 'mean'
                 Numerical operation used for resizing ('mean' or 'sum').
-            update : bool | False
-                Option to update current dataset.
             ret : bool | False
                 Option to return the resized data array.
 
@@ -102,14 +106,16 @@ class BandStructure(DataArray):
                 Resized n-dimensional array.
         """
 
-        binarr = u.arraybin(self.data, factor, method=method)
+        binarr = u.arraybin(data, factor, method=method)
 
-        if update:
-            self.data = binarr
-            # Update axis values
+        axesdict = OrderedDict()
+        # DataArray sizes cannot be changed, need to create new class instance
+        for i, (k, v) in enumerate(axes.items()):
+            fac = factor[i]
+            axesdict[k] = v[::fac]
 
         if ret:
-            return binarr
+            return cls(data=binarr, coords=axesdict, dims=axesdict.keys(), **kwds)
 
     def rotate(data, axis, update=True, ret=False):
         """
@@ -160,6 +166,9 @@ class BandStructure(DataArray):
 
         pass
 
+    def saveas(self, form='h5', save_addr='./'):
+
+        pass
 
 class MPESDataset(BandStructure):
     """
@@ -196,23 +205,56 @@ class MPESDataset(BandStructure):
 
     def subset(self, axis, axisrange):
         """
-        Spawn instances of BandStructure class from axis slicing
+        Spawn an instance of the BandStructure class from axis slicing.
+
+        :Parameters:
+            axis : str/list
+                Axes to subset from.
+            axisrange : slice object/list
+                The value range of axes to be sliced out.
+
+        :Return:
+            An instances of BandStructure, MPESDataset or DataArray class.
         """
 
-        if axis == 'tpp':
+        # Determine the remaining coordinate keys using set operations
+        restaxes = set(self.coords.keys()) - set(axis)
+        bsaxes = set(['kx', 'ky', 'E'])
 
-            axid = self.get_axis_num('tpp')
-            subdata = np.moveaxis(self.data, axid, 0)
+        # Construct the subset data and the axes values
+        axid = self.get_axis_num(axis)
+        subdata = np.moveaxis(self.data, axid, 0)
 
-            try:
-                subdata = subdata[axisrange,...].mean(axis=0)
-            except:
-                subdata = subdata[axisrange,...]
+        try:
+            subdata = subdata[axisrange,...].mean(axis=0)
+        except:
+            subdata = subdata[axisrange,...]
 
-            # Copy the correct axes values after slicing
-            tempdict = deepcopy(self.axesdict)
-            tempdict.pop(axis)
+        # Copy the correct axes values after slicing
+        tempdict = deepcopy(self.axesdict)
+        tempdict.pop(axis)
 
+        # When the remaining axes are only a set of (kx, ky, E),
+        # Create a BandStructure instance to contain it.
+        if restaxes == bsaxes:
             bs = BandStructure(subdata, coords=tempdict, dims=tempdict.keys())
 
             return bs
+
+        # When the remaining axes contain a set of (kx, ky, E) and other parameters,
+        # Return an MPESDataset instance to contain it.
+        elif bsaxes < restaxes:
+            mpsd = MPESDataset(subdata, coords=tempdict, dims=tempdict.keys())
+
+            return mpsd
+
+        # When the remaining axes don't contain a full set of (kx, ky, E),
+        # Create a normal DataArray instance to contain it.
+        else:
+            dray = DataArray(subdata, coords=tempdict, dims=tempdict.keys())
+
+            return dray
+
+    def saveas(self):
+
+        pass
