@@ -303,6 +303,7 @@ def _datacheck_peakdetect(x_axis, y_axis):
     # Needs to be a numpy array
     y_axis = np.array(y_axis)
     x_axis = np.array(x_axis)
+
     return x_axis, y_axis
 
 
@@ -349,9 +350,10 @@ def peakdetect1d(y_axis, x_axis = None, lookahead = 200, delta=0):
     length = len(y_axis)
 
 
-    #perform some checks
+    # Perform some checks
     if lookahead < 1:
         raise ValueError("Lookahead must be '1' or above in value")
+
     if not (np.isscalar(delta) and delta >= 0):
         raise ValueError("delta must be a positive number")
 
@@ -359,12 +361,13 @@ def peakdetect1d(y_axis, x_axis = None, lookahead = 200, delta=0):
     #mx and mn respectively
     mn, mx = np.Inf, -np.Inf
 
-    #Only detect peak if there is 'lookahead' amount of points after it
+    # Only detect peak if there is 'lookahead' amount of points after it
     for index, (x, y) in enumerate(zip(x_axis[:-lookahead],
                                         y_axis[:-lookahead])):
         if y > mx:
             mx = y
             mxpos = x
+
         if y < mn:
             mn = y
             mnpos = x
@@ -374,11 +377,13 @@ def peakdetect1d(y_axis, x_axis = None, lookahead = 200, delta=0):
             # Maxima peak candidate found
             # look ahead in signal to ensure that this is a peak and not jitter
             if y_axis[index:index+lookahead].max() < mx:
+
                 max_peaks.append([mxpos, mx])
                 dump.append(True)
                 # Set algorithm to only find minima now
                 mx = np.Inf
                 mn = np.Inf
+
                 if index+lookahead >= length:
                     # The end is within lookahead no more peaks can be found
                     break
@@ -392,11 +397,13 @@ def peakdetect1d(y_axis, x_axis = None, lookahead = 200, delta=0):
             # Minima peak candidate found
             # look ahead in signal to ensure that this is a peak and not jitter
             if y_axis[index:index+lookahead].min() > mn:
+
                 min_peaks.append([mnpos, mn])
                 dump.append(False)
                 # Set algorithm to only find maxima now
                 mn = -np.Inf
                 mx = -np.Inf
+
                 if index+lookahead >= length:
                     # The end is within lookahead no more peaks can be found
                     break
@@ -405,13 +412,14 @@ def peakdetect1d(y_axis, x_axis = None, lookahead = 200, delta=0):
             #    mnpos = x_axis[np.where(y_axis[index:index+lookahead]==mn)]
 
 
-    #Remove the false hit on the first value of the y_axis
+    # Remove the false hit on the first value of the y_axis
     try:
         if dump[0]:
             max_peaks.pop(0)
         else:
             min_peaks.pop(0)
         del dump
+
     except IndexError: # When no peaks have been found
         pass
 
