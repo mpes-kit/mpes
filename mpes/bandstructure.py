@@ -33,6 +33,7 @@ class BandStructure(DataArray):
 
         # Initialization by loading data from an hdf5 file (details see mpes.fprocessing)
         if self.faddr is not None:
+
             hdfdict = fp.readBinnedhdf5(self.faddr, typ=typ)
             data = hdfdict.pop(datakey)
 
@@ -48,13 +49,14 @@ class BandStructure(DataArray):
 
         # Initialization by direct connection to existing data
         elif self.faddr is None:
+
             self.axesdict = coords
             super().__init__(data, coords=coords, dims=dims, **kwds)
 
         #setattr(self.data, 'datadim', self.data.ndim)
         #self['datadim'] = self.data.ndim
 
-    def kcenter_estimate(self, threshold, dimname='E', method='centroid', view=False):
+    def keypoint_estimate(self, img, threshold, dimname='E', method='centroid', view=False):
         """
         Estimate the momentum center (Gamma point) of the isoenergetic plane.
         """
@@ -138,8 +140,7 @@ class BandStructure(DataArray):
                 Option to return the resized data array.
 
         :Return:
-            binarr : nD array
-                Resized n-dimensional array.
+            Instance of resized n-dimensional array along with downsampled axis coordinates.
         """
 
         binarr = u.arraybin(data, factor, method=method)
@@ -153,7 +154,7 @@ class BandStructure(DataArray):
         if ret:
             return cls(data=binarr, coords=axesdict, dims=axesdict.keys(), **kwds)
 
-    def rotate(data, axis, update=True, ret=False):
+    def rotate(data, axis, angle, angle_unit='deg', update=True, ret=False):
         """
         Primary axis rotation.
         """
@@ -195,9 +196,9 @@ class BandStructure(DataArray):
         if ret:
             return
 
-    def _view_result(self):
+    def _view_result(self, img, annotations=None):
         """
-        2D visualization of temporary result.
+        2D visualization of intermediate result.
         """
 
         pass
@@ -242,16 +243,59 @@ class MPESDataset(BandStructure):
             self.axesdict = coords
             super().__init__(data, coords=coords, dims=dims, **kwds)
 
-    def gradient(self):
+    def slicediff(self, slicea, sliceb, slicetype='index', axreduce=None, ret=False, **kwds):
+        """
+        Calculate the difference of two hyperslices (hs), hsa - hsb.
 
-        pass
+        :Parameters:
+            slicea, sliceb : dict
+                Dictionaries for slicing.
+            slicetype : str | 'index'
+                Type of slicing, 'index' (DataArray.isel) or 'value' (DataArray.sel)
+            axreduce : tuple of int | None
+                Axes to sum over.
+            ret : bool | False
+                Options for return.
+            **kwds : keyword arguments
+                Those passed into DataArray.isel() and DataArray.sel()
 
-    def maxdiff(self):
+        :Return:
+            sldiff : class
+                Sliced class instance.
+        """
+
+        drop = kwds.pop('drop', False)
+
+        # Calculate hyperslices
+        if slicetype == 'index':
+
+            sla = self.isel(**slicea, drop=drop)
+            slb = self.isel(**sliceb, drop=drop)
+
+        elif slicetype == 'value':
+
+            meth = kwds.pop('method', None)
+            tol = kwds.pop('tol', None)
+
+            sla = self.sel(**slicea, method=meth, tolerance=tol, drop=drop)
+            slb = self.sel(**sliceb, method=meth, tolerance=tol, drop=drop)
+
+        # Calculate the difference between hyperslices
+        if axreduce:
+            sldiff = sla.sum(axis=axreduce) - slb.sum(axis=axreduce)
+
+        else:
+            sldiff = sla - slb
+
+        if ret:
+            return sldiff
+
+    def maxdiff(self, vslice, ret=False):
         """
         Find the hyperslice with maximum difference from the specified one.
         """
 
-        pass
+        raise NotImplementedError
 
     def subset(self, axis, axisrange):
         """
