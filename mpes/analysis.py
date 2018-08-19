@@ -421,7 +421,22 @@ def peakdetect1d(y_axis, x_axis = None, lookahead = 200, delta=0):
     return max_peaks, min_peaks
 
 
-def peakfind2d(img, method='daofind', **kwds):
+def peakdetect2d(img, method='daofind', **kwds):
+    """
+    Peak detection in 2D image.
+
+    :Parameters:
+        img : 2D array
+            Image matrix.
+        method : str | 'daofind'
+            Detection method ('daofind' or 'maxlist').
+        **kwds : keyword arguments
+            Arguments passed to the specific methods chosen.
+
+    :Return:
+        pks : 2D array
+            Pixel coordinates of detected peaks, in (column, row) ordering.
+    """
 
     if method == 'daofind':
 
