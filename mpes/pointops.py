@@ -15,7 +15,7 @@ from numpy.linalg import norm
 
 def pointset_center(pset, condition='among', method='meancp'):
     """
-    Determine the center position of a point set
+    Determine the center position of a point set.
 
     :Parameters:
         pset : 2D array
@@ -48,7 +48,7 @@ def pointset_center(pset, condition='among', method='meancp'):
 
 def order_pointset(pset, center=None, direction='cw'):
     """
-    Order a point set around a centroid in a clockwise or counterclockwise way.
+    Order a point set around a center in a clockwise or counterclockwise way.
 
     :Parameters:
         pset : 2D array

@@ -5,11 +5,15 @@
 @author: R. Patrick Xian
 """
 
+# ======================================================= #
+# Main data structure for processing band structure data  #
+# ======================================================= #
+
 import numpy as np
 import cv2
 from copy import deepcopy
 from xarray import DataArray
-from mpes import fprocessing as fp, analysis as aly, utils as u
+from mpes import fprocessing as fp, analysis as aly, pointops as po, utils as u
 from collections import OrderedDict
 
 
@@ -30,6 +34,9 @@ class BandStructure(DataArray):
         # Specify the symmetries of the band structure
         self.rot_sym_order = kwds.pop('rot_sym_order', 1) # Lowest rotational symmetry
         self.mir_sym_order = kwds.pop('mir_sym_order', 0) # No mirror symmetry
+        self.kcenter = [0, 0]
+        self.high_sym_points = []
+        self.sym_points_dict = {}
 
         # Initialization by loading data from an hdf5 file (details see mpes.fprocessing)
         if self.faddr is not None:
@@ -56,25 +63,35 @@ class BandStructure(DataArray):
         #setattr(self.data, 'datadim', self.data.ndim)
         #self['datadim'] = self.data.ndim
 
-    def keypoint_estimate(self, img, threshold, dimname='E', method='centroid', view=False):
+    def keypoint_estimate(self, img, dimname='E', pdmethod='daofind', display=False, update=False, ret=False, **kwds):
         """
-        Estimate the momentum center (Gamma point) of the isoenergetic plane.
+        Estimate the positions of momentum local maxima (high symmetry points) in the isoenergetic plane.
         """
 
         if dimname not in self.coords.keys():
             raise ValueError('Need to specify the name of the energy dimension if different from default (E)!')
+
         else:
-            if method == 'centroid':
-                pass
-            elif method == 'peakfind':
-                pass
+            direction = kwds.pop('direction', 'cw')
+            pks = aly.peakdetect2d(img, method=pdmethod, **kwds)
 
-            center = (0, 0)
+            # Select center and non-center peaks
+            center, verts = po.pointset_center(pks)
+            hsp = po.order_pointset(verts, direction=direction)
 
-            if view:
-                pass
+            if update:
+                self.center = center
+                self.high_sym_points = hsp
 
-            return center
+            if display:
+                self._view_result(img)
+                for ip, p in enumerate(hsp):
+                    self['ax'].scatter(p[1], p[0], s=20, c='k')
+                    self['ax'].text(p[1]+3, p[0]+3, str(ip), c='r')
+                self['ax'].text(center[0], center[1], 'C', color='r')
+
+            if ret:
+                return center, hsp
 
     def scale(self, axis, scale_array, update=True, ret=False):
         """
@@ -156,7 +173,7 @@ class BandStructure(DataArray):
 
     def rotate(data, axis, angle, angle_unit='deg', update=True, ret=False):
         """
-        Primary axis rotation.
+        Primary axis rotation that preserves the data size.
         """
 
         # Slice out
@@ -182,7 +199,7 @@ class BandStructure(DataArray):
     def symmetrize(self, center, symtype, update=True, ret=False):
         """
         Symmetrize data within isoenergetic planes. Supports rotational and
-        mirror symmetries.
+        mirror symmetries. The operation preserves the data size.
         """
 
         if symtype == 'mirror':
@@ -196,12 +213,13 @@ class BandStructure(DataArray):
         if ret:
             return
 
-    def _view_result(self, img, annotations=None):
+    def _view_result(self, img, figsize=(5,5), cmap='terrain_r', origin='lower'):
         """
         2D visualization of intermediate result.
         """
 
-        pass
+        self['fig'], self['ax'] = plt.subplots(figsize=figsize)
+        self['ax'].imshow(img, cmap=cmap, origin=origin)
 
     def saveas(self, form='h5', save_addr='./'):
 
@@ -217,6 +235,7 @@ class MPESDataset(BandStructure):
     def __init__(self, data=None, coords=None, dims=None, datakey='V', faddr=None, typ='float32', **kwds):
 
         self.faddr = faddr
+        self.f, self.ax = None, None
 
         # Initialization by loading data from an hdf5 file
         if self.faddr is not None:
@@ -267,12 +286,12 @@ class MPESDataset(BandStructure):
         drop = kwds.pop('drop', False)
 
         # Calculate hyperslices
-        if slicetype == 'index':
+        if slicetype == 'index': # Index-based slicing
 
             sla = self.isel(**slicea, drop=drop)
             slb = self.isel(**sliceb, drop=drop)
 
-        elif slicetype == 'value':
+        elif slicetype == 'value': # Value-based slicing
 
             meth = kwds.pop('method', None)
             tol = kwds.pop('tol', None)
@@ -349,6 +368,6 @@ class MPESDataset(BandStructure):
 
             return dray
 
-    def saveas(self):
+    def saveas(self, form='h5', save_addr='./'):
 
         pass

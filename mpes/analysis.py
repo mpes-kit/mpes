@@ -26,6 +26,7 @@ import pandas as pd
 from skimage import measure, filters, morphology
 from skimage.draw import circle, polygon
 from skimage.feature import peak_local_max
+import astropy.stats as astat
 import photutils as pho
 import cv2
 from functools import reduce, partial
