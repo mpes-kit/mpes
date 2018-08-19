@@ -25,6 +25,8 @@ from scipy.special import wofz
 import pandas as pd
 from skimage import measure, filters, morphology
 from skimage.draw import circle, polygon
+from skimage.feature import peak_local_max
+import photutils as pho
 import cv2
 from functools import reduce, partial
 import warnings as wn
@@ -304,7 +306,7 @@ def _datacheck_peakdetect(x_axis, y_axis):
     return x_axis, y_axis
 
 
-def peakdetect(y_axis, x_axis = None, lookahead = 200, delta=0):
+def peakdetect1d(y_axis, x_axis = None, lookahead = 200, delta=0):
     """
     Function for detecting local maxima and minima in a signal.
     Discovers peaks by searching for values which are surrounded by lower
@@ -419,6 +421,29 @@ def peakdetect(y_axis, x_axis = None, lookahead = 200, delta=0):
     return max_peaks, min_peaks
 
 
+def peakfind2d(img, method='daofind', **kwds):
+
+    if method == 'daofind':
+
+        sg = kwds.pop('sigma', 5.0)
+        fwhm = kwds.pop('fwhm', 3.0)
+        threshfactor = kwds.pop('threshfactor', 8)
+
+        mean, median, std = astat.sigma_clipped_stats(img, sigma=sg)
+        daofind = pho.DAOStarFinder(fwhm=fwhm, threshold=threshfactor*std)
+        sources = daofind(img)
+        pks = np.stack((sources['ycentroid'], sources['xcentroid']), axis=1)
+
+    elif method == 'maxlist':
+
+        mindist = kwds.pop('mindist', 10)
+        numpeaks = kwds.pop('numpeaks', 7)
+
+        pks = peak_local_max(img, min_distance=mindist, num_peaks=numpeaks)
+
+    return pks
+
+
 # ======================== #
 #  Coordinate calibration  #
 # ======================== #
@@ -519,7 +544,7 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
         method : str | 'range-limited'
             Method for peak-finding ('range-limited' and 'alignment').
         pkwindow : int | 3
-            Window width of a peak(amounts to lookahead in mpes.analysis.peakdetect).
+            Window width of a peak(amounts to lookahead in mpes.analysis.peakdetect1d).
         plot : bool | False
             Specify whether to display a custom plot of the peak search results.
 
@@ -539,7 +564,7 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
             cond = (tof >= rg[0]) & (tof <= rg[1])
             trace = np.array(trace).ravel()
             tofseg, trseg = tof[cond], trace[cond]
-            maxs, _ = peakdetect(trseg, tofseg, lookahead=pkwindow)
+            maxs, _ = peakdetect1d(trseg, tofseg, lookahead=pkwindow)
             pkmaxs.append(maxs[0, 0])
 
             if plot:

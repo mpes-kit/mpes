@@ -20,3 +20,5 @@ numba
 opencv-python
 opencv-contrib-python
 xarray
+astropy
+photutils
