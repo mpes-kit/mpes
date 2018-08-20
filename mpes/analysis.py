@@ -24,7 +24,7 @@ import scipy.optimize as opt
 from scipy.special import wofz
 import pandas as pd
 from skimage import measure, filters, morphology
-from skimage.draw import circle, polygon
+from skimage.draw import circle, polygon, polygon_perimeter
 from skimage.feature import peak_local_max
 import astropy.stats as astat
 import photutils as pho
@@ -1037,6 +1037,62 @@ def apply_mask_along(arr, mask, axes=None):
         maskedarr = np.moveaxis(maskedarr, list(range(ndimaug)), axes)
 
     return maskedarr
+
+
+def points2path(pointsr, pointsc, ret='separated'):
+    """
+    Calculate ordered pixel cooridnates along a path defined by specific intermediate points.
+
+    :Parameters:
+        pointsr, pointsc : list/tuple/array
+            The row and column pixel coordinates of
+        ret : str
+            Return type specfication ('combined' or 'separated').
+
+    :Return:
+        polyr, polyc : numpy array
+            Pixel coordinates along the path traced out sequentially.
+    """
+
+    polyr, polyc = polygon_perimeter(pointsr, pointsc)
+
+    if ret == 'combined':
+        return np.stack((polyr, polyc), axis=1)
+    elif ret == 'separated':
+        return polyr, polyc
+
+
+def bandpath_map(bsvol, pathr=None, pathc=None, path_coords=None, eaxis=2):
+    """
+    Extract band diagram map from volumetric data.
+
+    :Parameters:
+        bsvol : 3D array
+            Volumetric band structure data.
+        pathr, pathc : 1D array
+            Row and column pixel coordinates of the band path (ignored if path_coords is given).
+        path_coords : 2D array
+            Combined row and column pixel coordinates of the band path.
+        eaxis : int
+            Energy axis index.
+
+    :Return:
+        bpm : 2D array
+            Band path map sampled from the volumetric data.
+    """
+
+    bsvol = np.moveaxis(bsvol, eaxis, 2)
+
+    if path_coords is not None:
+        axid = np.where(np.array(path_coords.shape) == 2)[0][0]
+        pathr, pathc = np.split(path_coords, 2, axis=axid)
+    pathr, pathc = map(np.ravel, [pathr, pathc])
+
+    # TODO: add path width
+
+    bpm = bsvol[pathc, pathr, :]
+
+    return bpm
 
 
 # ================ #
