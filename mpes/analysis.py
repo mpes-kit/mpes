@@ -897,7 +897,6 @@ def _signedmask(imr, imc, maskr, maskc, sign):
 
 def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
     """ Use a circular binary mask to cover an image
-
     :Parameters:
         img : 2D array
             Input image to be masked
@@ -912,6 +911,13 @@ def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
         ret : str | 'mask'
             Return type ('mask', 'masked_image')
         kwds : keyword arguments
+        =============  ==========  ============ =========================
+           keyword     data type   default      meaning
+        =============  ==========  ============ =========================
+            shape      tuple/list  shape of img see skimage.draw.circle()
+           method         str       'graphic'   'graphic' or 'algebraic'
+          edgefactor     float        1.02       prefactor to rad**2
+        =============  ==========  ============ =========================
 
     :Return:
         cmask or cmask*img : 2D array
@@ -920,9 +926,16 @@ def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
 
     rim, cim = img.shape
     shape = kwds.pop('shape', (rim, cim))
+    method = kwds.pop('method', 'graphic')
+    edgefac = kwds.pop('edgefactor', 1.02)
 
     # Generate circular mask of the chosen sign
-    rr, cc = circle(rcent, ccent, rad, shape=shape)
+    if method == 'graphic':
+        rr, cc = circle(rcent, ccent, rad, shape=shape)
+    elif method == 'algebraic':
+        cmesh, rmesh = np.meshgrid(range(cim), range(rim))
+        rr, cc = np.where((cmesh - ccent)**2 + (rmesh - rcent)**2 <= edgefac*rad**2)
+
     cmask = _signedmask(rim, cim, rr, cc, sign=sign)
 
     if ret == 'mask':
