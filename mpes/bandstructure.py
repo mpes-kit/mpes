@@ -24,12 +24,12 @@ class BandStructure(DataArray):
     or by separately specify the data, the axes values and their names.
     """
 
-    keypair = {'X':'kx', 'Y':'ky', 't':'E'}
+    keypair = OrderedDict({'ADC':'tpp', 'X':'kx', 'Y':'ky', 't':'E'})
 
     def __init__(self, data=None, coords=None, dims=None, datakey='V', faddr=None, typ='float32', **kwds):
 
         self.faddr = faddr
-        self.axesdict = OrderedDict()
+        self.axesdict = OrderedDict() # Container for axis coordinates
 
         # Specify the symmetries of the band structure
         self.rot_sym_order = kwds.pop('rot_sym_order', 1) # Lowest rotational symmetry
@@ -52,7 +52,7 @@ class BandStructure(DataArray):
                 except:
                     self.axesdict[v] = hdfdict[k]
 
-            super().__init__(data, coords=hdfdict, dims=hdfdict.keys(), **kwds)
+            super().__init__(data, coords=self.axesdict, dims=self.axesdict.keys(), **kwds)
 
         # Initialization by direct connection to existing data
         elif self.faddr is None:
@@ -220,7 +220,7 @@ class BandStructure(DataArray):
 
         self['fig'], self['ax'] = plt.subplots(figsize=figsize)
         self['ax'].imshow(img, cmap=cmap, origin=origin)
-
+        
     def saveas(self, form='h5', save_addr='./'):
 
         pass
@@ -236,6 +236,7 @@ class MPESDataset(BandStructure):
 
         self.faddr = faddr
         self.f, self.ax = None, None
+        self.axesdict = OrderedDict()
 
         # Initialization by loading data from an hdf5 file
         if self.faddr is not None:
@@ -255,7 +256,7 @@ class MPESDataset(BandStructure):
                 except:
                     self.axesdict[v] = hdfdict[k]
 
-            super().__init__(data, coords=hdfdict, dims=hdfdict.keys(), **kwds)
+            super().__init__(data, coords=self.axesdict, dims=self.axesdict.keys(), **kwds)
 
         # Initialization by direct connection to existing data
         elif self.faddr is None:
