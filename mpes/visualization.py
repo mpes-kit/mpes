@@ -159,6 +159,33 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
 #  2D plots  #
 # ========== #
 
+def _imshow(img, plotaxes=None, xtk=None, ytk=None, xtklb=None, ytklb=None, fontsize=15, **kwds):
+    """
+    Generic image plotter with specifications of axes, ticks, and ticklabels.
+    """
+
+    if plotaxes is None:
+        f, ax = plt.subplots()
+    else:
+        ax = plotaxes
+
+    ax.imshow(img, **kwds)
+
+    try:
+        ax.set_xticks(xtk)
+        ax.set_xticklabels(xtklb, fontsize=fontsize)
+    except:
+        pass
+
+    try:
+        ax.set_yticks(ytk)
+        ax.set_yticklabels(ytklb, fontsize=fontsize)
+    except:
+        pass
+
+    return f, ax
+
+
 def colormesh2d(data, **kwds):
     """
     Efficient one-line color mesh plot of a 2D data matrix
@@ -489,6 +516,57 @@ def plot_overlay(imbot, imtop, origin='lower', **kwds):
         plt.axis('off')
 
     return f, ax, ims
+
+
+def bandpathplot(pathmap, symlabel, symid, energytk=None, energylabel=None, \
+                 vline=True, noends=True, vlinekwds={}, **kwds):
+    """
+    Band path map (band dispersion in sampled k path within Brillouin zone).
+
+    :Parameters:
+        pathmap : 2D array
+            Band path map.
+        symlabel : list/tuple
+            Labels of the symmetry points.
+        symid : list/tuple/array
+            Pixel indices of the symmetry points.
+        energytk : list/tuple/array | None
+            Energy axis ticks.
+        energylabel : list/tuple | None
+            Energy axis label.
+        vline: bool | True
+            Vertical annotation lines.
+        noends : bool | True
+            No vertical lines at the ends
+        vlinekwds : dict | {}
+            Style directives of the vertical annotation lines.
+        **kwds : keyword arguments
+            See mpes.visualization._imshow()
+
+    :Return:
+        ax : AxesObject
+            Axes of the generated plot.
+    """
+
+    fs = kwds.pop('fontsize', 15)
+
+    # Make plot
+    ax = _imshow(pathmap, xtk=symid, xtklb=symlabel, ytk=energytk, ytklb=energylabel, **kwds)
+
+    # Draw vertical annotation lines
+    if vline:
+
+        if noends: # No annotation at the two ends
+            symid = symid[1:-1]
+
+        vlc = vlinekwds.pop('lc', 'r')
+        vls = vlinekwds.pop('ls', '-.')
+        vlw = vlinekwds.pop('lw', 1)
+
+        for i in range(len(symid)):
+            ax.axvline(x=symid[i], linestyle=vls, lw=vlw, color=vlc)
+
+    return ax
 
 
 def sliceview3d(datamat, axis=0, numbered=True, **kwds):

@@ -24,7 +24,7 @@ import scipy.optimize as opt
 from scipy.special import wofz
 import pandas as pd
 from skimage import measure, filters, morphology
-from skimage.draw import circle, polygon, polygon_perimeter
+from skimage.draw import line, circle, polygon
 from skimage.feature import peak_local_max
 import astropy.stats as astat
 import photutils as pho
