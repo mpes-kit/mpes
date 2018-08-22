@@ -1042,24 +1042,45 @@ def apply_mask_along(arr, mask, axes=None):
 def points2path(pointsr, pointsc, ret='separated'):
     """
     Calculate ordered pixel cooridnates along a path defined by specific intermediate points.
+    The approach constructs the path using a set of line segments bridging the specified points,
+    therefore it is also able to trace the sequence indices of these special points.
 
     :Parameters:
         pointsr, pointsc : list/tuple/array
-            The row and column pixel coordinates of
+            The row and column pixel coordinates of the special points along the sampling path.
         ret : str
-            Return type specfication ('combined' or 'separated').
+            Specify if return combined ('combined') or separated ('separated') row and column coordinates.
 
-    :Return:
-        polyr, polyc : numpy array
+    :Returns:
+        polyr, polyc : 1D array
             Pixel coordinates along the path traced out sequentially.
+        pid : 1D array
+            Pointwise indices of the special lpoints.
     """
 
-    polyr, polyc = polygon_perimeter(pointsr, pointsc)
+    pointsr = np.round(pointsr).astype('int')
+    pointsc = np.round(pointsc).astype('int')
+    npts = len(pointsr)
+
+    polyr, polyc, pid = [], [], np.zeros((npts,), dtype='int')
+
+    for i in range(npts-1):
+
+        lsegr, lsegc = line(pointsr[i], pointsc[i], pointsr[i+1], pointsc[i+1])
+
+        # Attached all but the last element to the coordinate list to avoid
+        # double inclusion (from the beginning of the next line segment)
+        polyr.append(lsegr[:-1])
+        polyc.append(lsegc[:-1])
+        pid[i+1] = len(lsegr[:-1]) + pid.max()
+
+    # Concatenate all line segments comprising the path
+    polyr, polyc = map(np.concatenate, (polyr, polyc))
 
     if ret == 'combined':
-        return np.stack((polyr, polyc), axis=1)
+        return np.stack((polyr, polyc), axis=1), pid
     elif ret == 'separated':
-        return polyr, polyc
+        return polyr, polyc, pid
 
 
 def bandpath_map(bsvol, pathr=None, pathc=None, path_coords=None, eaxis=2):
