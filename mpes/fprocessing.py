@@ -475,7 +475,6 @@ class hdf5Reader(File):
         self.faddress = f_addr
         eventEstimator = kwds.pop('estimator', 'Stream_0')
         self.CHUNK_SIZE = int(kwds.pop('chunksz', 1e5))
-
         super().__init__(name=self.faddress, mode='r', **kwds)
 
         self.nEvents = self[eventEstimator].size
@@ -489,22 +488,6 @@ class hdf5Reader(File):
             self.ncores = N_CPU
         else:
             self.ncores = int(ncores)
-
-    def name2alias(self, names_to_convert):
-        """ Find corresponding aliases of the named groups.
-
-        :Parameter:
-            names_to_convert : list/tuple
-                Names to convert to aliases.
-
-        :Return:
-            aliases : list/tuple
-                Aliases corresponding to the names.
-        """
-
-        aliases = [self.readAttribute(self[ntc], 'Name', nullval=ntc) for ntc in names_to_convert]
-
-        return aliases
 
     def getGroupNames(self, wexpr=None, woexpr=None, use_alias=False):
         """ Retrieve group names from the loaded hdf5 file with string filtering
@@ -619,6 +602,22 @@ class hdf5Reader(File):
 
         return attributeContent
 
+    def name2alias(self, names_to_convert):
+        """ Find corresponding aliases of the named groups.
+
+        :Parameter:
+            names_to_convert : list/tuple
+                Names to convert to aliases.
+
+        :Return:
+            aliases : list/tuple
+                Aliases corresponding to the names.
+        """
+
+        aliases = [self.readAttribute(self[ntc], 'Name', nullval=ntc) for ntc in names_to_convert]
+
+        return aliases
+
     def _assembleGroups(self, gnames, amin=None, amax=None, use_alias=True, ret='array'):
         """ Assemble the content values of the selected groups.
         """
@@ -731,7 +730,7 @@ class hdf5Reader(File):
             if ret == True:
                 return self.edf
 
-    def convert(self, form, save_addr='./summary', **kwds):
+    def convert(self, form, save_addr='./summary', pqappend=False, **kwds):
         """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor)
 
         :Parameters:
@@ -741,11 +740,14 @@ class hdf5Reader(File):
                 File address to save to.
         """
 
-        save_addr = appendformat(save_addr, form)
+        save_fname = appendformat(save_addr, form)
 
-        if form == 'mat': # Save as mat file
+        if form == 'mat': # Save dictionary as mat file
             hdfdict = self.summarize(form='dict', ret=True, **kwds)
-            sio.savemat(save_addr, hdfdict)
+            sio.savemat(save_fname, hdfdict)
+
+        elif form == 'parquet': # Save dataframe as parquet file
+            self.edf.to_parquet(save_addr, compression='UNCOMPRESSED', append=pqappend, ignore_divisions=True)
 
         elif form == 'ibw':
         # TODO: Save in igor ibw format
@@ -857,7 +859,7 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
 
 
 class hdf5Processor(hdf5Reader):
-    """ Class for generating multidimensional histogram from hdf5 files
+    """ Class for generating multidimensional histogram from hdf5 files.
     """
 
     def __init__(self, f_addr, **kwds):
@@ -866,7 +868,7 @@ class hdf5Processor(hdf5Reader):
         self.ua = kwds.pop('use_alias', True)
         self.hdfdict = {}
         self.histdict = {}
-        
+
         super().__init__(f_addr=self.faddress, **kwds)
 
     def _addBinners(self, axes=None, nbins=None, ranges=None, binDict=None):
