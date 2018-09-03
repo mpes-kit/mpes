@@ -27,7 +27,7 @@ import skimage.io as skio
 import scipy.io as sio
 from h5py import File
 import psutil as ps
-import dask as d, dask.array as da
+import dask as d, dask.array as da, dask.dataframe as ddf
 from dask.diagnostics import ProgressBar
 import warnings as wn
 from tqdm import tqdm
@@ -470,18 +470,43 @@ class hdf5Reader(File):
     """ HDF5 reader class
     """
 
-    def __init__(self, f_addr, **kwds):
+    def __init__(self, f_addr, ncores=None, **kwds):
 
         self.faddress = f_addr
+        eventEstimator = kwds.pop('estimator', 'Stream_0')
+        self.CHUNK_SIZE = int(kwds.pop('chunksz', 1e5))
+
         super().__init__(name=self.faddress, mode='r', **kwds)
 
+        self.nEvents = self[eventEstimator].size
         self.groupNames = list(self)
         self.groupAliases = [self.readAttribute(self[gn], 'Name', nullval=gn) for gn in self.groupNames]
         # Initialize the look-up dictionary between group aliases and group names
         self.nameLookupDict = dict(zip(self.groupAliases, self.groupNames))
         self.attributeNames = list(self.attrs)
 
-    def getGroupNames(self, wexpr=None, woexpr=None):
+        if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
+            self.ncores = N_CPU
+        else:
+            self.ncores = int(ncores)
+
+    def name2alias(self, names_to_convert):
+        """ Find corresponding aliases of the named groups.
+
+        :Parameter:
+            names_to_convert : list/tuple
+                Names to convert to aliases.
+
+        :Return:
+            aliases : list/tuple
+                Aliases corresponding to the names.
+        """
+
+        aliases = [self.readAttribute(self[ntc], 'Name', nullval=ntc) for ntc in names_to_convert]
+
+        return aliases
+
+    def getGroupNames(self, wexpr=None, woexpr=None, use_alias=False):
         """ Retrieve group names from the loaded hdf5 file with string filtering
 
         :Parameters:
@@ -495,12 +520,19 @@ class hdf5Reader(File):
                 List of filtered group names
         """
 
+        # Gather group aliases, if specified
+        if use_alias == True:
+            groupNames = self.name2alias(self.groupNames)
+        else:
+            groupNames = self.groupNames
+
+        # Filter the group names
         if (wexpr is None) and (woexpr is None):
-            filteredGroupNames = self.groupNames
-        elif wexpr:
-            filteredGroupNames = [i for i in self.groupNames if wexpr in i]
+            filteredGroupNames = groupNames
+        if wexpr:
+            filteredGroupNames = [i for i in groupNames if wexpr in i]
         elif woexpr:
-            filteredGroupNames = [i for i in self.groupNames if woexpr not in i]
+            filteredGroupNames = [i for i in groupNames if woexpr not in i]
 
         return filteredGroupNames
 
@@ -542,8 +574,8 @@ class hdf5Reader(File):
 
         ngroup = len(group)
         amin, amax = u.intify(amin, amax)
-
         groupContent = []
+
         for g in group:
             try:
                 if sliced:
@@ -573,6 +605,7 @@ class hdf5Reader(File):
 
         nattr = len(attribute)
         attributeContent = []
+
         for ab in attribute:
             try:
                 attributeContent.append(element.attrs[ab].decode('utf-8'))
@@ -586,22 +619,55 @@ class hdf5Reader(File):
 
         return attributeContent
 
-    def summarize(self, output='text', use_alias=True, **kwds):
+    def _assembleGroups(self, gnames, amin=None, amax=None, use_alias=True, ret='array'):
+        """ Assemble the content values of the selected groups.
+        """
+
+        gdict = {}
+
+        # Add groups to dictionary
+        for ign, gn in enumerate(gnames):
+
+            g_dataset = self.readGroup(self, gn, sliced=False)
+            g_values = g_dataset[slice(amin, amax)]
+
+            # Use the group alias as the dictionary key
+            if use_alias == True:
+                g_name = self.readAttribute(g_dataset, 'Name', nullval=gn)
+                gdict[g_name] = g_values
+            # Use the group name as the dictionary key
+            else:
+                gdict[gn] = g_values
+
+        if ret == 'array':
+            return np.asarray(list(gdict.values()))
+        elif ret == 'dict':
+            return gdict
+
+    def summarize(self, form='text', use_alias=True, ret=False, **kwds):
         """ Summarize the content of the hdf5 file (names of the groups,
         attributes and the selected contents. Output by print or as a dictionary.)
 
         :Parameters:
-            output : str | 'text'
-                Output format, available options are 'text' and 'dict'.
+            form : str | 'text'
+                Format to summarize the content of the file into.
+                Options include 'text', 'dict' and 'dataframe'.
             use_alias : bool | True
-                Specify if to use the alias to rename the groups
+                Specify whether to use the alias to rename the groups.
+            ret : bool | False
+                Specify whether function return is sought.
+            **kwds : keyword arguments
 
         :Return:
             hdfdict : dict
-                Dictionary constructed if output format is set to 'dict'.
+                Dictionary including both the attributes and the groups,
+                using their names as the keys.
+            edf : dataframe
+                Dataframe constructed using only the group values, and the column
+                names are the corresponding group names (or aliases).
         """
 
-        if output == 'text':
+        if form == 'text':
             # Output as printed text
             print('*** HDF5 file info ***\n', \
                   'File address = ' + self.faddress + '\n')
@@ -621,7 +687,8 @@ class hdf5Reader(File):
 
                 print(gn + ', Shape = {}, Alias = {}'.format(g_shape, g_alias))
 
-        elif output == 'dict':
+        elif form == 'dict':
+            # Summarize attributes and groups into a dictionary
 
             # Retrieve the range of acquired events
             amin = kwds.pop('amin', None)
@@ -630,32 +697,39 @@ class hdf5Reader(File):
 
             # Output as a dictionary
             # Attribute name stays, stream_x rename as their corresponding attribute name
-            hdfdict = {}
+            # Add groups to dictionary
+            hdfdict = self._assembleGroups(self.groupNames, amin=amin, amax=amax, use_alias=use_alias, ret='dict')
 
             # Add attributes to dictionary
             for an in self.attributeNames:
 
                 hdfdict[an] = self.readAttribute(self, an)
 
-            # Add groups to dictionary
-            for gn in self.groupNames:
+            if ret == True:
+                return hdfdict
 
-                g_dataset = self.readGroup(self, gn, sliced=False)
-                g_values = g_dataset[slice(amin, amax)]
+        elif form == 'dataframe':
+            # Gather groups into columns of a dataframe
 
-                # Use the group alias as the dictionary key
-                if use_alias == True:
-                    g_name = self.readAttribute(g_dataset, 'Name', nullval=gn)
-                    hdfdict[g_name] = g_values
-                # Use the group name as the dictionary key
-                else:
-                    hdfdict[gn] = g_values
+            dfParts = []
+            chunkSize = min(self.CHUNK_SIZE, self.nEvents / self.ncores)
+            nPartitions = self.nEvents // chunkSize + 1
+            # Determine the column names
+            gNames = kwds.pop('groupnames', self.getGroupNames(wexpr='Stream'))
+            colNames = self.name2alias(gNames)
 
-            return hdfdict
+            for p in range(nPartitions):
 
-        elif output == 'dataframe':
+                # Calculate the starting and ending index of every chunk of events
+                eventIDStart = int(p * chunkSize)
+                eventIDEnd = int(min(eventIDStart + chunkSize, self.nEvents))
+                dfParts.append(d.delayed(self._assembleGroups)(gNames, amin=eventIDStart, amax=eventIDEnd))
 
-            raise NotImplementedError
+            eda = da.from_array(np.concatenate(d.compute(*dfParts), axis=1).T, chunks=self.CHUNK_SIZE)
+            self.edf = ddf.from_dask_array(eda, columns=colNames)
+
+            if ret == True:
+                return self.edf
 
     def convert(self, form, save_addr='./summary', **kwds):
         """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor)
@@ -670,7 +744,7 @@ class hdf5Reader(File):
         save_addr = appendformat(save_addr, form)
 
         if form == 'mat': # Save as mat file
-            hdfdict = self.summarize(output='dict', **kwds)
+            hdfdict = self.summarize(form='dict', ret=True, **kwds)
             sio.savemat(save_addr, hdfdict)
 
         elif form == 'ibw':
@@ -786,18 +860,14 @@ class hdf5Processor(hdf5Reader):
     """ Class for generating multidimensional histogram from hdf5 files
     """
 
-    def __init__(self, f_addr, ncores=None, **kwds):
+    def __init__(self, f_addr, **kwds):
 
         self.faddress = f_addr
         self.ua = kwds.pop('use_alias', True)
         self.hdfdict = {}
         self.histdict = {}
+        
         super().__init__(f_addr=self.faddress, **kwds)
-
-        if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
-            self.ncores = N_CPU
-        else:
-            self.ncores = int(ncores)
 
     def _addBinners(self, axes=None, nbins=None, ranges=None, binDict=None):
         """
@@ -812,7 +882,7 @@ class hdf5Processor(hdf5Reader):
                 self.bincounts = binDict['nbins']
                 self.binranges = binDict['ranges']
             except:
-                pass
+                pass # No action when binDict is not specified
         # Use information from other specified parameters if binDict is not given
         else:
             self.binaxes = axes
@@ -951,7 +1021,7 @@ class hdf5Processor(hdf5Reader):
         amin, amax = u.intify(amin, amax)
 
         # Assemble the data for binning, assuming they can be completely loaded into RAM
-        self.hdfdict = self.summarize(output='dict', use_alias=self.ua, amin=amin, amax=amax)
+        self.hdfdict = self.summarize(form='dict', use_alias=self.ua, amin=amin, amax=amax, ret=True)
 
         # Set up binning parameters
         self._addBinners(axes, nbins, ranges, binDict)
