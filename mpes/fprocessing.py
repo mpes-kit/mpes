@@ -12,8 +12,8 @@
 # =========================
 
 from __future__ import print_function, division
-from .igoribw  import loadibw
-from . import utils as u
+from .igoribw import loadibw
+from . import utils as u, bandstructure as bs
 import igor.igorpy as igor
 import pandas as pd
 import re, glob2 as g
@@ -459,7 +459,7 @@ def mat2im(datamat, dtype='uint8', scaling=['normal'], savename=None):
 
 def im2mat(fdir):
     """
-    Convert image to numpy ndarray
+    Convert image to numpy ndarray.
     """
 
     mat = np.asarray(pim.open(fdir))
@@ -490,7 +490,7 @@ class hdf5Reader(File):
             self.ncores = int(ncores)
 
     def getGroupNames(self, wexpr=None, woexpr=None, use_alias=False):
-        """ Retrieve group names from the loaded hdf5 file with string filtering
+        """ Retrieve group names from the loaded hdf5 file with string filtering.
 
         :Parameters:
             wexpr : str | None
@@ -500,7 +500,7 @@ class hdf5Reader(File):
 
         :Return:
             filteredGroupNames : list
-                List of filtered group names
+                List of filtered group names.
         """
 
         # Gather group aliases, if specified
@@ -520,7 +520,7 @@ class hdf5Reader(File):
         return filteredGroupNames
 
     def getAttributeNames(self, wexpr=None, woexpr=None):
-        """ Retrieve attribute names from the loaded hdf5 file with string filtering
+        """ Retrieve attribute names from the loaded hdf5 file with string filtering.
 
         :Parameters:
             wexpr : str | None
@@ -530,7 +530,7 @@ class hdf5Reader(File):
 
         :Return:
             filteredAttrbuteNames : list
-                List of filtered attribute names
+                List of filtered attribute names.
         """
 
         if (wexpr is None) and (woexpr is None):
@@ -544,15 +544,15 @@ class hdf5Reader(File):
 
     @staticmethod
     def readGroup(element, *group, amin=None, amax=None, sliced=True):
-        """ Retrieve the content of the group(s) in the loaded hdf5 file
+        """ Retrieve the content of the group(s) in the loaded hdf5 file.
 
         :Parameter:
             group : list/tuple
-                Collection of group names
+                Collection of group names.
 
         :Return:
             groupContent : list/tuple
-                Collection of values of the corresponding groups
+                Collection of values of the corresponding groups.
         """
 
         ngroup = len(group)
@@ -1102,6 +1102,13 @@ class hdf5Processor(hdf5Reader):
 
         return hdf5Splitter(f_addr=self.faddress)
 
+    def toBandStructure(self):
+        """
+        Convert to an instance of BandStructure.
+        """
+
+        pass
+
 
 class hdf5Splitter(hdf5Reader):
     """
@@ -1188,9 +1195,12 @@ class parallelHDF5Processor(object):
     Class for parallel processing of hdf5 files.
     """
 
-    def __init__(self, files):
+    def __init__(self, files, file_sorting=True):
 
-        self.files = files
+        if file_sorting == True:
+            self.files = nts.natsorted(files)
+        else:
+            self.files = files
         self.nfiles = len(self.files)
         self.results = {}
         self.combinedresult = {}
