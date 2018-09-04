@@ -575,15 +575,15 @@ class hdf5Reader(File):
 
     @staticmethod
     def readAttribute(element, *attribute, nullval='None'):
-        """ Retrieve the content of the attribute(s) in the loaded hdf5 file
+        """ Retrieve the content of the attribute(s) in the loaded hdf5 file.
 
         :Parameter:
             attribute : list/tuple
-                Collection of attribute names
+                Collection of attribute names.
 
         :Return:
             attributeContent : list/tuple
-                Collection of values of the corresponding attributes
+                Collection of values of the corresponding attributes.
         """
 
         nattr = len(attribute)
@@ -731,7 +731,7 @@ class hdf5Reader(File):
                 return self.edf
 
     def convert(self, form, save_addr='./summary', pqappend=False, **kwds):
-        """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor)
+        """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor).
 
         :Parameters:
             form : str
@@ -763,13 +763,13 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
 
     :Parameters:
         processor : class
-            Class including all attributes
+            Class including all attributes.
         dictname : str
-            Namestring of the dictionary to save (such as the attribute name in a class)
+            Namestring of the dictionary to save (such as the attribute name in a class).
         form : str | 'h5'
-            Save format, supporting 'mat', 'h5', 'tiff' (need tifffile) or 'png' (need imageio)
+            Save format, supporting 'mat', 'h5', 'tiff' (need tifffile) or 'png' (need imageio).
         save_addr : str | './histogram'
-            File path to save the binning result
+            File path to save the binning result.
         **kwds : keyword arguments
             =========  ===========  ===========  ========================================
              keyword    data type     default     meaning
@@ -873,7 +873,7 @@ class hdf5Processor(hdf5Reader):
 
     def _addBinners(self, axes=None, nbins=None, ranges=None, binDict=None):
         """
-        Construct the binning parameters within an instance
+        Construct the binning parameters within an instance.
         """
 
         # Use information specified in binDict, ignore others
@@ -901,7 +901,7 @@ class hdf5Processor(hdf5Reader):
     @d.delayed
     def _delayedBinning(self, data):
         """
-        Lazily evaluated multidimensional binning
+        Lazily evaluated multidimensional binning.
 
         :Parameters:
             data : numpy array
@@ -1069,7 +1069,7 @@ class hdf5Processor(hdf5Reader):
 
     def updateHistogram(self, axes=None, sliceranges=None, ret=False):
         """
-        Update the size of the binning results
+        Update the size of the binning results.
         """
 
         # Input axis order to binning axes order
@@ -1095,10 +1095,17 @@ class hdf5Processor(hdf5Reader):
         except:
             raise Exception('Saving histogram was unsuccessful!')
 
+    def toSplitter(self):
+        """
+        Convert to an instance of hdf5Splitter.
+        """
+
+        return hdf5Splitter(f_addr=self.faddress)
+
 
 class hdf5Splitter(hdf5Reader):
     """
-    Class to split large hdf5 files
+    Class to split large hdf5 files.
     """
 
     def __init__(self, f_addr, **kwds):
@@ -1110,23 +1117,23 @@ class hdf5Splitter(hdf5Reader):
     def split(self, nsplit, save_addr='./', namestr='split_', \
     split_group='Stream_0', pbar=False):
         """
-        Split and save an hdf5 file
+        Split and save an hdf5 file.
 
         :Parameters:
             nsplit : int
-                Number of split files
+                Number of split files.
             save_addr : str | './'
-                Directory to store the split files
+                Directory to store the split files.
             namestr : str | 'split_'
-                Additional namestring attached to the front of the filename
+                Additional namestring attached to the front of the filename.
             split_group : str | 'Stream_0'
-                Name of the example group to split for file length reference
+                Name of the example group to split for file length reference.
             pbar : bool | False
-                Enable (when True)/Disable (when False) the progress bar
+                Enable (when True)/Disable (when False) the progress bar.
         """
 
         nsplit = int(nsplit)
-        self.splitFilepaths = []
+        self.splitFilepaths = [] # Refresh the path when re-splitting
         self.eventLen = self[split_group].size
         self.eventList = np.linspace(0, self.eventLen, nsplit+1, dtype='int')
 
@@ -1157,10 +1164,28 @@ class hdf5Splitter(hdf5Reader):
             finally:
                 fsp.close()
 
+    def subset(self, file_id):
+        """
+        Spawn an instance of hdf5Processor with a specified split file.
+        """
+
+        if self.splitFilepaths:
+            return hdf5Processor(f_addr=self.splitFilepaths[file_id])
+
+        else:
+            raise ValueError("No split files are present.")
+
+    def toProcessor(self):
+        """
+        Change to an hdf5Processor instance.
+        """
+
+        return hdf5Processor(f_addr=self.faddress)
+
 
 class parallelHDF5Processor(object):
     """
-    Class for parallel processing of hdf5 files
+    Class for parallel processing of hdf5 files.
     """
 
     def __init__(self, files):
@@ -1173,7 +1198,7 @@ class parallelHDF5Processor(object):
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads',\
     pbar=True, ret=True, binning_kwds={}, compute_kwds={}):
         """
-        Parallel computation of the multidimensional histogram from file segments
+        Parallel computation of the multidimensional histogram from file segments.
 
         :Parameters:
             axes : (list of) strings | None
@@ -1218,7 +1243,7 @@ class parallelHDF5Processor(object):
 
     def combineResults(self, bin_accumulated=True, ret=True):
         """
-        Combine the results from all segments
+        Combine the results from all segments.
 
         :Parameters:
             bin_accumulated : bool | True
