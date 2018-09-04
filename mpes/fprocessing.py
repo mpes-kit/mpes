@@ -16,7 +16,7 @@ from .igoribw import loadibw
 from . import utils as u, bandstructure as bs
 import igor.igorpy as igor
 import pandas as pd
-import re, glob2 as g
+import re, glob as g
 import numpy as np
 import numpy.fft as nft
 from numpy import polyval as poly
@@ -1195,15 +1195,30 @@ class parallelHDF5Processor(object):
     Class for parallel processing of hdf5 files.
     """
 
-    def __init__(self, files, file_sorting=True):
+    def __init__(self, files=[], file_sorting=True, folder=None):
 
         if file_sorting == True:
             self.files = nts.natsorted(files)
         else:
             self.files = files
-        self.nfiles = len(self.files)
+        self.folder = folder
         self.results = {}
         self.combinedresult = {}
+
+    @property
+    def nfiles(self):
+
+        return len(self.files)
+
+    def gatherFiles(self, identifier=r'/*.h5'):
+        """
+        Gather files from a folder (specified at instantiation).
+        """
+
+        if self.folder is not None:
+            self.files = g.glob(self.folder + identifier)
+        else:
+            raise ValueError('No folder is specified!')
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads',\
     pbar=True, ret=True, binning_kwds={}, compute_kwds={}):
