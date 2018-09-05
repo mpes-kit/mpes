@@ -1124,13 +1124,44 @@ class hdf5Splitter(hdf5Reader):
         self.splitFilepaths = []
         super().__init__(f_addr=self.faddress, **kwds)
 
+    @d.delayed
+    def _split_file(self, idx, save_addr, namestr):
+        """ Split file generator
+        """
+
+        evmin, evmax = self.eventList[idx], self.eventList[idx+1]
+        fpath = save_addr + namestr + str(idx+1) + '.h5'
+
+        try:
+            fsp = File(fpath, 'w')
+
+            # Copy the attributes
+            for attr, attrval in self.attrs.items():
+                fsp.attrs[attr] = attrval
+
+            # Copy the segmented groups and their attributes
+            for gp in self.groupNames:
+                #self.copy(gn, fsp[gn])
+                fsp.create_dataset(gp, data=self.readGroup(self, gp, amin=evmin, amax=evmax))
+                for gattr, gattrval in self[gp].attrs.items():
+                    fsp[gp].attrs[gattr] = gattrval
+
+        except Exception as e:
+            print(e)
+
+        # Save and close the file
+        finally:
+            fsp.close()
+
+        return(fpath)
+
     def split(self, nsplit, save_addr='./', namestr='split_', \
     split_group='Stream_0', pbar=False):
         """
         Split and save an hdf5 file.
 
         :Parameters:
-            nsplit : int
+             : int
                 Number of split files.
             save_addr : str | './'
                 Directory to store the split files.
@@ -1146,37 +1177,18 @@ class hdf5Splitter(hdf5Reader):
         self.splitFilepaths = [] # Refresh the path when re-splitting
         self.eventLen = self[split_group].size
         self.eventList = np.linspace(0, self.eventLen, nsplit+1, dtype='int')
+        tasks = []
 
-        for i in tqdm(range(nsplit), disable=not(pbar)):
+        # Distributed file splitting
+        for isp in tqdm(range(nsplit), disable=not(pbar)):
 
-            evmin, evmax = self.eventList[i], self.eventList[i+1]
-            fpath = save_addr + namestr + str(i+1) + '.h5'
-            self.splitFilepaths.append(fpath)
+            tasks.append(self._split_file(self, isp, save_addr, namestr))
 
-            try:
-                fsp = File(fpath, 'w')
-
-                # Copy the attributes
-                for attr, attrval in self.attrs.items():
-                    fsp.attrs[attr] = attrval
-
-                # Copy the segmented groups and their attributes
-                for gp in self.groupNames:
-                    #self.copy(gn, fsp[gn])
-                    fsp.create_dataset(gp, data=self.readGroup(self, gp, amin=evmin, amax=evmax))
-                    for gattr, gattrval in self[gp].attrs.items():
-                        fsp[gp].attrs[gattr] = gattrval
-
-            except Exception as e:
-                print(e)
-
-            # Save and close the file
-            finally:
-                fsp.close()
+        self.splitFilepaths = d.compute(tasks)
 
     def subset(self, file_id):
         """
-        Spawn an instance of hdf5Processor with a specified split file.
+        Spawn an instance of hdf5Processor associated a specified split file.
         """
 
         if self.splitFilepaths:
@@ -1270,7 +1282,7 @@ class parallelHDF5Processor(object):
             binning_kwds : dict | {}
                 keyword arguments to be included in hdf5Processor.localBinning()
             compute_kwds : dict | {}
-                keyword arguments to specify in dask.computer()
+                keyword arguments to specify in dask.compute()
 
         """
 
