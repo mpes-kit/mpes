@@ -1180,11 +1180,15 @@ class hdf5Splitter(hdf5Reader):
         tasks = []
 
         # Distributed file splitting
-        for isp in tqdm(range(nsplit), disable=not(pbar)):
+        for isp in range(nsplit):
 
             tasks.append(self._split_file(self, isp, save_addr, namestr))
 
-        self.splitFilepaths = d.compute(tasks)
+        if pbar:
+            with ProgressBar():
+                self.splitFilepaths = d.compute(*tasks)
+        else:
+            self.splitFilepaths = d.compute(*tasks)
 
     def subset(self, file_id):
         """
