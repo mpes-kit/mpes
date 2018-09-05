@@ -991,7 +991,7 @@ class hdf5Processor(hdf5Reader):
         return hist_partition
 
     def distributedBinning(self, axes=None, nbins=None, ranges=None, \
-                           binDict=None, ret=True, **kwds):
+                           binDict=None, pbar=True, ret=True, **kwds):
         """
         Compute the photoelectron intensity histogram in the distributed way.
 
@@ -1026,7 +1026,7 @@ class hdf5Processor(hdf5Reader):
         self.summarize(form='dataframe')
 
         partitionResults = []
-        for i in range(0, self.edf.npartitions, self.ncores):
+        for i in tqdm(range(0, self.edf.npartitions, self.ncores), disable=not(pbar)):
 
             bintasks = []
             for j in range(0, self.ncores):
