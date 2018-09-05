@@ -712,11 +712,11 @@ class hdf5Reader(File):
 
             dfParts = []
             chunkSize = min(self.CHUNK_SIZE, self.nEvents / self.ncores)
-            nPartitions = self.nEvents // chunkSize + 1
+            nPartitions = int(self.nEvents // chunkSize) + 1
             # Determine the column names
             gNames = kwds.pop('groupnames', self.getGroupNames(wexpr='Stream'))
             colNames = self.name2alias(gNames)
-
+            
             for p in range(nPartitions):
 
                 # Calculate the starting and ending index of every chunk of events
