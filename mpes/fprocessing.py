@@ -1200,7 +1200,7 @@ class parallelHDF5Processor(object):
 
     def __init__(self, files=[], file_sorting=True, folder=None):
 
-        self.files = _sort_terms(files, file_sorting)
+        self.files = self._sort_terms(files, file_sorting)
         self.folder = folder
         self.results = {}
         self.combinedresult = {}
@@ -1243,7 +1243,7 @@ class parallelHDF5Processor(object):
 
         if self.folder is not None:
             files = g.glob(self.folder + identifier)
-            self.files = _sort_terms(files, file_sorting)
+            self.files = self._sort_terms(files, file_sorting)
         else:
             raise ValueError('No folder is specified!')
 
