@@ -1069,7 +1069,7 @@ class hdf5Processor(hdf5Reader):
 
     def updateHistogram(self, axes=None, sliceranges=None, ret=False):
         """
-        Update the size of the binning results.
+        Update the dimensional sizes of the binning results.
         """
 
         # Input axis order to binning axes order
@@ -1089,6 +1089,9 @@ class hdf5Processor(hdf5Reader):
             return self.histdict
 
     def saveHistogram(self, dictname='histdict', form='h5', save_addr='./histogram', **kwds):
+        """
+        Save binned histogram and the axes.
+        """
 
         try:
             saveDict(self, dictname, form, save_addr, **kwds)
@@ -1207,7 +1210,8 @@ class parallelHDF5Processor(object):
 
         return len(self.files)
 
-    def _sort_terms(self, terms, parameter):
+    @staticmethod
+    def _sort_terms(terms, parameter):
         """
         Sort terms according to parameter value.
 
@@ -1276,9 +1280,12 @@ class parallelHDF5Processor(object):
         self.bincounts = nbins
         self.binranges = ranges
 
+        # Construct binning tasks
         for f in self.files:
             binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
                            (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
+
+        # Execute binning tasks
         if len(binTasks) > 0:
             if pbar:
                 with ProgressBar():
@@ -1320,7 +1327,7 @@ class parallelHDF5Processor(object):
 
     def updateHistogram(self, axes=None, sliceranges=None, ret=False):
         """
-        Update the size of the binning results
+        Update the dimensional sizes of the binning results.
         """
 
         # Input axis order to binning axes order
@@ -1339,6 +1346,9 @@ class parallelHDF5Processor(object):
             return self.combinedresult
 
     def saveHistogram(self, dictname='combinedresult', form='h5', save_addr='./histogram', **kwds):
+        """
+        Save binned histogram and the axes.
+        """
 
         try:
             saveDict(self, dictname, form, save_addr, **kwds)
