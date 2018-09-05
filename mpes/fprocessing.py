@@ -1197,10 +1197,7 @@ class parallelHDF5Processor(object):
 
     def __init__(self, files=[], file_sorting=True, folder=None):
 
-        if file_sorting == True:
-            self.files = nts.natsorted(files)
-        else:
-            self.files = files
+        self.files = _sort_terms(files, file_sorting)
         self.folder = folder
         self.results = {}
         self.combinedresult = {}
@@ -1210,13 +1207,39 @@ class parallelHDF5Processor(object):
 
         return len(self.files)
 
-    def gatherFiles(self, identifier=r'/*.h5'):
+    def _sort_terms(self, terms, parameter):
+        """
+        Sort terms according to parameter value.
+
+        :Parameters:
+            terms : list
+                List of terms (e.g. strings).
+            parameter : bool
+                Decision parameter for sorting.
+
+        :Return:
+            Sorted or unsorted terms.
+        """
+
+        if parameter == True:
+            return nts.natsorted(terms)
+        else:
+            return terms
+
+    def gatherFiles(self, identifier=r'/*.h5', file_sorting=True):
         """
         Gather files from a folder (specified at instantiation).
+
+        :Parameters:
+            identifier : str | r'/*.h5'
+                File identifier used for glob2.glob().
+            file_sorting : bool | True
+                Option to sort the files by their names.
         """
 
         if self.folder is not None:
-            self.files = g.glob(self.folder + identifier)
+            files = g.glob(self.folder + identifier)
+            self.files = _sort_terms(files, file_sorting)
         else:
             raise ValueError('No folder is specified!')
 
