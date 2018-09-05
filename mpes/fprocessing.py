@@ -918,7 +918,7 @@ class hdf5Processor(hdf5Reader):
 
         return hist, edges
 
-    def distributedBinning(self, axes=None, nbins=None, ranges=None, \
+    def distributedProcessBinning(self, axes=None, nbins=None, ranges=None, \
                            binDict=None, chunksz=100000, ret=True, **kwds):
         """
         Compute the photoelectron intensity histogram in the distributed way.
@@ -974,6 +974,92 @@ class hdf5Processor(hdf5Reader):
 
         if ret:
             return self.histdict
+
+    def _bin_partition(self, partition, binaxes, nbins, binranges):
+        """ Bin the data within a file partition.
+        """
+
+        cols, vals = partition.columns.values, partition.values
+
+        binColumns = []
+        for binax in binaxes:
+            idx = cols.tolist().index(binax)
+            binColumns.append(idx)
+
+        hist_partition, _ = np.histogramdd(vals[:, binColumns], bins=nbins, range=binranges)
+
+        return hist_partition
+
+    def distributedBinning(self, axes=None, nbins=None, ranges=None, \
+                           binDict=None, ret=True, **kwds):
+        """
+        Compute the photoelectron intensity histogram in the distributed way.
+
+        :Paramters:
+            axes : (list of) strings | None
+                Names the axes to bin.
+            nbins : (list of) int | None
+                Number of bins along each axis.
+            ranges : (list of) tuples | None
+                Ranges of binning along every axis.
+            binDict : dict | None
+                Dictionary with specifications of axes, nbins and ranges. If binDict
+                is not None. It will override the specifications from other arguments.
+            ret : bool | True
+                :True: returns the dictionary containing binned data explicitly
+                :False: no explicit return of the binned data, the dictionary
+                generated in the binning is still retained as an instance attribute.
+
+        :Return:
+            histdict : dict
+                Dictionary containing binned data and the axes values (if `ret = True`).
+
+        """
+
+        # Retrieve the range of acquired events
+        amin = kwds.pop('amin', None)
+        amax = kwds.pop('amax', None)
+        amin, amax = u.intify(amin, amax)
+
+        # Set up the binning parameters
+        self._addBinners(axes, nbins, ranges, binDict)
+        self.summarize(form='dataframe')
+
+        partitionResults = []
+        for i in range(0, self.edf.npartitions, self.ncores):
+
+            bintasks = []
+            for j in range(0, self.ncores):
+
+                ij = i + j
+                if ij >= self.edf.npartitions:
+                    break
+
+                dfPartition = self.edf.get_partition(ij)
+                bintasks.append(d.delayed(self._bin_partition)(dfPartition, axes, nbins, ranges))
+
+            if len(bintasks) > 0:
+                binresults = d.compute(*bintasks)
+                ttl = np.zeros_like(binresults[0])
+
+                for binresult in binresults:
+                    ttl += binresult
+
+                partitionResults.append(ttl)
+                del ttl
+
+            del bintasks
+
+        result = np.zeros_like(partitionResults[0])
+        for pr in partitionResults:
+            result += np.nan_to_num(pr)
+        result = result.astype('float64')
+
+        # for iax, ax in enumerate(axes):
+        #     self.histdict[ax] = ax_vals[iax]
+
+        if ret:
+            return result
 
     def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None, \
                      jittered=False, histcoord='midpoint', ret=True, **kwds):
