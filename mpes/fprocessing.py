@@ -1401,6 +1401,53 @@ def readBinnedhdf5(fpath, combined=True, typ='float32'):
     return out
 
 
+class parquetProcessor(object):
+    """
+    Processs the parquet file assembled from single events.
+    """
+
+    def __init__(self, folder):
+
+        self.folder = folder
+        self.read()
+
+    def read(self):
+        """ Read parquet files from a folder.
+        """
+
+        self.edf = d.dataframe.read_parquet(self.folder)
+
+    def appendColumn(self):
+        """ Append columns to dataframe.
+        """
+
+        pass
+
+    def appendRow(self):
+        """ Append rows to dataframe.
+        """
+
+        pass
+
+    def binning(self):
+
+        pass
+
+    def convert(self, form='parquet'):
+        """ Update or convert to other file formats.
+        """
+
+        pass
+
+    def saveHistogram(self):
+
+        pass
+
+    def toBandStructure(self):
+
+        pass
+
+
 # =================== #
 # Data transformation #
 # =================== #
