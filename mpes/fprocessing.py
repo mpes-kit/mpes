@@ -1363,24 +1363,31 @@ class parallelHDF5Processor(object):
 
         return arraya + arrayb
 
-    def gatherFiles(self, identifier=r'/*.h5', file_sorting=True):
+    def gatherFiles(self, identifier=r'/*.h5', f_start=None, f_end=None, f_step=1, file_sorting=True):
         """
         Gather files from a folder (specified at instantiation).
 
         :Parameters:
             identifier : str | r'/*.h5'
                 File identifier used for glob2.glob().
+            f_start, f_end, f_step : int | None, None, 1
+                Starting, ending file id and the step. Used to construct a file selector.
             file_sorting : bool | True
                 Option to sort the files by their names.
         """
 
         if self.folder is not None:
-            files = g.glob(self.folder + identifier)
-            self.files = self._sort_terms(files, file_sorting)
+            self.files = g.glob(self.folder + identifier)
+
+            if file_sorting == True:
+                self.files = self._sort_terms(self.files, file_sorting)
+
+            self.files = self.files[slice(f_start, f_end, f_step)]
+
         else:
             raise ValueError('No folder is specified!')
 
-    def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,\
+    def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):
         """
         Parallel computation of the multidimensional histogram from file segments.
@@ -1419,14 +1426,14 @@ class parallelHDF5Processor(object):
             binning_kwds = u.dictmerge({'ret':'histogram'}, binning_kwds)
             # Construct binning tasks
             for f in self.files:
-                binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
-                               (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
+                binTasks.append(d.delayed(hdf5Processor(f).localBinning)
+                                (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
             if pbar:
                 with ProgressBar():
-                    self.combinedresult['binned'] = reduce(self._arraysum, \
+                    self.combinedresult['binned'] = reduce(self._arraysum,
                     d.compute(*binTasks, scheduler=scheduler, **compute_kwds))
             else:
-                self.combinedresult['binned'] = reduce(self._arraysum, \
+                self.combinedresult['binned'] = reduce(self._arraysum,
                 d.compute(*binTasks, scheduler=scheduler, **compute_kwds))
 
             # Calculate and store values of the axes
@@ -1439,8 +1446,8 @@ class parallelHDF5Processor(object):
 
         else: # Return all task outcome of binning (not recommended due to the size)
             for f in self.files:
-                binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
-                               (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
+                binTasks.append(d.delayed(hdf5Processor(f).localBinning)
+                                (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
             if pbar:
                 with ProgressBar():
                     self.results = d.compute(*binTasks, scheduler=scheduler, **compute_kwds)
