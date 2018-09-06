@@ -921,8 +921,8 @@ class hdf5Processor(hdf5Reader):
 
         return hist, edges
 
-    def distributedProcessBinning(self, axes=None, nbins=None, ranges=None, \
-                           binDict=None, chunksz=100000, pbar=True, ret=True, **kwds):
+    def distributedProcessBinning(self, axes=None, nbins=None, ranges=None,
+                                binDict=None, chunksz=100000, pbar=True, ret=True, **kwds):
         """
         Compute the photoelectron intensity histogram using dask array.
 
@@ -995,8 +995,8 @@ class hdf5Processor(hdf5Reader):
 
         return hist_partition
 
-    def distributedBinning(self, axes=None, nbins=None, ranges=None, \
-                           binDict=None, pbar=True, ret=True, **kwds):
+    def distributedBinning(self, axes=None, nbins=None, ranges=None,
+                            binDict=None, pbar=True, ret=True, **kwds):
         """
         Compute the photoelectron intensity histogram using dask dataframe.
         Prof. Yves Acremann's method.
@@ -1074,8 +1074,8 @@ class hdf5Processor(hdf5Reader):
         if ret:
             return self.histdict
 
-    def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None, \
-                     jittered=False, histcoord='midpoint', ret='dict', **kwds):
+    def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None,
+        jittered=False, histcoord='midpoint', ret='dict', **kwds):
         """
         Compute the photoelectron intensity histogram locally after loading all data into RAM.
 
@@ -1152,10 +1152,12 @@ class hdf5Processor(hdf5Reader):
         # print(axes)
         # print(list(self.hdfdict))
         data_unbinned = np.stack((self.hdfdict[ax] for ax in axes), axis=1)
+        self.hdfdict = {}
 
         # Compute binned data locally
         self.histdict['binned'], ax_vals = \
         np.histogramdd(data_unbinned, bins=self.bincounts, range=self.binranges)
+        del data_unbinned
 
         for iax, ax in enumerate(axes):
             if histcoord == 'midpoint':
@@ -1420,6 +1422,9 @@ class parallelHDF5Processor(object):
         self.nbinaxes = len(axes)
         self.bincounts = nbins
         self.binranges = ranges
+        
+        self.results = {}
+        self.combinedresult = {}
 
         # Execute binning tasks
         if combine == True: # Combine results in the process of binning
@@ -1435,6 +1440,8 @@ class parallelHDF5Processor(object):
             else:
                 self.combinedresult['binned'] = reduce(self._arraysum,
                 d.compute(*binTasks, scheduler=scheduler, **compute_kwds))
+
+            del binTasks
 
             # Calculate and store values of the axes
             for iax, ax in enumerate(self.binaxes):
@@ -1453,6 +1460,8 @@ class parallelHDF5Processor(object):
                     self.results = d.compute(*binTasks, scheduler=scheduler, **compute_kwds)
             else:
                 self.results = d.compute(*binTasks, scheduler=scheduler, **compute_kwds)
+
+            del binTasks
 
             if ret:
                 return self.results
