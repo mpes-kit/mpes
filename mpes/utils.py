@@ -248,3 +248,16 @@ def arraybin(arr, bins, method='mean'):
             arrbinned = arr.reshape(shape_tuple).sum(axis=bin_axis_tuple)
 
         return arrbinned
+
+
+def calcax(start, end, steps, ret='midpoint'):
+    """ Calculate the positions of the axes values.
+    """
+
+    edges = np.linspace(start, end, steps+1, endpoint=True)
+
+    if ret == 'edge':
+        return edges
+    elif ret == 'midpoint':
+        midpoints = (edges[1:] + edges[:-1])/2
+        return midpoints

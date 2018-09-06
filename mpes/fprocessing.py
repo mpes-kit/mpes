@@ -32,6 +32,7 @@ from dask.diagnostics import ProgressBar
 import warnings as wn
 from tqdm import tqdm
 import natsort as nts
+from functools import reduce
 
 N_CPU = ps.cpu_count()
 
@@ -724,6 +725,7 @@ class hdf5Reader(File):
                 eventIDEnd = int(min(eventIDStart + chunkSize, self.nEvents))
                 dfParts.append(d.delayed(self._assembleGroups)(gNames, amin=eventIDStart, amax=eventIDEnd))
 
+            # Construct eda (event dask array) and edf (event dask dataframe)
             eda = da.from_array(np.concatenate(d.compute(*dfParts), axis=1).T, chunks=self.CHUNK_SIZE)
             self.edf = ddf.from_dask_array(eda, columns=colNames)
 
@@ -868,6 +870,7 @@ class hdf5Processor(hdf5Reader):
         self.ua = kwds.pop('use_alias', True)
         self.hdfdict = {}
         self.histdict = {}
+        self.axesdict = {}
 
         super().__init__(f_addr=self.faddress, **kwds)
 
@@ -935,6 +938,8 @@ class hdf5Processor(hdf5Reader):
                 is not None. It will override the specifications from other arguments.
             chunksz : numeric (single numeric or tuple)
                 Size of the chunk to distribute.
+            pbar : bool | True
+                Option to display a progress bar.
             ret : bool | True
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
@@ -943,7 +948,6 @@ class hdf5Processor(hdf5Reader):
         :Return:
             histdict : dict
                 Dictionary containing binned data and the axes values (if `ret = True`).
-
         """
 
         # Retrieve the range of acquired events
@@ -983,10 +987,11 @@ class hdf5Processor(hdf5Reader):
         """ Bin the data within a file partition.
         """
 
-        cols, vals = partition.columns.values, partition.values
-        binColumns = [cols.tolist().index(binax) for binax in binaxes]
+        cols = partition.columns
+        binColumns = [cols.get_loc(binax) for binax in binaxes]
+        vals = partition.values[:, binColumns]
 
-        hist_partition, _ = np.histogramdd(vals[:, binColumns], bins=nbins, range=binranges)
+        hist_partition, _ = np.histogramdd(vals, bins=nbins, range=binranges)
 
         return hist_partition
 
@@ -1006,6 +1011,8 @@ class hdf5Processor(hdf5Reader):
             binDict : dict | None
                 Dictionary with specifications of axes, nbins and ranges. If binDict
                 is not None. It will override the specifications from other arguments.
+            pbar : bool | True
+                Option to display a progress bar.
             ret : bool | True
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
@@ -1068,7 +1075,7 @@ class hdf5Processor(hdf5Reader):
             return self.histdict
 
     def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None, \
-                     jittered=False, histcoord='midpoint', ret=True, **kwds):
+                     jittered=False, histcoord='midpoint', ret='dict', **kwds):
         """
         Compute the photoelectron intensity histogram locally after loading all data into RAM.
 
@@ -1093,16 +1100,16 @@ class hdf5Processor(hdf5Reader):
                 :False: no explicit return of the binned data, the dictionary
                 generated in the binning is still retained as an instance attribute.
             **kwds : keyword argument
-                ================  ==============  ===========  ========================================
+                ================  ==============  ===========  ==========================================
                      keyword         data type      default     meaning
-                ================  ==============  ===========  ========================================
+                ================  ==============  ===========  ==========================================
                      amin          numeric/None      None       minimum value of electron sequence
                      amax          numeric/None      None       maximum value of electron sequence
                   jitter_axes          list          axes       list of axes to jitter
                   jitter_bins          list          nbins      list of the number of bins
-                jitter_amplitude       list       [0.5, ...]    list of the jitter amplitude
+                jitter_amplitude   numeric/array     0.5        jitter amplitude (single number for all)
                  jitter_ranges         list         ranges      list of the binning ranges
-                ================  ==============  ===========  ========================================
+                ================  ==============  ===========  ==========================================
 
         :Return:
             histdict : dict
@@ -1127,21 +1134,23 @@ class hdf5Processor(hdf5Reader):
             # parameters is the same as that for the binning
             jitter_axes = kwds.pop('jitter_axes', axes)
             jitter_bins = kwds.pop('jitter_bins', nbins)
-            jitter_amplitude = kwds.pop('jitter_amplitude', 0.5*np.ones(self.nbinaxes))
+            jitter_amplitude = kwds.pop('jitter_amplitude', 0.5) * np.ones(self.nbinaxes)
             jitter_ranges = kwds.pop('jitter_ranges', ranges)
 
-            # Add jitter to every dimension of the data
+            # Add jitter to the specified dimensions of the data
             for jb, jax, jamp, jr in zip(jitter_bins, jitter_axes, jitter_amplitude, jitter_ranges):
 
                 sz = self.hdfdict[jax].size
                 # Calculate the bar size of the histogram in every dimension
                 binsize = abs(jr[0] - jr[1])/jb
-
                 self.hdfdict[jax] = self.hdfdict[jax].astype('float32')
+                # Jitter as random uniformly distributed noise (W. S. Cleveland)
                 self.hdfdict[jax] += jamp * binsize * np.random.\
                 uniform(low=-1, high=1, size=sz).astype('float32')
 
         # Stack up data from unbinned axes
+        # print(axes)
+        # print(list(self.hdfdict))
         data_unbinned = np.stack((self.hdfdict[ax] for ax in axes), axis=1)
 
         # Compute binned data locally
@@ -1156,8 +1165,15 @@ class hdf5Processor(hdf5Reader):
             elif histcoord == 'edge':
                 self.histdict[ax] = ax_vals[iax]
 
-        if ret:
+        if ret == 'dict':
             return self.histdict
+        elif ret == 'histogram':
+            histogram = self.histdict.pop('binned')
+            self.axesdict = self.histdict.copy()
+            self.histdict = {}
+            return histogram
+        elif ret == False:
+            return
 
     def updateHistogram(self, axes=None, sliceranges=None, ret=False):
         """
@@ -1253,7 +1269,7 @@ class hdf5Splitter(hdf5Reader):
         Split and save an hdf5 file.
 
         :Parameters:
-             : int
+            nsplit : int
                 Number of split files.
             save_addr : str | './'
                 Directory to store the split files.
@@ -1315,6 +1331,8 @@ class parallelHDF5Processor(object):
 
     @property
     def nfiles(self):
+        """ Total number of loaded files.
+        """
 
         return len(self.files)
 
@@ -1338,6 +1356,13 @@ class parallelHDF5Processor(object):
         else:
             return terms
 
+    @staticmethod
+    def _arraysum(arraya, arrayb):
+        """ Sum of two arrays.
+        """
+
+        return arraya + arrayb
+
     def gatherFiles(self, identifier=r'/*.h5', file_sorting=True):
         """
         Gather files from a folder (specified at instantiation).
@@ -1355,8 +1380,8 @@ class parallelHDF5Processor(object):
         else:
             raise ValueError('No folder is specified!')
 
-    def parallelBinning(self, axes, nbins, ranges, scheduler='threads',\
-    pbar=True, ret=True, binning_kwds={}, compute_kwds={}):
+    def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,\
+    histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):
         """
         Parallel computation of the multidimensional histogram from file segments.
 
@@ -1369,17 +1394,18 @@ class parallelHDF5Processor(object):
                 Ranges of binning along every axis.
             scheduler : str | 'threads'
                 Type of distributed scheduler ('threads', 'processes', 'synchronous')
+            combine : bool | True
+                Combine the results obtained from distributed binning.
+            histcoord : string | 'midpoint'
+                The coordinates of the histogram. Specify 'edge' to get the bar edges (every
+                dimension has one value more), specify 'midpoint' to get the midpoint of the
+                bars (same length as the histogram dimensions).
             pbar : Bool | true
                 Whether to show the progress bar
-            ret : bool | True
-                :True: returns the dictionary containing binned data explicitly
-                :False: no explicit return of the binned data, the dictionary
-                generated in the binning is still retained as an instance attribute.
             binning_kwds : dict | {}
                 keyword arguments to be included in hdf5Processor.localBinning()
             compute_kwds : dict | {}
                 keyword arguments to specify in dask.compute()
-
         """
 
         binTasks = []
@@ -1388,29 +1414,47 @@ class parallelHDF5Processor(object):
         self.bincounts = nbins
         self.binranges = ranges
 
-        # Construct binning tasks
-        for f in self.files:
-            binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
-                           (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
-
         # Execute binning tasks
-        if len(binTasks) > 0:
+        if combine == True: # Combine results in the process of binning
+            binning_kwds = u.dictmerge({'ret':'histogram'}, binning_kwds)
+            # Construct binning tasks
+            for f in self.files:
+                binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
+                               (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
+            if pbar:
+                with ProgressBar():
+                    self.combinedresult['binned'] = reduce(self._arraysum, \
+                    d.compute(*binTasks, scheduler=scheduler, **compute_kwds))
+            else:
+                self.combinedresult['binned'] = reduce(self._arraysum, \
+                d.compute(*binTasks, scheduler=scheduler, **compute_kwds))
+
+            # Calculate and store values of the axes
+            for iax, ax in enumerate(self.binaxes):
+                p_start, p_end = self.binranges[iax]
+                self.combinedresult[ax] = u.calcax(p_start, p_end, self.bincounts[iax], ret=histcoord)
+
+            if ret:
+                return self.combinedresult
+
+        else: # Return all task outcome of binning (not recommended due to the size)
+            for f in self.files:
+                binTasks.append(d.delayed(hdf5Processor(f).localBinning)\
+                               (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
             if pbar:
                 with ProgressBar():
                     self.results = d.compute(*binTasks, scheduler=scheduler, **compute_kwds)
             else:
                 self.results = d.compute(*binTasks, scheduler=scheduler, **compute_kwds)
 
-        if ret:
-            return self.results
+            if ret:
+                return self.results
 
-    def combineResults(self, bin_accumulated=True, ret=True):
+    def combineResults(self, ret=True):
         """
-        Combine the results from all segments.
+        Combine the results from all segments (only when self.results is non-empty).
 
         :Parameters:
-            bin_accumulated : bool | True
-                Accumulate the bins.
             ret : bool | True
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
@@ -1421,14 +1465,14 @@ class parallelHDF5Processor(object):
                 Return combined result dictionary (if `ret == True`).
         """
 
-        binnedhist = np.stack([self.results[i]['binned'] for i in range(self.nfiles)], axis=0)
+        try:
+            binnedhist = np.stack([self.results[i]['binned'] for i in range(self.nfiles)], axis=0).sum(axis=0)
 
-        if bin_accumulated:
-            binnedhist = np.sum(binnedhist, axis=0)
-
-        # Transfer the results to combined result
-        self.combinedresult = self.results[0]
-        self.combinedresult['binned'] = binnedhist
+            # Transfer the results to combined result
+            self.combinedresult = self.results[0].copy()
+            self.combinedresult['binned'] = binnedhist
+        except:
+            pass
 
         if ret:
             return self.combinedresult
