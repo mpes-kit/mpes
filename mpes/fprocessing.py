@@ -716,7 +716,7 @@ class hdf5Reader(File):
             # Determine the column names
             gNames = kwds.pop('groupnames', self.getGroupNames(wexpr='Stream'))
             colNames = self.name2alias(gNames)
-            
+
             for p in range(nPartitions):
 
                 # Calculate the starting and ending index of every chunk of events
@@ -919,9 +919,9 @@ class hdf5Processor(hdf5Reader):
         return hist, edges
 
     def distributedProcessBinning(self, axes=None, nbins=None, ranges=None, \
-                           binDict=None, chunksz=100000, ret=True, **kwds):
+                           binDict=None, chunksz=100000, pbar=True, ret=True, **kwds):
         """
-        Compute the photoelectron intensity histogram in the distributed way.
+        Compute the photoelectron intensity histogram using dask array.
 
         :Paramters:
             axes : (list of) strings | None
@@ -959,6 +959,7 @@ class hdf5Processor(hdf5Reader):
             dsets = [self[self.nameLookupDict[ax]] for ax in axes]
         else:
             dsets = [self[self.nameLookupDict[ax]][slice(amin, amax)] for ax in axes]
+
         dsets_distributed = [da.from_array(ds, chunks=(chunksz)) for ds in dsets]
         data_unbinned = da.stack(dsets_distributed, axis=1)
         # if rechunk:
@@ -966,7 +967,10 @@ class hdf5Processor(hdf5Reader):
 
         # Compute binned data
         bintask = self._delayedBinning(self, data_unbinned)
-        with ProgressBar():
+        if pbar:
+            with ProgressBar():
+                self.histdict['binned'], ax_vals = bintask.compute()
+        else:
             self.histdict['binned'], ax_vals = bintask.compute()
 
         for iax, ax in enumerate(axes):
@@ -980,11 +984,7 @@ class hdf5Processor(hdf5Reader):
         """
 
         cols, vals = partition.columns.values, partition.values
-
-        binColumns = []
-        for binax in binaxes:
-            idx = cols.tolist().index(binax)
-            binColumns.append(idx)
+        binColumns = [cols.tolist().index(binax) for binax in binaxes]
 
         hist_partition, _ = np.histogramdd(vals[:, binColumns], bins=nbins, range=binranges)
 
@@ -993,7 +993,8 @@ class hdf5Processor(hdf5Reader):
     def distributedBinning(self, axes=None, nbins=None, ranges=None, \
                            binDict=None, pbar=True, ret=True, **kwds):
         """
-        Compute the photoelectron intensity histogram in the distributed way.
+        Compute the photoelectron intensity histogram using dask dataframe.
+        Prof. Yves Acremann's method.
 
         :Paramters:
             axes : (list of) strings | None
@@ -1013,7 +1014,6 @@ class hdf5Processor(hdf5Reader):
         :Return:
             histdict : dict
                 Dictionary containing binned data and the axes values (if `ret = True`).
-
         """
 
         # Retrieve the range of acquired events
@@ -1024,42 +1024,48 @@ class hdf5Processor(hdf5Reader):
         # Set up the binning parameters
         self._addBinners(axes, nbins, ranges, binDict)
         self.summarize(form='dataframe')
+        self.edf = self.edf[amin:amax] # Select event range for binning
 
-        partitionResults = []
+        partitionResults = [] # Partition-level results
         for i in tqdm(range(0, self.edf.npartitions, self.ncores), disable=not(pbar)):
 
-            bintasks = []
+            coreTasks = [] # Core-level jobs
             for j in range(0, self.ncores):
 
                 ij = i + j
                 if ij >= self.edf.npartitions:
                     break
 
-                dfPartition = self.edf.get_partition(ij)
-                bintasks.append(d.delayed(self._bin_partition)(dfPartition, axes, nbins, ranges))
+                dfPartition = self.edf.get_partition(ij) # Obtain dataframe partition
+                coreTasks.append(d.delayed(self._bin_partition)(dfPartition, axes, nbins, ranges))
 
-            if len(bintasks) > 0:
-                binresults = d.compute(*bintasks)
-                ttl = np.zeros_like(binresults[0])
+            if len(coreTasks) > 0:
+                coreResults = d.compute(*coreTasks)
 
-                for binresult in binresults:
-                    ttl += binresult
+                # Combine all core results for a dataframe partition
+                partitionResult = np.zeros_like(coreResults[0])
+                for coreResult in coreResults:
+                    partitionResult += coreResult
 
-                partitionResults.append(ttl)
-                del ttl
+                partitionResults.append(partitionResult)
+                del partitionResult
 
-            del bintasks
+            del coreTasks
 
-        result = np.zeros_like(partitionResults[0])
+        # Combine all partition results
+        fullResult = np.zeros_like(partitionResults[0])
         for pr in partitionResults:
-            result += np.nan_to_num(pr)
-        result = result.astype('float64')
+            fullResult += np.nan_to_num(pr)
 
-        # for iax, ax in enumerate(axes):
-        #     self.histdict[ax] = ax_vals[iax]
+        # Load into dictionary
+        self.histdict['binned'] = fullResult.astype('float64')
+        # Calculate axes values
+        for iax, ax in enumerate(axes):
+            axrange = ranges[iax]
+            self.histdict[ax] = np.linspace(axrange[0], axrange[1], nbins[iax])
 
         if ret:
-            return result
+            return self.histdict
 
     def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None, \
                      jittered=False, histcoord='midpoint', ret=True, **kwds):
