@@ -33,6 +33,7 @@ from functools import reduce, partial
 import warnings as wn
 import operator as op
 import matplotlib.pyplot as plt
+from symmetrize import sym, pointops as po
 
 
 # =================== #
@@ -1153,7 +1154,7 @@ def fitEllipseParams(*coords, plot=False, img=None, **kwds):
 
 def vertexGenerator(center, fixedvertex, arot, direction=-1, scale=1, ret='all'):
     """
-    Generation of the vertices of symmetric polygons
+    Generation of the vertices of symmetric polygons.
 
     :Parameters:
         center : (int, int)
@@ -1175,8 +1176,13 @@ def vertexGenerator(center, fixedvertex, arot, direction=-1, scale=1, ret='all')
             Collection of generated vertices.
     """
 
-    nangles = int(np.round(360 / arot)) - 1 # Number of angles needed
-    rotangles = direction*np.linspace(1, nangles, nangles)*arot
+    if type(arot) in (int, float):
+        nangles = int(np.round(360 / arot)) - 1 # Number of angles needed
+        rotangles = direction*np.linspace(1, nangles, nangles)*arot
+    else:
+        nangles = len(arot)
+        rotangles = np.cumsum(arot)
+
     # Reformat the input array to satisfy function requirement
     fixedvertex_reformatted = np.array(fixedvertex, dtype='int32', ndmin=2)[None,...]
 
@@ -1185,9 +1191,13 @@ def vertexGenerator(center, fixedvertex, arot, direction=-1, scale=1, ret='all')
     elif ret == 'generated':
         vertices = []
 
-    for ra in rotangles:
+    if type(scale) in (int, float):
+        scale = np.ones((nangles,)) * scale
 
-        rmat = cv2.getRotationMatrix2D(center, ra, scale)
+    # Generate reference points by rotation and scaling
+    for ira, ra in enumerate(rotangles):
+
+        rmat = cv2.getRotationMatrix2D(center, ra, scale[ira])
         rotvertex = np.squeeze(cv2.transform(fixedvertex_reformatted, rmat)).tolist()
         vertices.append(rotvertex)
 
@@ -1253,6 +1263,116 @@ def applyWarping(imgstack, axis, hgmat):
     imgstack_transformed = np.moveaxis(imgstack_transformed, 0, axis)
 
     return imgstack_transformed
+
+
+class MomentumCorrector(object):
+    """
+    Momentum correction and calibration workflow.
+    """
+
+    def __init__(self, image, rotsym=6):
+
+        self.image = image
+        self.imgndim = image.ndim
+        self.rotsym = int(rotsym)
+        self.features = {}
+
+    def selectSlice2D(self, selector, axis):
+        """ Select (hyper)slice from a (hyper)volume.
+        """
+
+        if self.imgndim > 2:
+            im = np.moveaxis(self.image, axis, 0)
+            self.slice = im[selector,...].sum(axis=0)
+        else:
+            raise ValueError('Input image dimension is already 2!')
+
+    def featureExtract(self, image, direction='ccw', type='points'):
+        """ Extract features from the selected (hyper)slice.
+        """
+
+        if type == 'points':
+
+            self.peaks = po.peakdetect2d(image)
+            self.pcent, self.pouter = po.pointset_center(self.peaks)
+            self.pcent = tuple(self.pcent)
+            self.pouter_ord = po.pointset_order(self.pouter, direction=direction)
+            # Construct feature dictionary
+            self.features['verts'] = self.pouter_ord
+            self.features['center'] = np.atleast_2d(self.pcent)
+
+            self.mcvdist = po.cvdist(self.pouter_ord, self.pcent).mean()
+            self.mvvdist = po.vvdist(self.pouter_ord).mean()
+
+            if self.rotsym == 6:
+                self.mdist = (self.mcvdist + self.mvvdist)/2
+                self.mcvdist = self.mdist
+                self.mvvdist = self.mdist
+
+    def linWarpEstimate(self, weights=(1, 1, 1), method='Nelder-Mead', rotangle=0, update=False, ret=True, **kwds):
+        """ Estimate the linear deformation field.
+        """
+
+        landmarks = kwds.pop('landmarks', self.pouter_ord)
+        self.init = kwds.pop('fitinit', np.asarray([[0, 60., 60., 60., 60., 60.], [1.0]*self.rotsym]).ravel())
+
+        self.prefs, _ = sym.refsetopt(self.init, landmarks, self.pcent, self.mcvdist, self.mvvdist, niter=5, \
+                                      direction=1, weights=weights, method=method, stepsize=0.5)
+        self.slice_corrected, self.H = sym.imgWarping(self.slice, landmarks=landmarks, refs=self.prefs)
+
+        if update:
+            self.slice = self.slice_corrected
+            del self.slice_corrected
+
+        if ret:
+            return self.slice_corrected
+
+    def nonlinWarpEstimate(self, update=False, ret=True):
+        """ Estimate the nonlinear deformation field.
+        """
+
+        if update:
+            self.slice = self.slice_corrected
+            del self.slice_corrected
+
+        if ret:
+            return self.slice_corrected
+
+    def correct(self, axis, update=True):
+        """ Correct a stack of images.
+        """
+
+        self.image_corrected = sym.applyWarping(self.image, axis, hgmat=self.H)
+
+        if update:
+            self.image = self.image_corrected
+            del self.image
+
+    def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={}, annotated=False, ret=False, **kwds):
+        """ Generate imshow plot.
+        """
+
+        image = kwds.pop('image', self.slice)
+        f, ax = plt.subplots(figsize=figsize)
+        ax.imshow(image, origin=origin, cmap=cmap)
+
+        if annotated:
+            for pk, pvs in points.items():
+                ax.scatter(pvs[:,1], pvs[:,0])
+                if pvs.size > 2:
+                    for ipv, pv in enumerate(pvs):
+                        ax.text(pv[1]+3, pv[0]+3, str(ipv), fontsize=12)
+
+        if ret:
+            return f, ax
+
+    def calibrate(self, image, point_from, point_to, dist, ret='extent'):
+        """ Calibration of the momentum axes.
+        """
+
+        kvals = aly.calibrateK(image, point_from, point_to, dist, ret=ret)
+
+        return kvals
 
 
 # ================ #

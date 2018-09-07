@@ -1129,7 +1129,6 @@ class hdf5Processor(hdf5Reader):
 
         # Add jitter to the data streams before binning
         if jittered:
-
             # Retrieve parameters for histogram jittering, the ordering of the jittering
             # parameters is the same as that for the binning
             jitter_axes = kwds.pop('jitter_axes', axes)
@@ -1145,18 +1144,15 @@ class hdf5Processor(hdf5Reader):
                 binsize = abs(jr[0] - jr[1])/jb
                 self.hdfdict[jax] = self.hdfdict[jax].astype('float32')
                 # Jitter as random uniformly distributed noise (W. S. Cleveland)
-                self.hdfdict[jax] += jamp * binsize * np.random.\
+                self.hdfdict[jax] += jamp * binsize * np.random.
                 uniform(low=-1, high=1, size=sz).astype('float32')
 
         # Stack up data from unbinned axes
-        # print(axes)
-        # print(list(self.hdfdict))
         data_unbinned = np.stack((self.hdfdict[ax] for ax in axes), axis=1)
         self.hdfdict = {}
 
         # Compute binned data locally
-        self.histdict['binned'], ax_vals = \
-        np.histogramdd(data_unbinned, bins=self.bincounts, range=self.binranges)
+        self.histdict['binned'], ax_vals = np.histogramdd(data_unbinned, bins=self.bincounts, range=self.binranges)
         del data_unbinned
 
         for iax, ax in enumerate(axes):
@@ -1372,11 +1368,13 @@ class parallelHDF5Processor(object):
         :Parameters:
             identifier : str | r'/*.h5'
                 File identifier used for glob2.glob().
-            f_start, f_end, f_step : int | None, None, 1
+            f_start, f_end, f_step : int, int, int | None, None, 1
                 Starting, ending file id and the step. Used to construct a file selector.
             file_sorting : bool | True
                 Option to sort the files by their names.
         """
+
+        f_start, f_end, f_step = u.intify(f_start, f_end, f_step)
 
         if self.folder is not None:
             self.files = g.glob(self.folder + identifier)
@@ -1422,7 +1420,8 @@ class parallelHDF5Processor(object):
         self.nbinaxes = len(axes)
         self.bincounts = nbins
         self.binranges = ranges
-        
+
+        # Reset containers of results
         self.results = {}
         self.combinedresult = {}
 
