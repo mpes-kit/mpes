@@ -467,6 +467,69 @@ def im2mat(fdir):
     return mat
 
 
+class FileCollection(object):
+    """ File collecting and sorting class.
+    """
+
+    def __init__(self, files=[], file_sorting=True, folder=None):
+
+        self.files = self._sort_terms(files, file_sorting)
+        self.folder = folder
+
+    @property
+    def nfiles(self):
+        """ Total number of loaded files.
+        """
+
+        return len(self.files)
+
+    @staticmethod
+    def _sort_terms(terms, parameter):
+        """
+        Sort terms according to parameter value.
+
+        :Parameters:
+            terms : list
+                List of terms (e.g. strings).
+            parameter : bool
+                Decision parameter for sorting.
+
+        :Return:
+            Sorted or unsorted terms.
+        """
+
+        if parameter == True:
+            return nts.natsorted(terms)
+        else:
+            return terms
+
+    def gatherFiles(self, identifier=r'/*.h5', f_start=None, f_end=None, f_step=1, file_sorting=True):
+        """
+        Gather files from a folder (specified at instantiation).
+
+        :Parameters:
+            identifier : str | r'/*.h5'
+                File identifier used for glob2.glob().
+            f_start, f_end, f_step : int, int, int | None, None, 1
+                Starting, ending file id and the step. Used to construct a file selector.
+            file_sorting : bool | True
+                Option to sort the files by their names.
+        """
+
+        f_start, f_end, f_step = u.intify(f_start, f_end, f_step)
+
+        if self.folder is not None:
+            self.files = g.glob(self.folder + identifier)
+
+            if file_sorting == True:
+                self.files = self._sort_terms(self.files, file_sorting)
+
+            self.files = self.files[slice(f_start, f_end, f_step)]
+
+        else:
+            raise ValueError('No folder is specified!')
+
+
 class hdf5Reader(File):
     """ HDF5 reader class
     """
@@ -1133,7 +1196,7 @@ class hdf5Processor(hdf5Reader):
             # parameters is the same as that for the binning
             jitter_axes = kwds.pop('jitter_axes', axes)
             jitter_bins = kwds.pop('jitter_bins', nbins)
-            jitter_amplitude = kwds.pop('jitter_amplitude', 0.5) * np.ones(self.nbinaxes)
+            jitter_amplitude = kwds.pop('jitter_amplitude', 0.5*np.ones(self.nbinaxes))
             jitter_ranges = kwds.pop('jitter_ranges', ranges)
 
             # Add jitter to the specified dimensions of the data
@@ -1144,8 +1207,8 @@ class hdf5Processor(hdf5Reader):
                 binsize = abs(jr[0] - jr[1])/jb
                 self.hdfdict[jax] = self.hdfdict[jax].astype('float32')
                 # Jitter as random uniformly distributed noise (W. S. Cleveland)
-                self.hdfdict[jax] += jamp * binsize * np.random.
-                uniform(low=-1, high=1, size=sz).astype('float32')
+                self.hdfdict[jax] += jamp * binsize * np.random.uniform(low=-1,
+                                        high=1, size=sz).astype('float32')
 
         # Stack up data from unbinned axes
         data_unbinned = np.stack((self.hdfdict[ax] for ax in axes), axis=1)
@@ -1298,7 +1361,7 @@ class hdf5Splitter(hdf5Reader):
 
     def subset(self, file_id):
         """
-        Spawn an instance of hdf5Processor associated a specified split file.
+        Spawn an instance of hdf5Processor from a specified split file.
         """
 
         if self.splitFilepaths:
@@ -1315,44 +1378,16 @@ class hdf5Splitter(hdf5Reader):
         return hdf5Processor(f_addr=self.faddress)
 
 
-class parallelHDF5Processor(object):
+class parallelHDF5Processor(FileCollection):
     """
     Class for parallel processing of hdf5 files.
     """
 
     def __init__(self, files=[], file_sorting=True, folder=None):
 
-        self.files = self._sort_terms(files, file_sorting)
-        self.folder = folder
+        super().__init__(files=files, file_sorting=file_sorting, folder=folder)
         self.results = {}
         self.combinedresult = {}
-
-    @property
-    def nfiles(self):
-        """ Total number of loaded files.
-        """
-
-        return len(self.files)
-
-    @staticmethod
-    def _sort_terms(terms, parameter):
-        """
-        Sort terms according to parameter value.
-
-        :Parameters:
-            terms : list
-                List of terms (e.g. strings).
-            parameter : bool
-                Decision parameter for sorting.
-
-        :Return:
-            Sorted or unsorted terms.
-        """
-
-        if parameter == True:
-            return nts.natsorted(terms)
-        else:
-            return terms
 
     @staticmethod
     def _arraysum(arraya, arrayb):
@@ -1361,31 +1396,16 @@ class parallelHDF5Processor(object):
 
         return arraya + arrayb
 
-    def gatherFiles(self, identifier=r'/*.h5', f_start=None, f_end=None, f_step=1, file_sorting=True):
+    def subset(self, file_id):
         """
-        Gather files from a folder (specified at instantiation).
-
-        :Parameters:
-            identifier : str | r'/*.h5'
-                File identifier used for glob2.glob().
-            f_start, f_end, f_step : int, int, int | None, None, 1
-                Starting, ending file id and the step. Used to construct a file selector.
-            file_sorting : bool | True
-                Option to sort the files by their names.
+        Spawn an instance of hdf5Processor from a specified substituent file.
         """
 
-        f_start, f_end, f_step = u.intify(f_start, f_end, f_step)
-
-        if self.folder is not None:
-            self.files = g.glob(self.folder + identifier)
-
-            if file_sorting == True:
-                self.files = self._sort_terms(self.files, file_sorting)
-
-            self.files = self.files[slice(f_start, f_end, f_step)]
+        if self.files:
+            return hdf5Processor(f_addr=self.files[file_id])
 
         else:
-            raise ValueError('No folder is specified!')
+            raise ValueError("No substituent file is present.")
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):
