@@ -473,6 +473,28 @@ def peakdetect2d(img, method='daofind', **kwds):
 #  Coordinate calibration  #
 # ======================== #
 
+def kmap_xy(x, y, x0, y0, fx, fy):
+    """
+    Conversion from Cartesian coordinate (x, y) to momentum coordinate.
+    """
+
+    kx = fx * (x - x0)
+    ky = fy * (y - y0)
+
+    return (kx, ky)
+
+
+def kmap_rc(r, c, r0, c0, fr, fc):
+    """
+    Conversion from image coordinate (row, column) to momentum coordinate.
+    """
+
+    kr = fr * (r - r0)
+    kc = fc * (c - c0)
+
+    return (kr, kc)
+
+
 def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
     """
     Momentum axes calibration using the pixel positions of two symmetry points (a and b)
@@ -525,6 +547,10 @@ def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
     elif ret == 'grid':
         k_rowgrid, k_colgrid = np.meshgrid(k_row, k_col)
         return k_rowgrid, k_colgrid
+
+    elif ret == 'func':
+        pfunc = partial(kmap_rc, fr=ratio, fc=ratio)
+        return pfunc
 
 
 def tof2evpoly(a, E0, t):
@@ -1275,6 +1301,9 @@ class MomentumCorrector(object):
         self.image = image
         self.imgndim = image.ndim
         self.rotsym = int(rotsym)
+        self.rotsym_angle = int(360 / self.rotsym)
+        self.arot = np.array([0] + [self.rotsym_angle]*(self.rotsym-1))
+        self.ascale = np.array([1.0]*self.rotsym)
         self.features = {}
 
     def selectSlice2D(self, selector, axis):
@@ -1287,13 +1316,13 @@ class MomentumCorrector(object):
         else:
             raise ValueError('Input image dimension is already 2!')
 
-    def featureExtract(self, image, direction='ccw', type='points'):
+    def featureExtract(self, image, direction='ccw', type='points', **kwds):
         """ Extract features from the selected (hyper)slice.
         """
 
         if type == 'points':
 
-            self.peaks = po.peakdetect2d(image)
+            self.peaks = po.peakdetect2d(image, **kwds)
             self.pcent, self.pouter = po.pointset_center(self.peaks)
             self.pcent = tuple(self.pcent)
             self.pouter_ord = po.pointset_order(self.pouter, direction=direction)
@@ -1309,59 +1338,126 @@ class MomentumCorrector(object):
                 self.mcvdist = self.mdist
                 self.mvvdist = self.mdist
 
-    def linWarpEstimate(self, weights=(1, 1, 1), method='Nelder-Mead', rotangle=0, update=False, ret=True, **kwds):
+        else:
+            raise NotImplementedError
+
+    def _featureUpdate(self, **kwds):
+
+        image = kwds.pop('image', self.slice)
+        # Update the point landmarks in the transformed coordinate system
+        pks = po.peakdetect2d(image, **kwds)
+        self.pcent, self.pouter = po.pointset_center(pks)
+        self.pouter_ord = po.pointset_order(self.pouter, direction='ccw')
+        self.pcent = tuple(self.pcent)
+        self.features['verts'] = self.pouter_ord
+        self.features['center'] = np.atleast_2d(self.pcent)
+
+    def _imageUpdate(self):
+
+        try:
+            self.slice = self.slice_corrected
+            del self.slice_corrected
+        except:
+            pass
+
+        try:
+            self.image = self.image_corrected
+            del self.image_corrected
+        except:
+            pass
+
+    def update(self, content='all', **kwds):
+
+        if content == 'feature':
+            self._featureUpdate(**kwds)
+        elif content == 'image':
+            self._imageUpdate()
+        elif content == 'all':
+            self._imageUpdate()
+            self._featureUpdate(**kwds)
+
+    def linWarpEstimate(self, weights=(1, 1, 1), niter=50, method='Nelder-Mead',
+                        rotangle=0, ret=True, **kwds):
         """ Estimate the linear deformation field.
         """
 
         landmarks = kwds.pop('landmarks', self.pouter_ord)
-        self.init = kwds.pop('fitinit', np.asarray([[0, 60., 60., 60., 60., 60.], [1.0]*self.rotsym]).ravel())
+        # Set up the initial condition for the optimization for symmetrization
+        fitinit = np.asarray([self.arot, self.ascale]).ravel()
+        self.init = kwds.pop('fitinit', fitinit)
 
-        self.prefs, _ = sym.refsetopt(self.init, landmarks, self.pcent, self.mcvdist, self.mvvdist, niter=5, \
+        self.prefs, _ = sym.refsetopt(self.init, landmarks, self.pcent, self.mcvdist, self.mvvdist, niter=niter,
                                       direction=1, weights=weights, method=method, stepsize=0.5)
-        self.slice_corrected, self.H = sym.imgWarping(self.slice, landmarks=landmarks, refs=self.prefs)
 
-        if update:
-            self.slice = self.slice_corrected
-            del self.slice_corrected
+        # Calculate linearly warped image and landmark positions
+        self.slice_corrected, self.linwarp = sym.imgWarping(self.slice, landmarks=landmarks, refs=self.prefs)
 
         if ret:
             return self.slice_corrected
 
-    def nonlinWarpEstimate(self, update=False, ret=True):
+    @staticmethod
+    def transform(points, mapping):
+        """ Coordinate transform of a point set in the (row, column) formulation
+        """
+
+        pts_cart_trans = sym.pointsetTransform(np.roll(points, shift=1, axis=1), mapping)
+
+        return np.roll(pts_cart_trans, shift=1, axis=1)
+
+    def nonlinWarpEstimate(self, image, axis, rand_amp=1, ret=True):
         """ Estimate the nonlinear deformation field.
         """
 
-        if update:
-            self.slice = self.slice_corrected
-            del self.slice_corrected
+        self.prefs = sym.vertexGenerator(self.pcent, self.pouter_ord[0,:], self.arot, direction=-1,
+                                         scale=self.ascale, rand_amp=rand_amp, ret='all')[1:,:]
+        self.image_corrected, self.nonlinwarp = tps.tpsWarping(self.pouter_ord, self.prefs, image, axis)
 
         if ret:
-            return self.slice_corrected
+            return self.image_corrected
 
-    def correct(self, axis, update=True):
+    def rotate(self, angle, **kwds):
+        """ Test image rotation.
+        """
+
+        image = kwds.pop('image', self.slice)
+        rotmat = cv2.getRotationMatrix2D(self.pcent, angle=angle, scale=1)
+        # Construct rotation matrix in homogeneous coordinate
+        rotmat = np.concatenate((rotmat, np.array([0, 0, 1], ndmin=2)), axis=0)
+
+        self.image_rot = cv2.warpPerspective(image, rotmat, image.shape)
+
+        self.composite_linwarp = np.dot(rotmat, self.linwarp)
+
+    def correct(self, axis, **kwds):
         """ Correct a stack of images.
         """
 
-        self.image_corrected = sym.applyWarping(self.image, axis, hgmat=self.H)
+        mapping = kwds.pop('mapping', self.linwarp)
+        self.image_corrected = sym.applyWarping(self.image, axis, hgmat=mapping)
 
-        if update:
-            self.image = self.image_corrected
-            del self.image
-
-    def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={}, annotated=False, ret=False, **kwds):
+    def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={},
+             annotated=False, ret=False, imkwd={}, **kwds):
         """ Generate imshow plot.
         """
 
         image = kwds.pop('image', self.slice)
         f, ax = plt.subplots(figsize=figsize)
-        ax.imshow(image, origin=origin, cmap=cmap)
+        ax.imshow(image, origin=origin, cmap=cmap, **imkwd)
 
+        # Add annotation to the figure
         if annotated:
+            tsr, tsc = kwds.pop('textshift', (3, 3))
+            txtsize = kwds.pop('textsize', 12)
+
             for pk, pvs in points.items():
-                ax.scatter(pvs[:,1], pvs[:,0])
+                try:
+                    ax.scatter(pvs[:,1], pvs[:,0])
+                except:
+                    ax.scatter(pvs[1], pvs[0])
+
                 if pvs.size > 2:
                     for ipv, pv in enumerate(pvs):
-                        ax.text(pv[1]+3, pv[0]+3, str(ipv), fontsize=12)
+                        ax.text(pv[1]+tsc, pv[0]+tsr, str(ipv), fontsize=txtsize)
 
         if ret:
             return f, ax
@@ -1370,9 +1466,27 @@ class MomentumCorrector(object):
         """ Calibration of the momentum axes.
         """
 
-        kvals = aly.calibrateK(image, point_from, point_to, dist, ret=ret)
+        conv = calibrateK(image, point_from, point_to, dist, ret=ret)
 
-        return kvals
+        return conv
+
+    def save(self, form='tiff', save_addr='./', dtyp='float32', **kwds):
+        """ Save the distortion-corrected dataset.
+        """
+
+        data = kwds.pop('data', self.image).astype(dtyp)
+
+        if form == 'tiff':
+
+            try:
+                import tifffile as ti
+                ti.imsave(save_addr, data=data)
+            except ImportError:
+                raise('tifffile package is not installed locally!')
+
+        elif form == 'mat':
+
+            sio.savemat(save_addr, {'data':data})
 
 
 # ================ #
