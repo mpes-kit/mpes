@@ -22,9 +22,9 @@ import numpy.fft as nft
 from numpy import polyval as poly
 from scipy.interpolate import interp1d
 from scipy.signal import savgol_filter
-from PIL import Image as pim
-import skimage.io as skio
 import scipy.io as sio
+import skimage.io as skio
+from PIL import Image as pim
 from h5py import File
 import psutil as ps
 import dask as d, dask.array as da, dask.dataframe as ddf
@@ -809,7 +809,7 @@ class hdf5Reader(File):
 
         if form == 'mat': # Save dictionary as mat file
             hdfdict = self.summarize(form='dict', ret=True, **kwds)
-            sio.savemat(save_fname, hdfdict)
+            sio.savemat(save_addr, hdfdict)
 
         elif form == 'parquet': # Save dataframe as parquet file
             self.edf.to_parquet(save_addr, compression='UNCOMPRESSED', append=pqappend, ignore_divisions=True)
