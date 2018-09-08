@@ -22,3 +22,4 @@ opencv-contrib-python
 xarray
 astropy
 photutils
+symmetrize
