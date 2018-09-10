@@ -28,6 +28,7 @@ from copy import copy
 import re, glob2 as g
 from PIL import Image
 import imageio as imio
+import natsort as nts
 
 global PLOT3D
 PLOT3D = False
@@ -892,7 +893,7 @@ def trisurf2d(datamat, **kwds):
 #  Movie generation  #
 # ================== #
 
-def moviemaker(foldername, imform='png', movform='avi', namestr='movie', **kwds):
+def moviemaker(foldername, imform='png', movform='avi', namestr='movie', file_sorting=True, ret=False, **kwds):
     """ Generate a movie file from a stack of images
     """
 
@@ -900,12 +901,16 @@ def moviemaker(foldername, imform='png', movform='avi', namestr='movie', **kwds)
     loop = kwds.pop('loop', 1)
 
     fnames = g.glob(foldername + r'\*.'+imform)
-    _, fnames_sorted = fp.sortNamesBy(fnames, pattern=r'\d+')
-    images = []
+    if file_sorting == True:
+        fnames = nts.natsorted(fnames)
 
-    for fid, fn in enumerate(fnames_sorted):
+    images = []
+    for fid, fn in enumerate(fnames):
 
         im = Image.open(fn)
         images.append(np.asarray(im))
 
     imio.mimsave(namestr+'.'+movform, images, fps=fps)
+
+    if ret:
+        return fnames
