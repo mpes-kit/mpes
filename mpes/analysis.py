@@ -1293,13 +1293,16 @@ def applyWarping(imgstack, axis, hgmat):
 
 class MomentumCorrector(object):
     """
-    Momentum correction and calibration workflow.
+    Momentum distortion correction and momentum calibration workflow.
     """
 
     def __init__(self, image, rotsym=6):
 
         self.image = image
         self.imgndim = image.ndim
+        if (self.imgndim > 3) or (self.imgndim < 2):
+            raise ValueError('The input image dimension need to be 2 or 3!')
+
         self.rotsym = int(rotsym)
         self.rotsym_angle = int(360 / self.rotsym)
         self.arot = np.array([0] + [self.rotsym_angle]*(self.rotsym-1))
@@ -1313,7 +1316,7 @@ class MomentumCorrector(object):
         if self.imgndim > 2:
             im = np.moveaxis(self.image, axis, 0)
             self.slice = im[selector,...].sum(axis=0)
-        else:
+        elif self.imgndim == 2:
             raise ValueError('Input image dimension is already 2!')
 
     def featureExtract(self, image, direction='ccw', type='points', **kwds):
@@ -1322,6 +1325,7 @@ class MomentumCorrector(object):
 
         if type == 'points':
 
+            # Detection and ordering of geometric landmarks
             self.peaks = po.peakdetect2d(image, **kwds)
             self.pcent, self.pouter = po.pointset_center(self.peaks)
             self.pcent = tuple(self.pcent)
@@ -1329,7 +1333,7 @@ class MomentumCorrector(object):
             # Construct feature dictionary
             self.features['verts'] = self.pouter_ord
             self.features['center'] = np.atleast_2d(self.pcent)
-
+            # Calculate geometric distances
             self.mcvdist = po.cvdist(self.pouter_ord, self.pcent).mean()
             self.mvvdist = po.vvdist(self.pouter_ord).mean()
 
@@ -1342,6 +1346,8 @@ class MomentumCorrector(object):
             raise NotImplementedError
 
     def _featureUpdate(self, **kwds):
+        """ Update selected features.
+        """
 
         image = kwds.pop('image', self.slice)
         # Update the point landmarks in the transformed coordinate system
@@ -1353,6 +1359,8 @@ class MomentumCorrector(object):
         self.features['center'] = np.atleast_2d(self.pcent)
 
     def _imageUpdate(self):
+        """ Update distortion-corrected images.
+        """
 
         try:
             self.slice = self.slice_corrected
@@ -1367,6 +1375,8 @@ class MomentumCorrector(object):
             pass
 
     def update(self, content='all', **kwds):
+        """ Update specific attributes of the class.
+        """
 
         if content == 'feature':
             self._featureUpdate(**kwds)
@@ -1386,8 +1396,8 @@ class MomentumCorrector(object):
         fitinit = np.asarray([self.arot, self.ascale]).ravel()
         self.init = kwds.pop('fitinit', fitinit)
 
-        self.prefs, _ = sym.refsetopt(self.init, landmarks, self.pcent, self.mcvdist, self.mvvdist, niter=niter,
-                                      direction=1, weights=weights, method=method, stepsize=0.5)
+        self.prefs, _ = sym.refsetopt(self.init, landmarks, self.pcent, self.mcvdist, self.mvvdist, niter=niter,\
+                                        direction=1, weights=weights, method=method, stepsize=0.5)
 
         # Calculate linearly warped image and landmark positions
         self.slice_corrected, self.linwarp = sym.imgWarping(self.slice, landmarks=landmarks, refs=self.prefs)
@@ -1415,25 +1425,64 @@ class MomentumCorrector(object):
         if ret:
             return self.image_corrected
 
-    def rotate(self, angle, **kwds):
-        """ Test image rotation.
+    def rotate(self, angle, ret=False, **kwds):
+        """ Rotate 2D image in the homogeneous coordinate.
         """
 
         image = kwds.pop('image', self.slice)
-        rotmat = cv2.getRotationMatrix2D(self.pcent, angle=angle, scale=1)
-        # Construct rotation matrix in homogeneous coordinate
-        rotmat = np.concatenate((rotmat, np.array([0, 0, 1], ndmin=2)), axis=0)
+        center = kwds.pop('center', self.pcent)
+        scale = kwds.pop('center', 1)
 
-        self.image_rot = cv2.warpPerspective(image, rotmat, image.shape)
-
+        self.image_rot, rotmat = _rotate2d(image, center, angle, scale)
+        # Compose the rotation matrix with the previously determined warping matrix
         self.composite_linwarp = np.dot(rotmat, self.linwarp)
 
-    def correct(self, axis, **kwds):
-        """ Correct a stack of images.
+        if ret:
+            return rotmat
+
+    def correct(self, axis, use_composite_transform=False, update=False, **kwds):
+        """ Apply a 2D transform to a stack of 2D images (3D).
         """
 
-        mapping = kwds.pop('mapping', self.linwarp)
-        self.image_corrected = sym.applyWarping(self.image, axis, hgmat=mapping)
+        image = kwds.pop('image', self.image)
+        if use_composite_transform == True:
+            hgmat = kwds.pop('warping', self.composite_linwarp)
+        else:
+            hgmat = kwds.pop('warping', self.linwarp)
+
+        self.image_corrected = sym.applyWarping(image, axis, hgmat=hgmat)
+
+        if update == True:
+            self._imageUpdate()
+
+    @staticmethod
+    def correctnd(data, warping, **kwds):
+        """ Apply a 2D transform to 2D in n-dimensional data.
+        """
+
+        apply_axis = kwds.pop('apply_axis', (0, 1))
+        dshape = data.shape
+        dsize = kwds.pop('dsize', op.itemgetter(*apply_axis)(dshape))
+
+        # Reshape data
+        redata = reshape2d(data, apply_axis)
+        redata = np.moveaxis(redata, 2, 0)
+        redata = mapping(redata, cv2.warpPerspective, M=warping, dsize=dsize, **kwds)
+        redata = np.moveaxis(redata, 0, 2).reshape(dshape)
+
+        return redata
+
+    def getWarpFunction(self, **kwds):
+        """ Construct warping function to apply to other datasets.
+        """
+
+        try:
+            warping = kwds.pop('warping', self.composite_linwarp)
+        except:
+            warping = kwds.pop('warping', self.linwarp)
+        warpfunc = partial(self.correctnd, warping=warping)
+
+        return warpfunc
 
     def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={},
              annotated=False, ret=False, imkwd={}, **kwds):
@@ -1487,6 +1536,54 @@ class MomentumCorrector(object):
         elif form == 'mat':
 
             sio.savemat(save_addr, {'data':data})
+
+
+def reshape2d(data, apply_axis):
+    """ Reshape matrix to apply 2D function to.
+    """
+
+    nax = len(apply_axis)
+    dshape = data.shape
+    dim_rest = tuple(set(range(data.ndim)) - set(apply_axis))
+    shapedict = dict(enumerate(dshape))
+
+    # Calculate the matrix dimension to reshape original data into
+    reshapedict = {}
+    for ax in apply_axis:
+        reshapedict[ax] = dshape[ax]
+
+    squeezed_dim = 1
+    for dr in dim_rest:
+        squeezed_dim *= shapedict[dr]
+    reshapedict[nax+1] = squeezed_dim
+
+    reshape_dims = tuple(reshapedict.values())
+    data = data.reshape(reshape_dims)
+
+    return data
+
+
+def mapping(data, f, **kwds):
+    """ Mapping a generic function to multidimensional data with
+    the possibility to supply keyword arguments.
+    """
+
+    result = np.asarray(list(map(lambda x:f(x, **kwds), data)))
+
+    return result
+
+
+def _rotate2d(image, center, angle, scale=1):
+    """ 2D matrix rotation.
+    """
+
+    rotmat = cv2.getRotationMatrix2D(center, angle=angle, scale=scale)
+    # Construct rotation matrix in homogeneous coordinate
+    rotmat = np.concatenate((rotmat, np.array([0, 0, 1], ndmin=2)), axis=0)
+
+    image_rot = cv2.warpPerspective(image, rotmat, image.shape)
+
+    return image_rot, rotmat
 
 
 # ================ #
