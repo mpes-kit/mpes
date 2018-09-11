@@ -13,13 +13,14 @@ lmfit
 h5py
 #tifffile
 dask[complete]
+fastparquet
 tqdm
 natsort
 imageio
 numba
 opencv-python
-opencv-contrib-python
 xarray
 astropy
 photutils
 symmetrize
+silx[full]

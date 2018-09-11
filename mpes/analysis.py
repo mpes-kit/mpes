@@ -16,25 +16,26 @@
 # =======================================
 
 from __future__ import print_function, division
-from . import utils as u, ellipsefit as elf
+from . import utils as u, fprocessing as fp, ellipsefit as elf
 from math import cos, pi
 import numpy as np
 from numpy.linalg import norm, lstsq
 import scipy.optimize as opt
 from scipy.special import wofz
+import scipy.io as sio
 import pandas as pd
 from skimage import measure, filters, morphology
 from skimage.draw import line, circle, polygon
 from skimage.feature import peak_local_max
+import cv2
 import astropy.stats as astat
 import photutils as pho
-import cv2
+from symmetrize import sym, pointops as po
 from functools import reduce, partial
-import warnings as wn
 import operator as op
 import matplotlib.pyplot as plt
-from symmetrize import sym, pointops as po
-
+from silx.io import dictdump
+import warnings as wn
 
 # =================== #
 #  Utility functions  #
@@ -1456,31 +1457,12 @@ class MomentumCorrector(object):
             self._imageUpdate()
 
     @staticmethod
-    def correctnd(data, warping, **kwds):
-        """ Apply a 2D transform to 2D in n-dimensional data.
-        """
-
-        apply_axis = kwds.pop('apply_axis', (0, 1))
-        dshape = data.shape
-        dsize = kwds.pop('dsize', op.itemgetter(*apply_axis)(dshape))
-
-        # Reshape data
-        redata = reshape2d(data, apply_axis)
-        redata = np.moveaxis(redata, 2, 0)
-        redata = mapping(redata, cv2.warpPerspective, M=warping, dsize=dsize, **kwds)
-        redata = np.moveaxis(redata, 0, 2).reshape(dshape)
-
-        return redata
-
-    def getWarpFunction(self, **kwds):
+    def getWarpFunction(**kwds):
         """ Construct warping function to apply to other datasets.
         """
 
-        try:
-            warping = kwds.pop('warping', self.composite_linwarp)
-        except:
-            warping = kwds.pop('warping', self.linwarp)
-        warpfunc = partial(self.correctnd, warping=warping)
+        warping = kwds.pop('warping', np.eye(3))
+        warpfunc = partial(correctnd, warping=warping)
 
         return warpfunc
 
@@ -1519,23 +1501,41 @@ class MomentumCorrector(object):
 
         return conv
 
-    def save(self, form='tiff', save_addr='./', dtyp='float32', **kwds):
-        """ Save the distortion-corrected dataset.
+    def saveImage(self, form='tiff', save_addr='./', dtyp='float32', **kwds):
+        """ Save the distortion-corrected dataset (image only, without axes).
         """
 
         data = kwds.pop('data', self.image).astype(dtyp)
+        save_addr = fp.appendformat(save_addr, form)
 
         if form == 'tiff':
 
             try:
                 import tifffile as ti
-                ti.imsave(save_addr, data=data)
+                ti.imsave(save_addr, data=data, **kwds)
+
             except ImportError:
                 raise('tifffile package is not installed locally!')
 
         elif form == 'mat':
 
             sio.savemat(save_addr, {'data':data})
+
+    def saveParameters(self, form='h5', save_addr='./momentum'):
+        """ Save all the attributes of the workflow instance for later use
+        (e.g. reconstructing the warping map function).
+        """
+
+        save_addr = fp.appendformat(save_addr, form)
+
+        if form == 'mat':
+            sio.savemat(save_addr, self.__dict__)
+
+        elif form in ('h5', 'hdf5'):
+            dictdump.dicttoh5(self.__dict__, save_addr, mode='w')
+
+        else:
+            raise NotImplementedError
 
 
 def reshape2d(data, apply_axis):
@@ -1584,6 +1584,23 @@ def _rotate2d(image, center, angle, scale=1):
     image_rot = cv2.warpPerspective(image, rotmat, image.shape)
 
     return image_rot, rotmat
+
+
+def correctnd(data, warping, **kwds):
+    """ Apply a 2D transform to 2D in n-dimensional data.
+    """
+
+    apply_axis = kwds.pop('apply_axis', (0, 1))
+    dshape = data.shape
+    dsize = kwds.pop('dsize', op.itemgetter(*apply_axis)(dshape))
+
+    # Reshape data
+    redata = reshape2d(data, apply_axis)
+    redata = np.moveaxis(redata, 2, 0)
+    redata = mapping(redata, cv2.warpPerspective, M=warping, dsize=dsize, **kwds)
+    redata = np.moveaxis(redata, 0, 2).reshape(dshape)
+
+    return redata
 
 
 # ================ #
