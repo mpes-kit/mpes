@@ -32,6 +32,7 @@ import astropy.stats as astat
 import photutils as pho
 from symmetrize import sym, pointops as po
 from functools import reduce, partial
+from funcy import project
 import operator as op
 import matplotlib.pyplot as plt
 from silx.io import dictdump
@@ -122,13 +123,13 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
         the photoelectron energy axis
     y : 1D numeric array
         the photoemission intensity axis
-    tol : float
+    tol : float | 1e-5
         fitting tolerance
     maxiter : int | 20
         maximal iteration
     explicit : bool | False
         explicit display of iteration number
-    warning : bool | True
+    warning : bool | False
         display of warnings during calculation
 
     **Return**
@@ -537,21 +538,23 @@ def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
     coldist = range(nc) - pxlb[1]
     k_col = coldist * ratio + coordb[1]
 
-    # Specify return options
-    if ret == 'axes':
-        return k_row, k_col
+    # Calculate other return parameters
+    pfunc = partial(kmap_rc, fr=ratio, fc=ratio)
+    k_rowgrid, k_colgrid = np.meshgrid(k_row, k_col)
 
-    elif ret == 'extent':
-        axis_extent = [k_col[0], k_col[-1], k_row[0], k_row[-1]]
-        return axis_extent
+    # Assemble into return dictionary
+    kcalibdict = {}
+    kcalibdict['axis'] = (k_row, k_col)
+    kcalibdict['extent'] = (k_col[0], k_col[-1], k_row[0], k_row[-1])
+    kcalibdict['coeffs'] = (ratio, ratio)
+    kcalibdict['grid'] = (k_rowgrid, k_colgrid)
 
-    elif ret == 'grid':
-        k_rowgrid, k_colgrid = np.meshgrid(k_row, k_col)
-        return k_rowgrid, k_colgrid
-
+    if ret == 'all':
+        return kcalibdict
     elif ret == 'func':
-        pfunc = partial(kmap_rc, fr=ratio, fc=ratio)
         return pfunc
+    else:
+        return project(kcalibdict, ret)
 
 
 def tof2evpoly(a, E0, t):
@@ -572,9 +575,10 @@ def tof2evpoly(a, E0, t):
             Converted energy
     """
 
-    odr = len(a)
+    odr = len(a) # Polynomial order
     a = a[::-1]
     E = 0
+
     for i, d in enumerate(range(1, odr+1)):
         E += a[i]*t**d
     E += E0
@@ -1493,13 +1497,18 @@ class MomentumCorrector(object):
         if ret:
             return f, ax
 
-    def calibrate(self, image, point_from, point_to, dist, ret='extent'):
-        """ Calibration of the momentum axes.
+    def calibrate(self, image, point_from, point_to, dist, ret='coeffs'):
+        """ Calibration of the momentum axes. Obtain all calibration-related values,
+        return only the ones requested.
         """
 
-        conv = calibrateK(image, point_from, point_to, dist, ret=ret)
+        self.calibration = calibrateK(image, point_from, point_to, dist, ret='all')
 
-        return conv
+        if ret != False:
+            try:
+                return project(self.calibration, [ret])
+            except:
+                return project(self.calibration, ret)
 
     def saveImage(self, form='tiff', save_addr='./', dtyp='float32', **kwds):
         """ Save the distortion-corrected dataset (image only, without axes).
