@@ -719,6 +719,85 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
         return eVscale
 
 
+class MapParser(fp.FileCollection):
+    """ Parser of recorded parameters and turn into functional maps.
+    """
+
+    def __init__(self, files=[], file_sorting=True, folder=None, **kwds):
+
+        super().__init__(files=files, file_sorting=file_sorting, folder=folder)
+
+    @property
+    def kfile(self, **kwds):
+        """ File containing the momentum correction and calibration information.
+        """
+
+        fstr_k = kwds.pop('filestring_momentum', 'momentum.')
+        return self.filterFile(wexpr=fstr_k)
+
+    @property
+    def Efile(self, **kwds):
+        """ File containing the energy calibration information.
+        """
+
+        fstr_E = kwds.pop('filestring_energy', 'energy.')
+        return self.filterFile(wexpr=fstr_E)
+
+    @property
+    def kMap(self):
+        """ The (row, column) to momentum coordinate transform function.
+        """
+
+        try:
+            self.parse_kmap()
+            return partial(kmap_rc, fr=self.fr, fc=self.fc)
+
+        except:
+            return None
+
+    @property
+    def Emap(self, func):
+        """ The ToF to energy coordinate transform function.
+        """
+
+        try:
+            self.parse_Emap()
+            return partial(func, a=coeffs)
+
+        except:
+            pass
+
+    @property
+    def wmap(self):
+        """ The distortion correction transform function.
+        """
+
+        try:
+            self.parse_wmap()
+            return partial(correctnd, warping=warping)
+
+        except:
+            pass
+
+    def parse_kmap(self):
+        """ Retrieve the parameters to construct the momentum conversion function.
+        """
+
+        self.fr, self.fc = dictdump.load(self.kfile)['calibration']['coeffs']
+
+    def parse_Emap(self):
+        """ Retrieve the parameters to construct the energy conversion function.
+        """
+
+        self.coeffs = dictdump.load(self.Efile)['coeffs']
+
+    def parse_wmap(self):
+        """ Retrieve the parameters to construct the distortion correction function
+        """
+
+        self.warping = dictdump.load(self.kfile)['warping']
+
+
 # ==================== #
 #  Image segmentation  #
 # ==================== #
