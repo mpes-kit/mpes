@@ -668,6 +668,121 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
         return eVscale
 
 
+class EnergyCalibrator(FileCollection):
+    """
+    Electron binding energy calibration workflow.
+    """
+
+    def __init__(self, biases=None, files=[], folder=None, file_sorting=True, traces=None):
+
+        self.biases = biases
+
+        super().__init__(folder=folder, file_sorting=file_sorting, files=files)
+
+        if traces:
+            self.traces = traces
+        else:
+            self.traces = 0
+
+    @property
+    def nfiles(self):
+        """ The number of loaded files.
+        """
+
+        return len(self.files)
+
+    def read(self, form='h5', name=''):
+        """ Read traces (e.g. energy dispersion curves) from files.
+        """
+
+        traces = []
+        if form == 'h5':
+
+            for f in self.files:
+                traces = np.asarray(File(f).get(name))
+
+        elif form == 'mat':
+
+            for f in self.files:
+                traces = sio.loadmat(f)[name]
+
+        self.traces = np.array(traces)
+
+    def normalize(self, axis, **kwds):
+        """ Normalize the spectra along an axis.
+        """
+
+        self.normspec = normspec(*self.traces, **kwds)
+
+    @staticmethod
+    def findCorrespondence(self, sig_still, sig_mov, position, order=3):
+        """ Determine the parametric map between two traces by alignment.
+        """
+        from ptw import ptw
+        w, siglim, a = ptw.timeWarp(sig_still, sig_mov)
+
+        return a
+
+    def featureSelect(self, trace_id, peakrange, infer_others=True, **kwds):
+        """ Select the equivalent landmarks among all traces.
+        """
+
+        self.peakrange = peakrange
+
+        if infer_others == True:
+            pass
+        else:
+            self.peaks = aly.peaksearch(normedcs, tof, peakrange, **kwds)
+
+    def calibrate(self, refid=0, ret='coeffs', **kwds):
+        """ Calibrate the energy scales using optimization methods.
+        """
+
+        landmarks = kwd.pop('landmarks', self.peaks)
+        biases = kwds.pop('biases', self.biases)
+        self.calibration = calibrateE(landmarks, biases, refid=refid, ret=ret)
+
+        if ret != False:
+            try:
+                return project(self.calibration, [ret])
+            except:
+                return project(self.calibration, ret)
+
+    def view(self, ret=False, **kwds):
+        """ Display a plot showing all traces with annotation.
+        """
+
+        figsize = kwds.pop('figsize', (12, 4))
+        f, ax = plt.subplots(figsize=figsize)
+
+        ax.plot(tof, trace, '--k', linewidth=1)
+        ax.plot(tofseg, trseg, linewidth=2)
+        ax.scatter(maxs[0, 0], maxs[0, 1], s=30)
+
+        # ax.plot(tof2ev(7018, tofseg), normedcs[0,:][tofcond], label=str(Vs[0]) + ' V')
+
+        ax.legend()
+        ax.xticks(range(-3, 10, 1))
+        ax.xlabel('Energy (eV)', fontsize=15)
+
+        if ret:
+            return f, ax
+
+    def saveParameters(self, form='h5', save_addr='./energy'):
+        """ Save all the attributes of the workflow instance for later use
+        (e.g. energy scale conversion).
+        """
+
+        if form == 'mat':
+            sio.savemat(save_addr, self.__dict__)
+
+        elif form in ('h5', 'hdf5'):
+            dictdump.dicttoh5(self.__dict__, save_addr, mode='w')
+
+        else:
+            raise NotImplementedError
+
+
 # ==================== #
 #  Image segmentation  #
 # ==================== #
@@ -1481,7 +1596,7 @@ class MomentumCorrector(object):
 
     def saveParameters(self, form='h5', save_addr='./momentum'):
         """ Save all the attributes of the workflow instance for later use
-        (e.g. reconstructing the warping map function).
+        (e.g. momentum scale conversion, reconstructing the warping map function).
         """
 
         save_addr = u.appendformat(save_addr, form)

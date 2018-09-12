@@ -1735,7 +1735,7 @@ def fftfilter2d(datamat):
     return fltrmat
 
 
-def normspec(*specs, smooth=False, aligned=False, span=13, order=1):
+def normspec(*specs, smooth=False, span=13, order=1):
     """
     Normalize a series of 1D spectra
     """
