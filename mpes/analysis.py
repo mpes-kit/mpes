@@ -16,7 +16,7 @@
 # =======================================
 
 from __future__ import print_function, division
-from . import utils as u, fprocessing as fp, ellipsefit as elf
+from . import base, utils as u, ellipsefit as elf
 from math import cos, pi
 import numpy as np
 from numpy.linalg import norm, lstsq
@@ -475,28 +475,6 @@ def peakdetect2d(img, method='daofind', **kwds):
 #  Coordinate calibration  #
 # ======================== #
 
-def kmap_xy(x, y, x0, y0, fx, fy):
-    """
-    Conversion from Cartesian coordinate (x, y) to momentum coordinate.
-    """
-
-    kx = fx * (x - x0)
-    ky = fy * (y - y0)
-
-    return (kx, ky)
-
-
-def kmap_rc(r, c, r0, c0, fr, fc):
-    """
-    Conversion from image coordinate (row, column) to momentum coordinate.
-    """
-
-    kr = fr * (r - r0)
-    kc = fc * (c - c0)
-
-    return (kr, kc)
-
-
 def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
     """
     Momentum axes calibration using the pixel positions of two symmetry points (a and b)
@@ -539,7 +517,7 @@ def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
     k_col = coldist * ratio + coordb[1]
 
     # Calculate other return parameters
-    pfunc = partial(kmap_rc, fr=ratio, fc=ratio)
+    pfunc = partial(base.kmap_rc, fr=ratio, fc=ratio)
     k_rowgrid, k_colgrid = np.meshgrid(k_row, k_col)
 
     # Assemble into return dictionary
@@ -555,35 +533,6 @@ def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
         return pfunc
     else:
         return project(kcalibdict, ret)
-
-
-def tof2evpoly(a, E0, t):
-    """
-    Polynomial approximation of the time-of-flight to electron volt
-    conversion formula.
-
-    :Parameters:
-        a : 1D array
-            Polynomial coefficients.
-        E0 : float
-            Energy offset.
-        t : numeric array
-            Drift time of electron.
-
-    :Return:
-        E : numeric array
-            Converted energy
-    """
-
-    odr = len(a) # Polynomial order
-    a = a[::-1]
-    E = 0
-
-    for i, d in enumerate(range(1, odr+1)):
-        E += a[i]*t**d
-    E += E0
-
-    return E
 
 
 def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plot=False):
@@ -705,7 +654,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
     a = sol[0]
 
     # Construct the calibrating function
-    pfunc = partial(tof2evpoly, a)
+    pfunc = partial(base.tof2evpoly, a)
 
     # Return results according to specification
     if ret == 'func':
@@ -717,85 +666,6 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
     elif ret == 'eVscale':
         eVscale = pfunc(E0, t)
         return eVscale
-
-
-class MapParser(fp.FileCollection):
-    """ Parser of recorded parameters and turn into functional maps.
-    """
-
-    def __init__(self, files=[], file_sorting=True, folder=None, **kwds):
-
-        super().__init__(files=files, file_sorting=file_sorting, folder=folder)
-
-    @property
-    def kfile(self, **kwds):
-        """ File containing the momentum correction and calibration information.
-        """
-
-        fstr_k = kwds.pop('filestring_momentum', 'momentum.')
-        return self.filterFile(wexpr=fstr_k)
-
-    @property
-    def Efile(self, **kwds):
-        """ File containing the energy calibration information.
-        """
-
-        fstr_E = kwds.pop('filestring_energy', 'energy.')
-        return self.filterFile(wexpr=fstr_E)
-
-    @property
-    def kMap(self):
-        """ The (row, column) to momentum coordinate transform function.
-        """
-
-        try:
-            self.parse_kmap()
-            return partial(kmap_rc, fr=self.fr, fc=self.fc)
-
-        except:
-            return None
-
-    @property
-    def Emap(self, func):
-        """ The ToF to energy coordinate transform function.
-        """
-
-        try:
-            self.parse_Emap()
-            return partial(func, a=coeffs)
-
-        except:
-            pass
-
-    @property
-    def wmap(self):
-        """ The distortion correction transform function.
-        """
-
-        try:
-            self.parse_wmap()
-            return partial(correctnd, warping=warping)
-
-        except:
-            pass
-
-    def parse_kmap(self):
-        """ Retrieve the parameters to construct the momentum conversion function.
-        """
-
-        self.fr, self.fc = dictdump.load(self.kfile)['calibration']['coeffs']
-
-    def parse_Emap(self):
-        """ Retrieve the parameters to construct the energy conversion function.
-        """
-
-        self.coeffs = dictdump.load(self.Efile)['coeffs']
-
-    def parse_wmap(self):
-        """ Retrieve the parameters to construct the distortion correction function
-        """
-
-        self.warping = dictdump.load(self.kfile)['warping']
 
 
 # ==================== #
@@ -1121,7 +991,7 @@ def apply_mask_along(arr, mask, axes=None):
             Multidimensional array for masking.
         mask : nD array
             Mask to apply.
-        axes : list/tuple of int
+        axes : list/tuple of int | None
             The axes to apply the mask to.
 
     :Return:
@@ -1159,7 +1029,7 @@ def points2path(pointsr, pointsc, ret='separated'):
     :Parameters:
         pointsr, pointsc : list/tuple/array
             The row and column pixel coordinates of the special points along the sampling path.
-        ret : str
+        ret : str | 'separated'
             Specify if return combined ('combined') or separated ('separated') row and column coordinates.
 
     :Returns:
@@ -1201,11 +1071,11 @@ def bandpath_map(bsvol, pathr=None, pathc=None, path_coords=None, eaxis=2):
     :Parameters:
         bsvol : 3D array
             Volumetric band structure data.
-        pathr, pathc : 1D array
+        pathr, pathc : 1D array | None, None
             Row and column pixel coordinates of the band path (ignored if path_coords is given).
-        path_coords : 2D array
+        path_coords : 2D array | None
             Combined row and column pixel coordinates of the band path.
-        eaxis : int
+        eaxis : int | 2
             Energy axis index.
 
     :Return:
@@ -1545,7 +1415,7 @@ class MomentumCorrector(object):
         """
 
         warping = kwds.pop('warping', np.eye(3))
-        warpfunc = partial(correctnd, warping=warping)
+        warpfunc = partial(base.correctnd, warping=warping)
 
         return warpfunc
 
@@ -1594,7 +1464,7 @@ class MomentumCorrector(object):
         """
 
         data = kwds.pop('data', self.image).astype(dtyp)
-        save_addr = fp.appendformat(save_addr, form)
+        save_addr = u.appendformat(save_addr, form)
 
         if form == 'tiff':
 
@@ -1614,7 +1484,7 @@ class MomentumCorrector(object):
         (e.g. reconstructing the warping map function).
         """
 
-        save_addr = fp.appendformat(save_addr, form)
+        save_addr = u.appendformat(save_addr, form)
 
         if form == 'mat':
             sio.savemat(save_addr, self.__dict__)
@@ -1624,41 +1494,6 @@ class MomentumCorrector(object):
 
         else:
             raise NotImplementedError
-
-
-def reshape2d(data, apply_axis):
-    """ Reshape matrix to apply 2D function to.
-    """
-
-    nax = len(apply_axis)
-    dshape = data.shape
-    dim_rest = tuple(set(range(data.ndim)) - set(apply_axis))
-    shapedict = dict(enumerate(dshape))
-
-    # Calculate the matrix dimension to reshape original data into
-    reshapedict = {}
-    for ax in apply_axis:
-        reshapedict[ax] = dshape[ax]
-
-    squeezed_dim = 1
-    for dr in dim_rest:
-        squeezed_dim *= shapedict[dr]
-    reshapedict[nax+1] = squeezed_dim
-
-    reshape_dims = tuple(reshapedict.values())
-    data = data.reshape(reshape_dims)
-
-    return data
-
-
-def mapping(data, f, **kwds):
-    """ Mapping a generic function to multidimensional data with
-    the possibility to supply keyword arguments.
-    """
-
-    result = np.asarray(list(map(lambda x:f(x, **kwds), data)))
-
-    return result
 
 
 def _rotate2d(image, center, angle, scale=1):
@@ -1672,23 +1507,6 @@ def _rotate2d(image, center, angle, scale=1):
     image_rot = cv2.warpPerspective(image, rotmat, image.shape)
 
     return image_rot, rotmat
-
-
-def correctnd(data, warping, **kwds):
-    """ Apply a 2D transform to 2D in n-dimensional data.
-    """
-
-    apply_axis = kwds.pop('apply_axis', (0, 1))
-    dshape = data.shape
-    dsize = kwds.pop('dsize', op.itemgetter(*apply_axis)(dshape))
-
-    # Reshape data
-    redata = reshape2d(data, apply_axis)
-    redata = np.moveaxis(redata, 2, 0)
-    redata = mapping(redata, cv2.warpPerspective, M=warping, dsize=dsize, **kwds)
-    redata = np.moveaxis(redata, 0, 2).reshape(dshape)
-
-    return redata
 
 
 # ================ #

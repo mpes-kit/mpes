@@ -13,7 +13,8 @@
 
 from __future__ import print_function, division
 from .igoribw import loadibw
-from . import utils as u, analysis as aly, bandstructure as bs
+from .base import FileCollection, MapParser
+from . import utils as u, bandstructure as bs
 import igor.igorpy as igor
 import pandas as pd
 import re, glob as g
@@ -271,25 +272,6 @@ def txtlocate(ffolder, keytext):
     return txtfile
 
 
-def appendformat(filepath, form):
-    """
-    Append a format string to the end of a file path
-
-    :Parameters:
-        filepath : str
-            File path of interest
-        form : str
-            File format of interest
-    """
-
-    format_string = '.'+form
-    if filepath:
-        if not filepath.endswith(format_string):
-            filepath += format_string
-
-    return filepath
-
-
 def parsenum(
         NumberPattern,
         strings,
@@ -465,99 +447,6 @@ def im2mat(fdir):
 
     mat = np.asarray(pim.open(fdir))
     return mat
-
-
-class FileCollection(object):
-    """ File collecting and sorting class.
-    """
-
-    def __init__(self, files=[], file_sorting=True, folder=None):
-
-        self.files = self._sort_terms(files, file_sorting)
-        self.folder = folder
-
-    @property
-    def nfiles(self):
-        """ Total number of loaded files.
-        """
-
-        return len(self.files)
-
-    @property
-    def fileID(self):
-        """ The sequence IDs of the files.
-        """
-
-        return list(range(self.nfiles))
-
-    @staticmethod
-    def _sort_terms(terms, parameter):
-        """
-        Sort terms according to parameter value.
-
-        :Parameters:
-            terms : list
-                List of terms (e.g. strings).
-            parameter : bool
-                Decision parameter for sorting.
-
-        :Return:
-            Sorted or unsorted terms.
-        """
-
-        if parameter == True:
-            return nts.natsorted(terms)
-        else:
-            return terms
-
-    def gatherFiles(self, identifier=r'/*.h5', f_start=None, f_end=None, f_step=1, file_sorting=True):
-        """
-        Gather files from a folder (specified at instantiation).
-
-        :Parameters:
-            identifier : str | r'/*.h5'
-                File identifier used for glob2.glob().
-            f_start, f_end, f_step : int, int, int | None, None, 1
-                Starting, ending file id and the step. Used to construct a file selector.
-            file_sorting : bool | True
-                Option to sort the files by their names.
-        """
-
-        f_start, f_end, f_step = u.intify(f_start, f_end, f_step)
-
-        if self.folder is not None:
-            self.files = g.glob(self.folder + identifier)
-
-            if file_sorting == True:
-                self.files = self._sort_terms(self.files, file_sorting)
-
-            self.files = self.files[slice(f_start, f_end, f_step)]
-
-        else:
-            raise ValueError('No folder is specified!')
-
-    def filterFile(self, wexpr=None, woexpr=None, str_start=None, str_end=None):
-        """ Filter filenames by keywords.
-
-        :Parameters:
-            wexpr : str | None
-                Expression in a name to leave in the filename list (w = with).
-            woexpr : str | None
-                Expression in a name to leave out of the filename list (wo = without).
-
-        :Return:
-            filteredFiles : list
-                List of filtered filenames.
-        """
-
-        if (wexpr is None) and (woexpr is None):
-            filteredFiles = self.files
-        elif wexpr:
-            filteredFiles = [i for i in self.files if wexpr in i[str_start:str_end]]
-        elif woexpr:
-            filteredFiles = [i for i in self.files if woexpr not in i[str_start:str_end]]
-
-        return filteredFiles
 
 
 class hdf5Reader(File):
@@ -835,7 +724,7 @@ class hdf5Reader(File):
                 File address to save to.
         """
 
-        save_fname = appendformat(save_addr, form)
+        save_fname = u.appendformat(save_addr, form)
 
         if form == 'mat': # Save dictionary as mat file
             hdfdict = self.summarize(form='dict', ret=True, **kwds)
@@ -878,7 +767,7 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
 
     dtyp = kwds.pop('dtyp', 'float32')
     sln = kwds.pop('slicename', 'V')
-    save_addr = appendformat(save_addr, form)
+    save_addr = u.appendformat(save_addr, form)
     otheraxes = kwds.pop('otheraxes', None)
 
     histdict = getattr(processor, dictname)
@@ -1618,7 +1507,7 @@ def readBinnedhdf5(fpath, combined=True, typ='float32'):
     return out
 
 
-class parquetProcessor(aly.MapParser):
+class parquetProcessor(MapParser):
     """
     Processs the parquet file assembled from single events.
     """
@@ -1671,11 +1560,14 @@ class parquetProcessor(aly.MapParser):
             for cn, cv in zip(colnames, colvals):
                 self.edf = self.edf.assign(**{cn:ddf.from_array(cv)})
 
-    def transformColumn(oldcolname, mapping, newcolname, args=(), **kwds):
-        """ Apply function to existing column(s) and append to the dataframe.
+    def transformColumn(oldcolname, mapping, newcolname='Transformed', args=(), update='append', **kwds):
+        """ Apply function to an existing column and append to the dataframe.
         """
 
-        self.edf[newcol] = self.edf[oldcol].apply(mapping, args=args, meta=('x', 'f8'), **kwds)
+        if update == 'append':
+            self.edf[newcolname] = self.edf[oldcolname].apply(mapping, args=args, meta=('x', 'f8'), **kwds)
+        elif update == 'replace':
+            self.edf[oldcolname] = self.edf[oldcolname].apply(mapping, args=args, meta=('x', 'f8'), **kwds)
 
     def appendRow(self, folder=None, df=None, type='parquet', **kwds):
         """ Append rows read from other parquet files to existing dataframe.
@@ -1714,7 +1606,6 @@ class parquetProcessor(aly.MapParser):
 
         if form == 'parquet':
             self.edf.to_parquet(save_addr, compression='UNCOMPRESSED', append=append, ignore_divisions=True)
-
         elif form == 'h5':
             self.edf.to_hdf(save_addr, namestr)
 

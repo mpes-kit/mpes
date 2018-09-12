@@ -124,6 +124,25 @@ def replist(entry, row, column):
     return [[entry]*column for _ in range(row)]
 
 
+def appendformat(filepath, form):
+    """
+    Append a format string to the end of a file path
+
+    :Parameters:
+        filepath : str
+            File path of interest
+        form : str
+            File format of interest
+    """
+
+    format_string = '.'+form
+    if filepath:
+        if not filepath.endswith(format_string):
+            filepath += format_string
+
+    return filepath
+
+
 def shuffleaxis(arr, axes, direction='front'):
     """
     Move multiple axes of a multidimensional array simultaneously
