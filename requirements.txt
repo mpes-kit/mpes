@@ -16,6 +16,7 @@ dask[complete]
 fastparquet
 tqdm
 natsort
+funcy
 imageio
 numba
 opencv-python

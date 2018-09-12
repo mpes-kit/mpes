@@ -13,7 +13,7 @@
 
 from __future__ import print_function, division
 from .igoribw import loadibw
-from . import utils as u, bandstructure as bs
+from . import utils as u, analysis as aly, bandstructure as bs
 import igor.igorpy as igor
 import pandas as pd
 import re, glob as g
@@ -483,6 +483,13 @@ class FileCollection(object):
 
         return len(self.files)
 
+    @property
+    def fileID(self):
+        """ The sequence IDs of the files.
+        """
+
+        return list(range(self.nfiles))
+
     @staticmethod
     def _sort_terms(terms, parameter):
         """
@@ -528,6 +535,29 @@ class FileCollection(object):
 
         else:
             raise ValueError('No folder is specified!')
+
+    def filterFile(self, wexpr=None, woexpr=None, str_start=None, str_end=None):
+        """ Filter filenames by keywords.
+
+        :Parameters:
+            wexpr : str | None
+                Expression in a name to leave in the filename list (w = with).
+            woexpr : str | None
+                Expression in a name to leave out of the filename list (wo = without).
+
+        :Return:
+            filteredFiles : list
+                List of filtered filenames.
+        """
+
+        if (wexpr is None) and (woexpr is None):
+            filteredFiles = self.files
+        elif wexpr:
+            filteredFiles = [i for i in self.files if wexpr in i[str_start:str_end]]
+        elif woexpr:
+            filteredFiles = [i for i in self.files if woexpr not in i[str_start:str_end]]
+
+        return filteredFiles
 
 
 class hdf5Reader(File):
@@ -809,7 +839,7 @@ class hdf5Reader(File):
 
         if form == 'mat': # Save dictionary as mat file
             hdfdict = self.summarize(form='dict', ret=True, **kwds)
-            sio.savemat(save_addr, hdfdict)
+            sio.savemat(save_fname, hdfdict)
 
         elif form == 'parquet': # Save dataframe as parquet file
             self.edf.to_parquet(save_addr, compression='UNCOMPRESSED', append=pqappend, ignore_divisions=True)
@@ -1588,7 +1618,7 @@ def readBinnedhdf5(fpath, combined=True, typ='float32'):
     return out
 
 
-class parquetProcessor(object):
+class parquetProcessor(aly.MapParser):
     """
     Processs the parquet file assembled from single events.
     """
@@ -1596,41 +1626,110 @@ class parquetProcessor(object):
     def __init__(self, folder):
 
         self.folder = folder
-        self.read()
+        self.edf = self.read(self.folder)
+        self.npart = self.edf.npartitions
+        self.histogram = None
+        self.histdict = {}
 
-    def read(self):
+        super().__init__(file_sorting=False, folder=folder)
+
+    @property
+    def nrow(self):
+        """ Number of rows in the distributed dataframe.
+        """
+
+        return len(self.edf.index)
+
+    @property
+    def ncol(self):
+        """ Number of columns in the distrbuted dataframe.
+        """
+
+        return len(self.edf.columns)
+
+    @staticmethod
+    def read(folder):
         """ Read parquet files from a folder.
         """
 
-        self.edf = d.dataframe.read_parquet(self.folder)
+        return d.dataframe.read_parquet(folder)
 
-    def appendColumn(self):
+    def appendColumn(self, colnames, colvals):
         """ Append columns to dataframe.
         """
 
-        pass
+        colnames = list(colnames)
+        colvals = [colvals]
+        ncn = len(colnames)
+        ncv = len(colvals)
 
-    def appendRow(self):
-        """ Append rows to dataframe.
+        if ncn != ncv:
+            errmsg = 'The names and values of the columns need to have the same dimensions.'
+            raise ValueError(errmsg)
+
+        else:
+            for cn, cv in zip(colnames, colvals):
+                self.edf = self.edf.assign(**{cn:ddf.from_array(cv)})
+
+    def transformColumn(oldcolname, mapping, newcolname, args=(), **kwds):
+        """ Apply function to existing column(s) and append to the dataframe.
         """
 
-        pass
+        self.edf[newcol] = self.edf[oldcol].apply(mapping, args=args, meta=('x', 'f8'), **kwds)
 
-    def binning(self):
+    def appendRow(self, folder=None, df=None, type='parquet', **kwds):
+        """ Append rows read from other parquet files to existing dataframe.
+        """
 
-        pass
+        if type == 'parquet':
+            return self.edf.append(self.read(folder), **kwds)
+        elif type == 'dataframe':
+            return self.edf.append(df, **kwds)
+        else:
+            raise NotImplementedError
 
-    def convert(self, form='parquet'):
+    def applyFilter(self, colname, lb=-np.inf, ub=np.inf):
+        """ Application of bound filters to a specified column (can be used consecutively).
+        """
+
+        self.edf = self.edf[(self.edf[self.colnam] > lb) & (self.edf[colname] < ub)]
+
+    def distributedBinning(self, axes, nbins, ranges, ret=False):
+        """ Binning the dataframe to a multidimensional histogram.
+        """
+
+        # Set up the binning parameters
+        self._addBinners(axes, nbins, ranges, binDict)
+        self.summarize(form='dataframe')
+        self.edf = self.edf[amin:amax] # Select event range for binning
+
+        self.histdict = _distributed_binning()
+
+        if ret:
+            return self.histdict
+
+    def convert(self, form='parquet', save_addr=None, namestr='/data', append=False):
         """ Update or convert to other file formats.
         """
 
-        pass
+        if form == 'parquet':
+            self.edf.to_parquet(save_addr, compression='UNCOMPRESSED', append=append, ignore_divisions=True)
 
-    def saveHistogram(self):
+        elif form == 'h5':
+            self.edf.to_hdf(save_addr, namestr)
 
-        pass
+    def saveHistogram(self, form, save_addr, dictname='histdict', **kwds):
+        """ Export binned histogram as other files.
+        """
 
-    def toBandStructure(self):
+        try:
+            saveDict(self, dictname, form, save_addr, **kwds)
+        except:
+            raise Exception('Saving histogram was unsuccessful!')
+
+    def toBandStructure(self, axes=None):
+        """ Instatiation of the BandStructure class from existing data.
+        """
 
         pass
 
