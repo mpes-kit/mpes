@@ -13,7 +13,8 @@ import numpy as np
 import cv2
 from copy import deepcopy
 from xarray import DataArray
-from mpes import fprocessing as fp, analysis as aly, pointops as po, utils as u
+from mpes import fprocessing as fp, analysis as aly, utils as u, visualization as vis
+from symmetrize import pointops as po
 from collections import OrderedDict
 
 
@@ -73,7 +74,7 @@ class BandStructure(DataArray):
 
         else:
             direction = kwds.pop('direction', 'cw')
-            pks = aly.peakdetect2d(img, method=pdmethod, **kwds)
+            pks = po.peakdetect2d(img, method=pdmethod, **kwds)
 
             # Select center and non-center peaks
             center, verts = po.pointset_center(pks)
@@ -220,7 +221,7 @@ class BandStructure(DataArray):
 
         self['fig'], self['ax'] = plt.subplots(figsize=figsize)
         self['ax'].imshow(img, cmap=cmap, origin=origin)
-        
+
     def saveas(self, form='h5', save_addr='./'):
 
         pass
