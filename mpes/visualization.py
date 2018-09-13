@@ -893,16 +893,39 @@ def trisurf2d(datamat, **kwds):
 #  Movie generation  #
 # ================== #
 
-def moviemaker(foldername, imform='png', movform='avi', namestr='movie', file_sorting=True, ret=False, **kwds):
+def moviemaker(folder, imform='png', movform='avi', namestr='movie',
+                file_sorting='forward', ret=False, **kwds):
     """ Generate a movie file from a stack of images
+
+    :Parameters:
+        folder : str
+            Directory of the file folder.
+        imform : str | 'png'
+            Format of the images.
+        movform : str | 'avi'
+            Format of the generated movie.
+        namestr : str | 'movie'
+            Namestring (including folder path) used to save the generated movie.
+        file_sorting : str | 'forward'
+            File-sorting direction.
+        ret : bool | False
+            Specify return.
+        **kwds : keyword arguments
+            Specific parameter settings for the vocoder.
+
+    :Return:
+        fnames : list of str
+            List of (un)sorted filenames.
     """
 
     fps = kwds.pop('fps', 4)
     loop = kwds.pop('loop', 1)
 
-    fnames = g.glob(foldername + r'\*.'+imform)
-    if file_sorting == True:
-        fnames = nts.natsorted(fnames)
+    fnames = g.glob(folder + r'\*.'+imform) # Not sorted
+    if file_sorting == 'forward':
+        fnames = nts.natsorted(fnames, reverse=False)
+    elif file_sorting == 'backward':
+        fnames = nts.natsorted(fnames, reverse=True)
 
     images = []
     for fid, fn in enumerate(fnames):
@@ -910,7 +933,7 @@ def moviemaker(foldername, imform='png', movform='avi', namestr='movie', file_so
         im = Image.open(fn)
         images.append(np.asarray(im))
 
-    imio.mimsave(namestr+'.'+movform, images, fps=fps)
+    imio.mimsave(namestr+'.'+movform, images, fps=fps, **kwds)
 
     if ret:
         return fnames
