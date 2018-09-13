@@ -668,7 +668,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
         return eVscale
 
 
-class EnergyCalibrator(FileCollection):
+class EnergyCalibrator(base.FileCollection):
     """
     Electron binding energy calibration workflow.
     """
