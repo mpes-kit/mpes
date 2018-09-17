@@ -20,8 +20,21 @@ class FileCollection(object):
 
     def __init__(self, files=[], file_sorting=True, folder=None):
 
-        self.files = self._sort_terms(files, file_sorting)
+        self.sorting = file_sorting
+        self.files = self._sort_terms(files, self.sorting)
         self.folder = folder
+
+    def __add__(self, other):
+        """ Append two FileCollection instances by combining the file names.
+        """
+
+        self.files = list(set(self.files) | set(other.files))
+        self.folder = None
+
+    def __iter__(self):
+
+        for file in self.files:
+            yield file
 
     @property
     def nfiles(self):
@@ -57,7 +70,7 @@ class FileCollection(object):
         else:
             return terms
 
-    def gatherFiles(self, identifier=r'/*.h5', f_start=None, f_end=None, f_step=1, file_sorting=True):
+    def gather(self, identifier=r'/*.h5', f_start=None, f_end=None, f_step=1, file_sorting=True):
         """
         Gather files from a folder (specified at instantiation).
 
@@ -83,7 +96,7 @@ class FileCollection(object):
         else:
             raise ValueError('No folder is specified!')
 
-    def filterFile(self, wexpr=None, woexpr=None, str_start=None, str_end=None):
+    def filter(self, wexpr=None, woexpr=None, str_start=None, str_end=None):
         """ Filter filenames by keywords.
 
         :Parameters:
@@ -106,6 +119,41 @@ class FileCollection(object):
 
         return filteredFiles
 
+    def select(self, ids=[], update='', ret='selected'):
+        """ Select files by the filename id.
+
+        :Parameters:
+            ids : 1D array | []
+                File IDs for selection.
+            update : str | ''
+                File address list update condition,
+                'remove' = remove the selected files
+                'keep' = keep the selected files and remove the rest
+                others strings or no action = do nothing
+            ret : str | 'selected'
+                Return option,
+                'selected' = return selected files
+                'rest' = return the rest of the files (not selected)
+        """
+
+        if self.files:
+            selectedFiles = list(map(self.files.__getitem__, ids))
+            selectedFiles = self._sort_terms(selectedFiles, self.sorting)
+
+            if update == 'remove':
+                difflist = list(set(self.files) - set(selectedFiles))
+                self.files = self._sort_terms(difflist, self.sorting)
+            elif update == 'keep':
+                self.files = selectedFiles
+
+            if ret == 'selected':
+                return selectedFiles
+            elif ret == 'rest':
+                return self.files
+
+        else:
+            raise ValueError('No files addresses are gathered!')
+
 
 class MapParser(FileCollection):
     """ Parser of recorded parameters and turn into functional maps.
@@ -121,7 +169,7 @@ class MapParser(FileCollection):
         """
 
         fstr_k = kwds.pop('filestring_momentum', 'momentum.')
-        return self.filterFile(wexpr=fstr_k)
+        return self.filter(wexpr=fstr_k)
 
     @property
     def Efile(self, **kwds):
@@ -129,7 +177,7 @@ class MapParser(FileCollection):
         """
 
         fstr_E = kwds.pop('filestring_energy', 'energy.')
-        return self.filterFile(wexpr=fstr_E)
+        return self.filter(wexpr=fstr_E)
 
     def parse_kmap(self):
         """ Retrieve the parameters to construct the momentum conversion function.
