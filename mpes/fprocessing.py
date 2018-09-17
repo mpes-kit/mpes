@@ -22,7 +22,6 @@ import numpy as np
 import numpy.fft as nft
 from numpy import polyval as poly
 from scipy.interpolate import interp1d
-from scipy.signal import savgol_filter
 import scipy.io as sio
 import skimage.io as skio
 from PIL import Image as pim
@@ -1733,30 +1732,3 @@ def fftfilter2d(datamat):
     fltrmat = np.abs(nft.ifft2((1 - zm) * ftmat))
 
     return fltrmat
-
-
-def normspec(*specs, smooth=False, span=13, order=1):
-    """
-    Normalize a series of 1D spectra
-    """
-
-    nspec = len(specs)
-    specnorm = []
-
-    for i in range(nspec):
-
-        spec = specs[i]
-
-        if smooth:
-            spec = savgol_filter(spec, span, order)
-
-        if type(spec) in (list, tuple):
-            nsp = spec / max(spec)
-        else:
-            nsp = spec / spec.max()
-        specnorm.append(nsp)
-
-        # Align 1D spectrum
-        normalized_specs = np.asarray(specnorm)
-
-    return normalized_specs

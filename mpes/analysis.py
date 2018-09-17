@@ -693,6 +693,12 @@ class EnergyCalibrator(base.FileCollection):
 
     def read(self, form='h5', name=''):
         """ Read traces (e.g. energy dispersion curves) from files.
+
+        :Parameters:
+            form : str | 'h5'
+                Format of the files ('h5' or 'mat').
+            name : str | ''
+                Name of the group/attribute to read from the file.
         """
 
         traces = []
@@ -708,11 +714,11 @@ class EnergyCalibrator(base.FileCollection):
 
         self.traces = np.array(traces)
 
-    def normalize(self, axis, **kwds):
-        """ Normalize the spectra along an axis.
+    def normalize(self, **kwds):
+        """ Normalize the collection of 1D photoemission spectra.
         """
 
-        self.normspec = normspec(*self.traces, **kwds)
+        self.normspec = u.normspec(*self.traces, **kwds)
 
     @staticmethod
     def findCorrespondence(self, sig_still, sig_mov, position, order=3):
@@ -772,6 +778,12 @@ class EnergyCalibrator(base.FileCollection):
     def saveParameters(self, form='h5', save_addr='./energy'):
         """ Save all the attributes of the workflow instance for later use
         (e.g. energy scale conversion).
+
+        :Parameters:
+            form : str | 'h5'
+                The file format to save the attributes in ('h5'/'hdf5' or 'mat').
+            save_addr : str | './energy'
+                The filename to save the files with.
         """
 
         if form == 'mat':

@@ -6,6 +6,7 @@
 """
 from math import cos, pi
 import numpy as np
+from scipy.signal import savgol_filter
 
 
 def numFormatConversion(seq, form='int', **kwds):
@@ -122,6 +123,33 @@ def replist(entry, row, column):
     """
 
     return [[entry]*column for _ in range(row)]
+
+
+def normspec(*specs, smooth=False, span=13, order=1):
+    """
+    Normalize a series of 1D spectra
+    """
+
+    nspec = len(specs)
+    specnorm = []
+
+    for i in range(nspec):
+
+        spec = specs[i]
+
+        if smooth:
+            spec = savgol_filter(spec, span, order)
+
+        if type(spec) in (list, tuple):
+            nsp = spec / max(spec)
+        else:
+            nsp = spec / spec.max()
+        specnorm.append(nsp)
+
+        # Align 1D spectrum
+        normalized_specs = np.asarray(specnorm)
+
+    return normalized_specs
 
 
 def appendformat(filepath, form):
