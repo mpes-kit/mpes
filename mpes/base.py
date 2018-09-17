@@ -25,11 +25,12 @@ class FileCollection(object):
         self.folder = folder
 
     def __add__(self, other):
-        """ Append two FileCollection instances by combining the file names.
+        """ Combine two FileCollection instances by combining the file names.
         """
 
-        self.files = list(set(self.files) | set(other.files))
-        self.folder = None
+        files = list(set(self.files) | set(other.files))
+
+        return FileCollection(files=files, file_sorting=self.sorting)
 
     def __iter__(self):
 
@@ -200,6 +201,14 @@ class MapParser(FileCollection):
     @staticmethod
     def parse(parse_map):
         """ Parse map parameters stored in files.
+
+        :Parameter:
+            parse_map : function
+                Run parse_map function to populate the class namespace.
+
+        :Return:
+            flag : int (0 or 1)
+                Returns 1 if successful, 0 if not.
         """
 
         try:

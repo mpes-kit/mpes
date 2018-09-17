@@ -718,6 +718,7 @@ class EnergyCalibrator(base.FileCollection):
     def findCorrespondence(self, sig_still, sig_mov, position, order=3):
         """ Determine the parametric map between two traces by alignment.
         """
+
         from ptw import ptw
         w, siglim, a = ptw.timeWarp(sig_still, sig_mov)
 
@@ -1445,6 +1446,14 @@ class MomentumCorrector(object):
 
     def update(self, content='all', **kwds):
         """ Update specific attributes of the class.
+
+        :Parameters:
+            content : str | 'all'
+                'feature' = update only feature attributes
+                'image' = update only image-related attributes
+                'all' = update both feature and image-related attributes
+            **kwds : keyword arguments
+                Extra arguments passed into _featureUpdate()
         """
 
         if content == 'feature':
