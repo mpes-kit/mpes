@@ -1379,8 +1379,14 @@ class MomentumCorrector(object):
         self.ascale = np.array([1.0]*self.rotsym)
         self.features = {}
 
-    def selectSlice2D(self, selector, axis):
+    def selectSlice2D(self, selector, axis=2):
         """ Select (hyper)slice from a (hyper)volume.
+
+        :Parameters:
+            selector : slice object
+                Selector for the slice (image).
+            axis : int | 2
+                Axis along which to select the image.
         """
 
         if self.imgndim > 2:
@@ -1467,6 +1473,10 @@ class MomentumCorrector(object):
     def linWarpEstimate(self, weights=(1, 1, 1), niter=50, method='Nelder-Mead',
                         rotangle=0, ret=True, **kwds):
         """ Estimate the linear deformation field.
+
+        :Parameters:
+            weights : tuple/list/array
+                Weights added to the terms in the optimizer.
         """
 
         landmarks = kwds.pop('landmarks', self.pouter_ord)
@@ -1486,6 +1496,15 @@ class MomentumCorrector(object):
     @staticmethod
     def transform(points, mapping):
         """ Coordinate transform of a point set in the (row, column) formulation
+
+        :Parameters:
+            points : list/array
+                Cartesian pixel coordinates of the points to be transformed.
+            mapping : 2D array
+                The transform matrix.
+
+        :Return:
+            Transformed point coordinates.
         """
 
         pts_cart_trans = sym.pointsetTransform(np.roll(points, shift=1, axis=1), mapping)
@@ -1505,6 +1524,13 @@ class MomentumCorrector(object):
 
     def rotate(self, angle, ret=False, **kwds):
         """ Rotate 2D image in the homogeneous coordinate.
+
+        :Parameters:
+            angle : float
+                Angle of rotation.
+            ret : bool | False
+                Return specification (True/False)
+            **kwds : keyword arguments
         """
 
         image = kwds.pop('image', self.slice)
@@ -1585,6 +1611,15 @@ class MomentumCorrector(object):
 
     def saveImage(self, form='tiff', save_addr='./', dtyp='float32', **kwds):
         """ Save the distortion-corrected dataset (image only, without axes).
+
+        :Parameters:
+            form : str | 'tiff'
+                File format for saving the corrected image ('tiff' or 'mat').
+            save_addr : str | './'
+                The address to save the file at.
+            dtyp : str | 'float32'
+                Data type (in case conversion if needed).
+            **kwds : keyword arguments
         """
 
         data = kwds.pop('data', self.image).astype(dtyp)
@@ -1606,6 +1641,12 @@ class MomentumCorrector(object):
     def saveParameters(self, form='h5', save_addr='./momentum'):
         """ Save all the attributes of the workflow instance for later use
         (e.g. momentum scale conversion, reconstructing the warping map function).
+
+        :Parameters:
+            form : str | 'h5'
+                File format to for saving the parameters ('h5'/'hdf5', 'mat')
+            save_addr : str | './momentum'
+                The address for the to be saved file.
         """
 
         save_addr = u.appendformat(save_addr, form)
