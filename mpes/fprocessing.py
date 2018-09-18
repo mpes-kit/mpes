@@ -456,7 +456,7 @@ class hdf5Reader(File):
 
         self.faddress = f_addr
         eventEstimator = kwds.pop('estimator', 'Stream_0')
-        self.CHUNK_SIZE = int(kwds.pop('chunksz', 1e5))
+        self.CHUNK_SIZE = int(kwds.pop('chunksz', 1e6))
         super().__init__(name=self.faddress, mode='r', **kwds)
 
         self.nEvents = self[eventEstimator].size
@@ -600,7 +600,7 @@ class hdf5Reader(File):
 
         return aliases
 
-    def _assembleGroups(self, gnames, amin=None, amax=None, use_alias=True, ret='array'):
+    def _assembleGroups(self, gnames, amin=None, amax=None, use_alias=True, dtyp='float32', ret='array'):
         """ Assemble the content values of the selected groups.
         """
 
@@ -611,6 +611,8 @@ class hdf5Reader(File):
 
             g_dataset = self.readGroup(self, gn, sliced=False)
             g_values = g_dataset[slice(amin, amax)]
+            if bool(dtyp):
+                g_values = g_values.astype(dtyp)
 
             # Use the group alias as the dictionary key
             if use_alias == True:
@@ -619,6 +621,8 @@ class hdf5Reader(File):
             # Use the group name as the dictionary key
             else:
                 gdict[gn] = g_values
+
+            print(g_name, g_values.dtype)
 
         if ret == 'array':
             return np.asarray(list(gdict.values()))
@@ -692,7 +696,7 @@ class hdf5Reader(File):
         elif form == 'dataframe':
             # Gather groups into columns of a dataframe
 
-            self.CHUNK_SIZE = int(kwds.pop('chunksz', 1e5))
+            self.CHUNK_SIZE = int(kwds.pop('chunksz', 1e6))
 
             dfParts = []
             chunkSize = min(self.CHUNK_SIZE, self.nEvents / self.ncores)
@@ -701,12 +705,12 @@ class hdf5Reader(File):
             gNames = kwds.pop('groupnames', self.getGroupNames(wexpr='Stream'))
             colNames = self.name2alias(gNames)
 
-            for p in range(nPartitions):
+            for p in range(nPartitions): # Generate partitioned dataframe
 
                 # Calculate the starting and ending index of every chunk of events
                 eventIDStart = int(p * chunkSize)
                 eventIDEnd = int(min(eventIDStart + chunkSize, self.nEvents))
-                dfParts.append(d.delayed(self._assembleGroups)(gNames, amin=eventIDStart, amax=eventIDEnd))
+                dfParts.append(d.delayed(self._assembleGroups)(gNames, amin=eventIDStart, amax=eventIDEnd, **kwds))
 
             # Construct eda (event dask array) and edf (event dask dataframe)
             eda = da.from_array(np.concatenate(d.compute(*dfParts), axis=1).T, chunks=self.CHUNK_SIZE)
@@ -1226,8 +1230,8 @@ class hdf5Splitter(hdf5Reader):
         evmin, evmax = self.eventList[idx], self.eventList[idx+1]
         fpath = save_addr + namestr + str(idx+1) + '.h5'
 
-        try:
-            fsp = File(fpath, 'w')
+        # Use context manager to open hdf5 file
+        with File(fpath, 'w') as fsp:
 
             # Copy the attributes
             for attr, attrval in self.attrs.items():
@@ -1239,13 +1243,6 @@ class hdf5Splitter(hdf5Reader):
                 fsp.create_dataset(gp, data=self.readGroup(self, gp, amin=evmin, amax=evmax))
                 for gattr, gattrval in self[gp].attrs.items():
                     fsp[gp].attrs[gattr] = gattrval
-
-        except Exception as e:
-            print(e)
-
-        # Save and close the file
-        finally:
-            fsp.close()
 
         return(fpath)
 
@@ -1276,7 +1273,7 @@ class hdf5Splitter(hdf5Reader):
         # Distributed file splitting
         for isp in range(nsplit):
 
-            tasks.append(self._split_file(self, isp, save_addr, namestr))
+            tasks.append(self._split_file(isp, save_addr, namestr))
 
         if pbar:
             with ProgressBar():
