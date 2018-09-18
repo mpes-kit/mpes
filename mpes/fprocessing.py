@@ -692,6 +692,8 @@ class hdf5Reader(File):
         elif form == 'dataframe':
             # Gather groups into columns of a dataframe
 
+            self.CHUNK_SIZE = int(kwds.pop('chunksz', 1e5))
+
             dfParts = []
             chunkSize = min(self.CHUNK_SIZE, self.nEvents / self.ncores)
             nPartitions = int(self.nEvents // chunkSize) + 1
@@ -733,7 +735,7 @@ class hdf5Reader(File):
             compression = kwds.pop('compression', 'UNCOMPRESSED')
             engine = kwds.pop('engine', 'fastparquet')
 
-            self.summarize(form='dataframe')
+            self.summarize(form='dataframe', **kwds)
             self.edf.to_parquet(save_addr, engine=engine, compression=compression,
                                 append=pq_append, ignore_divisions=True)
 
@@ -755,7 +757,7 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
         dictname : str
             Namestring of the dictionary to save (such as the attribute name in a class).
         form : str | 'h5'
-            Save format, supporting 'mat', 'h5', 'tiff' (need tifffile) or 'png' (need imageio).
+            Save format, supporting 'mat', 'h5'/'hdf5', 'tiff' (need tifffile) or 'png' (need imageio).
         save_addr : str | './histogram'
             File path to save the binning result.
         **kwds : keyword arguments
@@ -783,7 +785,7 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
 
         sio.savemat(save_addr, histdict)
 
-    elif form == 'h5': # Save as hdf5 file
+    elif form in ('h5', 'hdf5'): # Save as hdf5 file
 
         cutaxis = kwds.pop('cutaxis', 3)
 
@@ -1522,12 +1524,13 @@ def readBinnedhdf5(fpath, combined=True, typ='float32'):
 
 class parquetProcessor(MapParser):
     """
-    Processs the parquet file assembled from single events.
+    Processs the parquet file converted from single events data.
     """
 
     def __init__(self, folder):
 
         self.folder = folder
+        # Create the event dataframe
         self.edf = self.read(self.folder)
         self.npart = self.edf.npartitions
         self.histogram = None
@@ -1558,6 +1561,12 @@ class parquetProcessor(MapParser):
 
     def appendColumn(self, colnames, colvals):
         """ Append columns to dataframe.
+
+        :Parameters:
+            colnames : list/tuple
+                New column names.
+            colvals : numpy array/list
+                Entries of the new columns.
         """
 
         colnames = list(colnames)
@@ -1575,6 +1584,22 @@ class parquetProcessor(MapParser):
 
     def transformColumn(oldcolname, mapping, newcolname='Transformed', args=(), update='append', **kwds):
         """ Apply function to an existing column and append to the dataframe.
+
+        :Parameters:
+            oldcolname : str
+                Old column name.
+            mapping : function
+                Functional map to apply to the values of the old column.
+            newcolname : str | 'Transformed'
+                New column name.
+            args : tuple | ()
+                Additional arguments of the functional map.
+            update : str | 'append'
+                Updating option.
+                'append' = append to the current dask dataframe as a new column with the new column name.
+                'replace' = replace the values of the old column.
+            **kwds : keyword arguments
+                Additional arguments for the dask.dataframe.apply() function
         """
 
         if update == 'append':
@@ -1613,14 +1638,18 @@ class parquetProcessor(MapParser):
         if ret:
             return self.histdict
 
-    def convert(self, form='parquet', save_addr=None, namestr='/data', append=False):
+    def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
         """ Update or convert to other file formats.
         """
 
         if form == 'parquet':
-            self.edf.to_parquet(save_addr, compression='UNCOMPRESSED', append=append, ignore_divisions=True)
-        elif form == 'h5':
-            self.edf.to_hdf(save_addr, namestr)
+            compression = kwds.pop('compression', 'UNCOMPRESSED')
+            engine = kwds.pop('engine', 'fastparquet')
+            self.edf.to_parquet(save_addr, engine=engine, compression=compression,
+                                append=pq_append, ignore_divisions=True, **kwds)
+
+        elif form in ('h5', 'hdf5'):
+            self.edf.to_hdf(save_addr, namestr, **kwds)
 
     def saveHistogram(self, form, save_addr, dictname='histdict', **kwds):
         """ Export binned histogram as other files.
@@ -1635,7 +1664,10 @@ class parquetProcessor(MapParser):
         """ Instatiation of the BandStructure class from existing data.
         """
 
-        pass
+        if bool(self.histdict):
+            pass
+        else:
+            raise ValueError('No binning results are available!')
 
 
 # =================== #
