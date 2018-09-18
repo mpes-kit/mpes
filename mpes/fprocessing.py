@@ -713,7 +713,7 @@ class hdf5Reader(File):
             if ret == True:
                 return self.edf
 
-    def convert(self, form, save_addr='./summary', pqappend=False, **kwds):
+    def convert(self, form, save_addr='./summary', pq_append=False, **kwds):
         """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor).
 
         :Parameters:
@@ -730,7 +730,12 @@ class hdf5Reader(File):
             sio.savemat(save_fname, hdfdict)
 
         elif form == 'parquet': # Save dataframe as parquet file
-            self.edf.to_parquet(save_addr, compression='UNCOMPRESSED', append=pqappend, ignore_divisions=True)
+            compression = kwds.pop('compression', 'UNCOMPRESSED')
+            engine = kwds.pop('engine', 'fastparquet')
+
+            self.summarize(form='dataframe')
+            self.edf.to_parquet(save_addr, engine=engine, compression=compression,
+                                append=pq_append, ignore_divisions=True)
 
         elif form == 'ibw':
         # TODO: Save in igor ibw format
@@ -1429,6 +1434,15 @@ class parallelHDF5Processor(FileCollection):
 
         if ret:
             return self.combinedresult
+
+    def convert(self, form='parquet', save_addr='./summary', pq_append=True, **kwds):
+        """
+        Convert files to another format (e.g. parquet).
+        """
+
+        for fi in range(self.nfiles):
+            subproc = self.subset(file_id=fi)
+            subproc.convert(form=form, save_addr=save_addr, pq_append=pq_append, **kwds)
 
     def updateHistogram(self, axes=None, sliceranges=None, ret=False):
         """
