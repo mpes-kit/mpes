@@ -1301,7 +1301,8 @@ class parallelHDF5Processor(FileCollection):
             # Remove existing files in the folder before writing into it
             if (n_existing_files > 0) and (append_to_folder == False):
                 for f_exist in existing_files:
-                    os.remove(f_exist)
+                    if '.h5' not in f_exist: # Keep the calibration files
+                        os.remove(f_exist)
 
         for fi in range(self.nfiles):
             subproc = self.subset(file_id=fi)
@@ -1388,7 +1389,7 @@ class parquetProcessor(MapParser):
     Processs the parquet file converted from single events data.
     """
 
-    def __init__(self, folder, ncores=None):
+    def __init__(self, folder):
 
         self.folder = folder
         # Create the event dataframe
@@ -1398,11 +1399,6 @@ class parquetProcessor(MapParser):
         self.histdict = {}
 
         super().__init__(file_sorting=False, folder=folder)
-
-        if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
-            self.ncores = N_CPU
-        else:
-            self.ncores = int(ncores)
 
     @property
     def nrow(self):
@@ -1475,6 +1471,17 @@ class parquetProcessor(MapParser):
             for cn, cv in zip(colnames, colvals):
                 self.edf = self.edf.assign(**{cn:ddf.from_array(cv)})
 
+    def deleteColumn(self, colnames):
+        """ Delete columns
+
+        :Parameters:
+            colnames : str/list/tuple
+                List of column names to be dropped.
+        """
+
+        self.edf = self.edf.drop(colnames, axis=1)
+
+
     def applyFilter(self, colname, lb=-np.inf, ub=np.inf):
         """ Application of bound filters to a specified column (can be used consecutively).
         """
@@ -1534,7 +1541,7 @@ class parquetProcessor(MapParser):
         This method can be reused.
         """
 
-        pass
+        self.transformColumn('t', self.Emap, 'E', args=(t0, ))
 
     # Row operation
     def appendRow(self, folder=None, df=None, type='parquet', **kwds):
@@ -1557,7 +1564,7 @@ class parquetProcessor(MapParser):
         self._addBinners(axes, nbins, ranges, binDict)
         #self.edf = self.edf[amin:amax] # Select event range for binning
 
-        self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
+        self.histdict = binDataframe(self.edf, ncores=4, axes=axes, nbins=nbins,
                         ranges=ranges, binDict=binDict, pbar=pbar)
 
         if ret:
@@ -1578,6 +1585,7 @@ class parquetProcessor(MapParser):
 
     def saveHistogram(self, form, save_addr, dictname='histdict', **kwds):
         """ Export binned histogram as other files.
+        Refer to mpes.fprocessing.saveDict() for the description of arguments
         """
 
         try:
@@ -1585,12 +1593,18 @@ class parquetProcessor(MapParser):
         except:
             raise Exception('Saving histogram was unsuccessful!')
 
-    def toBandStructure(self, axes=None):
-        """ Instatiation of the BandStructure class from existing data.
+    def toDataStructure(self):
+        """ Convert to the xarray data structure from existing binned data.
         """
 
         if bool(self.histdict):
-            pass
+            coords = project(self.histdict, self.binaxes)
+
+            if self.nbinaxes == 3:
+                return bs.BandStructure(data=self.histdict['binned'], coords=coords, dims=self.binaxes, datakey='')
+            elif self.nbinaxes > 3:
+                return bs.MPESDataset(data=self.histdict['binned'], coords=coords, dims=self.binaxes, datakey='')
+
         else:
             raise ValueError('No binning results are available!')
 
