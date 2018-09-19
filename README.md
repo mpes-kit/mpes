@@ -1,5 +1,7 @@
 # mpes
 
+![Build Status](https://www.travis-ci.org/RealPolitiX/mpes.svg?branch=master)
+
 Python-based data processing routines for multidimensional photoemission spectroscopy (MPES). An upgrade of the time- and angle-resolved photoemission spectroscopy (trARPES).
 
 
