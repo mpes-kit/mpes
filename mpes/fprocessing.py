@@ -1565,7 +1565,7 @@ class parquetProcessor(MapParser):
     Processs the parquet file converted from single events data.
     """
 
-    def __init__(self, folder):
+    def __init__(self, folder, ncores=None):
 
         self.folder = folder
         # Create the event dataframe
@@ -1575,6 +1575,11 @@ class parquetProcessor(MapParser):
         self.histdict = {}
 
         super().__init__(file_sorting=False, folder=folder)
+
+        if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
+            self.ncores = N_CPU
+        else:
+            self.ncores = int(ncores)
 
     @property
     def nrow(self):
@@ -1596,6 +1601,32 @@ class parquetProcessor(MapParser):
         """
 
         return d.dataframe.read_parquet(folder)
+
+    def _addBinners(self, axes=None, nbins=None, ranges=None, binDict=None):
+        """ Construct the binning parameters within an instance.
+        """
+
+        # Use information specified in binDict, ignore others
+        if binDict is not None:
+            try:
+                self.binaxes = binDict['axes']
+                self.nbinaxes = len(self.binaxes)
+                self.bincounts = binDict['nbins']
+                self.binranges = binDict['ranges']
+            except:
+                pass # No action when binDict is not specified
+        # Use information from other specified parameters if binDict is not given
+        else:
+            self.binaxes = axes
+            self.nbinaxes = len(self.binaxes)
+
+            # Collect the number of bins
+            try: # To have the same number of bins on all axes
+                self.bincounts = int(nbins)
+            except: # To have different number of bins on each axis
+                self.bincounts = list(map(int, nbins))
+
+            self.binranges = ranges
 
     # Column operations
     def appendColumn(self, colnames, colvals):
@@ -1653,14 +1684,7 @@ class parquetProcessor(MapParser):
             self.edf[oldcolname] = self.edf[oldcolname].apply(mapping, args=args, meta=('x', 'f8'), **kwds)
 
     def transformColumn2D(self, map2D, X, Y, **kwds):
-        """ Apply a functional map simultaneously to two dimensions.
-
-        :Parameters:
-            map2D : function
-                2D functional map.
-            X, Y : str, str
-                Column names of the two dimensions.
-            **kwds : keywords argument
+        """ Apply a mapping simultaneously to two dimensions.
         """
 
         newX = kwds.pop('newX', X)
@@ -1702,22 +1726,22 @@ class parquetProcessor(MapParser):
             raise NotImplementedError
 
     # Complex operation
-    def distributedBinning(self, axes, nbins, ranges, ret=False):
+    def distributedBinning(self, axes, nbins, ranges, binDict=None, pbar=True, ret=False, **kwds):
         """ Binning the dataframe to a multidimensional histogram.
         """
 
         # Set up the binning parameters
         self._addBinners(axes, nbins, ranges, binDict)
-        self.summarize(form='dataframe')
-        self.edf = self.edf[amin:amax] # Select event range for binning
+        #self.edf = self.edf[amin:amax] # Select event range for binning
 
-        self.histdict = _distributed_binning()
+        self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
+                        ranges=ranges, binDict=binDict, pbar=pbar)
 
         if ret:
             return self.histdict
 
     def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
-        """ Method to update coordinate-converted parquet file or convert to other file formats.
+        """ Update or convert to other file formats.
         """
 
         if form == 'parquet':
