@@ -6,13 +6,12 @@
 """
 # =======================================
 # Sections:
-# 1.  Utility functions
-# 2.  Background removal
-# 3.  Coordinate calibration
-# 4.  Image segmentation
-# 5.  Image correction
-# 6.  Fitting routines
-# 7.  Fitting result parsing and testing
+# 1.  Background removal
+# 2.  Coordinate calibration
+# 3.  Image segmentation
+# 4.  Image correction
+# 5.  Fitting routines
+# 6.  Fitting result parsing and testing
 # =======================================
 
 from __future__ import print_function, division
@@ -37,69 +36,6 @@ import operator as op
 import matplotlib.pyplot as plt
 from silx.io import dictdump
 import warnings as wn
-
-# =================== #
-#  Utility functions  #
-# =================== #
-
-def sortByAxes(arr, axes):
-    """
-    Sort n-dimensional array into ascending order
-    based on the corresponding axes order
-
-    **Parameters**
-
-    arr : numeric nD array
-        the nD array to be sorted
-    axes : tuple/list
-        list of axes
-
-    **Return**
-    if no sorting is needed, returns None
-
-    if the ndarray and axes are sorted,
-    return the sorted values
-    """
-
-    arr = np.asarray(arr)
-    dim = np.ndim(arr)
-    dimax = len(axes)
-    if dim != dimax:
-        raise Exception('The number of axes should match the dimenison of arr!')
-
-    sortseq = np.zeros(dim)
-    # Sort the axes vectors in ascending order
-    if dimax == 1:
-        sortedaxes = np.sort(axes)
-        if np.prod(sortedaxes == axes) == 1:
-            seq = 0
-        elif np.prod(sortedaxes == axes[::-1]) == 1:
-            seq = 1
-            arr = arr[::-1]
-        sortseq[0] = seq
-    else:
-        sortedaxes = list(map(np.sort, axes))
-
-        # Check which axis changed, sort the array accordingly
-        for i in range(dim):
-
-            seq = None
-            # if an axis is in ascending order
-            if np.prod(sortedaxes[i] == axes[i]) == 1:
-                seq = 0
-
-            # if an axis is in descending order
-            elif np.prod(sortedaxes[i] == axes[i][::-1]) == 1:
-                seq = 1
-                arr = u.revaxis(arr, axis=i)
-
-            sortseq[i] = seq
-
-    # Return sorted arrays or None if sorting is not needed
-    if np.any(sortseq == 1):
-        return arr, sortedaxes
-    else:
-        return
 
 
 # ==================== #
