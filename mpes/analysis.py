@@ -1524,7 +1524,7 @@ class MomentumCorrector(object):
         return np.roll(pts_cart_trans, shift=1, axis=1)
 
     def nonlinWarpEstimate(self, image, axis, rand_amp=1, ret=True):
-        """ Estimate the nonlinear deformation field.
+        """ Estimate the nonlinear deformation field using thin plate spline.
         """
 
         self.prefs = sym.vertexGenerator(self.pcent, self.pouter_ord[0,:], self.arot, direction=-1,

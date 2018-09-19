@@ -17,7 +17,9 @@ from .base import FileCollection, MapParser
 from . import utils as u, bandstructure as bs
 import igor.igorpy as igor
 import pandas as pd
-import re, glob as g
+import os
+import re
+import glob as g
 import numpy as np
 import numpy.fft as nft
 from numpy import polyval as poly
@@ -622,8 +624,7 @@ class hdf5Reader(File):
             else:
                 gdict[gn] = g_values
 
-            print(g_name, g_values.dtype)
-
+            # print('{}: {}'.format(g_name, g_values.dtype))
         if ret == 'array':
             return np.asarray(list(gdict.values()))
         elif ret == 'dict':
@@ -975,44 +976,16 @@ class hdf5Processor(hdf5Reader):
         if ret:
             return self.histdict
 
-    def _bin_partition(self, partition, binaxes, nbins, binranges):
-        """ Bin the data within a file partition.
-        """
-
-        cols = partition.columns
-        binColumns = [cols.get_loc(binax) for binax in binaxes]
-        vals = partition.values[:, binColumns]
-
-        hist_partition, _ = np.histogramdd(vals, bins=nbins, range=binranges)
-
-        return hist_partition
-
     def distributedBinning(self, axes=None, nbins=None, ranges=None,
                             binDict=None, pbar=True, ret=True, **kwds):
         """
-        Compute the photoelectron intensity histogram using dask dataframe.
-        Prof. Yves Acremann's method.
-
-        :Paramters:
-            axes : (list of) strings | None
-                Names the axes to bin.
-            nbins : (list of) int | None
-                Number of bins along each axis.
-            ranges : (list of) tuples | None
-                Ranges of binning along every axis.
-            binDict : dict | None
-                Dictionary with specifications of axes, nbins and ranges. If binDict
-                is not None. It will override the specifications from other arguments.
-            pbar : bool | True
-                Option to display a progress bar.
+        :Parameters:
+            see mpes.fprocessing.binDataframe()
             ret : bool | True
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
                 generated in the binning is still retained as an instance attribute.
-
-        :Return:
-            histdict : dict
-                Dictionary containing binned data and the axes values (if `ret = True`).
+            **kwds : keyword arguments
         """
 
         # Retrieve the range of acquired events
@@ -1025,43 +998,8 @@ class hdf5Processor(hdf5Reader):
         self.summarize(form='dataframe')
         self.edf = self.edf[amin:amax] # Select event range for binning
 
-        partitionResults = [] # Partition-level results
-        for i in tqdm(range(0, self.edf.npartitions, self.ncores), disable=not(pbar)):
-
-            coreTasks = [] # Core-level jobs
-            for j in range(0, self.ncores):
-
-                ij = i + j
-                if ij >= self.edf.npartitions:
-                    break
-
-                dfPartition = self.edf.get_partition(ij) # Obtain dataframe partition
-                coreTasks.append(d.delayed(self._bin_partition)(dfPartition, axes, nbins, ranges))
-
-            if len(coreTasks) > 0:
-                coreResults = d.compute(*coreTasks)
-
-                # Combine all core results for a dataframe partition
-                partitionResult = np.zeros_like(coreResults[0])
-                for coreResult in coreResults:
-                    partitionResult += coreResult
-
-                partitionResults.append(partitionResult)
-                del partitionResult
-
-            del coreTasks
-
-        # Combine all partition results
-        fullResult = np.zeros_like(partitionResults[0])
-        for pr in partitionResults:
-            fullResult += np.nan_to_num(pr)
-
-        # Load into dictionary
-        self.histdict['binned'] = fullResult.astype('float64')
-        # Calculate axes values
-        for iax, ax in enumerate(axes):
-            axrange = ranges[iax]
-            self.histdict[ax] = np.linspace(axrange[0], axrange[1], nbins[iax])
+        self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
+                        ranges=ranges, binDict=binDict, pbar=pbar)
 
         if ret:
             return self.histdict
@@ -1209,6 +1147,99 @@ class hdf5Processor(hdf5Reader):
         """
 
         pass
+
+
+def binPartition(partition, binaxes, nbins, binranges):
+    """ Bin the data within a file partition (e.g. dask dataframe).
+
+    :Parameters:
+        partition : dataframe partition
+            Partition of a dataframe.
+        binaxes : list
+            List of axes to bin.
+        nbins : list
+            Number of bins for each binning axis.
+        binranges : list
+            The range of each axis to bin.
+
+    :Return:
+        hist_partition : ndarray
+            Histogram from the binning process.
+    """
+
+    cols = partition.columns
+    binColumns = [cols.get_loc(binax) for binax in binaxes]
+    vals = partition.values[:, binColumns]
+
+    hist_partition, _ = np.histogramdd(vals, bins=nbins, range=binranges)
+
+    return hist_partition
+
+
+def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
+                binDict=None, pbar=True):
+    """
+    Calculate multidimensional histogram from columns of a dask dataframe.
+    Prof. Yves Acremann's method.
+
+    :Paramters:
+        axes : (list of) strings | None
+            Names the axes to bin.
+        nbins : (list of) int | None
+            Number of bins along each axis.
+        ranges : (list of) tuples | None
+            Ranges of binning along every axis.
+        binDict : dict | None
+            Dictionary with specifications of axes, nbins and ranges. If binDict
+            is not None. It will override the specifications from other arguments.
+        pbar : bool | True
+            Option to display a progress bar.
+
+    :Return:
+        histdict : dict
+            Dictionary containing binned data and the axes values (if `ret = True`).
+    """
+
+    histdict = {}
+    partitionResults = [] # Partition-level results
+    for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
+
+        coreTasks = [] # Core-level jobs
+        for j in range(0, ncores):
+
+            ij = i + j
+            if ij >= df.npartitions:
+                break
+
+            dfPartition = df.get_partition(ij) # Obtain dataframe partition
+            coreTasks.append(d.delayed(binPartition)(dfPartition, axes, nbins, ranges))
+
+        if len(coreTasks) > 0:
+            coreResults = d.compute(*coreTasks)
+
+            # Combine all core results for a dataframe partition
+            partitionResult = np.zeros_like(coreResults[0])
+            for coreResult in coreResults:
+                partitionResult += coreResult
+
+            partitionResults.append(partitionResult)
+            del partitionResult
+
+        del coreTasks
+
+    # Combine all partition results
+    fullResult = np.zeros_like(partitionResults[0])
+    for pr in partitionResults:
+        fullResult += np.nan_to_num(pr)
+
+    # Load into dictionary
+    histdict['binned'] = fullResult.astype('float32')
+    # Calculate axes values
+    for iax, ax in enumerate(axes):
+        axrange = ranges[iax]
+        histdict[ax] = np.linspace(axrange[0], axrange[1], nbins[iax])
+
+    return histdict
 
 
 class hdf5Splitter(hdf5Reader):
@@ -1434,14 +1465,24 @@ class parallelHDF5Processor(FileCollection):
         if ret:
             return self.combinedresult
 
-    def convert(self, form='parquet', save_addr='./summary', pq_append=True, **kwds):
+    def convert(self, form='parquet', save_addr='./summary', append_to_folder=False, **kwds):
         """
         Convert files to another format (e.g. parquet).
         """
 
+        if os.path.exists(save_addr) and os.path.isdir(save_addr):
+            # In an existing folder, clean up the files if specified
+            existing_files = g.glob(save_addr + r'/*')
+            n_existing_files = len(existing_files)
+
+            # Remove existing files in the folder before writing into it
+            if (n_existing_files > 0) and (append_to_folder == False):
+                for f_exist in existing_files:
+                    os.remove(f_exist)
+
         for fi in range(self.nfiles):
             subproc = self.subset(file_id=fi)
-            subproc.convert(form=form, save_addr=save_addr, pq_append=pq_append, **kwds)
+            subproc.convert(form=form, save_addr=save_addr, pq_append=True, **kwds)
 
     def updateHistogram(self, axes=None, sliceranges=None, ret=False):
         """
@@ -1556,6 +1597,7 @@ class parquetProcessor(MapParser):
 
         return d.dataframe.read_parquet(folder)
 
+    # Column operations
     def appendColumn(self, colnames, colvals):
         """ Append columns to dataframe.
 
@@ -1579,7 +1621,13 @@ class parquetProcessor(MapParser):
             for cn, cv in zip(colnames, colvals):
                 self.edf = self.edf.assign(**{cn:ddf.from_array(cv)})
 
-    def transformColumn(oldcolname, mapping, newcolname='Transformed', args=(), update='append', **kwds):
+    def applyFilter(self, colname, lb=-np.inf, ub=np.inf):
+        """ Application of bound filters to a specified column (can be used consecutively).
+        """
+
+        self.edf = self.edf[(self.edf[self.colnam] > lb) & (self.edf[colname] < ub)]
+
+    def transformColumn(self, oldcolname, mapping, newcolname='Transformed', args=(), update='append', **kwds):
         """ Apply function to an existing column and append to the dataframe.
 
         :Parameters:
@@ -1604,6 +1652,44 @@ class parquetProcessor(MapParser):
         elif update == 'replace':
             self.edf[oldcolname] = self.edf[oldcolname].apply(mapping, args=args, meta=('x', 'f8'), **kwds)
 
+    def transformColumn2D(self, map2D, X, Y, **kwds):
+        """ Apply a functional map simultaneously to two dimensions.
+
+        :Parameters:
+            map2D : function
+                2D functional map.
+            X, Y : str, str
+                Column names of the two dimensions.
+            **kwds : keywords argument
+        """
+
+        newX = kwds.pop('newX', X)
+        newY = kwds.pop('newY', Y)
+
+        self.edf[newX], self.edf[newY] = map2D(self.edf[X], self.edf[Y], **kwds)
+
+    def applyKCorrection(self, X='X', Y='Y', newX='X', newY='Y'):
+        """ Calculate and replace the X and Y values with their distortion-correction version.
+        This method can be reused.
+        """
+
+        self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY)
+
+    def appendKAxis(self, x0, y0, X='X', Y='Y', newX='kx', newY='ky'):
+        """ Calculate and append the k axes (kx, ky) to the events dataframe.
+        This method can be reused.
+        """
+
+        self.transformColumn2D(map2D=self.kMap, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0)
+
+    def appendEAxis(self, t0):
+        """ Calculate and append the E axis to the events dataframe.
+        This method can be reused.
+        """
+
+        pass
+
+    # Row operation
     def appendRow(self, folder=None, df=None, type='parquet', **kwds):
         """ Append rows read from other parquet files to existing dataframe.
         """
@@ -1615,12 +1701,7 @@ class parquetProcessor(MapParser):
         else:
             raise NotImplementedError
 
-    def applyFilter(self, colname, lb=-np.inf, ub=np.inf):
-        """ Application of bound filters to a specified column (can be used consecutively).
-        """
-
-        self.edf = self.edf[(self.edf[self.colnam] > lb) & (self.edf[colname] < ub)]
-
+    # Complex operation
     def distributedBinning(self, axes, nbins, ranges, ret=False):
         """ Binning the dataframe to a multidimensional histogram.
         """
@@ -1636,7 +1717,7 @@ class parquetProcessor(MapParser):
             return self.histdict
 
     def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
-        """ Update or convert to other file formats.
+        """ Method to update coordinate-converted parquet file or convert to other file formats.
         """
 
         if form == 'parquet':

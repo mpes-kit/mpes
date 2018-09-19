@@ -11,6 +11,7 @@ import numpy as np
 import glob as g
 import natsort as nts
 import cv2
+from functools import partial
 from silx.io import dictdump
 
 
@@ -170,7 +171,7 @@ class MapParser(FileCollection):
         """
 
         fstr_k = kwds.pop('filestring_momentum', 'momentum.')
-        return self.filter(wexpr=fstr_k)
+        return self.filter(wexpr=fstr_k)[0]
 
     @property
     def Efile(self, **kwds):
@@ -178,7 +179,7 @@ class MapParser(FileCollection):
         """
 
         fstr_E = kwds.pop('filestring_energy', 'energy.')
-        return self.filter(wexpr=fstr_E)
+        return self.filter(wexpr=fstr_E)[0]
 
     def parse_kmap(self):
         """ Retrieve the parameters to construct the momentum conversion function.
@@ -242,7 +243,7 @@ class MapParser(FileCollection):
             return None
 
     @property
-    def Emap(self, **kwds):
+    def EMap(self, **kwds):
         """ The ToF to energy coordinate transform function.
         """
 
@@ -259,7 +260,7 @@ class MapParser(FileCollection):
             return None
 
     @property
-    def wmap(self, **kwds):
+    def wMap(self, **kwds):
         """ The distortion correction transform function.
         """
 
