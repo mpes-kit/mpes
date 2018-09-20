@@ -1047,7 +1047,7 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
                 partitionResult += coreResult
 
             partitionResults.append(partitionResult)
-            del partitionResult
+            # del partitionResult
 
         del coreTasks
 
@@ -1289,7 +1289,7 @@ class parallelHDF5Processor(FileCollection):
         if ret:
             return self.combinedresult
 
-    def convert(self, form='parquet', save_addr='./summary', append_to_folder=False, **kwds):
+    def convert(self, form='parquet', save_addr='./summary', append_to_folder=False, pbar=True, **kwds):
         """
         Convert files to another format (e.g. parquet).
         """
@@ -1305,7 +1305,7 @@ class parallelHDF5Processor(FileCollection):
                     if '.h5' not in f_exist: # Keep the calibration files
                         os.remove(f_exist)
 
-        for fi in range(self.nfiles):
+        for fi in tqdm(range(self.nfiles), disable=not(pbar)):
             subproc = self.subset(file_id=fi)
             subproc.convert(form=form, save_addr=save_addr, pq_append=True, **kwds)
 

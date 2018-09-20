@@ -220,7 +220,8 @@ class MapParser(FileCollection):
 
     @staticmethod
     def mapConstruct(mapfunc, **kwds):
-        """ Construct mapping function.
+        """ Construct mapping function (partial function) by filling in certain
+        known parameters.
         """
 
         return partial(mapfunc, **kwds)
@@ -230,6 +231,7 @@ class MapParser(FileCollection):
         """ The (row, column) to momentum coordinate transform function.
         """
 
+        # Load the parameters to construct the momentum conversion function
         ret = self.parse(self.parse_kmap, key=parse_key)
         if ret == 1:
 
@@ -247,6 +249,7 @@ class MapParser(FileCollection):
         """ The ToF to energy coordinate transform function.
         """
 
+        # Load the parameters to construct the energy conversion function
         ret = self.parse(self.parse_Emap, key=parse_key)
         if ret == 1:
 
@@ -264,6 +267,7 @@ class MapParser(FileCollection):
         """ The distortion correction transform function.
         """
 
+        # Load warping transformation
         ret = self.parse(self.parse_wmap, key=parse_key)
         if ret == 1:
 
@@ -306,24 +310,24 @@ def tof2evpoly(a, E0, t):
     return E
 
 
-def kmap_xy(x, y, x0, y0, fx, fy):
+def kmap_xy(x, y, x0, y0, fx, fy, xscale=1, yscale=1):
     """
     Conversion from Cartesian coordinate (x, y) to momentum coordinate.
     """
 
-    kx = fx * (x - x0)
-    ky = fy * (y - y0)
+    kx = fx * ((x - x0) / xscale)
+    ky = fy * ((y - y0) / yscale)
 
     return (kx, ky)
 
 
-def kmap_rc(r, c, r0, c0, fr, fc):
+def kmap_rc(r, c, r0, c0, fr, fc, rscale=1, cscale=1):
     """
     Conversion from image coordinate (row, column) to momentum coordinate.
     """
 
-    kr = fr * (r - r0)
-    kc = fc * (c - c0)
+    kr = fr * ((r - r0) / rscale)
+    kc = fc * ((c - c0) / cscale)
 
     return (kr, kc)
 
