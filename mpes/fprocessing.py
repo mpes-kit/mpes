@@ -1390,7 +1390,7 @@ class parquetProcessor(MapParser):
     Processs the parquet file converted from single events data.
     """
 
-    def __init__(self, folder):
+    def __init__(self, folder, ncores=None):
 
         self.folder = folder
         # Create the event dataframe
@@ -1400,6 +1400,11 @@ class parquetProcessor(MapParser):
         self.histdict = {}
 
         super().__init__(file_sorting=False, folder=folder)
+
+        if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
+            self.ncores = N_CPU
+        else:
+            self.ncores = int(ncores)
 
     @property
     def nrow(self):
@@ -1565,7 +1570,7 @@ class parquetProcessor(MapParser):
         self._addBinners(axes, nbins, ranges, binDict)
         #self.edf = self.edf[amin:amax] # Select event range for binning
 
-        self.histdict = binDataframe(self.edf, ncores=4, axes=axes, nbins=nbins,
+        self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
                         ranges=ranges, binDict=binDict, pbar=pbar)
 
         if ret:

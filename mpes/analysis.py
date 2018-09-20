@@ -1398,7 +1398,7 @@ class MomentumCorrector(object):
         except:
             pass
 
-    def update(self, content='all', **kwds):
+    def update(self, content, **kwds):
         """ Update specific attributes of the class.
 
         :Parameters:
@@ -1416,7 +1416,7 @@ class MomentumCorrector(object):
             self._imageUpdate()
         elif content == 'all':
             self._imageUpdate()
-            self._featureUpdate(**kwds)
+            self._featureUpdate(**kwds) # Feature update comes after image update
 
     def linWarpEstimate(self, weights=(1, 1, 1), niter=50, method='Nelder-Mead',
                         rotangle=0, ret=True, **kwds):
@@ -1504,8 +1504,11 @@ class MomentumCorrector(object):
 
         self.image_corrected = sym.applyWarping(image, axis, hgmat=hgmat)
 
-        if update == True:
-            self._imageUpdate()
+        if update != False:
+            if update == True:
+                self.update('all')
+            else:
+                self.update(update)
 
     @staticmethod
     def getWarpFunction(**kwds):
