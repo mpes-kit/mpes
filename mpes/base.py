@@ -170,7 +170,7 @@ class MapParser(FileCollection):
         """ File containing the momentum correction and calibration information.
         """
 
-        fstr_k = kwds.pop('filestring_momentum', 'momentum.')
+        fstr_k = kwds.pop('namestr', 'momentum.')
         return self.filter(wexpr=fstr_k)[0]
 
     @property
@@ -178,14 +178,14 @@ class MapParser(FileCollection):
         """ File containing the energy calibration information.
         """
 
-        fstr_E = kwds.pop('filestring_energy', 'energy.')
+        fstr_E = kwds.pop('namestr', 'energy.')
         return self.filter(wexpr=fstr_E)[0]
 
-    def parse_kmap(self, key='calibration/coeffs'):
+    def parse_kmap(self, key='coeffs'):
         """ Retrieve the parameters to construct the momentum conversion function.
         """
 
-        self.fr, self.fc = dictdump.load(self.kfile)[key]
+        self.fr, self.fc = dictdump.load(self.kfile)['calibration'][key]
 
     def parse_Emap(self, key='coeffs'):
         """ Retrieve the parameters to construct the energy conversion function.
@@ -200,7 +200,7 @@ class MapParser(FileCollection):
         self.warping = dictdump.load(self.kfile)[key]
 
     @staticmethod
-    def parse(parse_map):
+    def parse(parse_map, **mapkeys):
         """ Parse map parameters stored in files.
 
         :Parameter:
@@ -213,7 +213,7 @@ class MapParser(FileCollection):
         """
 
         try:
-            parse_map()
+            parse_map(**mapkeys)
             return 1 # Retrieved mapping parameters successfully
         except:
             return 0 # Failed to retrieve parameters
@@ -226,11 +226,11 @@ class MapParser(FileCollection):
         return partial(mapfunc, **kwds)
 
     @property
-    def kMap(self, **kwds):
+    def kMap(self, parse_key='coeffs', **kwds):
         """ The (row, column) to momentum coordinate transform function.
         """
 
-        ret = self.parse(self.parse_kmap)
+        ret = self.parse(self.parse_kmap, key=parse_key)
         if ret == 1:
 
             kmap = kwds.pop('map', kmap_rc)
@@ -243,11 +243,11 @@ class MapParser(FileCollection):
             return None
 
     @property
-    def EMap(self, **kwds):
+    def EMap(self, parse_key='coeffs', **kwds):
         """ The ToF to energy coordinate transform function.
         """
 
-        ret = self.parse(self.parse_Emap)
+        ret = self.parse(self.parse_Emap, key=parse_key)
         if ret == 1:
 
             Emap = kwds.pop('map', tof2evpoly)
@@ -260,11 +260,11 @@ class MapParser(FileCollection):
             return None
 
     @property
-    def wMap(self, **kwds):
+    def wMap(self, parse_key='warping', **kwds):
         """ The distortion correction transform function.
         """
 
-        ret = self.parse(self.parse_wmap)
+        ret = self.parse(self.parse_wmap, key=parse_key)
         if ret == 1:
 
             wmap = kwds.pop('map', correctnd)
