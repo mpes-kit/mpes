@@ -181,23 +181,23 @@ class MapParser(FileCollection):
         fstr_E = kwds.pop('filestring_energy', 'energy.')
         return self.filter(wexpr=fstr_E)[0]
 
-    def parse_kmap(self):
+    def parse_kmap(self, key='calibration/coeffs'):
         """ Retrieve the parameters to construct the momentum conversion function.
         """
 
-        self.fr, self.fc = dictdump.load(self.kfile)['calibration']['coeffs']
+        self.fr, self.fc = dictdump.load(self.kfile)[key]
 
-    def parse_Emap(self):
+    def parse_Emap(self, key='coeffs'):
         """ Retrieve the parameters to construct the energy conversion function.
         """
 
-        self.coeffs = dictdump.load(self.Efile)['coeffs']
+        self.coeffs = dictdump.load(self.Efile)[key]
 
-    def parse_wmap(self):
+    def parse_wmap(self, key='warping'):
         """ Retrieve the parameters to construct the distortion correction function
         """
 
-        self.warping = dictdump.load(self.kfile)['warping']
+        self.warping = dictdump.load(self.kfile)[key]
 
     @staticmethod
     def parse(parse_map):

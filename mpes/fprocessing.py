@@ -33,6 +33,7 @@ import warnings as wn
 from tqdm import tqdm
 import natsort as nts
 from functools import reduce
+from funcy import project
 
 N_CPU = ps.cpu_count()
 
@@ -163,8 +164,8 @@ def readtsv(fdir, header=None, dtype='float', **kwds):
         read and type-converted data
     """
 
-    data = np.asarray(pd.read_table(fdir, delim_whitespace=True, \
-                      header=None, **kwds), dtype=dtype)
+    data = np.asarray(pd.read_table(fdir, delim_whitespace=True,
+                        header=None, **kwds), dtype=dtype)
     return data
 
 
@@ -478,8 +479,8 @@ class hdf5Reader(File):
 
         if form == 'text':
             # Output as printed text
-            print('*** HDF5 file info ***\n', \
-                  'File address = ' + self.faddress + '\n')
+            print('*** HDF5 file info ***\n',
+                    'File address = ' + self.faddress + '\n')
 
             # Output info on attributes
             print('\n>>> Attributes <<<\n')
@@ -663,7 +664,7 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
                 imio.imwrite(save_addr[:-3]+'_'+str(i)+'.png', nddata[i,...], format='png')
 
         elif processor.nbinaxes >= 4:
-            raise NotImplementedError('The output format is undefined for data\
+            raise NotImplementedError('The output format is undefined for data \
             with higher than three dimensions!')
 
     elif form == 'ibw': # Save as Igor wave
@@ -1100,8 +1101,8 @@ class hdf5Splitter(hdf5Reader):
 
         return(fpath)
 
-    def split(self, nsplit, save_addr='./', namestr='split_', \
-    split_group='Stream_0', pbar=False):
+    def split(self, nsplit, save_addr='./', namestr='split_',
+                split_group='Stream_0', pbar=False):
         """
         Split and save an hdf5 file.
 
@@ -1601,9 +1602,11 @@ class parquetProcessor(MapParser):
             coords = project(self.histdict, self.binaxes)
 
             if self.nbinaxes == 3:
-                return bs.BandStructure(data=self.histdict['binned'], coords=coords, dims=self.binaxes, datakey='')
+                return bs.BandStructure(data=self.histdict['binned'],
+                        coords=coords, dims=self.binaxes, datakey='')
             elif self.nbinaxes > 3:
-                return bs.MPESDataset(data=self.histdict['binned'], coords=coords, dims=self.binaxes, datakey='')
+                return bs.MPESDataset(data=self.histdict['binned'],
+                        coords=coords, dims=self.binaxes, datakey='')
 
         else:
             raise ValueError('No binning results are available!')
