@@ -267,11 +267,11 @@ class MapParser(FileCollection):
         ret = self.parse(self.parse_wmap, key=parse_key)
         if ret == 1:
 
-            wmap = kwds.pop('map', correctnd)
+            wmap = kwds.pop('map', perspectiveTransform)
             if kwds: # Parse other remaining keyword arguments
                 return self.mapConstruct(wmap, **kwds)
             else:
-                return self.mapConstruct(wmap, warping=self.warping)
+                return self.mapConstruct(wmap, M=self.warping)
 
         else:
             return None
@@ -378,3 +378,14 @@ def correctnd(data, warping, func=cv2.warpPerspective, **kwds):
     redata = np.moveaxis(redata, 0, 2).reshape(dshape)
 
     return redata
+
+
+def perspectiveTransform(x, y, M):
+    """ Implementation of the perspective transform (homography) in 2D.
+    """
+
+    denom = M[2, 0]*x + M[2, 1]*y + M[2, 2]
+    Xtrans = (M[0, 0]*x + M[0, 1]*y + M[0, 2]) / denom
+    Ytrans = (M[1, 0]*x + M[1, 1]*y + M[1, 2]) / denom
+
+    return Xtrans, Ytrans

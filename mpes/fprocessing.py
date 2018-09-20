@@ -1523,26 +1523,26 @@ class parquetProcessor(MapParser):
 
         self.edf[newX], self.edf[newY] = map2D(self.edf[X], self.edf[Y], **kwds)
 
-    def applyKCorrection(self, X='X', Y='Y', newX='X', newY='Y'):
+    def applyKCorrection(self, X='X', Y='Y', newX='Xm', newY='Ym', **kwds):
         """ Calculate and replace the X and Y values with their distortion-correction version.
         This method can be reused.
         """
 
-        self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY)
+        self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
 
-    def appendKAxis(self, x0, y0, X='X', Y='Y', newX='kx', newY='ky'):
+    def appendKAxis(self, x0, y0, X='X', Y='Y', newX='kx', newY='ky', **kwds):
         """ Calculate and append the k axes (kx, ky) to the events dataframe.
         This method can be reused.
         """
 
-        self.transformColumn2D(map2D=self.kMap, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0)
+        self.transformColumn2D(map2D=self.kMap, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0, **kwds)
 
-    def appendEAxis(self, t0):
+    def appendEAxis(self, E0, **kwds):
         """ Calculate and append the E axis to the events dataframe.
         This method can be reused.
         """
 
-        self.transformColumn('t', self.Emap, 'E', args=(t0, ))
+        self.transformColumn('t', self.Emap, 'E', args=(E0, ), **kwds)
 
     # Row operation
     def appendRow(self, folder=None, df=None, type='parquet', **kwds):
