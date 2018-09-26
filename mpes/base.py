@@ -274,7 +274,7 @@ class MapParser(FileCollection):
                 return self.mapConstruct(kmap, **kwds)
             else:
                 return self.mapConstruct(kmap, fr=self.fr, fc=self.fc,
-                rstart=self.ystart, cstart=self.xstart, sr=self.ystep, sc=self.xstep)
+                rstart=self.ybr_start, cstart=self.xbr_start, sr=self.ystep, sc=self.xstep)
 
         else:
             return None
