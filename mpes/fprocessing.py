@@ -719,6 +719,11 @@ class hdf5Processor(hdf5Reader):
 
             self.binranges = ranges
 
+        # Construct binning steps
+        self.binsteps = []
+        for bc, (lrange, rrange) in zip(self.bincounts, self.binranges):
+            self.binsteps.append((rrange - lrange) / bc)
+
     @d.delayed
     def _delayedBinning(self, data):
         """
@@ -1233,6 +1238,11 @@ class parallelHDF5Processor(FileCollection):
         self.bincounts = nbins
         self.binranges = ranges
 
+        # Construct binning steps
+        self.binsteps = []
+        for bc, (lrange, rrange) in zip(self.bincounts, self.binranges):
+            self.binsteps.append((rrange - lrange) / bc)
+
         # Reset containers of results
         self.results = {}
         self.combinedresult = {}
@@ -1573,7 +1583,7 @@ class parquetProcessor(MapParser):
         """ Calculate and append the k axes (kx, ky) to the events dataframe.
         This method can be reused.
         """
-        
+
         self.transformColumn2D(map2D=self.kMap, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0, **kwds)
 
     def appendEAxis(self, E0, **kwds):
