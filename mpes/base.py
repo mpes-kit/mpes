@@ -219,7 +219,7 @@ class MapParser(FileCollection):
 
         self.parse_bfile()
         self.fr, self.fc = dictdump.load(self.kfile)['calibration'][key]
-        self.xcent, self.ycent = dictcump.load(self.kfile)['pcent']
+        self.xcent, self.ycent = dictdump.load(self.kfile)['pcent']
 
     def parse_Emap(self, key='coeffs'):
         """ Retrieve the parameters to construct the energy conversion function.
@@ -282,6 +282,10 @@ class MapParser(FileCollection):
     @property
     def EMap(self, parse_key='coeffs', **kwds):
         """ The ToF to energy coordinate transform function.
+
+        :Parameter:
+            parse_key : str | 'coeffs'
+                Parsing key for extracting parameters.
         """
 
         # Load the parameters to construct the energy conversion function
@@ -425,7 +429,18 @@ def detrc2krc(rd, cd, rstart, cstart, r0, c0, fr, fc, str, stc):
 
 
 def reshape2d(data, apply_axis):
-    """ Reshape matrix to apply 2D function to.
+    """
+    Reshape matrix to apply 2D function to.
+
+    :Parameters:
+        data : numpy.ndarray
+            N-dimensional numerical array.
+        apply_axis : tuple/list of int
+            The index of the axes to apply the transform to.
+
+    :Return:
+        data : numpy.ndarray
+            Reshaped n-dimensional array.
     """
 
     nax = len(apply_axis)
@@ -452,6 +467,14 @@ def reshape2d(data, apply_axis):
 def mapping(data, f, **kwds):
     """ Mapping a generic function to multidimensional data with
     the possibility to supply keyword arguments.
+
+    :Parameter:
+        data : numpy.ndarray
+            Data to map the function to.
+        f : function
+            Function to map to data.
+        **kwds : keyword arguments
+            Keyword arguments of the function map.
     """
 
     result = np.asarray(list(map(lambda x:f(x, **kwds), data)))
@@ -478,10 +501,20 @@ def correctnd(data, warping, func=cv2.warpPerspective, **kwds):
 
 def perspectiveTransform(x, y, M):
     """ Implementation of the perspective transform (homography) in 2D.
+
+    :Parameters:
+        x, y : numeric, numeric
+            Pixel coordinates of the original point.
+        M : 2d array
+            Perspective transform matrix.
+
+    :Return:
+        xtrans, ytrans : numeric, numeric
+            Pixel coordinates after perspective transform.
     """
 
     denom = M[2, 0]*x + M[2, 1]*y + M[2, 2]
-    Xtrans = (M[0, 0]*x + M[0, 1]*y + M[0, 2]) / denom
-    Ytrans = (M[1, 0]*x + M[1, 1]*y + M[1, 2]) / denom
+    xtrans = (M[0, 0]*x + M[0, 1]*y + M[0, 2]) / denom
+    ytrans = (M[1, 0]*x + M[1, 1]*y + M[1, 2]) / denom
 
-    return Xtrans, Ytrans
+    return xtrans, ytrans
