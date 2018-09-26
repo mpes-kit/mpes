@@ -427,7 +427,7 @@ def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
         coordb : list/tuple/1D array
             Actual coordinate of the symmetry point b.
         ret : str | 'axes'
-            Return type specification, options include 'axes', 'extent' and 'grid' (see below).
+            Return type specification, options include 'axes', 'extent', 'coeffs', 'grid', 'func', 'all'.
 
     :Returns:
         k_row, k_col : 1D array
@@ -453,7 +453,7 @@ def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
     k_col = coldist * ratio + coordb[1]
 
     # Calculate other return parameters
-    pfunc = partial(base.kmap_rc, fr=ratio, fc=ratio)
+    pfunc = partial(base.imrc2krc, fr=ratio, fc=ratio)
     k_rowgrid, k_colgrid = np.meshgrid(k_row, k_col)
 
     # Assemble into return dictionary
@@ -1315,6 +1315,13 @@ class MomentumCorrector(object):
     """
 
     def __init__(self, image, rotsym=6):
+        """
+        :Parameters:
+            image : 3d array
+                Volumetric band structure data.
+            rotsym : int | 6
+                Order of rotational symmetry.
+        """
 
         self.image = image
         self.imgndim = image.ndim
@@ -1345,6 +1352,16 @@ class MomentumCorrector(object):
 
     def featureExtract(self, image, direction='ccw', type='points', **kwds):
         """ Extract features from the selected (hyper)slice.
+
+        :Parameters:
+            image : 2d array
+                Image slice to extract features from.
+            direction : str | 'ccw'
+                Circular direction to reorder the features in ('cw' or 'ccw').
+            type : str | 'points'
+                Type of features to extract.
+            **kwds : keyword arguments
+                extra arguments for symmetrize.pointops.peakdetect2d()
         """
 
         if type == 'points':
@@ -1419,12 +1436,18 @@ class MomentumCorrector(object):
             self._featureUpdate(**kwds) # Feature update comes after image update
 
     def linWarpEstimate(self, weights=(1, 1, 1), niter=50, method='Nelder-Mead',
-                        rotangle=0, ret=True, **kwds):
+                        ret=True, **kwds):
         """ Estimate the linear deformation field.
 
         :Parameters:
             weights : tuple/list/array
                 Weights added to the terms in the optimizer.
+            niter : int | 50
+                Maximum number of iterations.
+            method : str | 'Nelder-Mead'
+                Name of the optimization method.
+            ret : bool | True
+                Specify if returning the corrected image slice.
         """
 
         landmarks = kwds.pop('landmarks', self.pouter_ord)
@@ -1442,20 +1465,20 @@ class MomentumCorrector(object):
             return self.slice_corrected
 
     @staticmethod
-    def transform(points, mapping):
+    def transform(points, transmat):
         """ Coordinate transform of a point set in the (row, column) formulation
 
         :Parameters:
             points : list/array
                 Cartesian pixel coordinates of the points to be transformed.
-            mapping : 2D array
+            transmat : 2D array
                 The transform matrix.
 
         :Return:
             Transformed point coordinates.
         """
 
-        pts_cart_trans = sym.pointsetTransform(np.roll(points, shift=1, axis=1), mapping)
+        pts_cart_trans = sym.pointsetTransform(np.roll(points, shift=1, axis=1), transmat)
 
         return np.roll(pts_cart_trans, shift=1, axis=1)
 
@@ -1494,6 +1517,15 @@ class MomentumCorrector(object):
 
     def correct(self, axis, use_composite_transform=False, update=False, **kwds):
         """ Apply a 2D transform to a stack of 2D images (3D).
+
+        :Parameters:
+            axis : int
+                Axis to select the slice.
+            use_composite_transform : bool | False
+                Option to use the composite transform involving the rotation.
+            update : bool | False
+                Option to update the existing figure attributes.
+            **kwds : keyword arguments
         """
 
         image = kwds.pop('image', self.image)
@@ -1523,6 +1555,24 @@ class MomentumCorrector(object):
     def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={},
              annotated=False, ret=False, imkwd={}, **kwds):
         """ Generate imshow plot.
+
+        :Parameters:
+            origin : str | 'lower'
+                Figure origin specification ('lower' or 'upper').
+            cmap : str | 'terrain_r'
+                Colormap specification.
+            figsize : tuple/list | (4, 4)
+                Figure size.
+            points : dict | {}
+                Points for annotation.
+            annotated : bool | False
+                Option for annotation.
+            ret : bool | False
+                Option to return figure and axis objects.
+            imkwd : dict | {}
+                Keyword arguments for matplotlib.pyplot.imshow().
+            **kwds : keyword arguments
+                General extra arguments for the plotting procedure.
         """
 
         image = kwds.pop('image', self.slice)
@@ -1550,6 +1600,16 @@ class MomentumCorrector(object):
     def calibrate(self, image, point_from, point_to, dist, ret='coeffs'):
         """ Calibration of the momentum axes. Obtain all calibration-related values,
         return only the ones requested.
+
+        :Parameters:
+            image : 2d array
+                Image slice to construct the calibration function.
+            point_from, point_to : list/tuple, list/tuple
+                Pixel coordinates of the two special points.
+            dist : float
+                Distance between the two selected points in inverse Angstrom.
+            ret : str | 'coeffs'
+                Specification of return values ('axes', 'extent', 'coeffs', 'grid', 'func', 'all').
         """
 
         self.calibration = calibrateK(image, point_from, point_to, dist, ret='all')
@@ -1613,7 +1673,14 @@ class MomentumCorrector(object):
 
 
 def _rotate2d(image, center, angle, scale=1):
-    """ 2D matrix rotation.
+    """
+    2D matrix rotation.
+
+    :Parameters:
+        image : 2d array
+        center : tuple/list
+        angle : numeric
+        scale : numeric | 1
     """
 
     rotmat = cv2.getRotationMatrix2D(center, angle=angle, scale=scale)
