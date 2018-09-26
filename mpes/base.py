@@ -202,7 +202,9 @@ class MapParser(FileCollection):
         """
 
         binDict = dictdump.load(self.bfile)
-        binaxes, binranges, binsteps = binDict['binaxes'], binDict['binranges'], binDict['binsteps']
+        binaxes = list(map(lambda x: x.decode('utf-8'), binDict['binaxes'].tolist()))
+        binranges = binDict['binranges'].tolist()
+        binsteps = binDict['binsteps'].tolist()
 
         # Retrieve the binning steps along X and Y axes
         self.xstep = self.listfind(binaxes, 'X', binsteps)
