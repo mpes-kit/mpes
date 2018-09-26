@@ -12,7 +12,7 @@ import glob as g
 import natsort as nts
 import cv2
 from functools import partial
-from import scipy.io as sio
+import scipy.io as sio
 from silx.io import dictdump
 
 
