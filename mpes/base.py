@@ -205,17 +205,19 @@ class MapParser(FileCollection):
         binaxes, binranges, binsteps = binDict['binaxes'], binDict['binranges'], binDict['binsteps']
 
         # Retrieve the binning steps along X and Y axes
-        self.xstep = listfind(binaxes, 'X', binsteps)
-        self.ystep = listfind(binaxes, 'Y', binsteps)
+        self.xstep = self.listfind(binaxes, 'X', binsteps)
+        self.ystep = self.listfind(binaxes, 'Y', binsteps)
         # Retrieve the binning ranges (br) along X and Y axes
-        self.xbr_start, self.xbr_end = listfind(binaxes, 'X', binranges)
-        self.ybr_start, self.ybr_end = listfind(binaxes, 'Y', binranges)
+        self.xbr_start, self.xbr_end = self.listfind(binaxes, 'X', binranges)
+        self.ybr_start, self.ybr_end = self.listfind(binaxes, 'Y', binranges)
 
     def parse_kmap(self, key='coeffs'):
         """ Retrieve the parameters to construct the momentum conversion function.
         """
 
+        self.parse_bfile()
         self.fr, self.fc = dictdump.load(self.kfile)['calibration'][key]
+        self.xcent, self.ycent = dictcump.load(self.kfile)['pcent']
 
     def parse_Emap(self, key='coeffs'):
         """ Retrieve the parameters to construct the energy conversion function.
@@ -413,7 +415,7 @@ def detrc2krc(rd, cd, rstart, cstart, r0, c0, fr, fc, str, stc):
     """
     Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).
     """
-    
+
     kr = fr * ((rd - rstart) / str - r0)
     kc = fc * ((cd - cstart) / stc - c0)
 
