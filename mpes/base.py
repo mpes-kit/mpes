@@ -395,14 +395,18 @@ def detxy2kxy(xdet, ydet, xstart, ystart, x0, y0, fx, fy, xstep, ystep):
         xstart, ystart : numeric, numeric
             The starting pixel number in the detector coordinate system
             along the x and y axes used in the binning.
+        x0, y0 : numeric, numeric
+            The center pixel position in binned image used in calibration.
         fx, fy : numeric, numeric
             Scaling factor along the x and y axes (in binned image).
         xstep, ystep : numeric, numeric
             Binning step size along x and y directions.
     """
 
-    kx = fx * ((xdet - xstart) / xstep - x0)
-    ky = fy * ((ydet - ystart) / ystep - y0)
+    xdet0 = xstart + xstep * x0
+    ydet0 = ystart + ystep * y0
+    kx = fx * ((xdet - xdet0) / xstep)
+    ky = fy * ((ydet - ydet0) / ystep)
 
     return (kx, ky)
 
@@ -420,11 +424,13 @@ def imrc2krc(r, c, r0, c0, fr, fc):
 
 def detrc2krc(rdet, cdet, rstart, cstart, r0, c0, fr, fc, rstep, cstep):
     """
-    Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).
+    Conversion from detector coordinates (rdet, cdet) to momentum coordinates (kr, kc).
     """
 
-    kr = fr * ((rdet - rstart) / rstep - r0)
-    kc = fc * ((cdet - cstart) / cstep - c0)
+    rdet0 = rstart + rstep * r0
+    cdet0 = cstart + cstep * c0
+    kr = fr * ((rdet - rdet0) / rstep)
+    kc = fc * ((cdet - cdet0) / cstep)
 
     return (kr, kc)
 

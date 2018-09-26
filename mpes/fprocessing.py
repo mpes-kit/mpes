@@ -1580,7 +1580,7 @@ class parquetProcessor(MapParser):
         self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
 
     def appendKAxis(self, x0, y0, X='X', Y='Y', newX='kx', newY='ky', **kwds):
-        """ Calculate and append the k axes (kx, ky) to the events dataframe.
+        """ Calculate and append the k axis coordinates (kx, ky) to the events dataframe.
         This method can be reused.
         """
 
