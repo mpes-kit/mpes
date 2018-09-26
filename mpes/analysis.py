@@ -711,7 +711,8 @@ class EnergyCalibrator(base.FileCollection):
             return f, ax
 
     def saveParameters(self, form='h5', save_addr='./energy'):
-        """ Save all the attributes of the workflow instance for later use
+        """
+        Save all the attributes of the workflow instance for later use
         (e.g. energy scale conversion).
 
         :Parameters:
@@ -1642,7 +1643,8 @@ class MomentumCorrector(object):
             sio.savemat(save_addr, {'data':data})
 
     def saveParameters(self, form='h5', save_addr='./momentum'):
-        """ Save all the attributes of the workflow instance for later use
+        """
+        Save all the attributes of the workflow instance for later use
         (e.g. momentum scale conversion, reconstructing the warping map function).
 
         :Parameters:

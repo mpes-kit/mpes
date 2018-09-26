@@ -167,12 +167,20 @@ class MapParser(FileCollection):
         super().__init__(files=files, file_sorting=file_sorting, folder=folder)
 
     @property
+    def bfile(self, **kwds):
+        """ File containing the binning parameters.
+        """
+
+        fstr_b = kwds.pop('namestr', 'binning.')
+        return self.filter(wexpr=fstr_b)[0] # Take the first file with the searched string
+
+    @property
     def kfile(self, **kwds):
         """ File containing the momentum correction and calibration information.
         """
 
         fstr_k = kwds.pop('namestr', 'momentum.')
-        return self.filter(wexpr=fstr_k)[0]
+        return self.filter(wexpr=fstr_k)[0] # Take the first file with the searched string
 
     @property
     def Efile(self, **kwds):
@@ -180,7 +188,28 @@ class MapParser(FileCollection):
         """
 
         fstr_E = kwds.pop('namestr', 'energy.')
-        return self.filter(wexpr=fstr_E)[0]
+        return self.filter(wexpr=fstr_E)[0] # Take the first file with the searched string
+
+    @staticmethod
+    def listfind(namelist, name, itemlist):
+        """ Find item in the itemlist according to the name index in the namelist.
+        """
+
+        return itemlist[namelist.index(name)]
+
+    def parse_bfile(self):
+        """ Retrieve the binning parameters.
+        """
+
+        binDict = dictdump.load(self.bfile)
+        binaxes, binranges, binsteps = binDict['binaxes'], binDict['binranges'], binDict['binsteps']
+
+        # Retrieve the binning steps along X and Y axes
+        self.xstep = listfind(binaxes, 'X', binsteps)
+        self.ystep = listfind(binaxes, 'Y', binsteps)
+        # Retrieve the binning ranges (br) along X and Y axes
+        self.xbr_start, self.xbr_end = listfind(binaxes, 'X', binranges)
+        self.ybr_start, self.ybr_end = listfind(binaxes, 'Y', binranges)
 
     def parse_kmap(self, key='coeffs'):
         """ Retrieve the parameters to construct the momentum conversion function.
@@ -236,11 +265,12 @@ class MapParser(FileCollection):
         ret = self.parse(self.parse_kmap, key=parse_key)
         if ret == 1:
 
-            kmap = kwds.pop('map', kmap_rc)
+            kmap = kwds.pop('map', detrc2krc)
             if kwds: # Parse other remaining keyword arguments
                 return self.mapConstruct(kmap, **kwds)
             else:
-                return self.mapConstruct(kmap, fr=self.fr, fc=self.fc)
+                return self.mapConstruct(kmap, fr=self.fr, fc=self.fc,
+                rstart=self.ystart, cstart=self.xstart, sr=self.ystep, sc=self.xstep)
 
         else:
             return None
@@ -283,6 +313,16 @@ class MapParser(FileCollection):
 
 
 def saveClassAttributes(clss, form, save_addr):
+    """ Save class attributes.
+
+    :Parameters:
+        clss : instance
+            Handle of the instance to be saved.
+        form : str
+            Format to save in ('h5' or 'mat').
+        save_addr : str
+            The address to save the attributes in.
+    """
 
     save_addr = u.appendformat(save_addr, form)
 
@@ -336,13 +376,24 @@ def imxy2kxy(x, y, x0, y0, fx, fy):
     return (kx, ky)
 
 
-def detxy2kxy(xd, yd, xdc, ydc, fx, fy, sx, sy):
+def detxy2kxy(xd, yd, xstart, ystart, x0, y0, fx, fy, stx, sty):
     """
     Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).
+
+    :Parameters:
+        xd, yd : numeric, numeric
+            Pixel coordinates in the detector coordinate system.
+        xstart, ystart : numeric, numeric
+            The starting pixel number in the detector coordinate system
+            along the x and y axes used in the binning.
+        fx, fy : numeric, numeric
+            Scaling factor along the x and y axes (in binned image).
+        stx, sty : numeric, numeric
+            Binning step size along x and y directions.
     """
 
-    kx = fx * ((xd - xdc) / sx)
-    ky = fy * ((yd - ydc) / sy)
+    kx = fx * ((xd - xstart) / stx - x0)
+    ky = fy * ((yd - ystart) / sty - y0)
 
     return (kx, ky)
 
@@ -358,13 +409,13 @@ def imrc2krc(r, c, r0, c0, fr, fc):
     return (kr, kc)
 
 
-def detrc2krc(rd, cd, rdc, cdc, fr, fc, sr, sc):
+def detrc2krc(rd, cd, rstart, cstart, r0, c0, fr, fc, str, stc):
     """
     Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).
     """
-
-    kr = fr * ((rd - rdc) / sr)
-    kc = fc * ((cd - cdc) / sc)
+    
+    kr = fr * ((rd - rstart) / str - r0)
+    kc = fc * ((cd - cstart) / stc - c0)
 
     return (kr, kc)
 

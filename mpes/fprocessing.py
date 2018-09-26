@@ -959,6 +959,20 @@ class hdf5Processor(hdf5Reader):
         except:
             raise Exception('Saving histogram was unsuccessful!')
 
+    def saveParameters(self, form='h5', save_addr='./binning'):
+        """
+        Save all the attributes of the binning instance for later use
+        (e.g. binning axes, ranges, etc).
+
+        :Parameters:
+            form : str | 'h5'
+                File format to for saving the parameters ('h5'/'hdf5', 'mat')
+            save_addr : str | './binning'
+                The address for the to be saved file.
+        """
+
+        saveClassAttributes(self, form, save_addr)
+
     def toSplitter(self):
         """
         Convert to an instance of hdf5Splitter.
@@ -1341,7 +1355,8 @@ class parallelHDF5Processor(FileCollection):
             raise Exception('Saving histogram was unsuccessful!')
 
     def saveParameters(self, form='h5', save_addr='./binning'):
-        """ Save all the attributes of the binning instance for later use
+        """
+        Save all the attributes of the binning instance for later use
         (e.g. binning axes, ranges, etc).
 
         :Parameters:
@@ -1467,6 +1482,11 @@ class parquetProcessor(MapParser):
 
             self.binranges = ranges
 
+        # Construct binning steps
+        self.binsteps = []
+        for bc, (lrange, rrange) in zip(self.bincounts, self.binranges):
+            self.binsteps.append((rrange - lrange) / bc)
+
     # Column operations
     def appendColumn(self, colnames, colvals):
         """ Append columns to dataframe.
@@ -1553,7 +1573,7 @@ class parquetProcessor(MapParser):
         """ Calculate and append the k axes (kx, ky) to the events dataframe.
         This method can be reused.
         """
-
+        
         self.transformColumn2D(map2D=self.kMap, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0, **kwds)
 
     def appendEAxis(self, E0, **kwds):
