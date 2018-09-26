@@ -209,6 +209,7 @@ class MapParser(FileCollection):
         # Retrieve the binning steps along X and Y axes
         self.xstep = self.listfind(binaxes, 'X', binsteps)
         self.ystep = self.listfind(binaxes, 'Y', binsteps)
+
         # Retrieve the binning ranges (br) along X and Y axes
         self.xbr_start, self.xbr_end = self.listfind(binaxes, 'X', binranges)
         self.ybr_start, self.ybr_end = self.listfind(binaxes, 'Y', binranges)
@@ -274,7 +275,7 @@ class MapParser(FileCollection):
                 return self.mapConstruct(kmap, **kwds)
             else:
                 return self.mapConstruct(kmap, fr=self.fr, fc=self.fc,
-                rstart=self.ybr_start, cstart=self.xbr_start, sr=self.ystep, sc=self.xstep)
+                rstart=self.ybr_start, cstart=self.xbr_start, rstep=self.ystep, cstep=self.xstep)
 
         else:
             return None
@@ -384,24 +385,24 @@ def imxy2kxy(x, y, x0, y0, fx, fy):
     return (kx, ky)
 
 
-def detxy2kxy(xd, yd, xstart, ystart, x0, y0, fx, fy, stx, sty):
+def detxy2kxy(xdet, ydet, xstart, ystart, x0, y0, fx, fy, xstep, ystep):
     """
     Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).
 
     :Parameters:
-        xd, yd : numeric, numeric
+        xdet, ydet : numeric, numeric
             Pixel coordinates in the detector coordinate system.
         xstart, ystart : numeric, numeric
             The starting pixel number in the detector coordinate system
             along the x and y axes used in the binning.
         fx, fy : numeric, numeric
             Scaling factor along the x and y axes (in binned image).
-        stx, sty : numeric, numeric
+        xstep, ystep : numeric, numeric
             Binning step size along x and y directions.
     """
 
-    kx = fx * ((xd - xstart) / stx - x0)
-    ky = fy * ((yd - ystart) / sty - y0)
+    kx = fx * ((xdet - xstart) / xstep - x0)
+    ky = fy * ((ydet - ystart) / ystep - y0)
 
     return (kx, ky)
 
@@ -417,13 +418,13 @@ def imrc2krc(r, c, r0, c0, fr, fc):
     return (kr, kc)
 
 
-def detrc2krc(rd, cd, rstart, cstart, r0, c0, fr, fc, str, stc):
+def detrc2krc(rdet, cdet, rstart, cstart, r0, c0, fr, fc, rstep, cstep):
     """
     Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).
     """
 
-    kr = fr * ((rd - rstart) / str - r0)
-    kc = fc * ((cd - cstart) / stc - c0)
+    kr = fr * ((rdet - rstart) / rstep - r0)
+    kc = fc * ((cdet - cstart) / cstep - c0)
 
     return (kr, kc)
 
