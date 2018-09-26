@@ -13,7 +13,7 @@
 
 from __future__ import print_function, division
 from .igoribw import loadibw
-from .base import FileCollection, MapParser
+from .base import FileCollection, MapParser, saveClassAttributes
 from . import utils as u, bandstructure as bs
 import igor.igorpy as igor
 import pandas as pd
@@ -27,6 +27,7 @@ import skimage.io as skio
 from PIL import Image as pim
 import warnings as wn
 from h5py import File
+from silx.io import dictdump
 import psutil as ps
 import dask as d, dask.array as da, dask.dataframe as ddf
 from dask.diagnostics import ProgressBar
@@ -699,7 +700,7 @@ class hdf5Processor(hdf5Reader):
         # Use information specified in binDict, ignore others
         if binDict is not None:
             try:
-                self.binaxes = binDict['axes']
+                self.binaxes = list(binDict['axes'])
                 self.nbinaxes = len(self.binaxes)
                 self.bincounts = binDict['nbins']
                 self.binranges = binDict['ranges']
@@ -707,7 +708,7 @@ class hdf5Processor(hdf5Reader):
                 pass # No action when binDict is not specified
         # Use information from other specified parameters if binDict is not given
         else:
-            self.binaxes = axes
+            self.binaxes = list(axes)
             self.nbinaxes = len(self.binaxes)
 
             # Collect the number of bins
@@ -1339,6 +1340,19 @@ class parallelHDF5Processor(FileCollection):
         except:
             raise Exception('Saving histogram was unsuccessful!')
 
+    def saveParameters(self, form='h5', save_addr='./binning'):
+        """ Save all the attributes of the binning instance for later use
+        (e.g. binning axes, ranges, etc).
+
+        :Parameters:
+            form : str | 'h5'
+                File format to for saving the parameters ('h5'/'hdf5', 'mat')
+            save_addr : str | './binning'
+                The address for the to be saved file.
+        """
+
+        saveClassAttributes(self, form, save_addr)
+
 
 def readBinnedhdf5(fpath, combined=True, typ='float32'):
     """
@@ -1434,7 +1448,7 @@ class parquetProcessor(MapParser):
         # Use information specified in binDict, ignore others
         if binDict is not None:
             try:
-                self.binaxes = binDict['axes']
+                self.binaxes = list(binDict['axes'])
                 self.nbinaxes = len(self.binaxes)
                 self.bincounts = binDict['nbins']
                 self.binranges = binDict['ranges']
@@ -1442,7 +1456,7 @@ class parquetProcessor(MapParser):
                 pass # No action when binDict is not specified
         # Use information from other specified parameters if binDict is not given
         else:
-            self.binaxes = axes
+            self.binaxes = list(axes)
             self.nbinaxes = len(self.binaxes)
 
             # Collect the number of bins

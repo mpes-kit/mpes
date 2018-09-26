@@ -34,7 +34,6 @@ from functools import reduce, partial
 from funcy import project
 import operator as op
 import matplotlib.pyplot as plt
-from silx.io import dictdump
 import warnings as wn
 
 
@@ -722,14 +721,7 @@ class EnergyCalibrator(base.FileCollection):
                 The filename to save the files with.
         """
 
-        if form == 'mat':
-            sio.savemat(save_addr, self.__dict__)
-
-        elif form in ('h5', 'hdf5'):
-            dictdump.dicttoh5(self.__dict__, save_addr, mode='w')
-
-        else:
-            raise NotImplementedError
+        base.saveClassAttributes(self, form, save_addr)
 
 
 # ==================== #
@@ -1520,7 +1512,7 @@ class MomentumCorrector(object):
 
         :Parameters:
             axis : int
-                Axis to select the slice.
+                Axis for slice selection.
             use_composite_transform : bool | False
                 Option to use the composite transform involving the rotation.
             update : bool | False
@@ -1660,16 +1652,7 @@ class MomentumCorrector(object):
                 The address for the to be saved file.
         """
 
-        save_addr = u.appendformat(save_addr, form)
-
-        if form == 'mat':
-            sio.savemat(save_addr, self.__dict__)
-
-        elif form in ('h5', 'hdf5'):
-            dictdump.dicttoh5(self.__dict__, save_addr, mode='w')
-
-        else:
-            raise NotImplementedError
+        base.saveClassAttributes(self, form, save_addr)
 
 
 def _rotate2d(image, center, angle, scale=1):

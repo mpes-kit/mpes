@@ -12,6 +12,7 @@ import glob as g
 import natsort as nts
 import cv2
 from functools import partial
+from import scipy.io as sio
 from silx.io import dictdump
 
 
@@ -281,6 +282,20 @@ class MapParser(FileCollection):
             return None
 
 
+def saveClassAttributes(clss, form, save_addr):
+
+    save_addr = u.appendformat(save_addr, form)
+
+    if form == 'mat':
+        sio.savemat(save_addr, clss.__dict__)
+
+    elif form in ('h5', 'hdf5'):
+        dictdump.dicttoh5(clss.__dict__, save_addr, mode='w')
+
+    else:
+        raise NotImplementedError
+
+
 def tof2evpoly(a, E0, t):
     """
     Polynomial approximation of the time-of-flight to electron volt
@@ -310,24 +325,46 @@ def tof2evpoly(a, E0, t):
     return E
 
 
-def kmap_xy(x, y, x0, y0, fx, fy, xscale=1, yscale=1):
+def imxy2kxy(x, y, x0, y0, fx, fy):
     """
-    Conversion from Cartesian coordinate (x, y) to momentum coordinate.
+    Conversion from Cartesian coordinate in binned image (x, y) to momentum coordinates (kx, ky).
     """
 
-    kx = fx * ((x - x0) / xscale)
-    ky = fy * ((y - y0) / yscale)
+    kx = fx * (x - x0)
+    ky = fy * (y - y0)
 
     return (kx, ky)
 
 
-def kmap_rc(r, c, r0, c0, fr, fc, rscale=1, cscale=1):
+def detxy2kxy(xd, yd, xdc, ydc, fx, fy, sx, sy):
     """
-    Conversion from image coordinate (row, column) to momentum coordinate.
+    Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).
     """
 
-    kr = fr * ((r - r0) / rscale)
-    kc = fc * ((c - c0) / cscale)
+    kx = fx * ((xd - xdc) / sx)
+    ky = fy * ((yd - ydc) / sy)
+
+    return (kx, ky)
+
+
+def imrc2krc(r, c, r0, c0, fr, fc):
+    """
+    Conversion from image coordinate (row, column) to momentum coordinates (kr, kc).
+    """
+
+    kr = fr * (r - r0)
+    kc = fc * (c - c0)
+
+    return (kr, kc)
+
+
+def detrc2krc(rd, cd, rdc, cdc, fr, fc, sr, sc):
+    """
+    Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).
+    """
+
+    kr = fr * ((rd - rdc) / sr)
+    kc = fc * ((cd - cdc) / sc)
 
     return (kr, kc)
 
