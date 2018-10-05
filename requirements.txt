@@ -10,7 +10,7 @@ nose
 coverage
 igor
 lmfit
-h5py==2.8.0rc1
+h5py>=2.8.0
 #tifffile
 dask[complete]
 fastparquet

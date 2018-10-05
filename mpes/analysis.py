@@ -1316,7 +1316,7 @@ class MomentumCorrector(object):
                 Order of rotational symmetry.
         """
 
-        self.image = image
+        self.image = np.squeeze(image)
         self.imgndim = image.ndim
         if (self.imgndim > 3) or (self.imgndim < 2):
             raise ValueError('The input image dimension need to be 2 or 3!')
@@ -1343,7 +1343,7 @@ class MomentumCorrector(object):
         elif self.imgndim == 2:
             raise ValueError('Input image dimension is already 2!')
 
-    def featureExtract(self, image, direction='ccw', type='points', **kwds):
+    def featureExtract(self, image, direction='ccw', type='points', center_det='centroidnn', **kwds):
         """ Extract features from the selected (hyper)slice.
 
         :Parameters:
@@ -1359,9 +1359,10 @@ class MomentumCorrector(object):
 
         if type == 'points':
 
+            self.center_detection_method = center_det
             # Detection and ordering of geometric landmarks
             self.peaks = po.peakdetect2d(image, **kwds)
-            self.pcent, self.pouter = po.pointset_center(self.peaks)
+            self.pcent, self.pouter = po.pointset_center(self.peaks, method=center_det, ret='cnc')
             self.pcent = tuple(self.pcent)
             self.pouter_ord = po.pointset_order(self.pouter, direction=direction)
             # Construct feature dictionary
@@ -1372,21 +1373,21 @@ class MomentumCorrector(object):
             self.mvvdist = po.vvdist(self.pouter_ord).mean()
 
             if self.rotsym == 6:
-                self.mdist = (self.mcvdist + self.mvvdist)/2
+                self.mdist = (self.mcvdist + self.mvvdist) / 2
                 self.mcvdist = self.mdist
                 self.mvvdist = self.mdist
 
         else:
             raise NotImplementedError
 
-    def _featureUpdate(self, **kwds):
+    def _featureUpdate(self, center_det='centroidnn', **kwds):
         """ Update selected features.
         """
 
         image = kwds.pop('image', self.slice)
         # Update the point landmarks in the transformed coordinate system
         pks = po.peakdetect2d(image, **kwds)
-        self.pcent, self.pouter = po.pointset_center(pks)
+        self.pcent, self.pouter = po.pointset_center(pks, method=center_det)
         self.pouter_ord = po.pointset_order(self.pouter, direction='ccw')
         self.pcent = tuple(self.pcent)
         self.features['verts'] = self.pouter_ord
