@@ -592,15 +592,19 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
     pfunc = partial(base.tof2evpoly, a)
 
     # Return results according to specification
-    if ret == 'func':
+    ecalibdict = {}
+    try:
+        ecalibdict['axis'] = pfunc(E0, t)
+    except:
+        pass
+    ecalibdict['coeffs'] = a
+
+    if ret == 'all':
+        return ecalibdict
+    elif ret == 'func':
         return pfunc
-    elif ret == 'coeffs':
-        return a
-    elif ret == 'full':
-        return pfunc, a, sol[1:]
-    elif ret == 'eVscale':
-        eVscale = pfunc(E0, t)
-        return eVscale
+    else:
+        return project(ecalibdict, ret)
 
 
 class EnergyCalibrator(base.FileCollection):
@@ -632,8 +636,10 @@ class EnergyCalibrator(base.FileCollection):
         :Parameters:
             form : str | 'h5'
                 Format of the files ('h5' or 'mat').
-            name : str | ''
-                Name of the group/attribute to read from the file.
+            tracename : str | ''
+                Name of the group/attribute corresponding to the trace.
+            tofname : str | 'ToF'
+                Name of the group/attribute corresponding to the time-of-flight.
         """
 
         if form == 'h5':
@@ -682,19 +688,19 @@ class EnergyCalibrator(base.FileCollection):
         else:
             self.peaks = aly.peaksearch(traces, self.tof, ranges, **kwds)
 
-    def calibrate(self, refid=0, ret='coeffs', **kwds):
+    def calibrate(self, refid=0, ret=['coeffs'], **kwds):
         """ Calibrate the energy scales using optimization methods.
         """
 
-        landmarks = kwd.pop('landmarks', self.peaks)
+        landmarks = kwds.pop('landmarks', self.peaks)
         biases = kwds.pop('biases', self.biases)
-        self.calibration = calibrateE(landmarks, biases, refid=refid, ret=ret)
+        self.calibration = aly.calibrateE(landmarks, biases, refid=refid, ret=ret)
 
         if ret != False:
             try:
-                return project(self.calibration, [ret])
-            except:
                 return project(self.calibration, ret)
+            except:
+                pass
 
     def view(self, traces, segs=None, ranges=None, peaks=None, ret=False, **kwds):
         """ Display a plot showing all traces with annotation.
