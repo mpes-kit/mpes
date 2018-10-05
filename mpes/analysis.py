@@ -626,7 +626,7 @@ class EnergyCalibrator(base.FileCollection):
 
         return len(self.files)
 
-    def read(self, form='h5', name=''):
+    def read(self, form='h5', tracename='', tofname='ToF'):
         """ Read traces (e.g. energy dispersion curves) from files.
 
         :Parameters:
@@ -636,24 +636,27 @@ class EnergyCalibrator(base.FileCollection):
                 Name of the group/attribute to read from the file.
         """
 
-        traces = []
         if form == 'h5':
 
+            traces = []
             for f in self.files:
-                traces = np.asarray(File(f).get(name))
+                traces = np.asarray(File(f).get(tracename))
+
+            tof = np.asarray(File(f).get(tofname))
 
         elif form == 'mat':
 
             for f in self.files:
-                traces = sio.loadmat(f)[name]
+                traces = sio.loadmat(f)[tracename]
+            self.traces = np.array(traces)
 
-        self.traces = np.array(traces)
+            self.tof = sio.loadmat(f)[tofname].ravel()
 
     def normalize(self, **kwds):
-        """ Normalize the collection of 1D photoemission spectra.
+        """ Normalize the spectra along an axis.
         """
 
-        self.normspec = u.normspec(*self.traces, **kwds)
+        self.traces_normed = u.normspec(*self.traces, **kwds)
 
     @staticmethod
     def findCorrespondence(self, sig_still, sig_mov, position, order=3):
@@ -665,16 +668,19 @@ class EnergyCalibrator(base.FileCollection):
 
         return a
 
-    def featureSelect(self, trace_id, peakrange, infer_others=True, **kwds):
+    def featureSelect(self, ranges, traces=None, infer_others=True, **kwds):
         """ Select the equivalent landmarks among all traces.
         """
 
-        self.peakrange = peakrange
+        self.ranges = ranges
+
+        if traces is None:
+            traces = self.traces
 
         if infer_others == True:
             pass
         else:
-            self.peaks = aly.peaksearch(normedcs, tof, peakrange, **kwds)
+            self.peaks = aly.peaksearch(traces, self.tof, ranges, **kwds)
 
     def calibrate(self, refid=0, ret='coeffs', **kwds):
         """ Calibrate the energy scales using optimization methods.
@@ -690,22 +696,33 @@ class EnergyCalibrator(base.FileCollection):
             except:
                 return project(self.calibration, ret)
 
-    def view(self, ret=False, **kwds):
+    def view(self, traces, segs=None, ranges=None, peaks=None, ret=False, **kwds):
         """ Display a plot showing all traces with annotation.
         """
 
         figsize = kwds.pop('figsize', (12, 4))
+        maincolor = kwds.pop('maincolor', 'None')
+        label = kwds.pop('labels', self)
         f, ax = plt.subplots(figsize=figsize)
 
-        ax.plot(tof, trace, '--k', linewidth=1)
-        ax.plot(tofseg, trseg, linewidth=2)
-        ax.scatter(maxs[0, 0], maxs[0, 1], s=30)
+        for itr, trace in enumerate(traces):
+            ax.plot(self.tof, trace, ls='--', linewidth=1, label=str(self.biases[itr])+' V')
 
-        # ax.plot(tof2ev(7018, tofseg), normedcs[0,:][tofcond], label=str(Vs[0]) + ' V')
+            if (segs is not None) and (ranges is not None):
+                rg = ranges[itr]
+                cond = (self.tof >= rg[0]) & (self.tof <= rg[1])
+                tofseg, traceseg = self.tof[cond], trace[cond]
+                ax.plot(tofseg, traceseg, color='k', linewidth=2)
 
-        ax.legend()
-        ax.xticks(range(-3, 10, 1))
-        ax.xlabel('Energy (eV)', fontsize=15)
+            if peaks:
+                ax.scatter(maxs[0, 0], maxs[0, 1], s=30)
+
+        try:
+            ax.legend(fontsize=12)
+        except:
+            pass
+
+        # ax.set_xlabel('Energy (eV)', fontsize=15)
 
         if ret:
             return f, ax
