@@ -694,7 +694,7 @@ class EnergyCalibrator(base.FileCollection):
 
         landmarks = kwds.pop('landmarks', self.peaks)
         biases = kwds.pop('biases', self.biases)
-        self.calibration = aly.calibrateE(landmarks, biases, refid=refid, ret=ret)
+        self.calibration = aly.calibrateE(landmarks, biases, refid=refid, ret=ret, **kwds)
 
         if ret != False:
             try:
@@ -708,11 +708,13 @@ class EnergyCalibrator(base.FileCollection):
 
         figsize = kwds.pop('figsize', (12, 4))
         maincolor = kwds.pop('maincolor', 'None')
-        label = kwds.pop('labels', self)
+        lbs = kwds.pop('labels', [str(b)+' V' for b in self.biases])
+        xaxis = kwds.pop('xaxis', self.tof)
+
         f, ax = plt.subplots(figsize=figsize)
 
         for itr, trace in enumerate(traces):
-            ax.plot(self.tof, trace, ls='--', linewidth=1, label=str(self.biases[itr])+' V')
+            ax.plot(xaxis, trace, ls='--', linewidth=1, label=lbs[itr])
 
             if (segs is not None) and (ranges is not None):
                 rg = ranges[itr]
@@ -721,7 +723,7 @@ class EnergyCalibrator(base.FileCollection):
                 ax.plot(tofseg, traceseg, color='k', linewidth=2)
 
             if peaks:
-                ax.scatter(maxs[0, 0], maxs[0, 1], s=30)
+                ax.scatter(peaks[itr, 0], peaks[itr, 1], s=30)
 
         try:
             ax.legend(fontsize=12)
@@ -1003,6 +1005,8 @@ def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
         return cmask
     elif ret == 'masked_image':
         return cmask*img
+    elif ret == 'all':
+        return cmask, cmask*img, [rr, cc]
 
 
 def rectmask(img, rcent, ccent, shift, direction='row', sign=1, ret='mask', **kwds):
@@ -1060,6 +1064,8 @@ def rectmask(img, rcent, ccent, shift, direction='row', sign=1, ret='mask', **kw
         return rmask
     elif ret == 'masked_image':
         return rmask*img
+    elif ret == 'all':
+        return rmask, rmask*img, [rr, cc]
 
 
 def apply_mask_along(arr, mask, axes=None):
