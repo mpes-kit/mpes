@@ -1378,6 +1378,24 @@ class parallelHDF5Processor(FileCollection):
 
         saveClassAttributes(self, form, save_addr)
 
+def extractEDC(folder=None, files=[], axes=['t'], bins=[1000], ranges=[(65000, 100000)],
+                binning_kwds={'jittered':True}, ret=True, **kwds):
+    """ Extract EDCs from a list of bias scan files.
+    """
+
+    pp = parallelHDF5Processor(folder=folder, files=files)
+    if len(files) == 0:
+        pp.gather(identifier='/*.h5')
+    pp.parallelBinning(axes=axes, nbins=bins, ranges=ranges, combine=False, ret=False,
+                        binning_kwds=binning_kwds, **kwds)
+
+    edcs = [pp.results[i]['binned'] for i in range(len(pp.results))]
+    tof = pp.results[0][axes[0]]
+    traces = np.asarray(edcs).T
+    del pp
+
+    if ret:
+        return traces, tof
 
 def readBinnedhdf5(fpath, combined=True, typ='float32'):
     """
