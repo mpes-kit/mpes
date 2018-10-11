@@ -34,6 +34,10 @@ from functools import reduce, partial
 from funcy import project
 import operator as op
 import matplotlib.pyplot as plt
+import bokeh.plotting as pbk
+from bokeh.io import output_notebook
+from bokeh.palettes import Category10 as ColorCycle
+import itertools as it
 import warnings as wn
 
 
@@ -708,38 +712,65 @@ class EnergyCalibrator(base.FileCollection):
         if calibret == True:
             return self.calibration
 
-    def view(self, traces, segs=None, ranges=None, peaks=None, ret=False, **kwds):
+    def view(self, traces, segs=None, ranges=None, peaks=None, ret=False, backend='matplotlib',
+            linekwds={}, scatterkwds={}, legkwds={}, **kwds):
         """ Display a plot showing all traces with annotation.
         """
 
-        figsize = kwds.pop('figsize', (12, 4))
         maincolor = kwds.pop('maincolor', 'None')
         lbs = kwds.pop('labels', [str(b)+' V' for b in self.biases])
         xaxis = kwds.pop('xaxis', self.tof)
+        ttl = kwds.pop('title', None)
 
-        f, ax = plt.subplots(figsize=figsize)
+        if backend == 'matplotlib':
 
-        for itr, trace in enumerate(traces):
-            ax.plot(xaxis, trace, ls='--', linewidth=1, label=lbs[itr])
+            figsize = kwds.pop('figsize', (12, 4))
+            f, ax = plt.subplots(figsize=figsize)
+            for itr, trace in enumerate(traces):
+                ax.plot(xaxis, trace, ls='--', linewidth=1, label=lbs[itr])
 
-            if (segs is not None) and (ranges is not None):
-                rg = ranges[itr]
-                cond = (self.tof >= rg[0]) & (self.tof <= rg[1])
-                tofseg, traceseg = self.tof[cond], trace[cond]
-                ax.plot(tofseg, traceseg, color='k', linewidth=2)
+                # Emphasize selected EDC segments
+                if (segs is not None) and (ranges is not None):
+                    rg = ranges[itr]
+                    cond = (self.tof >= rg[0]) & (self.tof <= rg[1])
+                    tofseg, traceseg = self.tof[cond], trace[cond]
+                    ax.plot(tofseg, traceseg, color='k', linewidth=2, **linekwds)
+                # Emphasize extracted local maxima
+                if peaks:
+                    ax.scatter(peaks[itr, 0], peaks[itr, 1], s=30, **scatterkwds)
 
-            if peaks:
-                ax.scatter(peaks[itr, 0], peaks[itr, 1], s=30)
+            try:
+                ax.legend(fontsize=12, **legkwds)
+            except:
+                pass
 
-        try:
-            ax.legend(fontsize=12)
-        except:
-            pass
+            ax.set_title(ttl)
+
+        elif backend == 'bokeh':
+
+            output_notebook(hide_banner=True)
+            colors = it.cycle(ColorCycle[10])
+            ttp = [('(x, y)', '($x, $y)')]
+
+            figsize = kwds.pop('figsize', (800, 300))
+            f = pbk.figure(title=ttl, plot_width=figsize[0], plot_height=figsize[1], tooltips=ttp)
+            for i, c in zip(range(len(traces)), colors):
+                f.line(xaxis, traces[i,:], color=c, line_dash='solid', line_width=1,
+                        line_alpha=1, legend=lbs[i], **kwds)
+
+            f.legend.location = kwds.pop('legend_location', 'top_right')
+            f.legend.spacing= 0
+            f.legend.padding = 2
+
+            pbk.show(f)
 
         # ax.set_xlabel('Energy (eV)', fontsize=15)
 
         if ret:
-            return f, ax
+            try:
+                return f, ax
+            except:
+                return f
 
     def saveParameters(self, form='h5', save_addr='./energy'):
         """

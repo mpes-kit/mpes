@@ -3,6 +3,7 @@ numpy
 pandas
 scipy
 matplotlib
+bokeh
 scikit-image
 glob2
 sphinx
@@ -24,4 +25,4 @@ xarray
 astropy
 photutils
 symmetrize
-silx[full]
+silx
