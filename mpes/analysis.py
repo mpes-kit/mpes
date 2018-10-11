@@ -617,7 +617,7 @@ class EnergyCalibrator(base.FileCollection):
         1.1 Use an hdf5 file containing all binned traces and tof
         1.2 Use a mat file containing all binned traces and tof
         1.3 Use the raw data hdf5 files
-        2. Initialize with the folder path
+        2. Initialize with the folder path containing any of the above files
         3. Initialize with the binned traces and the time-of-flight
         """
 
