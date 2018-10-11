@@ -226,7 +226,7 @@ class MapParser(FileCollection):
         """ Retrieve the parameters to construct the energy conversion function.
         """
 
-        self.coeffs = dictdump.load(self.Efile)['calibration'][key]
+        self.poly_a = dictdump.load(self.Efile)['calibration'][key]
 
     def parse_wmap(self, key='warping'):
         """ Retrieve the parameters to construct the distortion correction function

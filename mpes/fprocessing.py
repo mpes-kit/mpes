@@ -1391,7 +1391,7 @@ def extractEDC(folder=None, files=[], axes=['t'], bins=[1000], ranges=[(65000, 1
 
     edcs = [pp.results[i]['binned'] for i in range(len(pp.results))]
     tof = pp.results[0][axes[0]]
-    traces = np.asarray(edcs).T
+    traces = np.asarray(edcs)
     del pp
 
     if ret:
@@ -1556,8 +1556,21 @@ class parquetProcessor(MapParser):
 
         self.edf = self.edf[(self.edf[self.colnam] > lb) & (self.edf[colname] < ub)]
 
+    def columnApply(self, mapping, rescolname, **kwds):
+        """ Apply a user-defined function (e.g. partial function) to an existing column.
+
+        :Parameters:
+            mapping : function
+                Function to apply to the column.
+            rescolname : str
+                Name of the resulting column.
+            **kwds : keyword arguments
+        """
+
+        self.edf[rescolname] = mapping(**kwds)
+
     def transformColumn(self, oldcolname, mapping, newcolname='Transformed', args=(), update='append', **kwds):
-        """ Apply function to an existing column and append to the dataframe.
+        """ Apply a simple function to an existing column.
 
         :Parameters:
             oldcolname : str
@@ -1609,7 +1622,7 @@ class parquetProcessor(MapParser):
         This method can be reused.
         """
 
-        self.transformColumn('t', self.Emap, 'E', args=(E0, ), **kwds)
+        self.columnApply(mapping=self.EMap, rescolname='E', E0=E0, **kwds)
 
     # Row operation
     def appendRow(self, folder=None, df=None, type='parquet', **kwds):
