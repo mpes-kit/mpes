@@ -539,7 +539,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
         refid : int | 0
             Reference data point index, varies from 0 to vals.size - 1.
         ret : str | 'func'
-            Return type, including 'func', 'coeffs', 'full', and 'eVscale' (see below).
+            Return type, including 'func', 'coeffs', 'full', and 'axis' (see below).
         E0 : float | None
             Constant energy offset.
         t : numeric array | None
@@ -593,10 +593,8 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
 
     # Return results according to specification
     ecalibdict = {}
-    try:
+    if (E0 is not None) and (t is not None):
         ecalibdict['axis'] = pfunc(E0, t)
-    except:
-        pass
     ecalibdict['coeffs'] = a
 
     if ret == 'all':
@@ -618,7 +616,7 @@ class EnergyCalibrator(base.FileCollection):
 
         super().__init__(folder=folder, file_sorting=file_sorting, files=files)
 
-        if traces:
+        if traces is not None:
             self.traces = traces
         else:
             self.traces = 0
@@ -686,7 +684,7 @@ class EnergyCalibrator(base.FileCollection):
         if infer_others == True:
             pass
         else:
-            self.peaks = aly.peaksearch(traces, self.tof, ranges, **kwds)
+            self.peaks = peaksearch(traces, self.tof, ranges, **kwds)
 
     def calibrate(self, refid=0, ret=['coeffs'], **kwds):
         """ Calibrate the energy scales using optimization methods.
@@ -694,13 +692,11 @@ class EnergyCalibrator(base.FileCollection):
 
         landmarks = kwds.pop('landmarks', self.peaks)
         biases = kwds.pop('biases', self.biases)
-        self.calibration = aly.calibrateE(landmarks, biases, refid=refid, ret=ret, **kwds)
+        calibret = kwds.pop('calib_ret', False)
+        self.calibration = calibrateE(landmarks, biases, refid=refid, ret=ret, **kwds)
 
-        if ret != False:
-            try:
-                return project(self.calibration, ret)
-            except:
-                pass
+        if calibret == True:
+            return self.calibration
 
     def view(self, traces, segs=None, ranges=None, peaks=None, ret=False, **kwds):
         """ Display a plot showing all traces with annotation.
