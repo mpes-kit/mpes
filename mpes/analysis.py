@@ -610,9 +610,19 @@ class EnergyCalibrator(base.FileCollection):
     Electron binding energy calibration workflow.
     """
 
-    def __init__(self, biases=None, files=[], folder=None, file_sorting=True, traces=None):
+    def __init__(self, biases=None, files=[], folder=None, file_sorting=True, traces=None, tof=None):
+        """ Initialization of the EnergyCalibrator class can follow different ways,
+
+        1. Initialize with all the file paths in a list
+        1.1 Use an hdf5 file containing all binned traces and tof
+        1.2 Use a mat file containing all binned traces and tof
+        1.3 Use the raw data hdf5 files
+        2. Initialize with the folder path
+        3. Initialize with the binned traces and the time-of-flight
+        """
 
         self.biases = biases
+        self.tof = tof
 
         super().__init__(folder=folder, file_sorting=file_sorting, files=files)
 
