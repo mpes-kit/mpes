@@ -122,8 +122,8 @@ class FileCollection(object):
 
         return filteredFiles
 
-    def select(self, ids=[], update='', ret='selected'):
-        """ Select files by the filename id.
+    def select(self, ids=[], update='', ret=False):
+        """ Select gathered files by the filename id.
 
         :Parameters:
             ids : 1D array | []
