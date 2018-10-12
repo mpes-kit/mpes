@@ -502,14 +502,14 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
     if plot:
         plt.figure(figsize=(10, 4))
 
-    if method == 'range-limited':
+    if method == 'range-limited': # Peak detection within a specified range
         for rg, trace in zip(ranges, traces.tolist()):
 
             cond = (tof >= rg[0]) & (tof <= rg[1])
             trace = np.array(trace).ravel()
             tofseg, trseg = tof[cond], trace[cond]
             maxs, _ = peakdetect1d(trseg, tofseg, lookahead=pkwindow)
-            pkmaxs.append(maxs[0, 0])
+            pkmaxs.append(maxs[0, :])
 
             if plot:
                 plt.plot(tof, trace, '--k', linewidth=1)
@@ -704,7 +704,7 @@ class EnergyCalibrator(base.FileCollection):
         """ Calibrate the energy scales using optimization methods.
         """
 
-        landmarks = kwds.pop('landmarks', self.peaks)
+        landmarks = kwds.pop('landmarks', self.peaks)[:, 0]
         biases = kwds.pop('biases', self.biases)
         calibret = kwds.pop('calib_ret', False)
         self.calibration = calibrateE(landmarks, biases, refid=refid, ret=ret, **kwds)
@@ -736,8 +736,8 @@ class EnergyCalibrator(base.FileCollection):
                     tofseg, traceseg = self.tof[cond], trace[cond]
                     ax.plot(tofseg, traceseg, color='k', linewidth=2, **linekwds)
                 # Emphasize extracted local maxima
-                if peaks:
-                    ax.scatter(peaks[itr, 0], peaks[itr, 1], s=30, **scatterkwds)
+                if peaks is not None:
+                    ax.scatter(peaks[itr, 1], peaks[itr, 0], s=30, **scatterkwds)
 
             try:
                 ax.legend(fontsize=12, **legkwds)
@@ -754,9 +754,22 @@ class EnergyCalibrator(base.FileCollection):
 
             figsize = kwds.pop('figsize', (800, 300))
             f = pbk.figure(title=ttl, plot_width=figsize[0], plot_height=figsize[1], tooltips=ttp)
-            for i, c in zip(range(len(traces)), colors):
-                f.line(xaxis, traces[i,:], color=c, line_dash='solid', line_width=1,
-                        line_alpha=1, legend=lbs[i], **kwds)
+            # Main traces
+            for itr, c in zip(range(len(traces)), colors):
+                f.line(xaxis, traces[itr,:], color=c, line_dash='solid', line_width=1,
+                        line_alpha=1, legend=lbs[itr], **kwds)
+
+                # Emphasize selected EDC segments
+                if (segs is not None) and (ranges is not None):
+                    rg = ranges[itr]
+                    cond = (self.tof >= rg[0]) & (self.tof <= rg[1])
+                    tofseg, traceseg = self.tof[cond], trace[cond]
+                    f.line(tofseg, traceseg, color='k', line_width=2, **linekwds)
+
+                # Plot detected peaks
+                if peaks is not None:
+                    f.scatter(peaks[itr, 0], peaks[itr, 1], fill_color=c, fill_alpha=0.8,
+                                line_color=None, **scatterkwds)
 
             f.legend.location = kwds.pop('legend_location', 'top_right')
             f.legend.spacing= 0
