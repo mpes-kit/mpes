@@ -737,7 +737,7 @@ class EnergyCalibrator(base.FileCollection):
                     ax.plot(tofseg, traceseg, color='k', linewidth=2, **linekwds)
                 # Emphasize extracted local maxima
                 if peaks is not None:
-                    ax.scatter(peaks[itr, 1], peaks[itr, 0], s=30, **scatterkwds)
+                    ax.scatter(peaks[itr, 0], peaks[itr, 1], s=30, **scatterkwds)
 
             try:
                 ax.legend(fontsize=12, **legkwds)
