@@ -715,6 +715,25 @@ class EnergyCalibrator(base.FileCollection):
     def view(self, traces, segs=None, ranges=None, peaks=None, ret=False, backend='matplotlib',
             linekwds={}, scatterkwds={}, legkwds={}, **kwds):
         """ Display a plot showing all traces with annotation.
+
+        :Parameters:
+            traces : 2d array
+                Matrix of traces to visualize.
+            segs :
+            ranges :
+            peaks : 2d array
+                Peak positions for labelling the traces.
+            ret : bool
+                Return specification.
+            backend : str | 'matplotlib'
+                Backend specification ('matplotlib' or 'bokeh').
+            linekwds : dict | {}
+                keyword arguments for line plotting.
+            scatterkwds : dict | {}
+                keyword arguments for scatter plot.
+            legkwds : dict | {}
+                keyword arguments for legend.
+            **kwds : keyword arguments
         """
 
         maincolor = kwds.pop('maincolor', 'None')
@@ -754,7 +773,7 @@ class EnergyCalibrator(base.FileCollection):
 
             figsize = kwds.pop('figsize', (800, 300))
             f = pbk.figure(title=ttl, plot_width=figsize[0], plot_height=figsize[1], tooltips=ttp)
-            # Main traces
+            # Plotting the main traces
             for itr, c in zip(range(len(traces)), colors):
                 f.line(xaxis, traces[itr,:], color=c, line_dash='solid', line_width=1,
                         line_alpha=1, legend=lbs[itr], **kwds)
@@ -1566,12 +1585,12 @@ class MomentumCorrector(object):
         if ret:
             return self.image_corrected
 
-    def rotate(self, angle, ret=False, **kwds):
+    def rotate(self, angle='auto', ret=False, **kwds):
         """ Rotate 2D image in the homogeneous coordinate.
 
         :Parameters:
-            angle : float
-                Angle of rotation.
+            angle : float/str
+                Angle of rotation (specify 'auto' to use automated estimation).
             ret : bool | False
                 Return specification (True/False)
             **kwds : keyword arguments
@@ -1581,7 +1600,13 @@ class MomentumCorrector(object):
         center = kwds.pop('center', self.pcent)
         scale = kwds.pop('center', 1)
 
-        self.image_rot, rotmat = _rotate2d(image, center, angle, scale)
+        if angle == 'auto':
+            center = tuple(np.asarray(center).astype('int'))
+            angle_auto, _ = sym.sym_pose_estimate(image/image.max(), center, **kwds)
+            self.image_rot, rotmat = _rotate2d(image, center, angle_auto, scale)
+        else:
+            self.image_rot, rotmat = _rotate2d(image, center, angle, scale)
+
         # Compose the rotation matrix with the previously determined warping matrix
         self.composite_linwarp = np.dot(rotmat, self.linwarp)
 
