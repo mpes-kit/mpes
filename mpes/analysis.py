@@ -1252,6 +1252,163 @@ def bandpath_map(bsvol, pathr=None, pathc=None, path_coords=None, eaxis=2):
     return bpm
 
 
+class BoundedArea(object):
+    """
+    Bounded area object from a parametric equation.
+    """
+
+    def __init__(self, image=None, shape=None, subimage=None):
+        """ Initialization of the
+
+        :Parameters:
+            image : 2d array
+                Image to generate mask.
+            shape : tuple/list
+                Shape of the image matrix.
+            subimage : 2d bool array
+                Image generated.
+        """
+
+        self.image = image
+        if rc is None:
+            self.row, self.col = image.shape
+        else:
+            self.row, self.col = shape
+        self.rgrid, self.cgrid = np.meshgrid(range(self.row), range(self.col))
+
+        # Subimage comprises of the image segment within the overall image
+        if subimage is None:
+            self.subimage = self.image.copy()
+        else:
+            self.subimage = subimage
+
+    @property
+    def mask(self):
+        """ Subimage attribute as mask
+        """
+
+        return self.subimage.astype('bool')
+
+    @property
+    def subgrid(self):
+        """ Substituent pixel coordinates of the image.
+        """
+
+        sg = np.stack(np.where(self.subimage == 1))
+        return sg
+
+    # Logical operations between BoundedArea instances
+    def __and__(self, other):
+        """ Logical and operation.
+        """
+
+        subimage_and = self.mask & other.mask
+
+        return BoundedArea(image=self.image, subimage=subimage_and)
+
+    def __or__(self, other):
+        """ Logical or operation.
+        """
+
+        subimage_or = self.mask | other.mask
+
+        return BoundedArea(image=self.image, subimage=subimage_or)
+
+    def __invert__(self):
+        """ Logical invert operation
+        """
+
+        subimage_inv = ~ self.subimage
+
+        return BoundedArea(image=self.image, subimage=subimage_inv)
+
+    def setBoundary(self, pmz='linear', boundtype='>', **kwds):
+        """ Add bound to grid to redefine subgrid.
+
+        :Parameters:
+            pmz : str | 'linear'
+                Parametrization (pmz) of the decision boundary ('linear' or 'circular').
+            boundtype : str | '>'
+                Bound region specification ('>' or '<').
+            **kwds : keyword arguments
+        """
+
+        if pmz == 'linear':
+
+            # Construct decision boundary y = kx + b or r = kc + b based on two points
+            pa, pb = kwds.pop('points') # Points follow (row, column) index convention
+            k = (pb[1] - pa[1]) / (pb[0] - pa[0])
+            b = pa[1] - k * pa[0]
+
+            if boundtype == '>': # Keep the upper end
+                self.subrgrid, self.subcgrid = np.where(self.rgrid > k * self.cgrid + b)
+
+            elif boundtype == '<': # Keep the lower end
+                self.subrgrid, self.subcgrid = np.where(self.rgrid < k * self.cgrid + b)
+
+            self.subimage = aly._signedmask(self.row, self.col, self.subrgrid, self.subcgrid, sign=1)
+
+        elif pmz == 'circular':
+
+            # Construct decision boundary (r-r0)^2 + (c-c0)^2 = 1 based on center and radius
+            pc = kwds.pop('center') # in (row, column) format
+            rad = kwds.pop('radius')
+
+            if boundtype == '>': # Select inner circle
+                self.subimage, _, region = \
+                aly.circmask(self.image, pc[0], pc[1], rad, sign=0, ret='all', **kwds)
+                self.subrgrid, self.subcgrid = region
+
+            elif boundtype == '<': # Select outer circle
+                self.subimage, _, region = \
+                aly.circmask(self.image, pc[0], pc[1], rad, sign=1, ret='all', **kwds)
+                self.subrgrid, self.subcgrid = region
+
+        else:
+            raise NotImplementedError
+
+    def view(self, origin='lower', cmap='terrain_r', axes=True, **kwds):
+        """ Display the current mask.
+
+        :Parameters:
+            origin : str | 'lower'
+                Location of the image origin.
+            cmap : str | 'terrain_r'
+                Color map
+            axes : bool | True
+                Axes visibility option in plot.
+            **kwds : keyword arguments
+                Additional arguments for matplotlib.pyplot.imshow().
+        """
+
+        f, ax = plt.subplots(figsize=(4, 4))
+        ax.imshow(self.subimage, origin=origin, cmap=cmap, **kwds)
+
+        if axes == False:
+            ax.set_xticks([])
+            ax.set_yticks([])
+
+    def toMask(self, inbound=1, exbound=0):
+        """ Generate a scaled mask from existing shape.
+
+        :Parameters:
+            inbound : float | 1
+                Value for the pixels within the boundary.
+            exbound : float | 0
+                Value for the pixels outside the boundary.
+
+        :Return:
+            modmask : 2d array
+                Modified mask as a 2d array.
+        """
+
+        modmask = self.subimage.copy()
+        modmask[modmask==1] = inbound
+        modmask[modmask==0] = exbound
+
+        return modmask
+
+
 # ================ #
 # Image correction #
 # ================ #
