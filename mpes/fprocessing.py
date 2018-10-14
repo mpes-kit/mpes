@@ -893,7 +893,7 @@ class hdf5Processor(hdf5Reader):
             # parameters is the same as that for the binning
             jitter_axes = kwds.pop('jitter_axes', axes)
             jitter_bins = kwds.pop('jitter_bins', nbins)
-            jitter_amplitude = kwds.pop('jitter_amplitude', 0.5*np.ones(self.nbinaxes))
+            jitter_amplitude = kwds.pop('jitter_amplitude', 0.5*np.ones(len(jitter_axes)))
             jitter_ranges = kwds.pop('jitter_ranges', ranges)
 
             # Add jitter to the specified dimensions of the data
@@ -1021,7 +1021,7 @@ def binPartition(partition, binaxes, nbins, binranges):
 
 
 def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
-                binDict=None, pbar=True):
+                binDict=None, pbar=True, jittered=True, **kwds):
     """
     Calculate multidimensional histogram from columns of a dask dataframe.
     Prof. Yves Acremann's method.
@@ -1046,6 +1046,25 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
 
     histdict = {}
     partitionResults = [] # Partition-level results
+
+    # Add jitter to all the partitions before binning
+    if jittered:
+        # Retrieve parameters for histogram jittering, the ordering of the jittering
+        # parameters is the same as that for the binning
+        jitter_axes = kwds.pop('jitter_axes', axes)
+        jitter_bins = kwds.pop('jitter_bins', nbins)
+        jitter_amplitude = kwds.pop('jitter_amplitude', 0.5*np.ones(len(jitter_axes)))
+        jitter_ranges = kwds.pop('jitter_ranges', ranges)
+
+        # Add jitter to the specified dimensions of the data
+        for jb, jax, jamp, jr in zip(jitter_bins, jitter_axes, jitter_amplitude, jitter_ranges):
+
+            # Calculate the bar size of the histogram in every dimension
+            binsize = abs(jr[0] - jr[1])/jb
+            # Jitter as random uniformly distributed noise (W. S. Cleveland)
+            df[jax] += df.map_partitions(getJitter, amp=jamp*binsize, col=jax)
+
+    # Main loop for binning
     for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
 
         coreTasks = [] # Core-level jobs
@@ -1084,6 +1103,14 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
         histdict[ax] = np.linspace(axrange[0], axrange[1], nbins[iax])
 
     return histdict
+
+
+def getJitter(df, amp, col):
+    """ Obtain jitter dataframe.
+    """
+
+    colsize = df[col].size
+    return amp*np.random.uniform(low=-1, high=1, size=colsize)
 
 
 class hdf5Splitter(hdf5Reader):
