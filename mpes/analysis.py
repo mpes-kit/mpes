@@ -769,15 +769,15 @@ class EnergyCalibrator(base.FileCollection):
             legkwds : dict | {}
                 Keyword arguments for legend (see `matplotlib.pyplot.legend()`).
             **kwds : keyword arguments
-            ===============  ==========  ================================
-            keyword          data type   meaning
-            ===============  ==========  ================================
-            maincolor        str
-            labels           list        Labels for each curve
-            xaxis            1d array    x (horizontal) axis values
-            title            str         Title of the plot
-            legend_location  str         Location of the plot legend
-            ===============  ==========  ================================
+                ===============  ==========  ================================
+                keyword          data type   meaning
+                ===============  ==========  ================================
+                maincolor        str
+                labels           list        Labels for each curve
+                xaxis            1d array    x (horizontal) axis values
+                title            str         Title of the plot
+                legend_location  str         Location of the plot legend
+                ===============  ==========  ================================
         """
 
         maincolor = kwds.pop('maincolor', 'None')
@@ -997,7 +997,6 @@ def regionExpand(mask, **kwds):
     Expand the region of a binarized image around a line position
 
     **Parameters**
-
     mask : numeric binarized 2D array
         the mask to be expanded
     **kwds : keyword arguments
@@ -1011,8 +1010,8 @@ def regionExpand(mask, **kwds):
         clipbounds     tuple/list  bounds in the clipping direction
         selem          ndarray     structuring element
         =============  ==========  ===================================
-    **Return**
 
+    **Return**
     mask : numeric 2D array
         modified mask (returns the original mask if insufficient arguments
         are provided for the chosen method for region expansion)
@@ -1087,13 +1086,13 @@ def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
         ret : str | 'mask'
             Return type ('mask', 'masked_image')
         kwds : keyword arguments
-        =============  ==========  ============ =========================
-           keyword     data type   default      meaning
-        =============  ==========  ============ =========================
-            shape      tuple/list  shape of img see skimage.draw.circle()
-           method         str       'graphic'   'graphic' or 'algebraic'
-          edgefactor     float        1.02       prefactor to rad**2
-        =============  ==========  ============ =========================
+            =============  ==========  ============ =========================
+               keyword     data type   default      meaning
+            =============  ==========  ============ =========================
+                shape      tuple/list  shape of img see skimage.draw.circle()
+               method         str       'graphic'   'graphic' or 'algebraic'
+              edgefactor     float        1.02       prefactor to rad**2
+            =============  ==========  ============ =========================
 
     :Return:
         cmask or cmask*img : 2D array
@@ -1653,7 +1652,7 @@ class MomentumCorrector(object):
             type : str | 'points'
                 Type of features to extract.
             **kwds : keyword arguments
-                extra arguments for `symmetrize.pointops.peakdetect2d()`.
+                Extra keyword arguments for `symmetrize.pointops.peakdetect2d()`.
         """
 
         if type == 'points':
@@ -1717,7 +1716,7 @@ class MomentumCorrector(object):
                 'image' = update only image-related attributes
                 'all' = update both feature and image-related attributes
             **kwds : keyword arguments
-                Extra arguments passed into `self._featureUpdate()`
+                Extra keyword arguments passed into `self._featureUpdate()`.
         """
 
         if content == 'feature':
@@ -1742,12 +1741,12 @@ class MomentumCorrector(object):
             ret : bool | True
                 Specify if returning the corrected image slice.
             **kwds : keyword arguments
-            ========= ========== =============================================
-            keyword   data type  meaning
-            ========= ========== =============================================
-            landmarks list/array Symmetry landmarks selected for registration
-            fitinit   tuple/list Initial conditions for fitting
-            ========= ========== =============================================
+                ========= ========== =============================================
+                keyword   data type  meaning
+                ========= ========== =============================================
+                landmarks list/array Symmetry landmarks selected for registration
+                fitinit   tuple/list Initial conditions for fitting
+                ========= ========== =============================================
         """
 
         landmarks = kwds.pop('landmarks', self.pouter_ord)
@@ -1802,14 +1801,14 @@ class MomentumCorrector(object):
             ret : bool | False
                 Return specification (True/False)
             **kwds : keyword arguments
-            ======= ========== =======================================
-            keyword data type  meaning
-            ======= ========== =======================================
-            image   2d array   2D image for correction
-            center  tuple/list pixel coordinates of the image center
-            scale   float      scaling factor in rotation
-            ======= ========== =======================================
-            See `symmetrize.sym.sym_pose_estimate()` for other keywords.
+                ======= ========== =======================================
+                keyword data type  meaning
+                ======= ========== =======================================
+                image   2d array   2D image for correction
+                center  tuple/list pixel coordinates of the image center
+                scale   float      scaling factor in rotation
+                ======= ========== =======================================
+                See `symmetrize.sym.sym_pose_estimate()` for other keywords.
         """
 
         image = kwds.pop('image', self.slice)
@@ -1840,12 +1839,12 @@ class MomentumCorrector(object):
             update : bool | False
                 Option to update the existing figure attributes.
             **kwds : keyword arguments
-            ======= ========= ===============================
-            keyword data type meaning
-            ======= ========= ===============================
-            image   2d array  3D image for correction
-            warping 2d array  2D transform correction matrix
-            ======= ========= ===============================
+                ======= ========= ===============================
+                keyword data type meaning
+                ======= ========= ===============================
+                image   2d array  3D image for correction
+                warping 2d array  2D transform correction matrix
+                ======= ========= ===============================
         """
 
         image = kwds.pop('image', self.image)
