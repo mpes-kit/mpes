@@ -1038,6 +1038,8 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
             is not None. It will override the specifications from other arguments.
         pbar : bool | True
             Option to display a progress bar.
+        jittered : bool | True
+            Option to add histogram jittering during binning.
 
     :Return:
         histdict : dict
@@ -1252,11 +1254,11 @@ class parallelHDF5Processor(FileCollection):
                 dimension has one value more), specify 'midpoint' to get the midpoint of the
                 bars (same length as the histogram dimensions).
             pbar : Bool | true
-                Whether to show the progress bar
+                Option to display the progress bar.
             binning_kwds : dict | {}
-                keyword arguments to be included in hdf5Processor.localBinning()
+                Keyword arguments to be included in `hdf5Processor.localBinning()`.
             compute_kwds : dict | {}
-                keyword arguments to specify in dask.compute()
+                Keyword arguments to specify in `dask.compute()`.
         """
 
         binTasks = []
@@ -1384,6 +1386,9 @@ class parallelHDF5Processor(FileCollection):
     def saveHistogram(self, dictname='combinedresult', form='h5', save_addr='./histogram', **kwds):
         """
         Save binned histogram and the axes.
+
+        :Parameters:
+            See `mpes.fprocessing.saveDict()`.
         """
 
         try:
@@ -1693,7 +1698,9 @@ class parquetProcessor(MapParser):
 
     def saveHistogram(self, form, save_addr, dictname='histdict', **kwds):
         """ Export binned histogram as other files.
-        Refer to mpes.fprocessing.saveDict() for the description of arguments
+
+        :Parameters:
+            See `mpes.fprocessing.saveDict()`.
         """
 
         try:

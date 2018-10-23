@@ -38,6 +38,7 @@ import bokeh.plotting as pbk
 from bokeh.io import output_notebook
 from bokeh.palettes import Category10 as ColorCycle
 import itertools as it
+from tqdm import tqdm
 import warnings as wn
 
 
@@ -374,7 +375,7 @@ def peakdetect1d(y_axis, x_axis = None, lookahead = 200, delta=0):
 
 def peakdetect2d(img, method='daofind', **kwds):
     """
-    Peak detection in 2D image.
+    Peak-like feature detection in a 2D image.
 
     :Parameters:
         img : 2D array
@@ -383,6 +384,20 @@ def peakdetect2d(img, method='daofind', **kwds):
             Detection method ('daofind' or 'maxlist').
         **kwds : keyword arguments
             Arguments passed to the specific methods chosen.
+
+            :daofind: See `astropy.stats.sigma_clipped_stats()` and `photutils.detection.DAOStarFinder()`.
+            sigma : float | 5.0
+                Standard deviation of the clipping Gaussian.
+            fwhm : float | 3.0
+                FWHM of the convoluting Gaussian kernel.
+            threshfactor : float | 8
+                Intensity threshold for background-foreground separation (foreground is above threshold).
+
+            :maxlist: See `skimage.feature.peak_local_max()`.
+            mindist : float | 10
+                Minimal distance between two local maxima.
+            numpeaks : int | 7
+                Maximum number of detected peaks.
 
     :Return:
         pks : 2D array
@@ -618,9 +633,9 @@ class EnergyCalibrator(base.FileCollection):
         """ Initialization of the EnergyCalibrator class can follow different ways,
 
         1. Initialize with all the file paths in a list
-        1.1 Use an hdf5 file containing all binned traces and tof
-        1.2 Use a mat file containing all binned traces and tof
-        1.3 Use the raw data hdf5 files
+        1a. Use an hdf5 file containing all binned traces and tof
+        1b. Use a mat file containing all binned traces and tof
+        1c. Use the raw data hdf5 files
         2. Initialize with the folder path containing any of the above files
         3. Initialize with the binned traces and the time-of-flight
         """
@@ -672,6 +687,10 @@ class EnergyCalibrator(base.FileCollection):
 
     def normalize(self, **kwds):
         """ Normalize the spectra along an axis.
+
+        :Parameters:
+            **kwds : keyword arguments
+                See the keywords for `mpes.utils.normspec()`
         """
 
         self.traces_normed = u.normspec(*self.traces, **kwds)
@@ -686,22 +705,38 @@ class EnergyCalibrator(base.FileCollection):
 
         return a
 
-    def featureSelect(self, ranges, traces=None, infer_others=True, **kwds):
+    def featureSelect(self, ranges, refid=None, traces=None, infer_others=True, **kwds):
         """ Select the equivalent landmarks among all traces.
+
+        :Parameters:
+            range :
+            refid : int | None
+            traces : 2d array | None
+            infer_others : bool | True
         """
 
         self.ranges = ranges
-
         if traces is None:
             traces = self.traces
 
         if infer_others == True:
+            ranges_inferred = 0
+            self.ranges = ranges_inferred
             pass
-        else:
-            self.peaks = peaksearch(traces, self.tof, ranges, **kwds)
+
+        # Run peak detection for each trace within the specified range
+        self.peaks = peaksearch(traces, self.tof, self.ranges, **kwds)
 
     def calibrate(self, refid=0, ret=['coeffs'], **kwds):
         """ Calibrate the energy scales using optimization methods.
+
+        :Parameters:
+            refid : int | 0
+                The trace ID (an integer)
+            ret : list | ['coeffs']
+                Options for return values.
+            **kwds : keyword arguments
+                See possible keywords for `mpes.analysis.calibrateE()`
         """
 
         landmarks = kwds.pop('landmarks', self.peaks)[:, 0]
@@ -726,14 +761,23 @@ class EnergyCalibrator(base.FileCollection):
             ret : bool
                 Return specification.
             backend : str | 'matplotlib'
-                Backend specification ('matplotlib' or 'bokeh').
+                Backend specification, choose between 'matplotlib' (static) or 'bokeh' (interactive).
             linekwds : dict | {}
-                keyword arguments for line plotting.
+                Keyword arguments for line plotting (see `matplotlib.pyplot.plot()`).
             scatterkwds : dict | {}
-                keyword arguments for scatter plot.
+                Keyword arguments for scatter plot (see `matplotlib.pyplot.scatter()`).
             legkwds : dict | {}
-                keyword arguments for legend.
+                Keyword arguments for legend (see `matplotlib.pyplot.legend()`).
             **kwds : keyword arguments
+            ===============  ==========  ================================
+            keyword          data type   meaning
+            ===============  ==========  ================================
+            maincolor        str
+            labels           list        Labels for each curve
+            xaxis            1d array    x (horizontal) axis values
+            title            str         Title of the plot
+            legend_location  str         Location of the plot legend
+            ===============  ==========  ================================
         """
 
         maincolor = kwds.pop('maincolor', 'None')
@@ -1097,7 +1141,7 @@ def rectmask(img, rcent, ccent, shift, direction='row', sign=1, ret='mask', **kw
             Binary sign of the masked region
         ret : str | 'mask'
             Return type ('mask', 'masked_image')
-        kwds : keyword arguments
+        **kwds : keyword arguments
 
     :Return:
         cmask or cmask*img : 2D array
@@ -1378,7 +1422,7 @@ class BoundedArea(object):
             axes : bool | True
                 Axes visibility option in plot.
             **kwds : keyword arguments
-                Additional arguments for matplotlib.pyplot.imshow().
+                Additional arguments for `matplotlib.pyplot.imshow()`.
         """
 
         f, ax = plt.subplots(figsize=(4, 4))
@@ -1609,7 +1653,7 @@ class MomentumCorrector(object):
             type : str | 'points'
                 Type of features to extract.
             **kwds : keyword arguments
-                extra arguments for symmetrize.pointops.peakdetect2d()
+                extra arguments for `symmetrize.pointops.peakdetect2d()`.
         """
 
         if type == 'points':
@@ -1673,7 +1717,7 @@ class MomentumCorrector(object):
                 'image' = update only image-related attributes
                 'all' = update both feature and image-related attributes
             **kwds : keyword arguments
-                Extra arguments passed into _featureUpdate()
+                Extra arguments passed into `self._featureUpdate()`
         """
 
         if content == 'feature':
@@ -1697,6 +1741,13 @@ class MomentumCorrector(object):
                 Name of the optimization method.
             ret : bool | True
                 Specify if returning the corrected image slice.
+            **kwds : keyword arguments
+            ========= ========== =============================================
+            keyword   data type  meaning
+            ========= ========== =============================================
+            landmarks list/array Symmetry landmarks selected for registration
+            fitinit   tuple/list Initial conditions for fitting
+            ========= ========== =============================================
         """
 
         landmarks = kwds.pop('landmarks', self.pouter_ord)
@@ -1751,11 +1802,19 @@ class MomentumCorrector(object):
             ret : bool | False
                 Return specification (True/False)
             **kwds : keyword arguments
+            ======= ========== =======================================
+            keyword data type  meaning
+            ======= ========== =======================================
+            image   2d array   2D image for correction
+            center  tuple/list pixel coordinates of the image center
+            scale   float      scaling factor in rotation
+            ======= ========== =======================================
+            See `symmetrize.sym.sym_pose_estimate()` for other keywords.
         """
 
         image = kwds.pop('image', self.slice)
         center = kwds.pop('center', self.pcent)
-        scale = kwds.pop('center', 1)
+        scale = kwds.pop('scale', 1)
 
         if angle == 'auto':
             center = tuple(np.asarray(center).astype('int'))
@@ -1781,6 +1840,12 @@ class MomentumCorrector(object):
             update : bool | False
                 Option to update the existing figure attributes.
             **kwds : keyword arguments
+            ======= ========= ===============================
+            keyword data type meaning
+            ======= ========= ===============================
+            image   2d array  3D image for correction
+            warping 2d array  2D transform correction matrix
+            ======= ========= ===============================
         """
 
         image = kwds.pop('image', self.image)
@@ -1886,6 +1951,7 @@ class MomentumCorrector(object):
             dtyp : str | 'float32'
                 Data type (in case conversion if needed).
             **kwds : keyword arguments
+                See keywords from `tifffile.imsave()`.
         """
 
         data = kwds.pop('data', self.image).astype(dtyp)
@@ -2040,42 +2106,44 @@ def func_add(*funcs):
     return funcsum
 
 
-def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
+def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=False, **kwds):
     """
     Line-by-line fitting via bootstrapping fitted parameters from one line to the next
 
-    ***Parameters***
+    :Parameters:
+        data : ndarray
+            Data used in fitting.
+        axval : list/numeric array
+            Value for the axis.
+        model : lmfit Model object
+            The fitting model.
+        params : lmfit Parameters object
+            Initial guesses for fitting parameters.
+        axis : int | 0
+            The axis of the data to fit.
+        dfcontainer : pandas DataFrame | None
+            Dataframe container for the fitting parameters.
+        pbar : bool | False
+            Progress bar condition.
+        **kwds : keyword arguments
+            =============  ==========  ===================================
+            keyword        data type   meaning
+            =============  ==========  ===================================
+            maxiter        int         maximum iteration per fit (default = 20)
+            concat         bool        concatenate the fit parameters to DataFrame input
+                                       False (default) = no concatenation, use an empty DataFrame to start
+                                       True = with concatenation to input DataFrame
+            bgremove       bool        toggle for background removal (default = True)
+            flipped        bool        toggle for fitting start position
+                                       (if flipped, fitting start from the last line)
+            verbose        bool        toggle for output message (default = False)
+            =============  ==========  ===================================
 
-    data : ndarray
-        data used in fitting
-    axval : list/numeric array
-        value for the axis
-    model : lmfit Model object
-        fitting model
-    params : lmfit Parameters object
-        initial guesses for fitting parameters
-    axis : int | 0
-        axis of the data to fit
-    dfcontainer : pandas DataFrame | None
-        container for the fitting parameters
-    **kwds : keyword arguments
-        =============  ==========  ===================================
-        keyword        data type   meaning
-        =============  ==========  ===================================
-        maxiter        int         maximum iteration per fit (default = 20)
-        concat         bool        concatenate the fit parameters to DataFrame input
-                                   False (default) = no concatenation, use an empty DataFrame to start
-                                   True = with concatenation to input DataFrame
-        bgremove       bool        toggle for background removal (default = True)
-        flipped        bool        toggle for fitting start position
-                                   (if flipped, fitting start from the last line)
-        verbose        bool        toggle for output message (default = False)
-        =============  ==========  ===================================
-
-    ***Returns***
-
-    df_fit : pandas DataFrame
-        filled container for fitting parameters
+    :Returns:
+        df_fit : pandas DataFrame
+            Dataframe container populated with obtained fitting parameters.
+        data_nobg : ndarray
+            Background-removed (Shirley-type) traces.
     """
 
     # Retrieve values from input arguments
@@ -2106,7 +2174,7 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
         raise Exception('Input dfcontainer needs to be a pandas DataFrame!')
 
     # Fitting every line in data matrix
-    for i in range(nr):
+    for i in tqdm(range(nr), disable=not(pbar)):
 
         # Remove Shirley background (nobg = no background)
         line = data[i,:]
@@ -2124,7 +2192,7 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, **kwds):
             currdict[param.name] = param.value
             currdf = pd.DataFrame.from_dict(currdict, orient='index').T
 
-        df_fit = pd.concat([df_fit, currdf], ignore_index=True)
+        df_fit = pd.concat([df_fit, currdf], ignore_index=True, sort=True)
 
         # Set the next fit initial guesses to be
         # the best values from the current fit
