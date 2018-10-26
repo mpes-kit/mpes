@@ -14,7 +14,7 @@
 # =======================
 
 from __future__ import print_function, division
-from . import utils as u, fprocessing as fp
+from . import utils as u
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -24,11 +24,15 @@ import matplotlib.gridspec as matgrid
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.tri as mtri
 import matplotlib.colors as colors
+from matplotlib import cm
+import bokeh.palettes as bp
+from bokeh.colors import RGB
 from copy import copy
 import re, glob2 as g
 from PIL import Image
 import imageio as imio
 import natsort as nts
+
 
 global PLOT3D
 PLOT3D = False
@@ -72,6 +76,28 @@ class MidpointNormalize(colors.Normalize):
     def __call__(self, value, clip=None):
         x, y = [self.vmin, self.midpoint, self.vmax], [0, 0.5, 1]
         return np.ma.masked_array(np.interp(value, x, y))
+
+
+def cm2palette(cmapName):
+    """ Convert certain matplotlib colormap (cm) to bokeh palette.
+
+    :Parameter:
+        cmapName : str
+            Name of the colormap/palette.
+
+    :Return:
+        palette : list
+            List of colors in hex representation (a bokoeh palette).
+    """
+
+    if cmapName in bp.all_palettes.keys():
+        palette = eval('bp.' + cmapName)
+
+    else:
+        mpl_cm_rgb = (255 * eval('cm.' + cmapName)(range(256))).astype('int')
+        palette = [RGB(*tuple(rgb)).to_hex() for rgb in mpl_cm_rgb]
+
+    return palette
 
 
 # ========== #
