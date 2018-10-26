@@ -15,7 +15,7 @@
 # =======================================
 
 from __future__ import print_function, division
-from . import base, utils as u, ellipsefit as elf
+from . import base, utils as u, ellipsefit as elf, visualization as vis
 from math import cos, pi
 import numpy as np
 from numpy.linalg import norm, lstsq
@@ -41,6 +41,7 @@ import itertools as it
 from tqdm import tqdm
 import warnings as wn
 
+wn.filterwarnings("ignore")
 
 # ==================== #
 #  Background removal  #
@@ -734,9 +735,9 @@ class EnergyCalibrator(base.FileCollection):
             refid : int | 0
                 The trace ID (an integer)
             ret : list | ['coeffs']
-                Options for return values.
+                Options for return values (see `mpes.analysis.calibrateE()`).
             **kwds : keyword arguments
-                See possible keywords for `mpes.analysis.calibrateE()`
+                See possible keywords for `mpes.analysis.calibrateE()`.
         """
 
         landmarks = kwds.pop('landmarks', self.peaks)[:, 0]
@@ -1629,20 +1630,28 @@ class MomentumCorrector(object):
         """ Select (hyper)slice from a (hyper)volume.
 
         :Parameters:
-            selector : slice object
-                Selector for the slice (image).
+            selector : slice object/int
+                Selector along the specified axis to extract the slice (image).
+                Use the construct slice(start, stop, step) to select a range of images and sum them.
+                Use an integer to specify only a particular slice.
+
             axis : int | 2
                 Axis along which to select the image.
         """
 
         if self.imgndim > 2:
             im = np.moveaxis(self.image, axis, 0)
-            self.slice = im[selector,...].sum(axis=0)
+            try:
+                self.slice = im[selector,...].sum(axis=0)
+            except:
+                self.slice = im[selector,...]
+
         elif self.imgndim == 2:
             raise ValueError('Input image dimension is already 2!')
 
     def featureExtract(self, image, direction='ccw', type='points', center_det='centroidnn', **kwds):
-        """ Extract features from the selected (hyper)slice.
+        """ Extract features from the selected 2D slice.
+            Currently only point feature detection is implemented.
 
         :Parameters:
             image : 2d array
@@ -1747,6 +1756,9 @@ class MomentumCorrector(object):
                 landmarks list/array Symmetry landmarks selected for registration
                 fitinit   tuple/list Initial conditions for fitting
                 ========= ========== =============================================
+
+        :Return:
+            Corrected 2D image slice (when `ret=True` is specified in the arguments).
         """
 
         landmarks = kwds.pop('landmarks', self.pouter_ord)
@@ -1765,7 +1777,7 @@ class MomentumCorrector(object):
 
     @staticmethod
     def transform(points, transmat):
-        """ Coordinate transform of a point set in the (row, column) formulation
+        """ Coordinate transform of a point set in the (row, column) formulation.
 
         :Parameters:
             points : list/array
@@ -1815,10 +1827,12 @@ class MomentumCorrector(object):
         center = kwds.pop('center', self.pcent)
         scale = kwds.pop('scale', 1)
 
+        # Automatic determination of the best pose based on grid search within an angular range
         if angle == 'auto':
             center = tuple(np.asarray(center).astype('int'))
             angle_auto, _ = sym.sym_pose_estimate(image/image.max(), center, **kwds)
             self.image_rot, rotmat = _rotate2d(image, center, angle_auto, scale)
+        # Rotate image by the specified angle
         else:
             self.image_rot, rotmat = _rotate2d(image, center, angle, scale)
 
@@ -1829,7 +1843,7 @@ class MomentumCorrector(object):
             return rotmat
 
     def correct(self, axis, use_composite_transform=False, update=False, **kwds):
-        """ Apply a 2D transform to a stack of 2D images (3D).
+        """ Apply a 2D transform to a stack of 2D images (3D) along a specific axis.
 
         :Parameters:
             axis : int
@@ -1871,9 +1885,9 @@ class MomentumCorrector(object):
 
         return warpfunc
 
-    def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={},
-             annotated=False, ret=False, imkwd={}, **kwds):
-        """ Generate imshow plot.
+    def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={}, annotated=False,
+            backend='matplotlib', ret=False, imkwd={}, scatterkwd={}, **kwds):
+        """ Display image slice with specified annotations.
 
         :Parameters:
             origin : str | 'lower'
@@ -1886,37 +1900,71 @@ class MomentumCorrector(object):
                 Points for annotation.
             annotated : bool | False
                 Option for annotation.
+            backend : str | 'matplotlib'
+                Visualization backend package to use.
             ret : bool | False
                 Option to return figure and axis objects.
             imkwd : dict | {}
-                Keyword arguments for matplotlib.pyplot.imshow().
+                Keyword arguments for `matplotlib.pyplot.imshow()`.
             **kwds : keyword arguments
                 General extra arguments for the plotting procedure.
         """
 
         image = kwds.pop('image', self.slice)
-        f, ax = plt.subplots(figsize=figsize)
-        ax.imshow(image, origin=origin, cmap=cmap, **imkwd)
+        nr, nc = image.shape
+        xrg = kwds.pop('xaxis', (0, nc))
+        yrg = kwds.pop('yaxis', (0, nr))
 
-        # Add annotation to the figure
         if annotated:
             tsr, tsc = kwds.pop('textshift', (3, 3))
             txtsize = kwds.pop('textsize', 12)
 
-            for pk, pvs in points.items():
-                try:
-                    ax.scatter(pvs[:,1], pvs[:,0])
-                except:
-                    ax.scatter(pvs[1], pvs[0])
+        if backend == 'matplotlib':
+            f, ax = plt.subplots(figsize=figsize)
+            ax.imshow(image, origin=origin, cmap=cmap, **imkwd)
 
-                if pvs.size > 2:
-                    for ipv, pv in enumerate(pvs):
-                        ax.text(pv[1]+tsc, pv[0]+tsr, str(ipv), fontsize=txtsize)
+            # Add annotation to the figure
+            if annotated:
+                for pk, pvs in points.items():
+
+                    try:
+                        ax.scatter(pvs[:,1], pvs[:,0], **scatterkwd)
+                    except:
+                        ax.scatter(pvs[1], pvs[0], **scatterkwd)
+
+                    if pvs.size > 2:
+                        for ipv, pv in enumerate(pvs):
+                            ax.text(pv[1]+tsc, pv[0]+tsr, str(ipv), fontsize=txtsize)
+
+        elif backend == 'bokeh':
+
+            output_notebook(hide_banner=True)
+            ttp = [('(x, y)', '($x, $y)')]
+            figsize = kwds.pop('figsize', (420, 400))
+            palette = vis.cm2palette(cmap)
+            f = pbk.figure(plot_width=figsize[0], plot_height=figsize[1],
+                            tooltips=ttp, x_range=(0, nc), y_range=(0, nr))
+            f.image(image=[image], x=0, y=0, dw=nc, dh=nr, palette=palette, **imkwd)
+
+            if annotated == True:
+                for pk, pvs in points.items():
+
+                    try:
+                        xcirc, ycirc = pvs[:,1], pvs[:,0]
+                        f.circle(xcirc, ycirc, size=10, **scatterkwd)
+                    except:
+                        xcirc, ycirc = pvs[1], pvs[0]
+                        f.circle(xcirc, ycirc, size=10, color='red', **scatterkwd)
+
+            pbk.show(f)
 
         if ret:
-            return f, ax
+            try:
+                return f, ax
+            except:
+                return f
 
-    def calibrate(self, image, point_from, point_to, dist, ret='coeffs'):
+    def calibrate(self, image, point_from, point_to, dist, ret='coeffs', **kwds):
         """ Calibration of the momentum axes. Obtain all calibration-related values,
         return only the ones requested.
 
@@ -1929,9 +1977,14 @@ class MomentumCorrector(object):
                 Distance between the two selected points in inverse Angstrom.
             ret : str | 'coeffs'
                 Specification of return values ('axes', 'extent', 'coeffs', 'grid', 'func', 'all').
+            **kwds : keyword arguments
+                See arguments in `mpes.analysis.calibrateE()`.
+
+        :Return:
+            Specified calibration parameters in a dictionary.
         """
 
-        self.calibration = calibrateK(image, point_from, point_to, dist, ret='all')
+        self.calibration = calibrateK(image, point_from, point_to, dist, ret='all', **kwds)
 
         if ret != False:
             try:
@@ -1986,13 +2039,23 @@ class MomentumCorrector(object):
 
 def _rotate2d(image, center, angle, scale=1):
     """
-    2D matrix rotation.
+    2D matrix scaled rotation carried out in the homogenous coordinate.
 
     :Parameters:
         image : 2d array
+            Image matrix.
         center : tuple/list
+            Center of the image (row pixel, column pixel).
         angle : numeric
+            Angle of image rotation.
         scale : numeric | 1
+            Scale of image rotation.
+
+    :Returns:
+        image_rot : 2d array
+            Rotated image matrix.
+        rotmat : 2d array
+            Rotation matrix in the homogeneous coordinate system.
     """
 
     rotmat = cv2.getRotationMatrix2D(center, angle=angle, scale=scale)
@@ -2013,7 +2076,7 @@ SQ2PI = np.sqrt(2*np.pi)
 
 
 def gaussian(feval=False, vardict=None):
-    """Gaussian model
+    """ Gaussian model
     """
 
     asvars = ['amp', 'xvar', 'ctr', 'sig']
@@ -2026,7 +2089,7 @@ def gaussian(feval=False, vardict=None):
 
 
 def voigt(feval=False, vardict=None):
-    """Voigt model
+    """ Voigt model
     """
 
     asvars = ['amp', 'xvar', 'ctr', 'sig', 'gam']
