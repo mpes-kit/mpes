@@ -726,7 +726,7 @@ class EnergyCalibrator(base.FileCollection):
             pass
 
         # Run peak detection for each trace within the specified range
-        self.peaks = peaksearch(traces, self.tof, self.ranges, **kwds)
+        self.peaks = peaksearch(traces, self.tof, self.ranges, plot=False, **kwds)
 
     def calibrate(self, refid=0, ret=['coeffs'], **kwds):
         """ Calibrate the energy scales using optimization methods.
@@ -833,7 +833,7 @@ class EnergyCalibrator(base.FileCollection):
                 # Plot detected peaks
                 if peaks is not None:
                     f.scatter(peaks[itr, 0], peaks[itr, 1], fill_color=c, fill_alpha=0.8,
-                                line_color=None, **scatterkwds)
+                                line_color=None, size=5, **scatterkwds)
 
             f.legend.location = kwds.pop('legend_location', 'top_right')
             f.legend.spacing= 0
@@ -1886,7 +1886,7 @@ class MomentumCorrector(object):
         return warpfunc
 
     def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={}, annotated=False,
-            backend='matplotlib', ret=False, imkwd={}, scatterkwd={}, **kwds):
+            backend='matplotlib', ret=False, imkwds={}, scatterkwds={}, **kwds):
         """ Display image slice with specified annotations.
 
         :Parameters:
@@ -1921,16 +1921,16 @@ class MomentumCorrector(object):
 
         if backend == 'matplotlib':
             f, ax = plt.subplots(figsize=figsize)
-            ax.imshow(image, origin=origin, cmap=cmap, **imkwd)
+            ax.imshow(image, origin=origin, cmap=cmap, **imkwds)
 
             # Add annotation to the figure
             if annotated:
                 for pk, pvs in points.items():
 
                     try:
-                        ax.scatter(pvs[:,1], pvs[:,0], **scatterkwd)
+                        ax.scatter(pvs[:,1], pvs[:,0], **scatterkwds)
                     except:
-                        ax.scatter(pvs[1], pvs[0], **scatterkwd)
+                        ax.scatter(pvs[1], pvs[0], **scatterkwds)
 
                     if pvs.size > 2:
                         for ipv, pv in enumerate(pvs):
@@ -1941,21 +1941,21 @@ class MomentumCorrector(object):
             output_notebook(hide_banner=True)
             colors = it.cycle(ColorCycle[10])
             ttp = [('(x, y)', '($x, $y)')]
-            figsize = kwds.pop('figsize', (420, 400))
+            figsize = kwds.pop('figsize', (320, 300))
             palette = vis.cm2palette(cmap) # Retrieve palette colors
             f = pbk.figure(plot_width=figsize[0], plot_height=figsize[1],
                             tooltips=ttp, x_range=(0, nc), y_range=(0, nr))
-            f.image(image=[image], x=0, y=0, dw=nc, dh=nr, palette=palette, **imkwd)
+            f.image(image=[image], x=0, y=0, dw=nc, dh=nr, palette=palette, **imkwds)
 
             if annotated == True:
                 for pk, pvs in points.items():
 
                     try:
                         xcirc, ycirc = pvs[:,1], pvs[:,0]
-                        f.circle(xcirc, ycirc, size=10, color=next(colors), **scatterkwd)
+                        f.scatter(xcirc, ycirc, size=8, color=next(colors), **scatterkwds)
                     except:
                         xcirc, ycirc = pvs[1], pvs[0]
-                        f.circle(xcirc, ycirc, size=10, color=next(colors), **scatterkwd)
+                        f.scatter(xcirc, ycirc, size=8, color=next(colors), **scatterkwds)
 
             pbk.show(f)
 
