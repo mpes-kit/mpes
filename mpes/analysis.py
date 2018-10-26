@@ -430,7 +430,7 @@ def peakdetect2d(img, method='daofind', **kwds):
 #  Coordinate calibration  #
 # ======================== #
 
-def calibrateK(img, pxla, pxlb, k_ab=None, kcoorda=None, kcoordb=[0., 0.], equiscale=False, ret='axes'):
+def calibrateK(img, pxla, pxlb, k_ab=None, kcoorda=None, kcoordb=[0., 0.], equiscale=False, ret=['axes']):
     """
     Momentum axes calibration using the pixel positions of two symmetry points (a and b)
     and the absolute coordinate of a single point (b). All coordinates should be specified
@@ -449,7 +449,7 @@ def calibrateK(img, pxla, pxlb, k_ab=None, kcoorda=None, kcoordb=[0., 0.], equis
             Momentum coordinates of the symmetry point b (krow, kcol), default to k-space center.
         equiscale : bool | False
             Option to adopt equal scale along both the row and column directions.
-        ret : str | 'axes'
+        ret : list | ['axes']
             Return type specification, options include 'axes', 'extent', 'coeffs', 'grid', 'func', 'all'.
 
     :Returns:
@@ -477,14 +477,14 @@ def calibrateK(img, pxla, pxlb, k_ab=None, kcoorda=None, kcoordb=[0., 0.], equis
     else:
         # Calculate the conversion factor along x and y directions separately (need coorda)
         dy_ab, dx_ab = pxla - pxlb
-        kyb, kxb = coordb
-        kya, kxa = coorda
+        kyb, kxb = kcoordb
+        kya, kxa = kcoorda
         # Calculate the column- and row-wise conversion factor
         xratio = (kxa - kxb) / (pxla[1] - pxlb[1])
         yratio = (kya - kyb) / (pxla[0] - pxlb[0])
 
-    k_row = rowdist * yratio + coordb[0]
-    k_col = coldist * xratio + coordb[1]
+    k_row = rowdist * yratio + kcoordb[0]
+    k_col = coldist * xratio + kcoordb[1]
 
     # Calculate other return parameters
     pfunc = partial(base.imrc2krc, fr=yratio, fc=xratio)
@@ -492,7 +492,7 @@ def calibrateK(img, pxla, pxlb, k_ab=None, kcoorda=None, kcoordb=[0., 0.], equis
 
     # Assemble into return dictionary
     kcalibdict = {}
-    kcalibdict['axis'] = (k_row, k_col)
+    kcalibdict['axes'] = (k_row, k_col)
     kcalibdict['extent'] = (k_col[0], k_col[-1], k_row[0], k_row[-1])
     kcalibdict['coeffs'] = (yratio, xratio)
     kcalibdict['grid'] = (k_rowgrid, k_colgrid)
