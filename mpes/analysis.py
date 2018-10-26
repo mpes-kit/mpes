@@ -430,7 +430,7 @@ def peakdetect2d(img, method='daofind', **kwds):
 #  Coordinate calibration  #
 # ======================== #
 
-def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
+def calibrateK(img, pxla, pxlb, k_ab, coorda=None, coordb=[0., 0.], equiscale=False, ret='axes'):
     """
     Momentum axes calibration using the pixel positions of two symmetry points (a and b)
     and the absolute coordinate of a single point (b). All coordinates should be specified
@@ -443,8 +443,8 @@ def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
             Pixel coordinates of the two symmetry points (a and b).
         k_ab : float
             The known momentum space distance between the two symmetry points.
-        coordb : list/tuple/1D array
-            Actual coordinate of the symmetry point b.
+        coordb : list/tuple/1D array | [0., 0.]
+            Actual coordinate of the symmetry point b (default to k-space center).
         ret : str | 'axes'
             Return type specification, options include 'axes', 'extent', 'coeffs', 'grid', 'func', 'all'.
 
@@ -460,16 +460,30 @@ def calibrateK(img, pxla, pxlb, k_ab, coordb=[0., 0.], ret='axes'):
 
     nr, nc = img.shape
     pxla, pxlb = map(np.array, [pxla, pxlb])
-    d_ab = norm(pxla - pxlb)
-    ratio = k_ab / d_ab # Distance conversion factor
 
-    # Calculate the row-wise conversion factor
-    rowdist = range(nr) - pxlb[0]
-    k_row = rowdist * ratio + coordb[0]
+    if coorda is None:
 
-    # Calculate the column-wise conversion factor
-    coldist = range(nc) - pxlb[1]
-    k_col = coldist * ratio + coordb[1]
+
+    if equiscale == True:
+
+        d_ab = norm(pxla - pxlb)
+        ratio = k_ab / d_ab # Distance conversion factor
+
+        rowdist = range(nr) - pxlb[0]
+        k_row = rowdist * ratio + coordb[0]
+        coldist = range(nc) - pxlb[1]
+        k_col = coldist * ratio + coordb[1]
+
+    else:
+
+        dy_ab, dx_ab = pxla - pxlb
+        # Calculate the column-wise conversion factor
+        xratio = (kxa - kxb) / (pxla[1] - pxlb[1])
+        # Calculate the row-wise conversion factor
+        yratio = (kya - kyb) / (pxla[0] - pxlb[0])
+
+        k_row =
+
 
     # Calculate other return parameters
     pfunc = partial(base.imrc2krc, fr=ratio, fc=ratio)
@@ -748,8 +762,8 @@ class EnergyCalibrator(base.FileCollection):
         if calibret == True:
             return self.calibration
 
-    def view(self, traces, segs=None, ranges=None, peaks=None, ret=False, backend='matplotlib',
-            linekwds={}, scatterkwds={}, legkwds={}, **kwds):
+    def view(self, traces, segs=None, ranges=None, peaks=None, show_legend=True, ret=False,
+            backend='matplotlib', linekwds={}, linesegkwds={}, scatterkwds={}, legkwds={}, **kwds):
         """ Display a plot showing all traces with annotation.
 
         :Parameters:
@@ -784,29 +798,30 @@ class EnergyCalibrator(base.FileCollection):
         maincolor = kwds.pop('maincolor', 'None')
         lbs = kwds.pop('labels', [str(b)+' V' for b in self.biases])
         xaxis = kwds.pop('xaxis', self.tof)
-        ttl = kwds.pop('title', None)
+        ttl = kwds.pop('title', '')
 
         if backend == 'matplotlib':
 
             figsize = kwds.pop('figsize', (12, 4))
             f, ax = plt.subplots(figsize=figsize)
             for itr, trace in enumerate(traces):
-                ax.plot(xaxis, trace, ls='--', linewidth=1, label=lbs[itr])
+                ax.plot(xaxis, trace, ls='--', linewidth=1, label=lbs[itr], **linekwds)
 
                 # Emphasize selected EDC segments
                 if (segs is not None) and (ranges is not None):
                     rg = ranges[itr]
                     cond = (self.tof >= rg[0]) & (self.tof <= rg[1])
                     tofseg, traceseg = self.tof[cond], trace[cond]
-                    ax.plot(tofseg, traceseg, color='k', linewidth=2, **linekwds)
+                    ax.plot(tofseg, traceseg, color='k', linewidth=2, **linesegkwds)
                 # Emphasize extracted local maxima
                 if peaks is not None:
                     ax.scatter(peaks[itr, 0], peaks[itr, 1], s=30, **scatterkwds)
 
-            try:
-                ax.legend(fontsize=12, **legkwds)
-            except:
-                pass
+            if show_legend:
+                try:
+                    ax.legend(fontsize=12, **legkwds)
+                except:
+                    pass
 
             ax.set_title(ttl)
 
@@ -835,9 +850,10 @@ class EnergyCalibrator(base.FileCollection):
                     f.scatter(peaks[itr, 0], peaks[itr, 1], fill_color=c, fill_alpha=0.8,
                                 line_color=None, size=5, **scatterkwds)
 
-            f.legend.location = kwds.pop('legend_location', 'top_right')
-            f.legend.spacing= 0
-            f.legend.padding = 2
+            if show_legend:
+                f.legend.location = kwds.pop('legend_location', 'top_right')
+                f.legend.spacing= 0
+                f.legend.padding = 2
 
             pbk.show(f)
 
