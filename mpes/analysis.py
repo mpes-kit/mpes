@@ -1939,9 +1939,10 @@ class MomentumCorrector(object):
         elif backend == 'bokeh':
 
             output_notebook(hide_banner=True)
+            colors = it.cycle(ColorCycle[10])
             ttp = [('(x, y)', '($x, $y)')]
             figsize = kwds.pop('figsize', (420, 400))
-            palette = vis.cm2palette(cmap)
+            palette = vis.cm2palette(cmap) # Retrieve palette colors
             f = pbk.figure(plot_width=figsize[0], plot_height=figsize[1],
                             tooltips=ttp, x_range=(0, nc), y_range=(0, nr))
             f.image(image=[image], x=0, y=0, dw=nc, dh=nr, palette=palette, **imkwd)
@@ -1951,10 +1952,10 @@ class MomentumCorrector(object):
 
                     try:
                         xcirc, ycirc = pvs[:,1], pvs[:,0]
-                        f.circle(xcirc, ycirc, size=10, **scatterkwd)
+                        f.circle(xcirc, ycirc, size=10, color=next(colors), **scatterkwd)
                     except:
                         xcirc, ycirc = pvs[1], pvs[0]
-                        f.circle(xcirc, ycirc, size=10, color='red', **scatterkwd)
+                        f.circle(xcirc, ycirc, size=10, color=next(colors), **scatterkwd)
 
             pbk.show(f)
 
