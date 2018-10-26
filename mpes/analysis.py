@@ -430,7 +430,7 @@ def peakdetect2d(img, method='daofind', **kwds):
 #  Coordinate calibration  #
 # ======================== #
 
-def calibrateK(img, pxla, pxlb, k_ab, coorda=None, coordb=[0., 0.], equiscale=False, ret='axes'):
+def calibrateK(img, pxla, pxlb, k_ab=None, kcoorda=None, kcoordb=[0., 0.], equiscale=False, ret='axes'):
     """
     Momentum axes calibration using the pixel positions of two symmetry points (a and b)
     and the absolute coordinate of a single point (b). All coordinates should be specified
@@ -441,10 +441,14 @@ def calibrateK(img, pxla, pxlb, k_ab, coorda=None, coordb=[0., 0.], equiscale=Fa
             An energy cut of the band structure.
         pxla, pxlb : list/tuple/1D array
             Pixel coordinates of the two symmetry points (a and b).
-        k_ab : float
+        k_ab : float | None
             The known momentum space distance between the two symmetry points.
-        coordb : list/tuple/1D array | [0., 0.]
-            Actual coordinate of the symmetry point b (default to k-space center).
+        kcoorda : list/tuple/1D array | None
+            Momentum coordinates of the symmetry point a.
+        kcoordb : list/tuple/1D array | [0., 0.]
+            Momentum coordinates of the symmetry point b (krow, kcol), default to k-space center.
+        equiscale : bool | False
+            Option to adopt equal scale along both the row and column directions.
         ret : str | 'axes'
             Return type specification, options include 'axes', 'extent', 'coeffs', 'grid', 'func', 'all'.
 
@@ -461,39 +465,36 @@ def calibrateK(img, pxla, pxlb, k_ab, coorda=None, coordb=[0., 0.], equiscale=Fa
     nr, nc = img.shape
     pxla, pxlb = map(np.array, [pxla, pxlb])
 
-    if coorda is None:
-
+    rowdist = range(nr) - pxlb[0]
+    coldist = range(nc) - pxlb[1]
 
     if equiscale == True:
-
+        # Use the same conversion factor along both x and y directions (need k_ab)
         d_ab = norm(pxla - pxlb)
-        ratio = k_ab / d_ab # Distance conversion factor
-
-        rowdist = range(nr) - pxlb[0]
-        k_row = rowdist * ratio + coordb[0]
-        coldist = range(nc) - pxlb[1]
-        k_col = coldist * ratio + coordb[1]
+        # Calculate the pixel to momentum conversion factor
+        xratio = yratio = k_ab / d_ab
 
     else:
-
+        # Calculate the conversion factor along x and y directions separately (need coorda)
         dy_ab, dx_ab = pxla - pxlb
-        # Calculate the column-wise conversion factor
+        kyb, kxb = coordb
+        kya, kxa = coorda
+        # Calculate the column- and row-wise conversion factor
         xratio = (kxa - kxb) / (pxla[1] - pxlb[1])
-        # Calculate the row-wise conversion factor
         yratio = (kya - kyb) / (pxla[0] - pxlb[0])
 
-        k_row =
-
+    k_row = rowdist * yratio + coordb[0]
+    k_col = coldist * xratio + coordb[1]
 
     # Calculate other return parameters
-    pfunc = partial(base.imrc2krc, fr=ratio, fc=ratio)
+    pfunc = partial(base.imrc2krc, fr=yratio, fc=xratio)
     k_rowgrid, k_colgrid = np.meshgrid(k_row, k_col)
 
     # Assemble into return dictionary
     kcalibdict = {}
     kcalibdict['axis'] = (k_row, k_col)
     kcalibdict['extent'] = (k_col[0], k_col[-1], k_row[0], k_row[-1])
-    kcalibdict['coeffs'] = (ratio, ratio)
+    kcalibdict['coeffs'] = (yratio, xratio)
     kcalibdict['grid'] = (k_rowgrid, k_colgrid)
 
     if ret == 'all':
@@ -747,7 +748,7 @@ class EnergyCalibrator(base.FileCollection):
 
         :Parameters:
             refid : int | 0
-                The trace ID (an integer)
+                The reference trace index (an integer).
             ret : list | ['coeffs']
                 Options for return values (see `mpes.analysis.calibrateE()`).
             **kwds : keyword arguments
