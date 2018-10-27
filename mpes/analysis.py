@@ -632,6 +632,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
     ecalibdict = {}
     if (E0 is not None) and (t is not None):
         ecalibdict['axis'] = pfunc(E0, t)
+        ecalibdict['offset'] = ecalibdict['axis'].min()
     ecalibdict['coeffs'] = a
     ecalibdict['Tmat'] = Tmat
     ecalibdict['bvec'] = bvec
@@ -662,6 +663,7 @@ class EnergyCalibrator(base.FileCollection):
 
         self.biases = biases
         self.tof = tof
+        self.pathcorr = []
 
         super().__init__(folder=folder, file_sorting=file_sorting, files=files)
 
@@ -752,7 +754,7 @@ class EnergyCalibrator(base.FileCollection):
             return a
 
     def featureSelect(self, ranges, refid=0, traces=None, infer_others=False, alignkwds={}, **kwds):
-        """ Select the equivalent landmarks among all traces.
+        """ Select or extract the equivalent landmarks (e.g. peaks) among all traces.
 
         :Parameters:
             ranges : list/tuple
@@ -767,14 +769,14 @@ class EnergyCalibrator(base.FileCollection):
             alignkwds : dict | {}
                 Dictionarized keyword arguments for trace alignment (See `self.findCorrespondence()`).
             **kwds : keyword arguments
-                See keyword arguements in `mpes.analysis.peaksearch()`.
+                See available keywords in `mpes.analysis.peaksearch()`.
         """
 
         self.ranges = ranges
         if traces is None:
             traces = self.traces
 
-        # Infer the corresponding feature detection range of other traces
+        # Infer the corresponding feature detection range of other traces by alignment
         if infer_others == True:
             method = alignkwds.pop('alignmethod', 'dtw')
             ranges_inferred = []
@@ -783,14 +785,16 @@ class EnergyCalibrator(base.FileCollection):
                 pathcorr = self.findCorrespondence(traces[refid,:], traces[i,:],
                             method=method, **alignkwds)
                 ranges_inferred.append(rangeConvert(self.tof, ranges, pathcorr))
+                self.pathcorr.append(pathcorr)
 
             self.ranges = ranges_inferred
 
-        # Run peak detection for each trace within the specified range
+        # Run peak detection for each trace within the specified ranges
         self.peaks = peaksearch(traces, self.tof, self.ranges, plot=False, **kwds)
 
     def calibrate(self, refid=0, ret=['coeffs'], **kwds):
-        """ Calibrate the energy scales using optimization methods.
+        """ Calculate the functional mapping between time-of-flight and the energy
+        scale using optimization methods.
 
         :Parameters:
             refid : int | 0
@@ -798,7 +802,7 @@ class EnergyCalibrator(base.FileCollection):
             ret : list | ['coeffs']
                 Options for return values (see `mpes.analysis.calibrateE()`).
             **kwds : keyword arguments
-                See possible keywords for `mpes.analysis.calibrateE()`.
+                See available keywords for `mpes.analysis.calibrateE()`.
         """
 
         landmarks = kwds.pop('landmarks', self.peaks)[:, 0]
@@ -809,9 +813,9 @@ class EnergyCalibrator(base.FileCollection):
         if calibret == True:
             return self.calibration
 
-    def view(self, traces, segs=None, ranges=None, peaks=None, show_legend=True, ret=False,
+    def view(self, traces, segs=None, ranges=None, peaks=None, show_legend=True, ret=False, display=True,
             backend='matplotlib', linekwds={}, linesegkwds={}, scatterkwds={}, legkwds={}, **kwds):
-        """ Display a plot showing all traces with annotation.
+        """ Display a plot showing line traces with annotation.
 
         :Parameters:
             traces : 2d array
@@ -855,9 +859,9 @@ class EnergyCalibrator(base.FileCollection):
                 ax.plot(xaxis, trace, ls='--', linewidth=1, label=lbs[itr], **linekwds)
 
                 # Emphasize selected EDC segments
-                if (segs is not None) and (ranges is not None):
-                    rg = ranges[itr]
-                    cond = (self.tof >= rg[0]) & (self.tof <= rg[1])
+                if segs is not None:
+                    seg = segs[itr]
+                    cond = (self.tof >= seg[0]) & (self.tof <= seg[1])
                     tofseg, traceseg = self.tof[cond], trace[cond]
                     ax.plot(tofseg, traceseg, color='k', linewidth=2, **linesegkwds)
                 # Emphasize extracted local maxima
@@ -882,15 +886,16 @@ class EnergyCalibrator(base.FileCollection):
             f = pbk.figure(title=ttl, plot_width=figsize[0], plot_height=figsize[1], tooltips=ttp)
             # Plotting the main traces
             for itr, c in zip(range(len(traces)), colors):
-                f.line(xaxis, traces[itr,:], color=c, line_dash='solid', line_width=1,
+                trace = traces[itr, :]
+                f.line(xaxis, trace, color=c, line_dash='solid', line_width=1,
                         line_alpha=1, legend=lbs[itr], **kwds)
 
                 # Emphasize selected EDC segments
-                if (segs is not None) and (ranges is not None):
-                    rg = ranges[itr]
-                    cond = (self.tof >= rg[0]) & (self.tof <= rg[1])
+                if segs is not None:
+                    seg = segs[itr]
+                    cond = (self.tof >= seg[0]) & (self.tof <= seg[1])
                     tofseg, traceseg = self.tof[cond], trace[cond]
-                    f.line(tofseg, traceseg, color='k', line_width=2, **linekwds)
+                    f.line(tofseg, traceseg, color=c, line_width=3, **linekwds)
 
                 # Plot detected peaks
                 if peaks is not None:
@@ -902,7 +907,8 @@ class EnergyCalibrator(base.FileCollection):
                 f.legend.spacing= 0
                 f.legend.padding = 2
 
-            pbk.show(f)
+            if display:
+                pbk.show(f)
 
         # ax.set_xlabel('Energy (eV)', fontsize=15)
 
@@ -928,7 +934,8 @@ class EnergyCalibrator(base.FileCollection):
 
 
 def rangeConvert(x, xrng, pathcorr):
-    """ Convert value range using a pairwise path correspondence (e.g. generated using DTW).
+    """ Convert value range using a pairwise path correspondence (e.g. obtained
+    from time warping techniques).
 
     :Parameters:
         x : 1D array
@@ -1976,7 +1983,7 @@ class MomentumCorrector(object):
         return warpfunc
 
     def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={}, annotated=False,
-            backend='matplotlib', ret=False, imkwds={}, scatterkwds={}, **kwds):
+            display=True, backend='matplotlib', ret=False, imkwds={}, scatterkwds={}, **kwds):
         """ Display image slice with specified annotations.
 
         :Parameters:
@@ -2047,7 +2054,8 @@ class MomentumCorrector(object):
                         xcirc, ycirc = pvs[1], pvs[0]
                         f.scatter(xcirc, ycirc, size=8, color=next(colors), **scatterkwds)
 
-            pbk.show(f)
+            if display:
+                pbk.show(f)
 
         if ret:
             try:
