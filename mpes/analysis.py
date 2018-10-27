@@ -531,7 +531,6 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
     """
 
     pkmaxs = []
-
     if plot:
         plt.figure(figsize=(10, 4))
 
@@ -553,11 +552,10 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
         raise NotImplementedError
 
     pkmaxs = np.asarray(pkmaxs)
-
     return pkmaxs
 
 
-def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
+def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None, aug=1):
     """
     Energy calibration by nonlinear least squares fitting of spectral landmarks on
     a set of (energy dispersion curves (EDCs). This amounts to solving for the
@@ -588,9 +586,10 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
         ecalibdict : dict
             A dictionary of fitting parameters including the following,
             coeffs : Fitted polynomial coefficients (the a's).
-            axis : Fitted energy axis.
+            offset : Minimum time-of-flight corresponding to a peak.
             Tmat : the T matrix (differential time-of-flight) in the equation Ta=b.
             bvec : the b vector (differential bias) in the fitting Ta=b.
+            axis : Fitted energy axis.
     """
 
     vals = np.array(vals)
@@ -603,13 +602,14 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
 
     # Top-to-bottom ordering of terms in the T matrix
     termorder = np.delete(range(0, nvals, 1), refid)
+    termorder = np.tile(termorder, aug)
     # Left-to-right ordering of polynomials in the T matrix
     polyorder = np.linspace(order, 1, order, dtype='int')
 
     # Construct the T (differential drift time) matrix, Tmat = Tmain - Tsec
     Tmain = np.array([pos[refid]**p for p in polyorder])
     # Duplicate to the same order as the polynomials
-    Tmain = np.tile(Tmain, (nvals-1, 1))
+    Tmain = np.tile(Tmain, (aug*(nvals-1), 1))
 
     Tsec = []
 
@@ -620,6 +620,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
 
     # Construct the b vector (differential bias)
     bvec = vals[refid] - np.delete(vals, refid)
+    bvec = np.tile(bvec, aug)
 
     # Solve for the a vector (polynomial coefficients) using least squares
     sol = lstsq(Tmat, bvec, rcond=None)
@@ -630,12 +631,12 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
 
     # Return results according to specification
     ecalibdict = {}
-    if (E0 is not None) and (t is not None):
-        ecalibdict['axis'] = pfunc(E0, t)
-        ecalibdict['offset'] = ecalibdict['axis'].min()
+    ecalibdict['offset'] = np.asarray(pos).min()
     ecalibdict['coeffs'] = a
     ecalibdict['Tmat'] = Tmat
     ecalibdict['bvec'] = bvec
+    if (E0 is not None) and (t is not None):
+        ecalibdict['axis'] = pfunc(E0, t)
 
     if ret == 'all':
         return ecalibdict
@@ -663,14 +664,17 @@ class EnergyCalibrator(base.FileCollection):
 
         self.biases = biases
         self.tof = tof
+        self.featranges = [] # Value ranges for feature detection
         self.pathcorr = []
 
         super().__init__(folder=folder, file_sorting=file_sorting, files=files)
 
         if traces is not None:
             self.traces = traces
+            self.traces_normed = traces
         else:
             self.traces = []
+            self.traces_normed = []
 
     @property
     def nfiles(self):
@@ -685,6 +689,20 @@ class EnergyCalibrator(base.FileCollection):
         """
 
         return len(self.traces)
+
+    @property
+    def nranges(self):
+        """ The number of specified feature ranges.
+        """
+
+        return len(self.featranges)
+
+    @property
+    def dup(self):
+        """ The duplication number.
+        """
+
+        return int(np.round(self.nranges / self.ntraces))
 
     def read(self, form='h5', tracename='', tofname='ToF'):
         """ Read traces (e.g. energy dispersion curves) from files.
@@ -725,17 +743,18 @@ class EnergyCalibrator(base.FileCollection):
         self.traces_normed = u.normspec(*self.traces, **kwds)
 
     @staticmethod
-    def findCorrespondence(sig_still, sig_mov, dist_metric=distance.euclidean,
-                            order=3, method='dtw'):
+    def findCorrespondence(sig_still, sig_mov, method='dtw', **kwds):
         """ Determine the correspondence between two 1D traces by alignment.
 
         :Parameters:
             sig_still, sig_mov : 1D array, 1D array
                 Input 1D signals.
-            dist_metric : func | distance.euclidean
-            order : int | 3
             method : str | 'dtw'
-                Method for 1D signal correspondence detection.
+                Method for 1D signal correspondence detection ('dtw' or 'ptw').
+            **kwds : keyword arguments
+                See available keywords for the following functions,
+                (1) `fastdtw.fastdtw()` (when `method=='dtw'`)
+                (2) `ptw.ptw.timeWarp()` (when `method=='ptw'`)
 
         :Return:
             pathcorr : list
@@ -744,7 +763,9 @@ class EnergyCalibrator(base.FileCollection):
 
         if method == 'dtw':
 
-            dst, pathcorr = fastdtw(sig_still, sig_mov, dist=dist_metric)
+            dist = kwds.pop('dist_metric', distance.euclidean)
+            rad = kwds.pop('radius', 2)
+            dst, pathcorr = fastdtw(sig_still, sig_mov, dist=dist, radius=rad)
             return pathcorr
 
         elif method == 'ptw': # To be completed
@@ -753,7 +774,7 @@ class EnergyCalibrator(base.FileCollection):
             w, siglim, a = ptw.timeWarp(sig_still, sig_mov)
             return a
 
-    def featureSelect(self, ranges, refid=0, traces=None, infer_others=False, alignkwds={}, **kwds):
+    def addFeatures(self, ranges, refid=0, traces=None, infer_others=False, mode='append', **kwds):
         """ Select or extract the equivalent landmarks (e.g. peaks) among all traces.
 
         :Parameters:
@@ -766,31 +787,58 @@ class EnergyCalibrator(base.FileCollection):
                 Collection of energy dispersion curves (EDCs).
             infer_others : bool | True
                 Option to infer the feature detection range in other traces (EDCs) from a given one.
-            alignkwds : dict | {}
-                Dictionarized keyword arguments for trace alignment (See `self.findCorrespondence()`).
+            mode : str | 'append'
+                Specification on how to change the feature ranges ('append' or 'replace').
             **kwds : keyword arguments
-                See available keywords in `mpes.analysis.peaksearch()`.
+                Dictionarized keyword arguments for trace alignment (See `self.findCorrespondence()`)
         """
 
-        self.ranges = ranges
         if traces is None:
             traces = self.traces
 
         # Infer the corresponding feature detection range of other traces by alignment
         if infer_others == True:
-            method = alignkwds.pop('alignmethod', 'dtw')
-            ranges_inferred = []
+            method = kwds.pop('align_method', 'dtw')
+            newranges = []
 
             for i in range(self.ntraces):
+
                 pathcorr = self.findCorrespondence(traces[refid,:], traces[i,:],
-                            method=method, **alignkwds)
-                ranges_inferred.append(rangeConvert(self.tof, ranges, pathcorr))
+                            method=method, **kwds)
                 self.pathcorr.append(pathcorr)
+                newranges.append(rangeConvert(self.tof, ranges, pathcorr))
 
-            self.ranges = ranges_inferred
+        else:
+            if type(ranges) == list:
+                newranges = ranges
+            else:
+                newranges = [ranges]
 
+        if mode == 'append':
+            self.featranges += newranges
+        elif mode == 'replace':
+            self.featranges = newranges
+
+    def featureExtract(self, ranges=None, traces=None, **kwds):
+        """ Select or extract the equivalent landmarks (e.g. peaks) among all traces.
+
+        :Parameters:
+            ranges : list | None
+            traces : 2D array | None
+            **kwds : keyword arguments
+                See available keywords in `mpes.analysis.peaksearch()`.
+        """
+
+        if ranges is None:
+            ranges = self.featranges
+
+        if traces is None:
+            traces = self.traces_normed
+
+        # Augment the content of the calibration data
+        traces_aug = np.tile(traces, (self.dup, 1))
         # Run peak detection for each trace within the specified ranges
-        self.peaks = peaksearch(traces, self.tof, self.ranges, plot=False, **kwds)
+        self.peaks = peaksearch(traces_aug, self.tof, ranges=ranges, **kwds)
 
     def calibrate(self, refid=0, ret=['coeffs'], **kwds):
         """ Calculate the functional mapping between time-of-flight and the energy
@@ -805,10 +853,10 @@ class EnergyCalibrator(base.FileCollection):
                 See available keywords for `mpes.analysis.calibrateE()`.
         """
 
-        landmarks = kwds.pop('landmarks', self.peaks)[:, 0]
+        landmarks = kwds.pop('landmarks', self.peaks[:, 0])
         biases = kwds.pop('biases', self.biases)
         calibret = kwds.pop('calib_ret', False)
-        self.calibration = calibrateE(landmarks, biases, refid=refid, ret=ret, **kwds)
+        self.calibration = calibrateE(landmarks, biases, refid=refid, ret=ret, aug=self.dup, **kwds)
 
         if calibret == True:
             return self.calibration
@@ -1487,7 +1535,7 @@ class BoundedArea(object):
             elif boundtype == '<': # Keep the lower end
                 self.subrgrid, self.subcgrid = np.where(self.rgrid < k * self.cgrid + b)
 
-            self.subimage = aly._signedmask(self.row, self.col, self.subrgrid, self.subcgrid, sign=1)
+            self.subimage = _signedmask(self.row, self.col, self.subrgrid, self.subcgrid, sign=1)
 
         elif pmz == 'circular':
 
@@ -1496,13 +1544,13 @@ class BoundedArea(object):
             rad = kwds.pop('radius')
 
             if boundtype == '>': # Select inner circle
-                self.subimage, _, region = \
-                aly.circmask(self.image, pc[0], pc[1], rad, sign=0, ret='all', **kwds)
+                self.subimage, _, region = circmask(self.image, pc[0], pc[1], rad,
+                                            sign=0, ret='all', **kwds)
                 self.subrgrid, self.subcgrid = region
 
             elif boundtype == '<': # Select outer circle
-                self.subimage, _, region = \
-                aly.circmask(self.image, pc[0], pc[1], rad, sign=1, ret='all', **kwds)
+                self.subimage, _, region = circmask(self.image, pc[0], pc[1], rad,
+                                            sign=1, ret='all', **kwds)
                 self.subrgrid, self.subcgrid = region
 
         else:
@@ -1863,8 +1911,9 @@ class MomentumCorrector(object):
         fitinit = np.asarray([self.arot, self.ascale]).ravel()
         self.init = kwds.pop('fitinit', fitinit)
 
-        self.prefs, _ = sym.refsetopt(self.init, landmarks, self.pcent, self.mcvdist, self.mvvdist, niter=niter,\
-                                        direction=1, weights=weights, method=method, stepsize=0.5)
+        self.prefs, _ = sym.refsetopt(self.init, landmarks, self.pcent, self.mcvdist,
+                        self.mvvdist, niter=niter, direction=1, weights=weights,
+                        method=method, stepsize=0.5)
 
         # Calculate linearly warped image and landmark positions
         self.slice_corrected, self.linwarp = sym.imgWarping(self.slice, landmarks=landmarks, refs=self.prefs)
