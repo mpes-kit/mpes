@@ -572,7 +572,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
         order : int | 3
             Polynomial order of the fitting function.
         refid : int | 0
-            Reference data point index, varies from 0 to vals.size - 1.
+            Reference dataset index, varies from 0 to vals.size - 1.
         ret : str | 'func'
             Return type, including 'func', 'coeffs', 'full', and 'axis' (see below).
         E0 : float | None
@@ -583,12 +583,12 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
     :Returns:
         pfunc : partial function
             Calibrating function with determined polynomial coefficients (except the constant offset).
-        coeffs : 1D array
-            Fitted polynomial coefficients.
-        sol : tuple
-            Full solution output of the least squares (see numpy.linalg.lstsq).
-        eVscale : numpy array
-            Calibrated energy scale in eV.
+        ecalibdict : dict
+            A dictionary of fitting parameters including the following,
+            coeffs : Fitted polynomial coefficients (the a's).
+            axis : Fitted energy axis.
+            Tmat : the T matrix (differential time-of-flight) in the equation Ta=b.
+            bvec : the b vector (differential bias) in the fitting Ta=b.
     """
 
     vals = np.array(vals)
@@ -631,6 +631,8 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None):
     if (E0 is not None) and (t is not None):
         ecalibdict['axis'] = pfunc(E0, t)
     ecalibdict['coeffs'] = a
+    ecalibdict['Tmat'] = Tmat
+    ecalibdict['bvec'] = bvec
 
     if ret == 'all':
         return ecalibdict
