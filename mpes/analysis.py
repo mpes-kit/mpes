@@ -883,6 +883,35 @@ class EnergyCalibrator(base.FileCollection):
         base.saveClassAttributes(self, form, save_addr)
 
 
+def rangeConvert(x, xrng, pathcorr):
+    """ Convert value range using a pairwise path correspondence (e.g. generated using DTW).
+
+    :Parameters:
+        x : 1D array
+            Values of the x axis (e.g. time-of-flight values).
+        xrng : list/tuple
+            Boundary value range on the x axis.
+        pathcorr : list/tuple
+            Path correspondence between two 1D arrays in the following form,
+            [(id_1_trace_1, id_1_trace_2), (id_2_trace_1, id_2_trace_2), ...]
+
+    :Return:
+        xrange_trans : tuple
+            Transformed range according to the path correspondence.
+    """
+
+    pathcorr = np.asarray(pathcorr)
+    xrange_trans = []
+
+    for xval in xrng: # Transform each value in the range
+        xind = fp.find_nearest(xval, x)
+        xind_alt = fp.find_nearest(xind, pathcorr[:, 0])
+        xind_trans = pathcorr[xind_alt, 1]
+        xrange_trans.append(ec.tof[xind_trans])
+
+    return tuple(xrange_trans)
+
+
 # ==================== #
 #  Image segmentation  #
 # ==================== #
