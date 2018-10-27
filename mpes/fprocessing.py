@@ -42,26 +42,6 @@ N_CPU = ps.cpu_count()
 # Utility functions #
 # ================= #
 
-def find_nearest(val, narray):
-    """
-    Find the value closest to a given one in a 1D array
-
-    **Parameters**
-
-    val : float
-        Value of interest
-    narray : 1D numeric array
-        array to look for the nearest value
-
-    **Return**
-
-    ind : int
-        index of the value nearest to the sepcified
-    """
-
-    return np.argmin(np.abs(narray - val))
-
-
 def sgfltr2d(datamat, span, order, axis=0):
     """
     Savitzky-Golay filter for two dimensional data
@@ -1232,6 +1212,10 @@ class parallelHDF5Processor(FileCollection):
 
         else:
             raise ValueError("No substituent file is present.")
+
+    def summarize(self):
+
+        pass
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):

@@ -26,3 +26,4 @@ astropy
 photutils
 symmetrize
 silx
+fastdtw

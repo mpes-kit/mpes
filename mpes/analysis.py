@@ -22,6 +22,7 @@ from numpy.linalg import norm, lstsq
 import scipy.optimize as opt
 from scipy.special import wofz
 import scipy.io as sio
+from scipy.spatial import distance
 import pandas as pd
 from skimage import measure, filters, morphology
 from skimage.draw import line, circle, polygon
@@ -30,6 +31,7 @@ import cv2
 import astropy.stats as astat
 import photutils as pho
 from symmetrize import sym, pointops as po
+from fastdtw import fastdtw
 from functools import reduce, partial
 from funcy import project
 import operator as op
@@ -666,7 +668,7 @@ class EnergyCalibrator(base.FileCollection):
         if traces is not None:
             self.traces = traces
         else:
-            self.traces = 0
+            self.traces = []
 
     @property
     def nfiles(self):
@@ -674,6 +676,13 @@ class EnergyCalibrator(base.FileCollection):
         """
 
         return len(self.files)
+
+    @property
+    def ntraces(self):
+        """ The number of loaded/calculated traces.
+        """
+
+        return len(self.traces)
 
     def read(self, form='h5', tracename='', tofname='ToF'):
         """ Read traces (e.g. energy dispersion curves) from files.
@@ -714,33 +723,68 @@ class EnergyCalibrator(base.FileCollection):
         self.traces_normed = u.normspec(*self.traces, **kwds)
 
     @staticmethod
-    def findCorrespondence(self, sig_still, sig_mov, position, order=3):
-        """ Determine the parametric map between two traces by alignment.
+    def findCorrespondence(sig_still, sig_mov, dist_metric=distance.euclidean,
+                            order=3, method='dtw'):
+        """ Determine the correspondence between two 1D traces by alignment.
+
+        :Parameters:
+            sig_still, sig_mov : 1D array, 1D array
+                Input 1D signals.
+            dist_metric : func | distance.euclidean
+            order : int | 3
+            method : str | 'dtw'
+                Method for 1D signal correspondence detection.
+
+        :Return:
+            pathcorr : list
+                Pixel-wise path correspondences between two input 1D arrays (sig_still, sig_mov).
         """
 
-        from ptw import ptw
-        w, siglim, a = ptw.timeWarp(sig_still, sig_mov)
+        if method == 'dtw':
 
-        return a
+            dst, pathcorr = fastdtw(sig_still, sig_mov, dist=dist_metric)
+            return pathcorr
 
-    def featureSelect(self, ranges, refid=None, traces=None, infer_others=True, **kwds):
+        elif method == 'ptw': # To be completed
+            from ptw import ptw
+
+            w, siglim, a = ptw.timeWarp(sig_still, sig_mov)
+            return a
+
+    def featureSelect(self, ranges, refid=0, traces=None, infer_others=False, alignkwds={}, **kwds):
         """ Select the equivalent landmarks among all traces.
 
         :Parameters:
-            range :
-            refid : int | None
-            traces : 2d array | None
+            ranges : list/tuple
+                Collection of feature detection ranges, within which an algorithm
+                (i.e. 1D peak detector) with look for the feature.
+            refid : int | 0
+                Index of the reference trace (EDC).
+            traces : 2D array | None
+                Collection of energy dispersion curves (EDCs).
             infer_others : bool | True
+                Option to infer the feature detection range in other traces (EDCs) from a given one.
+            alignkwds : dict | {}
+                Dictionarized keyword arguments for trace alignment (See `self.findCorrespondence()`).
+            **kwds : keyword arguments
+                See keyword arguements in `mpes.analysis.peaksearch()`.
         """
 
         self.ranges = ranges
         if traces is None:
             traces = self.traces
 
+        # Infer the corresponding feature detection range of other traces
         if infer_others == True:
-            ranges_inferred = 0
+            method = alignkwds.pop('alignmethod', 'dtw')
+            ranges_inferred = []
+
+            for i in range(self.ntraces):
+                pathcorr = self.findCorrespondence(traces[refid,:], traces[i,:],
+                            method=method, **alignkwds)
+                ranges_inferred.append(rangeConvert(self.tof, ranges, pathcorr))
+
             self.ranges = ranges_inferred
-            pass
 
         # Run peak detection for each trace within the specified range
         self.peaks = peaksearch(traces, self.tof, self.ranges, plot=False, **kwds)
@@ -904,10 +948,10 @@ def rangeConvert(x, xrng, pathcorr):
     xrange_trans = []
 
     for xval in xrng: # Transform each value in the range
-        xind = fp.find_nearest(xval, x)
-        xind_alt = fp.find_nearest(xind, pathcorr[:, 0])
+        xind = u.find_nearest(xval, x)
+        xind_alt = u.find_nearest(xind, pathcorr[:, 0])
         xind_trans = pathcorr[xind_alt, 1]
-        xrange_trans.append(ec.tof[xind_trans])
+        xrange_trans.append(x[xind_trans])
 
     return tuple(xrange_trans)
 
@@ -920,19 +964,17 @@ def blocknorm(data, mavg_axis=0, blockwidth=1):
     """
     Block-thresholding 2D data
 
-    ***Parameters***
+    :Parameters:
+        data : ndarray
+            data to normalize
+        mavg_axis : int | 0
+            axis to move the block along
+        blockwidth : int | 1
+            width of the moving block
 
-    data : ndarray
-        data to normalize
-    mavg_axis : int | 0
-        axis to move the block along
-    blockwidth : int | 1
-        width of the moving block
-
-    ***Returns***
-
-    datanorm : ndarray
-        block-normalized data
+    :Return:
+        datanorm : ndarray
+            block-normalized data
     """
 
     datar = np.rollaxis(data, mavg_axis)

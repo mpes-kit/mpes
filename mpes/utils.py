@@ -4,29 +4,45 @@
 """
 @author: R. Patrick Xian
 """
+
 from math import cos, pi
 import numpy as np
 from scipy.signal import savgol_filter
 
 
+def find_nearest(val, narray):
+    """
+    Find the value closest to a given one in a 1D array.
+
+    :Parameters:
+        val : float
+            Value of interest.
+        narray : 1D numeric array
+            The array to look for the nearest value.
+
+    :Return:
+        ind : int
+            Array index of the value nearest to the given one.
+    """
+
+    return np.argmin(np.abs(narray - val))
+
+
 def numFormatConversion(seq, form='int', **kwds):
     """
     When length keyword is not specified as an argument, the function
-    returns a format-converted sequence of numbers
+    returns a format-converted sequence of numbers. The function returns
+    nothing when the conversion fails due to errors.
 
-    The function returns nothing when the conversion fails due to errors
+    :Parameters:
+        seq : 1D numeric array
+            The numeric array to be converted.
+        form : str | 'int'
+            The format to convert into.
 
-    **Parameters**
-
-    seq : 1D numeric array
-        the numeric array to be converted
-    form : str | 'int'
-        the converted format
-
-    **Return**
-
-    numseq : converted numeric type
-        the format-converted array
+    :Return:
+        numseq : converted numeric type
+            The format-converted array.
     """
 
     try:
@@ -50,16 +66,15 @@ def numFormatConversion(seq, form='int', **kwds):
 
 def to_odd(num):
     """
-    Convert a single number to its nearest odd number
+    Convert a single number to its nearest odd number.
 
-    **Parameters**
+    :Parameters:
+        num : float/int
+            Number to convert.
 
-    num : float/int
-
-    **Return**
-
-    oddnum : int
-        the nearest odd number
+    :Return:
+        oddnum : int
+            The nearest odd number.
     """
 
     rem = round(num) % 2
@@ -69,7 +84,7 @@ def to_odd(num):
 
 
 def intify(*nums):
-    """ Safely convert to integer (avoiding None)
+    """ Safely convert to integer (avoiding None).
     """
 
     intnums = list(nums) # Make a copy of the to-be-converted list
@@ -84,17 +99,17 @@ def intify(*nums):
 
 def revaxis(arr, axis=-1):
     """
-    Reverse an ndarray along certain axis
+    Reverse an ndarray along certain axis.
 
-    **Parameters**
-    arr : nD numeric array
-        array to invert
-    axis : int | -1
-        the axis along which to invert
+    :Parameters:
+        arr : nD numeric array
+            array to invert
+        axis : int | -1
+            the axis along which to invert
 
-    **Return**
-    revarr : nD numeric array
-        axis-inverted nD array
+    :Return:
+        revarr : nD numeric array
+            axis-inverted nD array
     """
 
     arr = np.asarray(arr).swapaxes(axis, 0)
@@ -108,18 +123,16 @@ def replist(entry, row, column):
     Generator of nested lists with identical entries.
     Generated values are independent of one another.
 
-    ***Parameters***
+    :Parameters:
+        entry : numeric/str
+            repeated item in nested list
+        row : int
+            number of rows in nested list
+        column : int
+            number of columns in nested list
 
-    entry : numeric/str
-        repeated item in nested list
-    row : int
-        number of rows in nested list
-    column : int
-        number of columns in nested list
-
-    ***Return***
-
-    nested list
+    :Return:
+        Nested list
     """
 
     return [[entry]*column for _ in range(row)]
@@ -127,7 +140,19 @@ def replist(entry, row, column):
 
 def normspec(*specs, smooth=False, span=13, order=1):
     """
-    Normalize a series of 1D spectra
+    Normalize a series of 1D signals.
+
+    :Parameters:
+        *specs : list/2D array
+            Collection of 1D signals.
+        smooth : bool | False
+            Option to smooth the signals before normalization.
+        span, order : int, int | 13, 1
+            Smoothing parameters of the LOESS method (see `scipy.signal.savgol_filter()`).
+
+    :Return:
+        normalized_specs : 2D array
+            The matrix assembled from a list of maximum-normalized signals.
     """
 
     nspec = len(specs)
@@ -176,19 +201,17 @@ def shuffleaxis(arr, axes, direction='front'):
     Move multiple axes of a multidimensional array simultaneously
     to the front or end of its axis order
 
-    ***Parameters***
+    :Parameters:
+        arr : ndarray
+            array to be shuffled
+        axes : tuple of int
+            dimensions to be shuffled
+        direction : str | 'front'
+            direction of shuffling ('front' or 'end')
 
-    arr : ndarray
-        array to be shuffled
-    axes : tuple of int
-        dimensions to be shuffled
-    direction : str | 'front'
-        direction of shuffling ('front' or 'end')
-
-    ***Return***
-
-    sharr : ndarray
-        dimension-shuffled array
+    :Return:
+        sharr : ndarray
+            dimension-shuffled array
     """
 
     nax, maxaxes, minaxes = len(axes), max(axes), min(axes)
@@ -210,17 +233,18 @@ def shuffleaxis(arr, axes, direction='front'):
 
 
 def dictmerge(D, others):
-    """ Merge a dictionary with other dictionaries
+    """
+    Merge a dictionary with other dictionaries
 
-        :Parameters:
-            D : dict
-                Main dictionary
-            others : list/tuple/dict
-                Other dictionary or composite dictionarized elements
+    :Parameters:
+        D : dict
+            Main dictionary
+        others : list/tuple/dict
+            Other dictionary or composite dictionarized elements
 
-        :Return:
-            D : dict
-                Merged dictionary
+    :Return:
+        D : dict
+            Merged dictionary
     """
 
     if type(others) == (list or tuple):
@@ -305,6 +329,7 @@ def calcax(start, end, steps, ret='midpoint'):
 
     if ret == 'edge':
         return edges
+
     elif ret == 'midpoint':
         midpoints = (edges[1:] + edges[:-1])/2
         return midpoints
