@@ -19,6 +19,7 @@ from . import base, utils as u, ellipsefit as elf, visualization as vis
 from math import cos, pi
 import numpy as np
 from numpy.linalg import norm, lstsq
+from scipy.sparse.linalg import lsqr
 import scipy.optimize as opt
 from scipy.special import wofz
 import scipy.io as sio
@@ -555,7 +556,7 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
     return pkmaxs
 
 
-def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None, aug=1):
+def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None, aug=1, method='lstsq', **kwds):
     """
     Energy calibration by nonlinear least squares fitting of spectral landmarks on
     a set of (energy dispersion curves (EDCs). This amounts to solving for the
@@ -579,6 +580,8 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None, aug=1):
             Constant energy offset.
         t : numeric array | None
             Drift time.
+        aug : int | 1
+            Fitting dimension augmentation (1=no change, 2=double, etc).
 
     :Returns:
         pfunc : partial function
@@ -623,7 +626,10 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None, aug=1):
     bvec = np.tile(bvec, aug)
 
     # Solve for the a vector (polynomial coefficients) using least squares
-    sol = lstsq(Tmat, bvec, rcond=None)
+    if method == 'lstsq':
+        sol = lstsq(Tmat, bvec, rcond=None)
+    elif method == 'lsqr':
+        sol = lsqr(Tmat, bvec, **kwds)
     a = sol[0]
 
     # Construct the calibrating function
@@ -764,7 +770,7 @@ class EnergyCalibrator(base.FileCollection):
         if method == 'dtw':
 
             dist = kwds.pop('dist_metric', distance.euclidean)
-            rad = kwds.pop('radius', 2)
+            rad = kwds.pop('radius', 1)
             dst, pathcorr = fastdtw(sig_still, sig_mov, dist=dist, radius=rad)
             return pathcorr
 
@@ -1207,11 +1213,17 @@ def _signedmask(imr, imc, maskr, maskc, sign):
 
     if sign == 1:
         mask = np.zeros((imr, imc))
-        mask[maskr, maskc] = 1
+        try:
+            mask[maskr, maskc] = 1
+        except:
+            pass
 
     elif sign == 0:
         mask = np.ones((imr, imc))
-        mask[maskr, maskc] = 0
+        try:
+            mask[maskr, maskc] = 0
+        except:
+            pass
 
     return mask
 
@@ -1459,11 +1471,11 @@ class BoundedArea(object):
         """
 
         self.image = image
-        if rc is None:
+        if shape is None:
             self.row, self.col = image.shape
         else:
             self.row, self.col = shape
-        self.rgrid, self.cgrid = np.meshgrid(range(self.row), range(self.col))
+        self.rgrid, self.cgrid = np.meshgrid(range(self.col), range(self.row))
 
         # Subimage comprises of the image segment within the overall image
         if subimage is None:
@@ -1526,30 +1538,31 @@ class BoundedArea(object):
 
             # Construct decision boundary y = kx + b or r = kc + b based on two points
             pa, pb = kwds.pop('points') # Points follow (row, column) index convention
-            k = (pb[1] - pa[1]) / (pb[0] - pa[0])
-            b = pa[1] - k * pa[0]
+            self.k = (pb[1] - pa[1]) / (pb[0] - pa[0])
+            self.b = pa[1] - self.k * pa[0]
+            rhs = self.k * self.cgrid + self.b # Right-hand side of the line equation
 
             if boundtype == '>': # Keep the upper end
-                self.subrgrid, self.subcgrid = np.where(self.rgrid > k * self.cgrid + b)
+                self.subrgrid, self.subcgrid = np.where(self.rgrid > rhs)
 
             elif boundtype == '<': # Keep the lower end
-                self.subrgrid, self.subcgrid = np.where(self.rgrid < k * self.cgrid + b)
+                self.subrgrid, self.subcgrid = np.where(self.rgrid < rhs)
 
             self.subimage = _signedmask(self.row, self.col, self.subrgrid, self.subcgrid, sign=1)
 
         elif pmz == 'circular':
 
             # Construct decision boundary (r-r0)^2 + (c-c0)^2 = 1 based on center and radius
-            pc = kwds.pop('center') # in (row, column) format
-            rad = kwds.pop('radius')
+            self.pcent = kwds.pop('center') # in (row, column) format
+            self.rad = kwds.pop('radius')
 
             if boundtype == '>': # Select inner circle
-                self.subimage, _, region = circmask(self.image, pc[0], pc[1], rad,
+                self.subimage, _, region = circmask(self.image, self.pcent[0], self.pcent[1], self.rad,
                                             sign=0, ret='all', **kwds)
                 self.subrgrid, self.subcgrid = region
 
             elif boundtype == '<': # Select outer circle
-                self.subimage, _, region = circmask(self.image, pc[0], pc[1], rad,
+                self.subimage, _, region = circmask(self.image, self.pcent[0], self.pcent[1], self.rad,
                                             sign=1, ret='all', **kwds)
                 self.subrgrid, self.subcgrid = region
 
@@ -2505,19 +2518,17 @@ def build_dynamic_matrix(fitparams, display_range=slice(None, None, None), pre_t
     for each fitting parameter, construct time-dependent value,
     time-dependent absolute and relative changes
 
-    ***Parameters***
+    :Parameters:
+        fitparams : 3D ndarray
+            fitting output
+        display_range : slice object | slice(None, None, None)
+            display time range of the fitting parameters (default = full range)
+        pre_t0_range : slice object | slice(None, 1, None)
+            time range regarded as before time-zero
 
-    fitparams : 3D ndarray
-        fitting output
-    display_range : slice object | slice(None, None, None)
-        display time range of the fitting parameters (default = full range)
-    pre_t0_range : slice object | slice(None, 1, None)
-        time range regarded as before time-zero
-
-    ***Returns***
-
-    dyn_matrix : 4D ndarray
-        calculated dynamic matrix
+    :Returns:
+        dyn_matrix : 4D ndarray
+            calculated dynamic matrix
     """
 
     if np.ndim(fitparams) != 3:
