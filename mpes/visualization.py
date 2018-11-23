@@ -675,6 +675,9 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
 
     ims = []
     f, ax = plt.subplots(nrows=nr, ncols=nc, figsize=(fw, fh))
+    ax = np.atleast_2d(ax) # Axes for single-row figure
+    if nc == 1: # Axes for single-column figure
+        ax = ax.T
 
     # Construct list of plottype for all subplots
     if isinstance(plottype, list):
@@ -711,8 +714,8 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
 
             # Make subplot
             if plottype[i] == 'imshow':
-                im = axcurr.imshow(img, cmap=cmap, \
-                    vmin=vmin, vmax=vmax, aspect=asp, origin=origin)
+                im = axcurr.imshow(img, cmap=cmap, vmin=vmin, vmax=vmax,
+                        aspect=asp, origin=origin)
 
                 # Set color scaling for each image individually
                 if cscale == 'log':  # log scale
@@ -723,8 +726,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
                     mp = cscale['midpoint']
                     imin = cscale.pop('vmin', np.min(img))
                     imax = cscale.pop('vmax', np.max(img))
-                    im.set_norm(MidpointNormalize(vmin=imin, \
-                    vmax=imax, midpoint=float(mp)))
+                    im.set_norm(MidpointNormalize(vmin=imin, vmax=imax, midpoint=float(mp)))
                 elif 'gamma' in cscale:  # gamma scale
                     gfactors = re.split('gamma|-', cscale)[1:]
                     gfactors = u.numFormatConversion(gfactors, form='float', length=2)
@@ -732,8 +734,8 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
                     im.set_data(img)
 
             elif plottype[i] == 'contourf':
-                im = axcurr.contourf(xgrid, ygrid, img, cmap=cmap, \
-                    levels=lvls, vmin=vmin, vmax=vmax, origin=origin)
+                im = axcurr.contourf(xgrid, ygrid, img, cmap=cmap,
+                        levels=lvls, vmin=vmin, vmax=vmax, origin=origin)
 
             ims.append(im)
 
