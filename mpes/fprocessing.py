@@ -31,7 +31,7 @@ from silx.io import dictdump
 import psutil as ps
 import dask as d, dask.array as da, dask.dataframe as ddf
 from dask.diagnostics import ProgressBar
-from tqdm import tqdm
+from tqdm import tqdm_notebook as tqdm
 import natsort as nts
 from functools import reduce
 from funcy import project
@@ -1196,11 +1196,11 @@ class parallelHDF5Processor(FileCollection):
         self.combinedresult = {}
 
     @staticmethod
-    def _arraysum(arraya, arrayb):
+    def _arraysum(array_a, array_b):
         """ Sum of two arrays.
         """
 
-        return arraya + arrayb
+        return array_a + array_b
 
     def subset(self, file_id):
         """
@@ -1237,7 +1237,7 @@ class parallelHDF5Processor(FileCollection):
                 The coordinates of the histogram. Specify 'edge' to get the bar edges (every
                 dimension has one value more), specify 'midpoint' to get the midpoint of the
                 bars (same length as the histogram dimensions).
-            pbar : Bool | true
+            pbar : bool | true
                 Option to display the progress bar.
             binning_kwds : dict | {}
                 Keyword arguments to be included in `hdf5Processor.localBinning()`.

@@ -41,7 +41,7 @@ import bokeh.plotting as pbk
 from bokeh.io import output_notebook
 from bokeh.palettes import Category10 as ColorCycle
 import itertools as it
-from tqdm import tqdm
+from tqdm import tqdm_notebook as tqdm
 import warnings as wn
 
 wn.filterwarnings("ignore")
@@ -657,7 +657,7 @@ class EnergyCalibrator(base.FileCollection):
     Electron binding energy calibration workflow.
     """
 
-    def __init__(self, biases=None, files=[], folder=None, file_sorting=True, traces=None, tof=None):
+    def __init__(self, biases=None, files=[], folder=[], file_sorting=True, traces=None, tof=None):
         """ Initialization of the EnergyCalibrator class can follow different ways,
 
         1. Initialize with all the file paths in a list
@@ -1646,21 +1646,28 @@ def fitEllipseParams(*coords, plot=False, img=None, **kwds):
     return center, phi, axes
 
 
-def vertexGenerator(center, fixedvertex, arot, direction=-1, scale=1, ret='all'):
+def vertexGenerator(center, fixedvertex=None, cvd=None, arot=None, nside=None, direction=-1, \
+                    scale=1, diagdir=None, ret='all', rettype='float32'):
     """
     Generation of the vertices of symmetric polygons.
 
     :Parameters:
         center : (int, int)
             Pixel positions of the symmetry center (row pixel, column pixel).
-        fixedvertex : (int, int)
+        fixedvertex : (int, int) | None
             Pixel position of the fixed vertex (row pixel, column pixel).
-        arot : float
+        cvd : numeric | None
+            Center-vertex distance.
+        arot : float | None
             Spacing in angle of rotation.
-        direction : int | 1
-            Direction of angular rotation (1 = anticlockwise, -1 = clockwise)
-        scale : float
+        nside : int | None
+            The total number of sides for the polygon.
+        direction : int | -1
+            Direction of angular rotation (1 = counterclockwise, -1 = clockwise)
+        scale : float | 1
             Radial scaling factor.
+        diagdir : str | None
+            Diagonal direction of the polygon ('x' or 'y').
         ret : str | 'all'
             Return type. Specify 'all' returns all vertices, specify 'generated'
             returns only the generated ones (without the fixedvertex in the argument).
@@ -1670,15 +1677,32 @@ def vertexGenerator(center, fixedvertex, arot, direction=-1, scale=1, ret='all')
             Collection of generated vertices.
     """
 
+    try:
+        cvd = abs(cvd)
+    except:
+        pass
+
+    try:
+        center = tuple(center)
+    except:
+        raise TypeError('The center coordinates should be provided in a tuple!')
+
     if type(arot) in (int, float):
-        nangles = int(np.round(360 / arot)) - 1 # Number of angles needed
+        nangles = int(np.round(360 / abs(arot))) - 1 # Number of angles needed
         rotangles = direction*np.linspace(1, nangles, nangles)*arot
     else:
         nangles = len(arot)
         rotangles = np.cumsum(arot)
 
+    # Generating polygon vertices starting with center-vertex distance
+    if fixedvertex is None:
+        if diagdir == 'x':
+            fixedvertex = [center[0], cvd + center[1]]
+        elif diagdir == 'y':
+            fixedvertex = [cvd + center[0], center[1]]
+
     # Reformat the input array to satisfy function requirement
-    fixedvertex_reformatted = np.array(fixedvertex, dtype='int32', ndmin=2)[None,...]
+    fixedvertex_reformatted = np.array(fixedvertex, dtype='float32', ndmin=2)[None,...]
 
     if ret == 'all':
         vertices = [fixedvertex]
@@ -1695,7 +1719,7 @@ def vertexGenerator(center, fixedvertex, arot, direction=-1, scale=1, ret='all')
         rotvertex = np.squeeze(cv2.transform(fixedvertex_reformatted, rmat)).tolist()
         vertices.append(rotvertex)
 
-    return np.asarray(vertices, dtype='int32')
+    return np.asarray(vertices, dtype=rettype)
 
 
 def affineWarping(img, landmarks, refs, ret='image'):
@@ -1813,11 +1837,13 @@ class MomentumCorrector(object):
 
         :Parameters:
             image : 2d array
-                Image slice to extract features from.
+                The image slice to extract features from.
             direction : str | 'ccw'
-                Circular direction to reorder the features in ('cw' or 'ccw').
+                The circular direction to reorder the features in ('cw' or 'ccw').
             type : str | 'points'
-                Type of features to extract.
+                The type of features to extract.
+            center_det : str | 'centroidnn'
+                Specification of center detection method ('centroidnn', 'centroid', None)
             **kwds : keyword arguments
                 Extra keyword arguments for `symmetrize.pointops.peakdetect2d()`.
         """
@@ -1825,17 +1851,27 @@ class MomentumCorrector(object):
         if type == 'points':
 
             self.center_detection_method = center_det
-            # Detection and ordering of geometric landmarks
+
+            # Detect the point landmarks
             self.peaks = po.peakdetect2d(image, **kwds)
-            self.pcent, self.pouter = po.pointset_center(self.peaks, method=center_det, ret='cnc')
-            self.pcent = tuple(self.pcent)
+            if center_det is None:
+                self.pouter = self.peaks
+                self.pcent = None
+            else:
+                self.pcent, self.pouter = po.pointset_center(self.peaks, method=center_det, ret='cnc')
+                self.pcent = tuple(self.pcent)
+            # Order the point landmarks
             self.pouter_ord = po.pointset_order(self.pouter, direction=direction)
-            # Construct feature dictionary
+
+            # Construct the feature dictionary
             self.features['verts'] = self.pouter_ord
-            self.features['center'] = np.atleast_2d(self.pcent)
+            try:
+                self.features['center'] = np.atleast_2d(self.pcent)
+            except:
+                pass
+
             # Calculate geometric distances
-            self.mcvdist = po.cvdist(self.pouter_ord, self.pcent).mean()
-            self.mvvdist = po.vvdist(self.pouter_ord).mean()
+            self.calcGeometricDistances()
 
             if self.rotsym == 6:
                 self.mdist = (self.mcvdist + self.mvvdist) / 2
@@ -1857,6 +1893,7 @@ class MomentumCorrector(object):
         self.pcent = tuple(self.pcent)
         self.features['verts'] = self.pouter_ord
         self.features['center'] = np.atleast_2d(self.pcent)
+        self.calcGeometricDistances()
 
     def _imageUpdate(self):
         """ Update distortion-corrected images.
@@ -1895,7 +1932,7 @@ class MomentumCorrector(object):
             self._featureUpdate(**kwds) # Feature update comes after image update
 
     def linWarpEstimate(self, weights=(1, 1, 1), niter=50, method='Nelder-Mead',
-                        ret=True, **kwds):
+                        ret=True, stepsize=0.5, **kwds):
         """ Estimate the linear deformation field.
 
         :Parameters:
@@ -1926,13 +1963,22 @@ class MomentumCorrector(object):
 
         self.prefs, _ = sym.refsetopt(self.init, landmarks, self.pcent, self.mcvdist,
                         self.mvvdist, niter=niter, direction=1, weights=weights,
-                        method=method, stepsize=0.5)
+                        method=method, stepsize=stepsize, **kwds)
 
         # Calculate linearly warped image and landmark positions
         self.slice_corrected, self.linwarp = sym.imgWarping(self.slice, landmarks=landmarks, refs=self.prefs)
 
         if ret:
             return self.slice_corrected
+
+    def calcGeometricDistances(self):
+        """ Calculate geometric distances involving the center and the vertices.
+        """
+
+        self.cvdist = po.cvdist(self.pouter_ord, self.pcent)
+        self.mcvdist = self.cvdist.mean()
+        self.vvdist = po.vvdist(self.pouter_ord)
+        self.mvvdist = self.vvdist.mean()
 
     @staticmethod
     def transform(points, transmat):
@@ -2133,7 +2179,7 @@ class MomentumCorrector(object):
             image : 2d array
                 Image slice to construct the calibration function.
             point_from, point_to : list/tuple, list/tuple
-                Pixel coordinates of the two special points.
+                Pixel coordinates of the two special points in (row, col) ordering.
             dist : float
                 Distance between the two selected points in inverse Angstrom.
             ret : str | 'coeffs'
@@ -2329,7 +2375,7 @@ def func_add(*funcs):
     return funcsum
 
 
-def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=False, **kwds):
+def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=False, ret='all', **kwds):
     """
     Line-by-line fitting via bootstrapping fitted parameters from one line to the next
 
@@ -2359,6 +2405,7 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
             bgremove       bool        toggle for background removal (default = True)
             flipped        bool        toggle for fitting start position
                                        (if flipped, fitting start from the last line)
+            limpropagate   bool
             verbose        bool        toggle for output message (default = False)
             =============  ==========  ===================================
 
@@ -2396,6 +2443,7 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
     else:
         raise Exception('Input dfcontainer needs to be a pandas DataFrame!')
 
+    comps = []
     # Fitting every line in data matrix
     for i in tqdm(range(nr), disable=not(pbar)):
 
@@ -2407,7 +2455,10 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
         else:
             line_nobg = line
         data_nobg[i,:] = line_nobg
+
+        # Commence curve fitting
         out = model.fit(line_nobg, params, x=axval)
+        comps.append(out.eval_components(x=axval))
 
         # Unpacking dictionary
         currdict = {}
@@ -2421,7 +2472,20 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
         # the best values from the current fit
         bestdict = out.best_values
         for (k, v) in bestdict.items():
-            params[k].set(v)
+            try:
+                params[k].set(value=v)
+            except:
+                pass
+
+            # if limpropagate:
+            #     try:
+            #         params[k].set(min=params[k])
+            #     except:
+            #         pass
+            #     try:
+            #         params[k].set(max=params[k])
+            #     except:
+            #         pass
 
         if vb == True:
             print("Finished line {}/{}...".format(i+1, nr))
@@ -2432,7 +2496,10 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
         df_fit.reset_index(drop=True, inplace=True)
         data_nobg = np.flip(data_nobg, axis=0)
 
-    return df_fit, data_nobg
+    if ret == 'all':
+        return df_fit, comps, data_nobg
+    else:
+        return df_fit, data_nobg
 
 
 class Model(object):

@@ -171,8 +171,8 @@ def _shiftscale(U, V, rgshift, rgscale, zeromat):
 
 def applyAlignment(V, shift, scale, axis=2, filterkwd=None, ret='mat'):
     """
-    Apply the calculated shift and scale matrices to the volume
-    W = scale*shift*V
+    Apply the calculated shift and scale matrices to the volume using the
+    formula, W = scale * shift * V
 
     :Parameters:
         V : numpy.ndarray
@@ -211,6 +211,7 @@ def applyAlignment(V, shift, scale, axis=2, filterkwd=None, ret='mat'):
             W[:-s, r, c] = V[s:, r, c]
 
     W = W[:-maxshift,...]
+    W = np.moveaxis(W, 0, axis)
 
     if ret == 'all':
         return W, maxshift
