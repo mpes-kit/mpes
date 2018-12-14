@@ -575,7 +575,7 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
              keyword    data type     default     meaning
             =========  ===========  ===========  ========================================
               dtyp       string      'float32'    Data type of the histogram
-             cutaxis      int            3        The axis to cut the 4D data in
+             cutaxis      int            3        The index of axis to cut the 4D data
             slicename    string         'V'       The shared namestring for the 3D slice
             otheraxes     dict         None       Values along other or converted axes
             =========  ===========  ===========  ========================================
@@ -723,6 +723,11 @@ class hdf5Processor(hdf5Reader):
         hist, edges = np.histogramdd(data, bins=self.bincounts, range=self.binranges)
 
         return hist, edges
+
+    def loadMapping(self):
+        """
+        Load the mapping parameters
+        """
 
     def distributedProcessBinning(self, axes=None, nbins=None, ranges=None,
                                 binDict=None, chunksz=100000, pbar=True, ret=True, **kwds):
@@ -1108,7 +1113,7 @@ class hdf5Splitter(hdf5Reader):
 
     @d.delayed
     def _split_file(self, idx, save_addr, namestr):
-        """ Split file generator
+        """ Split file generator.
         """
 
         evmin, evmax = self.eventList[idx], self.eventList[idx+1]
@@ -1330,6 +1335,18 @@ class parallelHDF5Processor(FileCollection):
     def convert(self, form='parquet', save_addr='./summary', append_to_folder=False, pbar=True, **kwds):
         """
         Convert files to another format (e.g. parquet).
+
+        :Parameters:
+            form : str | 'parquet'
+                File format to convert into.
+            save_addr : str | './summary'
+                Path of the folder for saving parquet files.
+            append_to_folder : bool | False
+                Option to append to the existing parquet files in the specified folder,
+                otherwise the existing parquet files will be deleted first. The HDF5 files
+                in the same folder are kept intact.
+            pbar : bool | True
+                Option to display progress bar.
         """
 
         if os.path.exists(save_addr) and os.path.isdir(save_addr):
@@ -1590,11 +1607,11 @@ class parquetProcessor(MapParser):
 
         :Parameters:
             oldcolname : str
-                Old column name.
+                The name of the column to use for computation.
             mapping : function
                 Functional map to apply to the values of the old column.
             newcolname : str | 'Transformed'
-                New column name.
+                New column name to be added to the dataframe.
             args : tuple | ()
                 Additional arguments of the functional map.
             update : str | 'append'
@@ -1602,7 +1619,7 @@ class parquetProcessor(MapParser):
                 'append' = append to the current dask dataframe as a new column with the new column name.
                 'replace' = replace the values of the old column.
             **kwds : keyword arguments
-                Additional arguments for the dask.dataframe.apply() function
+                Additional arguments for the `dask.dataframe.apply()` function.
         """
 
         if update == 'append':
@@ -1669,6 +1686,20 @@ class parquetProcessor(MapParser):
 
     def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
         """ Update or convert to other file formats.
+
+        :Parameters:
+            form : str | 'parquet'
+                File format to convert into.
+            save_addr : str | None
+                Path of the folder to save the converted files to.
+            namestr : '/data'
+                Extra namestring attached to the filename.
+            pq_append : bool | False
+                Option to append to the existing parquet file in the specified folder,
+                otherwise the existing parquet files will be deleted.
+            **kwds : keyword arguments
+                See extra keyword arguments in `dask.dataframe.to_parquet()` for parquet conversion,
+                or in `dask.dataframe.to_hdf()` for HDF5 conversion.
         """
 
         if form == 'parquet':
