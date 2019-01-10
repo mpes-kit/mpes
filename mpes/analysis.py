@@ -1933,17 +1933,21 @@ class MomentumCorrector(object):
 
     def linWarpEstimate(self, weights=(1, 1, 1), niter=50, method='Nelder-Mead',
                         ret=True, stepsize=0.5, warpkwds={}, **kwds):
-        """ Estimate the linear deformation field.
+        """ Estimate the linear deformation field using landmark correspondences.
 
         :Parameters:
-            weights : tuple/list/array
-                Weights added to the terms in the optimizer.
+            weights : tuple/list/array | (1, 1, 1)
+                Weights added to the terms in the optimizer. The terms are assigned
+                to the cost functions of (1) centeredness, (2) center-vertex symmetry,
+                (3) vertex-vertex symmetry, respectively.
             niter : int | 50
                 Maximum number of iterations.
             method : str | 'Nelder-Mead'
                 Name of the optimization method.
             ret : bool | True
                 Specify if returning the corrected image slice.
+            warpkwds : dictionary | {}
+                Additional arguments passed to `symmetrize.sym.imgWarping()`.
             **kwds : keyword arguments
                 ========= ========== =============================================
                 keyword   data type  meaning
