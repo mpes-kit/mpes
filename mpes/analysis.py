@@ -1932,7 +1932,7 @@ class MomentumCorrector(object):
             self._featureUpdate(**kwds) # Feature update comes after image update
 
     def linWarpEstimate(self, weights=(1, 1, 1), niter=50, method='Nelder-Mead',
-                        ret=True, stepsize=0.5, **kwds):
+                        ret=True, stepsize=0.5, warpkwds={}, **kwds):
         """ Estimate the linear deformation field.
 
         :Parameters:
@@ -1966,7 +1966,8 @@ class MomentumCorrector(object):
                         method=method, stepsize=stepsize, **kwds)
 
         # Calculate linearly warped image and landmark positions
-        self.slice_corrected, self.linwarp = sym.imgWarping(self.slice, landmarks=landmarks, refs=self.prefs)
+        self.slice_corrected, self.linwarp = sym.imgWarping(self.slice, landmarks=landmarks,
+                        refs=self.prefs, **warpkwds)
 
         if ret:
             return self.slice_corrected
