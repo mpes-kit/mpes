@@ -771,7 +771,7 @@ class EnergyCalibrator(base.FileCollection):
             dist = kwds.pop('dist_metric', distance.euclidean)
             rad = kwds.pop('radius', 1)
             dst, pathcorr = fastdtw(sig_still, sig_mov, dist=dist, radius=rad)
-            return pathcorr
+            return np.asarray(pathcorr)
 
         elif method == 'ptw': # To be completed
             from ptw import ptw
