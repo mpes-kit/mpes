@@ -352,7 +352,7 @@ def saveClassAttributes(clss, form, save_addr):
         sio.savemat(save_addr, clss.__dict__)
 
     elif form in ('h5', 'hdf5'):
-        dio.save(clss.__dict__, save_addr, compression=None)
+        dio.save(save_addr, clss.__dict__, compression=None)
 
     else:
         raise NotImplementedError
