@@ -743,7 +743,7 @@ class EnergyCalibrator(base.FileCollection):
 
         :Parameters:
             **kwds : keyword arguments
-                See the keywords for `mpes.utils.normspec()`
+                See the keywords for `mpes.utils.normspec()`.
         """
 
         self.traces_normed = u.normspec(*self.traces, **kwds)

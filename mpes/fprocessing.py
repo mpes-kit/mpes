@@ -27,7 +27,6 @@ import skimage.io as skio
 from PIL import Image as pim
 import warnings as wn
 from h5py import File
-from silx.io import dictdump
 import psutil as ps
 import dask as d, dask.array as da, dask.dataframe as ddf
 from dask.diagnostics import ProgressBar
@@ -1367,6 +1366,15 @@ class parallelHDF5Processor(FileCollection):
     def updateHistogram(self, axes=None, sliceranges=None, ret=False):
         """
         Update the dimensional sizes of the binning results.
+
+        :Parameters:
+            axes : tuple/list | None
+                Collection of the names of axes for size change.
+            sliceranges : tuple/list/array | None
+                Collection of ranges, e.g. (start_position, stop_position) pairs,
+                for each axis to be updated.
+            ret : bool | False
+                Option to return updated histogram.
         """
 
         # Input axis order to binning axes order
@@ -1404,7 +1412,7 @@ class parallelHDF5Processor(FileCollection):
 
         :Parameters:
             form : str | 'h5'
-                File format to for saving the parameters ('h5'/'hdf5', 'mat')
+                File format to for saving the parameters ('h5'/'hdf5', 'mat').
             save_addr : str | './binning'
                 The address for the to be saved file.
         """
@@ -1585,9 +1593,15 @@ class parquetProcessor(MapParser):
 
     def applyFilter(self, colname, lb=-np.inf, ub=np.inf):
         """ Application of bound filters to a specified column (can be used consecutively).
+
+        :Parameters:
+            colname : str
+                Name of the column to filter.
+            lb, ub : numeric, numeric | -infinity, infinity
+                The lower and upper bounds used in the filtering.
         """
 
-        self.edf = self.edf[(self.edf[self.colnam] > lb) & (self.edf[colname] < ub)]
+        self.edf = self.edf[(self.edf[colname] > lb) & (self.edf[colname] < ub)]
 
     def columnApply(self, mapping, rescolname, **kwds):
         """ Apply a user-defined function (e.g. partial function) to an existing column.
@@ -1725,6 +1739,9 @@ class parquetProcessor(MapParser):
 
     def toDataStructure(self):
         """ Convert to the xarray data structure from existing binned data.
+
+        :Return:
+            An instance of `BandStructure` or `MPESDataset` from the `mpes.bandstructure` module.
         """
 
         if bool(self.histdict):

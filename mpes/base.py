@@ -6,24 +6,24 @@
 """
 
 from __future__ import print_function, division
-from . import utils as u
+from . import utils as u, dictdump as dictdump
 import numpy as np
 import glob as g
 import natsort as nts
 import cv2
 from functools import partial
 import scipy.io as sio
-from silx.io import dictdump
 
 
 class FileCollection(object):
     """ File collecting and sorting class.
     """
 
-    def __init__(self, files=[], file_sorting=True, folder=None):
+    def __init__(self, files=[], file_sorting=True, folder=''):
 
         self.sorting = file_sorting
         self.files = self._sort_terms(files, self.sorting)
+        self.allfiles = self.files.copy()
         self.folder = folder
 
     def __add__(self, other):
@@ -41,10 +41,18 @@ class FileCollection(object):
 
     @property
     def nfiles(self):
-        """ Total number of loaded files.
+        """ Total number of files for a specific workflow.
         """
 
         return len(self.files)
+
+    @property
+    def nallfiles(self):
+        """ Total number of files with the same attributes.
+        # of allfiles >= # of files
+        """
+
+        return len(self.allfiles)
 
     @property
     def fileID(self):
@@ -88,16 +96,17 @@ class FileCollection(object):
 
         f_start, f_end, f_step = u.intify(f_start, f_end, f_step)
 
-        if self.folder is not None:
+        try:
             self.files = g.glob(self.folder + identifier)
 
             if file_sorting == True:
                 self.files = self._sort_terms(self.files, file_sorting)
 
+            self.allfiles = self.files.copy()
             self.files = self.files[slice(f_start, f_end, f_step)]
 
-        else:
-            raise ValueError('No folder is specified!')
+        except:
+            raise Exception('No legitimate folder address is specified for file retrieval!')
 
     def filter(self, wexpr=None, woexpr=None, str_start=None, str_end=None):
         """ Filter filenames by keywords.
@@ -126,17 +135,18 @@ class FileCollection(object):
         """ Select gathered files by the filename id.
 
         :Parameters:
-            ids : 1D array | []
+            ids : list/1D array | []
                 File IDs for selection.
             update : str | ''
                 File address list update condition,
-                'remove' = remove the selected files
-                'keep' = keep the selected files and remove the rest
-                others strings or no action = do nothing
+                'remove' = remove the selected files.
+                'keep' = keep the selected files and remove the rest.
+                others strings or no action = do nothing.
+                '' = nothing happens.
             ret : str | 'selected'
                 Return option,
-                'selected' = return selected files
-                'rest' = return the rest of the files (not selected)
+                'selected' = return selected files.
+                'rest' = return the rest of the files (not selected).
         """
 
         if self.files:
@@ -155,7 +165,7 @@ class FileCollection(object):
                 return self.files
 
         else:
-            raise ValueError('No files addresses are gathered!')
+            raise ValueError('No file address has been gathered!')
 
 
 class MapParser(FileCollection):
