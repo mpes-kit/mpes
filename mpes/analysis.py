@@ -41,7 +41,6 @@ import bokeh.plotting as pbk
 from bokeh.io import output_notebook
 from bokeh.palettes import Category10 as ColorCycle
 import itertools as it
-from tqdm import tqdm_notebook as tqdm
 import warnings as wn
 
 wn.filterwarnings("ignore")
@@ -2380,7 +2379,7 @@ def func_add(*funcs):
     return funcsum
 
 
-def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=False, ret='all', **kwds):
+def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=False, pbenv='classic', ret='all', **kwds):
     """
     Line-by-line fitting via bootstrapping fitted parameters from one line to the next
 
@@ -2399,6 +2398,8 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
             Dataframe container for the fitting parameters.
         pbar : bool | False
             Progress bar condition.
+        pbenv : str | 'classic'
+            Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
         **kwds : keyword arguments
             =============  ==========  ===================================
             keyword        data type   meaning
@@ -2427,6 +2428,7 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
     concat = kwds.pop('concat', False)
     bgremove = kwds.pop('bgremove', True)
     cond_flip = int(kwds.pop('flipped', False))
+    tqdm = u.tqdmenv(pbenv)
 
     data = np.rollaxis(data, axis)
     # Flip axis if the conditional is True

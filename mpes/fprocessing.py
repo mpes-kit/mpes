@@ -30,7 +30,6 @@ from h5py import File
 import psutil as ps
 import dask as d, dask.array as da, dask.dataframe as ddf
 from dask.diagnostics import ProgressBar
-from tqdm import tqdm_notebook as tqdm
 import natsort as nts
 from functools import reduce
 from funcy import project
@@ -1005,7 +1004,7 @@ def binPartition(partition, binaxes, nbins, binranges):
 
 
 def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
-                binDict=None, pbar=True, jittered=True, **kwds):
+                binDict=None, pbar=True, jittered=True, pbenv='classic', **kwds):
     """
     Calculate multidimensional histogram from columns of a dask dataframe.
     Prof. Yves Acremann's method.
@@ -1022,6 +1021,8 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
             is not None. It will override the specifications from other arguments.
         pbar : bool | True
             Option to display a progress bar.
+        pbenv : str | 'classic'
+            Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
         jittered : bool | True
             Option to add histogram jittering during binning.
 
@@ -1032,6 +1033,7 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
 
     histdict = {}
     partitionResults = [] # Partition-level results
+    tqdm = u.tqdmenv(pbenv)
 
     # Add jitter to all the partitions before binning
     if jittered:
@@ -1331,7 +1333,7 @@ class parallelHDF5Processor(FileCollection):
         if ret:
             return self.combinedresult
 
-    def convert(self, form='parquet', save_addr='./summary', append_to_folder=False, pbar=True, **kwds):
+    def convert(self, form='parquet', save_addr='./summary', append_to_folder=False, pbar=True, pbenv='classic', **kwds):
         """
         Convert files to another format (e.g. parquet).
 
@@ -1346,7 +1348,11 @@ class parallelHDF5Processor(FileCollection):
                 in the same folder are kept intact.
             pbar : bool | True
                 Option to display progress bar.
+            pbenv : str | 'classic'
+                Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
         """
+
+        tqdm = u.tqdmenv(pbenv)
 
         if os.path.exists(save_addr) and os.path.isdir(save_addr):
             # In an existing folder, clean up the files if specified

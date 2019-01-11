@@ -8,6 +8,8 @@
 from math import cos, pi
 import numpy as np
 from scipy.signal import savgol_filter
+from tqdm import tqdm_notebook
+from tqdm import tqdm as tqdm_classic
 
 
 def find_nearest(val, narray):
@@ -350,3 +352,15 @@ def bnorm(pval, pmax, pmin):
     """
 
     return (pval - pmin) / (pmax - pmin)
+
+
+def tqdmenv(env):
+    """ Choose tqdm environment.
+    """
+
+    if env == 'classic':
+        tqdm = tqdm_classic
+    elif env == 'notebook':
+        tqdm = tqdm_notebook
+
+    return tqdm
