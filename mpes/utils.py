@@ -333,3 +333,20 @@ def calcax(start, end, steps, ret='midpoint'):
     elif ret == 'midpoint':
         midpoints = (edges[1:] + edges[:-1])/2
         return midpoints
+
+
+def bnorm(pval, pmax, pmin):
+    """ Normalize parameters by the bounds of the given values.
+
+    :Parameters:
+        pval : array/numeric
+            A single value/collection of values to normalize.
+        pmax, pmin : numeric, numeric
+            The maximum and the minimum of the values.
+
+    :Return:
+        Normalized values (with the same dimensions as pval).
+
+    """
+
+    return (pval - pmin) / (pmax - pmin)
