@@ -8,6 +8,7 @@
 from __future__ import print_function, division
 from . import utils as u
 #from . import dictdump as dictdump
+from silx.io import dictdump
 import numpy as np
 import glob as g
 import natsort as nts
