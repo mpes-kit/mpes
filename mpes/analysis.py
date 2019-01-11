@@ -983,6 +983,8 @@ class EnergyCalibrator(base.FileCollection):
                 The filename to save the files with.
         """
 
+        # Modify the data type for HDF5-convertibility (temporary fix)
+        self.featranges = np.asarray(self.featranges)
         base.saveClassAttributes(self, form, save_addr)
 
 
