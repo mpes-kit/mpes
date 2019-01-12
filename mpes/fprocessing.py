@@ -253,6 +253,41 @@ def im2mat(fdir):
     return mat
 
 
+def metaReadhdf5(hfile, attributes=[], groups=[]):
+    """
+    Parse the attribute (i.e. metadata) tree in the input HDF5 file and construct a dictionary of attributes
+
+    :Parameters:
+        hfile : HDF5 file instance
+            Instance of the `h5py.File` class.
+        groups : list | []
+            List of strings of the specified group names.
+    """
+
+    out = {}
+    # Extract the file attributes
+    if attributes is not None:
+        attrdict = dict(hfile.attrs.items()) # Contains all file attributes
+        if len(attributes) > 0:
+            attrdict = project(attrdict, attributes)
+
+    out = u.dictmerge(out, attrdict)
+
+    # Extract the group information
+    if groups is not None:
+        # groups = None will not include any group.
+        if len(groups) == 0:
+            # group = [] will include all groups.
+            groups = list(hfile)
+
+        for g in groups:
+            gdata = hfile.get(g)
+            out[g] = dict(gdata.attrs)
+            out[g]['shape'] = gdata.shape
+
+    return out
+
+
 class hdf5Reader(File):
     """ HDF5 reader class
     """
@@ -435,12 +470,12 @@ class hdf5Reader(File):
 
     def summarize(self, form='text', use_alias=True, ret=False, **kwds):
         """ Summarize the content of the hdf5 file (names of the groups,
-        attributes and the selected contents. Output by print or as a dictionary.)
+        attributes and the selected contents. Output in various user-specified formats.)
 
         :Parameters:
             form : str | 'text'
                 Format to summarize the content of the file into.
-                Options include 'text', 'dict' and 'dataframe'.
+                Options include 'text', 'metadict', 'dict' and 'dataframe'.
             use_alias : bool | True
                 Specify whether to use the alias to rename the groups.
             ret : bool | False
@@ -456,8 +491,9 @@ class hdf5Reader(File):
                 names are the corresponding group names (or aliases).
         """
 
+        # Summarize file information as printed text
         if form == 'text':
-            # Output as printed text
+            # Print-out header
             print('*** HDF5 file info ***\n',
                     'File address = ' + self.faddress + '\n')
 
@@ -476,8 +512,16 @@ class hdf5Reader(File):
 
                 print(gn + ', Shape = {}, Alias = {}'.format(g_shape, g_alias))
 
+        # Summarize all metadata as a nested dictionary
+        elif form == 'metadict':
+
+            attributes = kwds.pop('attributes', [])
+            groups = kwds.pop('groups', [])
+
+            return metaReadhdf5(self, attributes, groups)
+
+        # Summarize attributes and groups into a dictionary
         elif form == 'dict':
-            # Summarize attributes and groups into a dictionary
 
             # Retrieve the range of acquired events
             amin = kwds.pop('amin', None)
@@ -497,8 +541,8 @@ class hdf5Reader(File):
             if ret == True:
                 return hdfdict
 
+        # Gather groups into columns of a dataframe
         elif form == 'dataframe':
-            # Gather groups into columns of a dataframe
 
             self.CHUNK_SIZE = int(kwds.pop('chunksz', 1e6))
 
@@ -1198,15 +1242,26 @@ class parallelHDF5Processor(FileCollection):
     def __init__(self, files=[], file_sorting=True, folder=None):
 
         super().__init__(files=files, file_sorting=file_sorting, folder=folder)
+        self.metadict = {}
         self.results = {}
         self.combinedresult = {}
 
     @staticmethod
     def _arraysum(array_a, array_b):
-        """ Sum of two arrays.
+        """
+        Calculate the sum of two arrays.
         """
 
         return array_a + array_b
+
+    def _parse_metadata(self, attributes, groups):
+        """
+        Parse the metadata from all HDF5 files.
+        """
+
+        for fid in range(self.nfiles):
+            output = self.subset(fid).summarize(form='metadict', attributes, groups)
+            self.metadict = u.dictmerge(self.metadict)
 
     def subset(self, file_id):
         """
@@ -1220,8 +1275,11 @@ class parallelHDF5Processor(FileCollection):
             raise ValueError("No substituent file is present.")
 
     def summarize(self):
-
-        pass
+        """
+        Summarize the measurement information from all HDF5 files.
+        """
+        
+        return
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):
