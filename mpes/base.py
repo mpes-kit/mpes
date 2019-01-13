@@ -8,7 +8,7 @@
 from __future__ import print_function, division
 from . import utils as u
 #from . import dictdump as dictdump
-from silx.io import dictdump
+#from silx.io import dictdump
 import deepdish.io as dio
 import numpy as np
 import glob as g
@@ -214,7 +214,7 @@ class MapParser(FileCollection):
         """ Retrieve the binning parameters.
         """
 
-        binDict = dictdump.load(self.bfile)
+        binDict = dio.load(self.bfile)
         binaxes = list(map(lambda x: x.decode('utf-8'), binDict['binaxes'].tolist()))
         binranges = binDict['binranges'].tolist()
         binsteps = binDict['binsteps'].tolist()
@@ -232,20 +232,20 @@ class MapParser(FileCollection):
         """
 
         self.parse_bfile()
-        self.fr, self.fc = dictdump.load(self.kfile)['calibration'][key]
-        self.xcent, self.ycent = dictdump.load(self.kfile)['pcent']
+        self.fr, self.fc = dio.load(self.kfile)['calibration'][key]
+        self.xcent, self.ycent = dio.load(self.kfile)['pcent']
 
     def parse_Emap(self, key='coeffs'):
         """ Retrieve the parameters to construct the energy conversion function.
         """
 
-        self.poly_a = dictdump.load(self.Efile)['calibration'][key]
+        self.poly_a = dio.load(self.Efile)['calibration'][key]
 
     def parse_wmap(self, key='warping'):
         """ Retrieve the parameters to construct the distortion correction function
         """
 
-        self.warping = dictdump.load(self.kfile)[key]
+        self.warping = dio.load(self.kfile)[key]
 
     @staticmethod
     def parse(parse_map, **mapkeys):
