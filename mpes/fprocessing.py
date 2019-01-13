@@ -1260,7 +1260,7 @@ class parallelHDF5Processor(FileCollection):
         """
 
         for fid in range(self.nfiles):
-            output = self.subset(fid).summarize(form='metadict', attributes, groups)
+            output = self.subset(fid).summarize(form='metadict', attributes=attributes, groups=groups)
             self.metadict = u.dictmerge(self.metadict)
 
     def subset(self, file_id):
@@ -1278,7 +1278,7 @@ class parallelHDF5Processor(FileCollection):
         """
         Summarize the measurement information from all HDF5 files.
         """
-        
+
         return
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
