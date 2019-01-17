@@ -474,8 +474,11 @@ class hdf5Reader(File):
 
         :Parameters:
             form : str | 'text'
-                Format to summarize the content of the file into.
-                Options include 'text', 'metadict', 'dict' and 'dataframe'.
+                Format to summarize the content of the file into. The options include the following,
+                :'dataframe': HDF5 content summarized into a dask dataframe.
+                :'dict': HDF5 content (both data and metadata) summarized into a dictionary.
+                :'metadict': HDF5 metadata summarized into a dictionary.
+                :'text': descriptive text summarizing the HDF5 content.
             use_alias : bool | True
                 Specify whether to use the alias to rename the groups.
             ret : bool | False
@@ -487,8 +490,8 @@ class hdf5Reader(File):
                 Dictionary including both the attributes and the groups,
                 using their names as the keys.
             edf : dataframe
-                Dataframe constructed using only the group values, and the column
-                names are the corresponding group names (or aliases).
+                Dataframe (edf = electron dataframe) constructed using only the group values,
+                and the column names are the corresponding group names (or aliases).
         """
 
         # Summarize file information as printed text
@@ -1274,12 +1277,28 @@ class parallelHDF5Processor(FileCollection):
         else:
             raise ValueError("No substituent file is present.")
 
-    def summarize(self):
+    def summarize(self, form='dataframe', ret=False, **kwds):
         """
         Summarize the measurement information from all HDF5 files.
         """
 
-        return
+        if form == 'text':
+
+            raise NotImplementedError
+
+        elif form == 'metadict':
+
+            self.metadict = {}
+
+            if ret == True:
+                return self.metadict
+
+        elif form == 'dataframe':
+            self.edf = ddf.multi.concat_indexed_dataframes([self.subset(i).
+                    summarize('dataframe', ret=True, **kwds) for i in range(self.nfiles)])
+
+            if ret == True:
+                return self.edf
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):
@@ -1304,7 +1323,7 @@ class parallelHDF5Processor(FileCollection):
             pbar : bool | true
                 Option to display the progress bar.
             binning_kwds : dict | {}
-                Keyword arguments to be included in `hdf5Processor.localBinning()`.
+                Keyword arguments to be included in `mpes.fprocessing.hdf5Processor.localBinning()`.
             compute_kwds : dict | {}
                 Keyword arguments to specify in `dask.compute()`.
         """
@@ -1483,80 +1502,17 @@ class parallelHDF5Processor(FileCollection):
 
         saveClassAttributes(self, form, save_addr)
 
-def extractEDC(folder=None, files=[], axes=['t'], bins=[1000], ranges=[(65000, 100000)],
-                binning_kwds={'jittered':True}, ret=True, **kwds):
-    """ Extract EDCs from a list of bias scan files.
-    """
-
-    pp = parallelHDF5Processor(folder=folder, files=files)
-    if len(files) == 0:
-        pp.gather(identifier='/*.h5')
-    pp.parallelBinning(axes=axes, nbins=bins, ranges=ranges, combine=False, ret=False,
-                        binning_kwds=binning_kwds, **kwds)
-
-    edcs = [pp.results[i]['binned'] for i in range(len(pp.results))]
-    tof = pp.results[0][axes[0]]
-    traces = np.asarray(edcs)
-    del pp
-
-    if ret:
-        return traces, tof
-
-def readBinnedhdf5(fpath, combined=True, typ='float32'):
-    """
-    Read binned hdf5 file (3D/4D data) into a dictionary.
-
-    :Parameters:
-        fpath : str
-            File path
-        combined : bool | True
-            Specify if the volume slices are combined.
-        typ : str | 'float32'
-            Data type of the numerical values in the output dictionary
-
-    :Return:
-        out : dict
-            Dictionary with keys being the axes and the volume (slices).
-    """
-
-    f = File(fpath, 'r')
-    out = {}
-
-    # Read the axes group
-    for ax, axval in f['axes'].items():
-        out[ax] = axval[...]
-
-    # Read the binned group
-    group = f['binned']
-    itemkeys = group.keys()
-    nbinned = len(itemkeys)
-
-    # Binned 3D matrix
-    if (nbinned == 1) or (combined == False):
-        for ik in itemkeys:
-            out[ik] = np.asarray(group[ik], dtype=typ)
-
-    # Binned 4D matrix
-    elif (nbinned > 1) or (combined == True):
-        val = []
-        itemkeys_sorted = nts.natsorted(itemkeys)
-        for ik in itemkeys_sorted:
-            val.append(group[ik])
-        out['V'] = np.asarray(val, dtype=typ)
-
-    return out
-
 
 class parquetProcessor(MapParser):
     """
     Processs the parquet file converted from single events data.
     """
 
-    def __init__(self, folder, ncores=None):
+    def __init__(self, folder, ftype='parquet', ncores=None):
 
         self.folder = folder
         # Create the event dataframe
-        self.edf = self.read(self.folder)
+        self.edf = self.read(self.folder, ftype=ftype)
         self.npart = self.edf.npartitions
         self.histogram = None
         self.histdict = {}
@@ -1583,11 +1539,28 @@ class parquetProcessor(MapParser):
         return len(self.edf.columns)
 
     @staticmethod
-    def read(folder):
-        """ Read parquet files from a folder.
+    def read(folder, ftype='parquet', **kwds):
+        """ Read stored files from a folder into a dataframe.
+
+        :Parameters:
+            folder : str/list
+                Folder of the files.
+            ftype : str | 'parquet'
+                File type to read ('parquet', 'json', 'csv', etc).
+            **kwds : keyword arguments
         """
 
-        return d.dataframe.read_parquet(folder)
+        if ftype == 'parquet':
+            return ddf.read_parquet(folder, **kwds)
+        elif ftype == 'json':
+            return ddf.read_json(folder, **kwds)
+        elif ftype == 'csv':
+            return ddf.read_csv(folder, **kwds)
+        else:
+            try:
+                return ddf.read_table(folder, **kwds)
+            except:
+                raise Exception('The file format cannot be understood!')
 
     def _addBinners(self, axes=None, nbins=None, ranges=None, binDict=None):
         """ Construct the binning parameters within an instance.
@@ -1820,6 +1793,70 @@ class parquetProcessor(MapParser):
 
         else:
             raise ValueError('No binning results are available!')
+
+
+def extractEDC(folder=None, files=[], axes=['t'], bins=[1000], ranges=[(65000, 100000)],
+                binning_kwds={'jittered':True}, ret=True, **kwds):
+    """ Extract EDCs from a list of bias scan files.
+    """
+
+    pp = parallelHDF5Processor(folder=folder, files=files)
+    if len(files) == 0:
+        pp.gather(identifier='/*.h5')
+    pp.parallelBinning(axes=axes, nbins=bins, ranges=ranges, combine=False, ret=False,
+                        binning_kwds=binning_kwds, **kwds)
+
+    edcs = [pp.results[i]['binned'] for i in range(len(pp.results))]
+    tof = pp.results[0][axes[0]]
+    traces = np.asarray(edcs)
+    del pp
+
+    if ret:
+        return traces, tof
+
+def readBinnedhdf5(fpath, combined=True, typ='float32'):
+    """
+    Read binned hdf5 file (3D/4D data) into a dictionary.
+
+    :Parameters:
+        fpath : str
+            File path
+        combined : bool | True
+            Specify if the volume slices are combined.
+        typ : str | 'float32'
+            Data type of the numerical values in the output dictionary
+
+    :Return:
+        out : dict
+            Dictionary with keys being the axes and the volume (slices).
+    """
+
+    f = File(fpath, 'r')
+    out = {}
+
+    # Read the axes group
+    for ax, axval in f['axes'].items():
+        out[ax] = axval[...]
+
+    # Read the binned group
+    group = f['binned']
+    itemkeys = group.keys()
+    nbinned = len(itemkeys)
+
+    # Binned 3D matrix
+    if (nbinned == 1) or (combined == False):
+        for ik in itemkeys:
+            out[ik] = np.asarray(group[ik], dtype=typ)
+
+    # Binned 4D matrix
+    elif (nbinned > 1) or (combined == True):
+        val = []
+        itemkeys_sorted = nts.natsorted(itemkeys)
+        for ik in itemkeys_sorted:
+            val.append(group[ik])
+        out['V'] = np.asarray(val, dtype=typ)
+
+    return out
 
 
 # =================== #
