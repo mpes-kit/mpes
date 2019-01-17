@@ -1730,7 +1730,7 @@ class parquetProcessor(MapParser):
         #self.edf = self.edf[amin:amax] # Select event range for binning
 
         self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
-                        ranges=ranges, binDict=binDict, pbar=pbar)
+                        ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
 
         if ret:
             return self.histdict
