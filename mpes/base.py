@@ -145,7 +145,8 @@ class FileCollection(object):
                 'remove' = remove the selected files.
                 'keep' = keep the selected files and remove the rest.
                 others strings or no action = do nothing.
-                '' = nothing happens.
+                '' = nothing happens (can be used in combination with `ret=True`
+                to retrieve filtered file names).
             ret : str | 'selected'
                 Return option,
                 'selected' = return selected files.
@@ -530,7 +531,7 @@ def perspectiveTransform(x, y, M):
 
     :Return:
         xtrans, ytrans : numeric, numeric
-            Pixel coordinates after perspective transform.
+            Pixel coordinates after projective/perspective transform.
     """
 
     denom = M[2, 0]*x + M[2, 1]*y + M[2, 2]

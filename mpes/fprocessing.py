@@ -859,7 +859,7 @@ class hdf5Processor(hdf5Reader):
         self.edf = self.edf[amin:amax] # Select event range for binning
 
         self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
-                        ranges=ranges, binDict=binDict, pbar=pbar)
+                        ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
 
         if ret:
             return self.histdict
@@ -1237,6 +1237,364 @@ class hdf5Splitter(hdf5Reader):
         return hdf5Processor(f_addr=self.faddress)
 
 
+def readDataframe(folder=None, files=None, ftype='parquet', **kwds):
+    """ Read stored files from a folder into a dataframe.
+
+    :Parameters:
+        folder, files : str, list/tuple | None, None
+            Folder path of the files or a list of file paths. The folder path has
+            the priority such that if it's specified, the specified files will be ignored.
+        ftype : str | 'parquet'
+            File type to read ('parquet', 'json', 'csv', etc). If a folder path is given,
+            all files of the specified type are read into the dataframe in the reading order.
+        **kwds : keyword arguments
+            See the keyword arguments for the specific file parser in `dask.dataframe`.
+
+    :Return:
+        Dask dataframe read from specified files.
+    """
+
+    # ff is a folder or a list/tuple of files
+    if folder is not None:
+        ff = folder
+        files = g.glob(folder + './*.' + ftype)
+        nfiles = len(files)
+
+    elif folder is None:
+        if files is not None:
+            ff = files # List of file paths
+            nfiles = len(files)
+        else:
+            raise ValueError('Either the folder or file path should be provided!')
+
+    if ftype == 'parquet':
+        return ddf.read_parquet(ff, **kwds)
+
+    elif ftype in ('h5', 'hdf5'):
+        return ddf.multi.concat_indexed_dataframes([hdf5Processor(f).
+                summarize('dataframe', ret=True, **kwds) for f in files])
+
+    elif ftype == 'json':
+        return ddf.read_json(ff, **kwds)
+
+    elif ftype == 'csv':
+        return ddf.read_csv(ff, **kwds)
+
+    else:
+        try:
+            return ddf.read_table(ff, **kwds)
+        except:
+            raise Exception('The file format cannot be understood!')
+
+
+class dataframeProcessor(MapParser):
+    """
+    Processs the parquet file converted from single events data.
+    """
+
+    def __init__(self, datafolder, paramfolder='', datafiles=[], ncores=None):
+
+        self.datafolder = datafolder
+        self.paramfolder = paramfolder
+        self.datafiles = datafiles
+        self.histogram = None
+        self.histdict = {}
+        self.npart = 0
+
+        # Instantiate the MapParser class (contains parameters related to binning and image transformation)
+        super().__init__(file_sorting=False, folder=paramfolder)
+
+        if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
+            self.ncores = N_CPU
+        else:
+            self.ncores = int(ncores)
+
+    @property
+    def nrow(self):
+        """ Number of rows in the distributed dataframe.
+        """
+
+        return len(self.edf.index)
+
+    @property
+    def ncol(self):
+        """ Number of columns in the distrbuted dataframe.
+        """
+
+        return len(self.edf.columns)
+
+    def read(self, source='folder', ftype='parquet', fselection_kwds={}, **kwds):
+        """ Read into distributed dataframe
+        """
+
+        # Create the single-event dataframe
+        if source == 'folder':
+            self.edf = readDataframe(folder=self.datafolder, ftype=ftype, **kwds)
+
+        elif source == 'files':
+            if len(self.datafiles > 0):
+                self.edf = readDataframe(folder=self.datafiles, ftype=ftype, **kwds)
+            else:
+                # When only the datafolder address is given but needs to read partial files,
+                # first gather files from the folder, then select files and read into dataframe
+                self.gather(identifier=r'/*.'+ftype, file_sorting=True)
+                self.select(**fselection_kwds)
+                self.edf = readDataframe(files=self.files, ftype=ftype, **kwds)
+
+        self.npart = self.edf.npartitions
+
+    def _addBinners(self, axes=None, nbins=None, ranges=None, binDict=None):
+        """ Construct the binning parameters within an instance.
+        """
+
+        # Use information specified in binDict, ignore others
+        if binDict is not None:
+            try:
+                self.binaxes = list(binDict['axes'])
+                self.nbinaxes = len(self.binaxes)
+                self.bincounts = binDict['nbins']
+                self.binranges = binDict['ranges']
+            except:
+                pass # No action when binDict is not specified
+        # Use information from other specified parameters if binDict is not given
+        else:
+            self.binaxes = list(axes)
+            self.nbinaxes = len(self.binaxes)
+
+            # Collect the number of bins
+            try: # To have the same number of bins on all axes
+                self.bincounts = int(nbins)
+            except: # To have different number of bins on each axis
+                self.bincounts = list(map(int, nbins))
+
+            self.binranges = ranges
+
+        # Construct binning steps
+        self.binsteps = []
+        for bc, (lrange, rrange) in zip(self.bincounts, self.binranges):
+            self.binsteps.append((rrange - lrange) / bc)
+
+    # Column operations
+    def appendColumn(self, colnames, colvals):
+        """ Append columns to dataframe.
+
+        :Parameters:
+            colnames : list/tuple
+                New column names.
+            colvals : numpy array/list
+                Entries of the new columns.
+        """
+
+        colnames = list(colnames)
+        colvals = [colvals]
+        ncn = len(colnames)
+        ncv = len(colvals)
+
+        if ncn != ncv:
+            errmsg = 'The names and values of the columns need to have the same dimensions.'
+            raise ValueError(errmsg)
+
+        else:
+            for cn, cv in zip(colnames, colvals):
+                self.edf = self.edf.assign(**{cn:ddf.from_array(cv)})
+
+    def deleteColumn(self, colnames):
+        """ Delete columns
+
+        :Parameters:
+            colnames : str/list/tuple
+                List of column names to be dropped.
+        """
+
+        self.edf = self.edf.drop(colnames, axis=1)
+
+
+    def applyFilter(self, colname, lb=-np.inf, ub=np.inf):
+        """ Application of bound filters to a specified column (can be used consecutively).
+
+        :Parameters:
+            colname : str
+                Name of the column to filter.
+            lb, ub : numeric, numeric | -infinity, infinity
+                The lower and upper bounds used in the filtering.
+        """
+
+        self.edf = self.edf[(self.edf[colname] > lb) & (self.edf[colname] < ub)]
+
+    def columnApply(self, mapping, rescolname, **kwds):
+        """ Apply a user-defined function (e.g. partial function) to an existing column.
+
+        :Parameters:
+            mapping : function
+                Function to apply to the column.
+            rescolname : str
+                Name of the resulting column.
+            **kwds : keyword arguments
+        """
+
+        self.edf[rescolname] = mapping(**kwds)
+
+    def transformColumn(self, oldcolname, mapping, newcolname='Transformed', args=(), update='append', **kwds):
+        """ Apply a simple function to an existing column.
+
+        :Parameters:
+            oldcolname : str
+                The name of the column to use for computation.
+            mapping : function
+                Functional map to apply to the values of the old column.
+            newcolname : str | 'Transformed'
+                New column name to be added to the dataframe.
+            args : tuple | ()
+                Additional arguments of the functional map.
+            update : str | 'append'
+                Updating option.
+                'append' = append to the current dask dataframe as a new column with the new column name.
+                'replace' = replace the values of the old column.
+            **kwds : keyword arguments
+                Additional arguments for the `dask.dataframe.apply()` function.
+        """
+
+        if update == 'append':
+            self.edf[newcolname] = self.edf[oldcolname].apply(mapping, args=args, meta=('x', 'f8'), **kwds)
+        elif update == 'replace':
+            self.edf[oldcolname] = self.edf[oldcolname].apply(mapping, args=args, meta=('x', 'f8'), **kwds)
+
+    def transformColumn2D(self, map2D, X, Y, **kwds):
+        """ Apply a mapping simultaneously to two dimensions.
+        """
+
+        newX = kwds.pop('newX', X)
+        newY = kwds.pop('newY', Y)
+
+        self.edf[newX], self.edf[newY] = map2D(self.edf[X], self.edf[Y], **kwds)
+
+    def applyKCorrection(self, X='X', Y='Y', newX='Xm', newY='Ym', **kwds):
+        """ Calculate and replace the X and Y values with their distortion-correction version.
+        This method can be reused.
+        """
+
+        self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
+
+    def appendKAxis(self, x0, y0, X='X', Y='Y', newX='kx', newY='ky', **kwds):
+        """ Calculate and append the k axis coordinates (kx, ky) to the events dataframe.
+        This method can be reused.
+        """
+
+        self.transformColumn2D(map2D=self.kMap, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0, **kwds)
+
+    def appendEAxis(self, E0, **kwds):
+        """ Calculate and append the E axis to the events dataframe.
+        This method can be reused.
+        """
+
+        self.columnApply(mapping=self.EMap, rescolname='E', E0=E0, **kwds)
+
+    # Row operation
+    def appendRow(self, folder=None, df=None, type='parquet', **kwds):
+        """ Append rows read from other parquet files to existing dataframe.
+        """
+
+        if type == 'parquet':
+            return self.edf.append(self.read(folder), **kwds)
+        elif type == 'dataframe':
+            return self.edf.append(df, **kwds)
+        else:
+            raise NotImplementedError
+
+    # Complex operation
+    def distributedBinning(self, axes, nbins, ranges, binDict=None, pbar=True, ret=False, **kwds):
+        """ Binning the dataframe to a multidimensional histogram.
+        """
+
+        # Set up the binning parameters
+        self._addBinners(axes, nbins, ranges, binDict)
+        edf = kwds.pop('df', self.edf)
+        #self.edf = self.edf[amin:amax] # Select event range for binning
+
+        self.histdict = {}
+        self.histdict = binDataframe(edf, ncores=self.ncores, axes=axes, nbins=nbins,
+                        ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
+
+        if ret:
+            return self.histdict
+
+    def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
+        """ Update or convert to other file formats.
+
+        :Parameters:
+            form : str | 'parquet'
+                File format to convert into.
+            save_addr : str | None
+                Path of the folder to save the converted files to.
+            namestr : '/data'
+                Extra namestring attached to the filename.
+            pq_append : bool | False
+                Option to append to the existing parquet file in the specified folder,
+                otherwise the existing parquet files will be deleted.
+            **kwds : keyword arguments
+                See extra keyword arguments in `dask.dataframe.to_parquet()` for parquet conversion,
+                or in `dask.dataframe.to_hdf()` for HDF5 conversion.
+        """
+
+        if form == 'parquet':
+            compression = kwds.pop('compression', 'UNCOMPRESSED')
+            engine = kwds.pop('engine', 'fastparquet')
+            self.edf.to_parquet(save_addr, engine=engine, compression=compression,
+                                append=pq_append, ignore_divisions=True, **kwds)
+
+        elif form in ('h5', 'hdf5'):
+            self.edf.to_hdf(save_addr, namestr, **kwds)
+
+        elif form == 'json':
+            self.edf.to_json(save_addr, **kwds)
+
+    def saveHistogram(self, form, save_addr, dictname='histdict', **kwds):
+        """ Export binned histogram as other files.
+
+        :Parameters:
+            See `mpes.fprocessing.saveDict()`.
+        """
+
+        try:
+            saveDict(self, dictname, form, save_addr, **kwds)
+        except:
+            raise Exception('Saving histogram was unsuccessful!')
+
+    def toDataStructure(self):
+        """ Convert to the xarray data structure from existing binned data.
+
+        :Return:
+            An instance of `BandStructure` or `MPESDataset` from the `mpes.bandstructure` module.
+        """
+
+        if bool(self.histdict):
+            coords = project(self.histdict, self.binaxes)
+
+            if self.nbinaxes == 3:
+                return bs.BandStructure(data=self.histdict['binned'],
+                        coords=coords, dims=self.binaxes, datakey='')
+            elif self.nbinaxes > 3:
+                return bs.MPESDataset(data=self.histdict['binned'],
+                        coords=coords, dims=self.binaxes, datakey='')
+
+        else:
+            raise ValueError('No binning results are available!')
+
+
+class parquetProcessor(dataframeProcessor):
+    """
+    Legacy version of the `mpes.fprocessing.dataframeProcessor` class.
+    """
+
+    def __init__(self, folder, files=[], source='folder', ftype='parquet',
+                fselection_kwds={}, ncores=None, **kwds):
+
+        super().__init__(datafolder=folder, paramfolder=folder, datafiles=files, ncores=ncores)
+        self.folder = folder
+        self.read(source=source, ftype=ftype, fselection_kwds=fselection_kwds, **kwds)
+        self.npart = self.edf.npartitions
+
+
 class parallelHDF5Processor(FileCollection):
     """
     Class for parallel processing of hdf5 files.
@@ -1269,10 +1627,14 @@ class parallelHDF5Processor(FileCollection):
     def subset(self, file_id):
         """
         Spawn an instance of hdf5Processor from a specified substituent file.
+
+        :Parameter:
+            file_id : int
+                Integer-numbered file ID (from 0 to self.nfiles).
         """
 
         if self.files:
-            return hdf5Processor(f_addr=self.files[file_id])
+            return hdf5Processor(f_addr=self.files[int(file_id)])
 
         else:
             raise ValueError("No substituent file is present.")
@@ -1280,6 +1642,14 @@ class parallelHDF5Processor(FileCollection):
     def summarize(self, form='dataframe', ret=False, **kwds):
         """
         Summarize the measurement information from all HDF5 files.
+
+        :Parameters:
+            form : str | 'dataframe'
+                Format of the files to summarize into.
+            ret : bool | False
+                Specification on value return.
+            **kwds : keyword arguments
+                See keyword arguments in `mpes.fprocessing.readDataframe()`.
         """
 
         if form == 'text':
@@ -1294,11 +1664,10 @@ class parallelHDF5Processor(FileCollection):
                 return self.metadict
 
         elif form == 'dataframe':
-            self.edf = ddf.multi.concat_indexed_dataframes([self.subset(i).
-                    summarize('dataframe', ret=True, **kwds) for i in range(self.nfiles)])
+            self.edfhdf = readDataframe(**kwds)
 
             if ret == True:
-                return self.edf
+                return self.edfhdf
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):
@@ -1501,299 +1870,6 @@ class parallelHDF5Processor(FileCollection):
         """
 
         saveClassAttributes(self, form, save_addr)
-
-
-class parquetProcessor(MapParser):
-    """
-    Processs the parquet file converted from single events data.
-    """
-
-    def __init__(self, folder, ftype='parquet', ncores=None):
-
-        self.folder = folder
-        # Create the event dataframe
-        self.edf = self.read(self.folder, ftype=ftype)
-        self.npart = self.edf.npartitions
-        self.histogram = None
-        self.histdict = {}
-
-        super().__init__(file_sorting=False, folder=folder)
-
-        if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
-            self.ncores = N_CPU
-        else:
-            self.ncores = int(ncores)
-
-    @property
-    def nrow(self):
-        """ Number of rows in the distributed dataframe.
-        """
-
-        return len(self.edf.index)
-
-    @property
-    def ncol(self):
-        """ Number of columns in the distrbuted dataframe.
-        """
-
-        return len(self.edf.columns)
-
-    @staticmethod
-    def read(folder, ftype='parquet', **kwds):
-        """ Read stored files from a folder into a dataframe.
-
-        :Parameters:
-            folder : str/list
-                Folder of the files.
-            ftype : str | 'parquet'
-                File type to read ('parquet', 'json', 'csv', etc).
-            **kwds : keyword arguments
-        """
-
-        if ftype == 'parquet':
-            return ddf.read_parquet(folder, **kwds)
-        elif ftype == 'json':
-            return ddf.read_json(folder, **kwds)
-        elif ftype == 'csv':
-            return ddf.read_csv(folder, **kwds)
-        else:
-            try:
-                return ddf.read_table(folder, **kwds)
-            except:
-                raise Exception('The file format cannot be understood!')
-
-    def _addBinners(self, axes=None, nbins=None, ranges=None, binDict=None):
-        """ Construct the binning parameters within an instance.
-        """
-
-        # Use information specified in binDict, ignore others
-        if binDict is not None:
-            try:
-                self.binaxes = list(binDict['axes'])
-                self.nbinaxes = len(self.binaxes)
-                self.bincounts = binDict['nbins']
-                self.binranges = binDict['ranges']
-            except:
-                pass # No action when binDict is not specified
-        # Use information from other specified parameters if binDict is not given
-        else:
-            self.binaxes = list(axes)
-            self.nbinaxes = len(self.binaxes)
-
-            # Collect the number of bins
-            try: # To have the same number of bins on all axes
-                self.bincounts = int(nbins)
-            except: # To have different number of bins on each axis
-                self.bincounts = list(map(int, nbins))
-
-            self.binranges = ranges
-
-        # Construct binning steps
-        self.binsteps = []
-        for bc, (lrange, rrange) in zip(self.bincounts, self.binranges):
-            self.binsteps.append((rrange - lrange) / bc)
-
-    # Column operations
-    def appendColumn(self, colnames, colvals):
-        """ Append columns to dataframe.
-
-        :Parameters:
-            colnames : list/tuple
-                New column names.
-            colvals : numpy array/list
-                Entries of the new columns.
-        """
-
-        colnames = list(colnames)
-        colvals = [colvals]
-        ncn = len(colnames)
-        ncv = len(colvals)
-
-        if ncn != ncv:
-            errmsg = 'The names and values of the columns need to have the same dimensions.'
-            raise ValueError(errmsg)
-
-        else:
-            for cn, cv in zip(colnames, colvals):
-                self.edf = self.edf.assign(**{cn:ddf.from_array(cv)})
-
-    def deleteColumn(self, colnames):
-        """ Delete columns
-
-        :Parameters:
-            colnames : str/list/tuple
-                List of column names to be dropped.
-        """
-
-        self.edf = self.edf.drop(colnames, axis=1)
-
-
-    def applyFilter(self, colname, lb=-np.inf, ub=np.inf):
-        """ Application of bound filters to a specified column (can be used consecutively).
-
-        :Parameters:
-            colname : str
-                Name of the column to filter.
-            lb, ub : numeric, numeric | -infinity, infinity
-                The lower and upper bounds used in the filtering.
-        """
-
-        self.edf = self.edf[(self.edf[colname] > lb) & (self.edf[colname] < ub)]
-
-    def columnApply(self, mapping, rescolname, **kwds):
-        """ Apply a user-defined function (e.g. partial function) to an existing column.
-
-        :Parameters:
-            mapping : function
-                Function to apply to the column.
-            rescolname : str
-                Name of the resulting column.
-            **kwds : keyword arguments
-        """
-
-        self.edf[rescolname] = mapping(**kwds)
-
-    def transformColumn(self, oldcolname, mapping, newcolname='Transformed', args=(), update='append', **kwds):
-        """ Apply a simple function to an existing column.
-
-        :Parameters:
-            oldcolname : str
-                The name of the column to use for computation.
-            mapping : function
-                Functional map to apply to the values of the old column.
-            newcolname : str | 'Transformed'
-                New column name to be added to the dataframe.
-            args : tuple | ()
-                Additional arguments of the functional map.
-            update : str | 'append'
-                Updating option.
-                'append' = append to the current dask dataframe as a new column with the new column name.
-                'replace' = replace the values of the old column.
-            **kwds : keyword arguments
-                Additional arguments for the `dask.dataframe.apply()` function.
-        """
-
-        if update == 'append':
-            self.edf[newcolname] = self.edf[oldcolname].apply(mapping, args=args, meta=('x', 'f8'), **kwds)
-        elif update == 'replace':
-            self.edf[oldcolname] = self.edf[oldcolname].apply(mapping, args=args, meta=('x', 'f8'), **kwds)
-
-    def transformColumn2D(self, map2D, X, Y, **kwds):
-        """ Apply a mapping simultaneously to two dimensions.
-        """
-
-        newX = kwds.pop('newX', X)
-        newY = kwds.pop('newY', Y)
-
-        self.edf[newX], self.edf[newY] = map2D(self.edf[X], self.edf[Y], **kwds)
-
-    def applyKCorrection(self, X='X', Y='Y', newX='Xm', newY='Ym', **kwds):
-        """ Calculate and replace the X and Y values with their distortion-correction version.
-        This method can be reused.
-        """
-
-        self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
-
-    def appendKAxis(self, x0, y0, X='X', Y='Y', newX='kx', newY='ky', **kwds):
-        """ Calculate and append the k axis coordinates (kx, ky) to the events dataframe.
-        This method can be reused.
-        """
-
-        self.transformColumn2D(map2D=self.kMap, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0, **kwds)
-
-    def appendEAxis(self, E0, **kwds):
-        """ Calculate and append the E axis to the events dataframe.
-        This method can be reused.
-        """
-
-        self.columnApply(mapping=self.EMap, rescolname='E', E0=E0, **kwds)
-
-    # Row operation
-    def appendRow(self, folder=None, df=None, type='parquet', **kwds):
-        """ Append rows read from other parquet files to existing dataframe.
-        """
-
-        if type == 'parquet':
-            return self.edf.append(self.read(folder), **kwds)
-        elif type == 'dataframe':
-            return self.edf.append(df, **kwds)
-        else:
-            raise NotImplementedError
-
-    # Complex operation
-    def distributedBinning(self, axes, nbins, ranges, binDict=None, pbar=True, ret=False, **kwds):
-        """ Binning the dataframe to a multidimensional histogram.
-        """
-
-        # Set up the binning parameters
-        self._addBinners(axes, nbins, ranges, binDict)
-        #self.edf = self.edf[amin:amax] # Select event range for binning
-
-        self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
-                        ranges=ranges, binDict=binDict, pbar=pbar)
-
-        if ret:
-            return self.histdict
-
-    def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
-        """ Update or convert to other file formats.
-
-        :Parameters:
-            form : str | 'parquet'
-                File format to convert into.
-            save_addr : str | None
-                Path of the folder to save the converted files to.
-            namestr : '/data'
-                Extra namestring attached to the filename.
-            pq_append : bool | False
-                Option to append to the existing parquet file in the specified folder,
-                otherwise the existing parquet files will be deleted.
-            **kwds : keyword arguments
-                See extra keyword arguments in `dask.dataframe.to_parquet()` for parquet conversion,
-                or in `dask.dataframe.to_hdf()` for HDF5 conversion.
-        """
-
-        if form == 'parquet':
-            compression = kwds.pop('compression', 'UNCOMPRESSED')
-            engine = kwds.pop('engine', 'fastparquet')
-            self.edf.to_parquet(save_addr, engine=engine, compression=compression,
-                                append=pq_append, ignore_divisions=True, **kwds)
-
-        elif form in ('h5', 'hdf5'):
-            self.edf.to_hdf(save_addr, namestr, **kwds)
-
-    def saveHistogram(self, form, save_addr, dictname='histdict', **kwds):
-        """ Export binned histogram as other files.
-
-        :Parameters:
-            See `mpes.fprocessing.saveDict()`.
-        """
-
-        try:
-            saveDict(self, dictname, form, save_addr, **kwds)
-        except:
-            raise Exception('Saving histogram was unsuccessful!')
-
-    def toDataStructure(self):
-        """ Convert to the xarray data structure from existing binned data.
-
-        :Return:
-            An instance of `BandStructure` or `MPESDataset` from the `mpes.bandstructure` module.
-        """
-
-        if bool(self.histdict):
-            coords = project(self.histdict, self.binaxes)
-
-            if self.nbinaxes == 3:
-                return bs.BandStructure(data=self.histdict['binned'],
-                        coords=coords, dims=self.binaxes, datakey='')
-            elif self.nbinaxes > 3:
-                return bs.MPESDataset(data=self.histdict['binned'],
-                        coords=coords, dims=self.binaxes, datakey='')
-
-        else:
-            raise ValueError('No binning results are available!')
-
 
 def extractEDC(folder=None, files=[], axes=['t'], bins=[1000], ranges=[(65000, 100000)],
                 binning_kwds={'jittered':True}, ret=True, **kwds):
