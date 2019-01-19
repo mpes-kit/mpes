@@ -1512,7 +1512,7 @@ class dataframeProcessor(MapParser):
         #self.edf = self.edf[amin:amax] # Select event range for binning
 
         self.histdict = {}
-        self.histdict = binDataframe(edf, ncores=self.ncores, axes=axes, nbins=nbins,
+        self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
                         ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
 
         if ret:
