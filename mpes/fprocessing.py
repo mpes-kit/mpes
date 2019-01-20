@@ -775,6 +775,8 @@ class hdf5Processor(hdf5Reader):
         Load the mapping parameters
         """
 
+        pass
+
     def distributedProcessBinning(self, axes=None, nbins=None, ranges=None,
                                 binDict=None, chunksz=100000, pbar=True, ret=True, **kwds):
         """
@@ -1258,7 +1260,7 @@ def readDataframe(folder=None, files=None, ftype='parquet', **kwds):
     # ff (folder or files) is a folder or a list/tuple of files
     if folder is not None:
         ff = folder
-        files = g.glob(folder + './*.' + ftype)
+        files = g.glob(folder + '/*.' + ftype)
 
     elif folder is None:
         if files is not None:
