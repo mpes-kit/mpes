@@ -1248,10 +1248,11 @@ def readDataframe(folder=None, files=None, ftype='parquet', **kwds):
             Folder path of the files or a list of file paths. The folder path has
             the priority such that if it's specified, the specified files will be ignored.
         ftype : str | 'parquet'
-            File type to read ('parquet', 'json', 'csv', etc). If a folder path is given,
-            all files of the specified type are read into the dataframe in the reading order.
+            File type to read ('h5' or 'hdf5', 'parquet', 'json', 'csv', etc).
+            If a folder path is given, all files of the specified type are read
+            into the dataframe in the reading order.
         **kwds : keyword arguments
-            See the keyword arguments for the specific file parser in `dask.dataframe`.
+            See the keyword arguments for the specific file parser in `dask.dataframe` module.
 
     :Return:
         Dask dataframe read from specified files.
@@ -1325,7 +1326,21 @@ class dataframeProcessor(MapParser):
         return len(self.edf.columns)
 
     def read(self, source='folder', ftype='parquet', fids=[], update='', **kwds):
-        """ Read into distributed dataframe
+        """ Read into distributed dataframe.
+
+        :Parameters:
+            source : str | 'folder'
+                Source of the file readout.
+                :'folder': Read from the provided data folder.
+                :'files': Read from the provided list of file addresses.
+            ftype : str | 'parquet'
+                Type of file to read into dataframe ('h5' or 'hdf5', 'parquet', 'json', 'csv').
+            fids : list | []
+                IDs of the files to be selected (see `mpes.base.FileCollection.select()`).
+            update : str | ''
+                File selection update option (see `mpes.base.FileCollection.select()`).
+            **kwds : keyword arguments
+                See keyword arguments in `mpes.readDataframe()`.
         """
 
         # Create the single-event dataframe
@@ -1588,11 +1603,12 @@ class parquetProcessor(dataframeProcessor):
     """
 
     def __init__(self, folder, files=[], source='folder', ftype='parquet',
-                fselection_kwds={}, ncores=None, **kwds):
+                fids=[], update='', ncores=None, **kwds):
 
         super().__init__(datafolder=folder, paramfolder=folder, datafiles=files, ncores=ncores)
         self.folder = folder
-        self.read(source=source, ftype=ftype, fselection_kwds=fselection_kwds, **kwds)
+        # Read only the parquet files from the given folder/files
+        self.read(source=source, ftype=ftype, fids=fids, update=update, **kwds)
         self.npart = self.edf.npartitions
 
 
