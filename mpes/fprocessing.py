@@ -534,7 +534,8 @@ class hdf5Reader(File):
             # Output as a dictionary
             # Attribute name stays, stream_x rename as their corresponding attribute name
             # Add groups to dictionary
-            hdfdict = self._assembleGroups(self.groupNames, amin=amin, amax=amax, use_alias=use_alias, ret='dict')
+            hdfdict = self._assembleGroups(self.groupNames, amin=amin, amax=amax,
+                            use_alias=use_alias, ret='dict')
 
             # Add attributes to dictionary
             for an in self.attributeNames:
@@ -1254,16 +1255,14 @@ def readDataframe(folder=None, files=None, ftype='parquet', **kwds):
         Dask dataframe read from specified files.
     """
 
-    # ff is a folder or a list/tuple of files
+    # ff (folder or files) is a folder or a list/tuple of files
     if folder is not None:
         ff = folder
         files = g.glob(folder + './*.' + ftype)
-        nfiles = len(files)
 
     elif folder is None:
         if files is not None:
             ff = files # List of file paths
-            nfiles = len(files)
         else:
             raise ValueError('Either the folder or file path should be provided!')
 
@@ -1329,15 +1328,15 @@ class dataframeProcessor(MapParser):
 
         # Create the single-event dataframe
         if source == 'folder':
-            self.edf = readDataframe(folder=self.datafolder, ftype=ftype, **kwds)
+            self.edf = readDataframe(folder=self.datafolder, files=[], ftype=ftype, **kwds)
 
         elif source == 'files':
-            if len(self.datafiles > 0):
-                self.edf = readDataframe(folder=self.datafiles, ftype=ftype, **kwds)
+            if len(self.datafiles) > 0:
+                self.edf = readDataframe(folder=None, files=self.datafiles, ftype=ftype, **kwds)
             else:
                 # When only the datafolder address is given but needs to read partial files,
                 # first gather files from the folder, then select files and read into dataframe
-                self.gather(identifier=r'/*.'+ftype, file_sorting=True)
+                self.gather(folder=self.datafolder, identifier=r'/*.'+ftype, file_sorting=True)
                 self.select(**fselection_kwds)
                 self.edf = readDataframe(files=self.files, ftype=ftype, **kwds)
 

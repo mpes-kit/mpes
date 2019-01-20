@@ -84,7 +84,7 @@ class FileCollection(object):
         else:
             return terms
 
-    def gather(self, identifier=r'/*.h5', f_start=None, f_end=None, f_step=1, file_sorting=True):
+    def gather(self, folder='', identifier=r'/*.h5', f_start=None, f_end=None, f_step=1, file_sorting=True):
         """
         Gather files from a folder (specified at instantiation).
 
@@ -100,7 +100,10 @@ class FileCollection(object):
         f_start, f_end, f_step = u.intify(f_start, f_end, f_step)
 
         try:
-            self.files = g.glob(self.folder + identifier)
+            if folder == '':
+                self.files = g.glob(self.folder + identifier)
+            else:
+                self.files = g.glob(folder + identifier)
 
             if file_sorting == True:
                 self.files = self._sort_terms(self.files, file_sorting)
