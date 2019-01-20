@@ -1324,7 +1324,7 @@ class dataframeProcessor(MapParser):
 
         return len(self.edf.columns)
 
-    def read(self, source='folder', ftype='parquet', fselection_kwds={}, **kwds):
+    def read(self, source='folder', ftype='parquet', ids=[], update='', **kwds):
         """ Read into distributed dataframe
         """
 
@@ -1339,7 +1339,7 @@ class dataframeProcessor(MapParser):
                 # When only the datafolder address is given but needs to read partial files,
                 # first gather files from the folder, then select files and read into dataframe
                 self.gather(folder=self.datafolder, identifier=r'/*.'+ftype, file_sorting=True)
-                self.select(**fselection_kwds)
+                self.datafiles = self.select(ids=[], update='', ret='selected')
                 self.edf = readDataframe(files=self.files, ftype=ftype, **kwds)
 
         self.npart = self.edf.npartitions
