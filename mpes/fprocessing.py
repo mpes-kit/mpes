@@ -253,15 +253,18 @@ def im2mat(fdir):
     return mat
 
 
-def metaReadhdf5(hfile, attributes=[], groups=[]):
+def metaReadHDF5(hfile, attributes=[], groups=[]):
     """
     Parse the attribute (i.e. metadata) tree in the input HDF5 file and construct a dictionary of attributes
 
     :Parameters:
         hfile : HDF5 file instance
             Instance of the `h5py.File` class.
-        groups : list | []
-            List of strings of the specified group names.
+        attributes, groups : list, list | [], []
+            List of strings representing the names of the specified attribute/group names.
+            When specified as None, the components (all attributes or all groups) are ignored.
+            When specified as [], all components (attributes/groups) are included.
+            When specified as a list of strings, only the attribute/group names matching the strings are retrieved.
     """
 
     out = {}
@@ -469,7 +472,8 @@ class hdf5Reader(File):
             return gdict
 
     def summarize(self, form='text', use_alias=True, ret=False, **kwds):
-        """ Summarize the content of the hdf5 file (names of the groups,
+        """
+        Summarize the content of the hdf5 file (names of the groups,
         attributes and the selected contents. Output in various user-specified formats.)
 
         :Parameters:
@@ -515,13 +519,14 @@ class hdf5Reader(File):
 
                 print(gn + ', Shape = {}, Alias = {}'.format(g_shape, g_alias))
 
-        # Summarize all metadata as a nested dictionary
+        # Summarize all metadata into a nested dictionary
         elif form == 'metadict':
 
+            # Empty list specifies retrieving all entries, see mpes.metaReadHDF5()
             attributes = kwds.pop('attributes', [])
             groups = kwds.pop('groups', [])
 
-            return metaReadhdf5(self, attributes, groups)
+            return metaReadHDF5(self, attributes, groups)
 
         # Summarize attributes and groups into a dictionary
         elif form == 'dict':
@@ -1446,6 +1451,7 @@ class dataframeProcessor(MapParser):
             rescolname : str
                 Name of the resulting column.
             **kwds : keyword arguments
+                Keyword arguments of the mapping function.
         """
 
         self.edf[rescolname] = mapping(**kwds)
@@ -1635,6 +1641,10 @@ class parallelHDF5Processor(FileCollection):
     def _parse_metadata(self, attributes, groups):
         """
         Parse the metadata from all HDF5 files.
+
+        :Parameters:
+            attributes, groups : list, list
+                See `mpes.fprocessing.metaReadHDF5()`.
         """
 
         for fid in range(self.nfiles):
