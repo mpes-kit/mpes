@@ -844,11 +844,14 @@ class hdf5Processor(hdf5Reader):
         if ret:
             return self.histdict
 
-    def distributedBinning(self, axes=None, nbins=None, ranges=None,
-                            binDict=None, pbar=True, ret=True, **kwds):
+    def distributedBinning(self, axes=None, nbins=None, ranges=None, binDict=None,
+                            binmethod='lean', pbar=True, ret=True, **kwds):
         """
         :Parameters:
-            see mpes.fprocessing.binDataframe()
+            axes, nbins, ranges, binDict, pbar
+                See `mpes.fprocessing.binDataframe()`.
+            binmethod : str | 'lean'
+                Dataframe binning method ('original' and 'lean').
             ret : bool | True
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
@@ -866,8 +869,12 @@ class hdf5Processor(hdf5Reader):
         self.summarize(form='dataframe')
         self.edf = self.edf[amin:amax] # Select event range for binning
 
-        self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
-                        ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
+        if binmethod == 'original':
+            self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
+                            ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
+        elif binmethod == 'lean':
+            self.histdict = binDataframe_lean(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
+                            ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
 
         if ret:
             return self.histdict
@@ -1137,6 +1144,87 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
     fullResult = np.zeros_like(partitionResults[0])
     for pr in partitionResults:
         fullResult += np.nan_to_num(pr)
+
+    # Load into dictionary
+    histdict['binned'] = fullResult.astype('float32')
+    # Calculate axes values
+    for iax, ax in enumerate(axes):
+        axrange = ranges[iax]
+        histdict[ax] = np.linspace(axrange[0], axrange[1], nbins[iax])
+
+    return histdict
+
+
+def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
+                binDict=None, pbar=True, jittered=True, pbenv='classic', **kwds):
+    """
+    Calculate multidimensional histogram from columns of a dask dataframe.
+
+    :Paramters:
+        axes : (list of) strings | None
+            Names the axes to bin.
+        nbins : (list of) int | None
+            Number of bins along each axis.
+        ranges : (list of) tuples | None
+            Ranges of binning along every axis.
+        binDict : dict | None
+            Dictionary with specifications of axes, nbins and ranges. If binDict
+            is not None. It will override the specifications from other arguments.
+        pbar : bool | True
+            Option to display a progress bar.
+        pbenv : str | 'classic'
+            Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
+        jittered : bool | True
+            Option to add histogram jittering during binning.
+
+    :Return:
+        histdict : dict
+            Dictionary containing binned data and the axes values (if `ret = True`).
+    """
+
+    histdict = {}
+    fullResult = np.zeros(tuple(nbins)) # Partition-level results
+    tqdm = u.tqdmenv(pbenv)
+
+    # Add jitter to all the partitions before binning
+    if jittered:
+        # Retrieve parameters for histogram jittering, the ordering of the jittering
+        # parameters is the same as that for the binning
+        jitter_axes = kwds.pop('jitter_axes', axes)
+        jitter_bins = kwds.pop('jitter_bins', nbins)
+        jitter_amplitude = kwds.pop('jitter_amplitude', 0.5*np.ones(len(jitter_axes)))
+        jitter_ranges = kwds.pop('jitter_ranges', ranges)
+
+        # Add jitter to the specified dimensions of the data
+        for jb, jax, jamp, jr in zip(jitter_bins, jitter_axes, jitter_amplitude, jitter_ranges):
+
+            # Calculate the bar size of the histogram in every dimension
+            binsize = abs(jr[0] - jr[1])/jb
+            # Jitter as random uniformly distributed noise (W. S. Cleveland)
+            df[jax] += df.map_partitions(getJitter, amp=jamp*binsize, col=jax)
+
+    # Main loop for binning
+    for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
+
+        coreTasks = [] # Core-level jobs
+        for j in range(0, ncores):
+
+            ij = i + j
+            if ij >= df.npartitions:
+                break
+
+            dfPartition = df.get_partition(ij) # Obtain dataframe partition
+            coreTasks.append(d.delayed(binPartition)(dfPartition, axes, nbins, ranges))
+
+        if len(coreTasks) > 0:
+            coreResults = d.compute(*coreTasks)
+
+            # Combine all core results for a dataframe partition
+            partitionResult = reduce(_arraysum, coreResults)
+            fullResult += partitionResult
+            # del partitionResult
+
+        del coreTasks
 
     # Load into dictionary
     histdict['binned'] = fullResult.astype('float32')
@@ -1524,8 +1612,15 @@ class dataframeProcessor(MapParser):
             raise NotImplementedError
 
     # Complex operation
-    def distributedBinning(self, axes, nbins, ranges, binDict=None, pbar=True, ret=False, **kwds):
+    def distributedBinning(self, axes, nbins, ranges, binDict=None, pbar=True,
+                            binmethod='lean', ret=False, **kwds):
         """ Binning the dataframe to a multidimensional histogram.
+
+        :Parameters:
+            axes, nbins, ranges, binDict, pbar
+                See `mpes.fprocessing.binDataframe()`.
+            binmethod : str | 'lean'
+                Dataframe binning method ('original' and 'lean').
         """
 
         # Set up the binning parameters
@@ -1534,8 +1629,12 @@ class dataframeProcessor(MapParser):
         #self.edf = self.edf[amin:amax] # Select event range for binning
 
         self.histdict = {}
-        self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
-                        ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
+        if binmethod == 'original':
+            self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
+                            ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
+        elif binmethod == 'lean':
+            self.histdict = binDataframe_lean(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
+                            ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
 
         if ret:
             return self.histdict
@@ -1618,6 +1717,14 @@ class parquetProcessor(dataframeProcessor):
         self.npart = self.edf.npartitions
 
 
+def _arraysum(array_a, array_b):
+    """
+    Calculate the sum of two arrays.
+    """
+
+    return array_a + array_b
+
+
 class parallelHDF5Processor(FileCollection):
     """
     Class for parallel processing of hdf5 files.
@@ -1629,14 +1736,6 @@ class parallelHDF5Processor(FileCollection):
         self.metadict = {}
         self.results = {}
         self.combinedresult = {}
-
-    @staticmethod
-    def _arraysum(array_a, array_b):
-        """
-        Calculate the sum of two arrays.
-        """
-
-        return array_a + array_b
 
     def _parse_metadata(self, attributes, groups):
         """
@@ -1748,10 +1847,10 @@ class parallelHDF5Processor(FileCollection):
                                 (axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
             if pbar:
                 with ProgressBar():
-                    self.combinedresult['binned'] = reduce(self._arraysum,
+                    self.combinedresult['binned'] = reduce(_arraysum,
                     d.compute(*binTasks, scheduler=scheduler, **compute_kwds))
             else:
-                self.combinedresult['binned'] = reduce(self._arraysum,
+                self.combinedresult['binned'] = reduce(_arraysum,
                 d.compute(*binTasks, scheduler=scheduler, **compute_kwds))
 
             del binTasks
