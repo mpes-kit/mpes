@@ -30,7 +30,7 @@ class FileCollection(object):
         self.folder = folder
 
     def __add__(self, other):
-        """ Combine two FileCollection instances by combining the file names.
+        """ Combine two FileCollection instances (self, other) by combining the file names.
         """
 
         files = list(set(self.files) | set(other.files))
@@ -38,6 +38,8 @@ class FileCollection(object):
         return FileCollection(files=files, file_sorting=self.sorting)
 
     def __iter__(self):
+        """ Iterator of the current class defined as iterating over file names.
+        """
 
         for file in self.files:
             yield file
@@ -52,7 +54,7 @@ class FileCollection(object):
     @property
     def nallfiles(self):
         """ Total number of files with the same attributes.
-        # of allfiles >= # of files
+        # of allfiles >= # of files (equal when no selection criterion is applied).
         """
 
         return len(self.allfiles)
@@ -152,8 +154,9 @@ class FileCollection(object):
                 to retrieve filtered file names).
             ret : str | 'selected'
                 Return option,
-                'selected' = return selected files.
-                'rest' = return the rest of the files (not selected).
+                :'selected': Return of the selected files.
+                :'rest': Return the rest of the files (not selected).
+                :False: No action (return).
         """
 
         if self.files:
