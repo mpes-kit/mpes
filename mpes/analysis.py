@@ -435,14 +435,16 @@ def peakdetect2d(img, method='daofind', **kwds):
 def calibrateK(img, pxla, pxlb, k_ab=None, kcoorda=None, kcoordb=[0., 0.], equiscale=False, ret=['axes']):
     """
     Momentum axes calibration using the pixel positions of two symmetry points (a and b)
-    and the absolute coordinate of a single point (b). All coordinates should be specified
-    in the (row_index, column_index) format.
+    and the absolute coordinate of a single point (b), defaulted to [0., 0.]. All coordinates
+    should be specified in the (row_index, column_index) format. See the equiscale option for
+    details on the specifications of point coordinates.
 
     :Parameters:
         img : 2D array
             An energy cut of the band structure.
         pxla, pxlb : list/tuple/1D array
-            Pixel coordinates of the two symmetry points (a and b).
+            Pixel coordinates of the two symmetry points (a and b). Point b has the
+            default coordinates [0., 0.] (see below).
         k_ab : float | None
             The known momentum space distance between the two symmetry points.
         kcoorda : list/tuple/1D array | None
@@ -451,6 +453,12 @@ def calibrateK(img, pxla, pxlb, k_ab=None, kcoorda=None, kcoordb=[0., 0.], equis
             Momentum coordinates of the symmetry point b (krow, kcol), default to k-space center.
         equiscale : bool | False
             Option to adopt equal scale along both the row and column directions.
+            :True: Use a uniform scale for both x and y directions in the image coordinate system.
+            This applies to the situation where the points a and b are (close to) parallel with one
+            of the two image axes.
+            :False: Calculate the momentum scale for both x and y directions separately. This applies
+            to the situation where the points a and b are sufficiently different in both x and y directions
+            in the image coordinate system.
         ret : list | ['axes']
             Return type specification, options include 'axes', 'extent', 'coeffs', 'grid', 'func', 'all'.
 
@@ -516,12 +524,13 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
             Collection of EDCs.
         tof : 1D array
             Time-of-flight values.
-        ranges : list of tuples | None
-            List of ranges for peak detection.
+        ranges : list of tuples/lists | None
+            List of ranges for peak detection in the format
+            [(LowerBound1, UpperBound1), (LowerBound2, UpperBound2), ....].
         method : str | 'range-limited'
             Method for peak-finding ('range-limited' and 'alignment').
         pkwindow : int | 3
-            Window width of a peak(amounts to lookahead in mpes.analysis.peakdetect1d).
+            Window width of a peak(amounts to lookahead in `mpes.analysis.peakdetect1d`).
         plot : bool | False
             Specify whether to display a custom plot of the peak search results.
 
@@ -562,7 +571,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None, aug=1, 
     coefficient vector, a, in the system of equations T.a = b. Here T is the
     differential drift time matrix and b the differential bias vector, and
     assuming that the energy-drift-time relationship can be written in the form,
-    E = sum (a_n * t**n) + E0
+    E = sum_n (a_n * t**n) + E0
 
     :Parameters:
         pos : list/array
@@ -587,11 +596,11 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None, aug=1, 
             Calibrating function with determined polynomial coefficients (except the constant offset).
         ecalibdict : dict
             A dictionary of fitting parameters including the following,
-            coeffs : Fitted polynomial coefficients (the a's).
-            offset : Minimum time-of-flight corresponding to a peak.
-            Tmat : the T matrix (differential time-of-flight) in the equation Ta=b.
-            bvec : the b vector (differential bias) in the fitting Ta=b.
-            axis : Fitted energy axis.
+            :coeffs: Fitted polynomial coefficients (the a's).
+            :offset: Minimum time-of-flight corresponding to a peak.
+            :Tmat: the T matrix (differential time-of-flight) in the equation Ta=b.
+            :bvec: the b vector (differential bias) in the fitting Ta=b.
+            :axis: Fitted energy axis.
     """
 
     vals = np.array(vals)
