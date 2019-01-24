@@ -298,7 +298,7 @@ class hdf5Reader(File):
     def __init__(self, f_addr, ncores=None, **kwds):
 
         self.faddress = f_addr
-        eventEstimator = kwds.pop('estimator', 'Stream_0')
+        eventEstimator = kwds.pop('estimator', 'Stream_0') # Dataset representing event length
         self.CHUNK_SIZE = int(kwds.pop('chunksz', 1e6))
         super().__init__(name=self.faddress, mode='r', **kwds)
 
@@ -322,6 +322,8 @@ class hdf5Reader(File):
                 Expression in a name to leave in the group name list (w = with).
             woexpr : str | None
                 Expression in a name to leave out of the group name list (wo = without).
+            use_alias : bool | False
+                Specification on the use of alias to replace the variable name.
 
         :Return:
             filteredGroupNames : list
@@ -374,6 +376,10 @@ class hdf5Reader(File):
         :Parameter:
             group : list/tuple
                 Collection of group names.
+            amin, amax : numeric, numeric | None, None
+                Minimum and maximum indice to select from the group (dataset).
+            sliced : bool | True
+                Perform slicing on the group (dataset), if `True`.
 
         :Return:
             groupContent : list/tuple
@@ -405,6 +411,8 @@ class hdf5Reader(File):
         :Parameter:
             attribute : list/tuple
                 Collection of attribute names.
+            nullval : str | 'None'
+                Null value to retrieve as a replacement of NoneType.
 
         :Return:
             attributeContent : list/tuple
@@ -445,6 +453,18 @@ class hdf5Reader(File):
 
     def _assembleGroups(self, gnames, amin=None, amax=None, use_alias=True, dtyp='float32', ret='array'):
         """ Assemble the content values of the selected groups.
+
+        :Parameters:
+            gnames : list
+                List of group names.
+            amin, amax : numeric, numeric | None, None
+                Index selection range for all groups.
+            use_alias : bool | True
+                See `hdf5Reader.getGroupNames()`.
+            dtype : str | 'float32'
+                Data type string.
+            ret : str | 'array'
+                Return type specification ('array' or 'dict').
         """
 
         gdict = {}
@@ -584,6 +604,10 @@ class hdf5Reader(File):
                 The format of the data to convert into.
             save_addr : str | './summary'
                 File address to save to.
+            pq_append : bool | False
+                Option to append to parquet files.
+                :True: Append to existing parquet files.
+                :False: The existing parquet files will be deleted before new file creation.
         """
 
         save_fname = u.appendformat(save_addr, form)
@@ -716,7 +740,7 @@ class hdf5Processor(hdf5Reader):
     def __init__(self, f_addr, **kwds):
 
         self.faddress = f_addr
-        self.ua = kwds.pop('use_alias', True)
+        self.ua = kwds.pop('', True)
         self.hdfdict = {}
         self.histdict = {}
         self.axesdict = {}
@@ -1001,7 +1025,7 @@ class hdf5Processor(hdf5Reader):
 
     def saveHistogram(self, dictname='histdict', form='h5', save_addr='./histogram', **kwds):
         """
-        Save binned histogram and the axes.
+        Save binned histogram and the axes. See `mpes.fprocessing.saveDict()`.
         """
 
         try:
@@ -1087,6 +1111,8 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
             Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
         jittered : bool | True
             Option to add histogram jittering during binning.
+        **kwds : keyword arguments
+            See `mpes.fprocessing.hdf5Processor.localBinning()`.
 
     :Return:
         histdict : dict
@@ -1176,6 +1202,8 @@ def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
             Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
         jittered : bool | True
             Option to add histogram jittering during binning.
+        **kwds : keyword arguments
+            See `mpes.fprocessing.hdf5Processor.localBinning()`.
 
     :Return:
         histdict : dict
@@ -1237,7 +1265,18 @@ def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
 
 
 def getJitter(df, amp, col):
-    """ Obtain jitter dataframe.
+    """ Calculate jittering for a dataframe column.
+
+    :Parameters:
+        df : dataframe
+            Dataframe to add noise/jittering to.
+        amp : numeric
+            Amplitude scaling for the jittering noise.
+        col : str
+            Name of the column to add jittering to.
+
+    :Return:
+        Uniformly distributed noise vector with specified amplitude and size.
     """
 
     colsize = df[col].size
@@ -1621,6 +1660,8 @@ class dataframeProcessor(MapParser):
                 See `mpes.fprocessing.binDataframe()`.
             binmethod : str | 'lean'
                 Dataframe binning method ('original' and 'lean').
+            ret : bool | False
+                Option to return binning results as a dictionary.
         """
 
         # Set up the binning parameters
@@ -1650,8 +1691,8 @@ class dataframeProcessor(MapParser):
             namestr : '/data'
                 Extra namestring attached to the filename.
             pq_append : bool | False
-                Option to append to the existing parquet file in the specified folder,
-                otherwise the existing parquet files will be deleted.
+                Option to append to the existing parquet file (if `True`) in the specified folder,
+                otherwise the existing parquet files will be deleted before writing new files in.
             **kwds : keyword arguments
                 See extra keyword arguments in `dask.dataframe.to_parquet()` for parquet conversion,
                 or in `dask.dataframe.to_hdf()` for HDF5 conversion.
@@ -1810,7 +1851,7 @@ class parallelHDF5Processor(FileCollection):
             scheduler : str | 'threads'
                 Type of distributed scheduler ('threads', 'processes', 'synchronous')
             combine : bool | True
-                Combine the results obtained from distributed binning.
+                Option to combine the results obtained from distributed binning.
             histcoord : string | 'midpoint'
                 The coordinates of the histogram. Specify 'edge' to get the bar edges (every
                 dimension has one value more), specify 'midpoint' to get the midpoint of the
@@ -1905,7 +1946,8 @@ class parallelHDF5Processor(FileCollection):
         if ret:
             return self.combinedresult
 
-    def convert(self, form='parquet', save_addr='./summary', append_to_folder=False, pbar=True, pbenv='classic', **kwds):
+    def convert(self, form='parquet', save_addr='./summary', append_to_folder=False,
+                pbar=True, pbenv='classic', **kwds):
         """
         Convert files to another format (e.g. parquet).
 
@@ -1921,7 +1963,10 @@ class parallelHDF5Processor(FileCollection):
             pbar : bool | True
                 Option to display progress bar.
             pbenv : str | 'classic'
-                Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
+                Specification of the progress bar environment ('classic' for generic version
+                and 'notebook' for notebook compatible version).
+            **kwds : keyword arguments
+                See `mpes.fprocessing.hdf5Processor.convert()`.
         """
 
         tqdm = u.tqdmenv(pbenv)
@@ -1997,6 +2042,7 @@ class parallelHDF5Processor(FileCollection):
 
         saveClassAttributes(self, form, save_addr)
 
+
 def extractEDC(folder=None, files=[], axes=['t'], bins=[1000], ranges=[(65000, 100000)],
                 binning_kwds={'jittered':True}, ret=True, **kwds):
     """ Extract EDCs from a list of bias scan files.
@@ -2015,6 +2061,7 @@ def extractEDC(folder=None, files=[], axes=['t'], bins=[1000], ranges=[(65000, 1
 
     if ret:
         return traces, tof
+
 
 def readBinnedhdf5(fpath, combined=True, typ='float32'):
     """
