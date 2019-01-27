@@ -124,6 +124,8 @@ class FileCollection(object):
                 Expression in a name to leave in the filename list (w = with).
             woexpr : str | None
                 Expression in a name to leave out of the filename list (wo = without).
+            str_start, str_end : int, int | None, None
+                Starting and ending indices of the filename string.
 
         :Return:
             filteredFiles : list
@@ -140,7 +142,7 @@ class FileCollection(object):
         return filteredFiles
 
     def select(self, ids=[], update='', ret=False):
-        """ Select gathered files by the filename id.
+        """ Select gathered files by the filename ids.
 
         :Parameters:
             ids : list/1D array | []
