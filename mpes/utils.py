@@ -79,14 +79,23 @@ def to_odd(num):
             The nearest odd number.
     """
 
-    rem = round(num) % 2
-    oddnum = num + int(cos(rem*pi/2))
+    rnum = int(num)
+    rem = rnum % 2
+    oddnum = rnum + int(cos(rem*pi/2))
 
     return oddnum
 
 
 def intify(*nums):
     """ Safely convert to integer (avoiding None).
+
+    :Parameter:
+        nums : list/tuple/1D array
+            Numeric array to convert to integer.
+
+    :Return:
+        intnums : list
+            Converted list of numerics.
     """
 
     intnums = list(nums) # Make a copy of the to-be-converted list
@@ -240,20 +249,20 @@ def dictmerge(D, others):
 
     :Parameters:
         D : dict
-            Main dictionary
+            Main dictionary.
         others : list/tuple/dict
-            Other dictionary or composite dictionarized elements
+            Other dictionary or composite dictionarized elements.
 
     :Return:
         D : dict
-            Merged dictionary
+            Merged dictionary.
     """
 
-    if type(others) == (list or tuple):
+    if type(others) in (list, tuple): # Merge D with a list or tuple of dictionaries
         for oth in others:
             D = {**D, **oth}
 
-    elif type(others) == dict:
+    elif type(others) == dict: # Merge D with a single dictionary
         D = {**D, **others}
 
     return D
