@@ -43,8 +43,11 @@ class TestUtils(unit.TestCase):
         """ Testing the None-insensitive integer conversion function.
         """
         
+        # Convert a list containing None
         self.assertEqual(u.intify(*[0.7, None, 6]), [0, None, 6])
+        # Convert a tuple containing None
         self.assertEqual(u.intify(*(0.7, None, 6)), [0, None, 6])
+        # Convert a 1D numpy array containing None
         self.assertEqual(u.intify(*np.array([0.7, None, 6])), [0, None, 6])
         
     def test_to_odd(self):
@@ -55,10 +58,11 @@ class TestUtils(unit.TestCase):
                          [3, 3, 5, 5])
         
     def test_replist(self):
-        """ Test list repetition function.
+        """ Test 2D list repetition function.
         """
         
-        pass
+        self.assertEqual(u.replist(True, 2, 3),
+                         [[True, True, True], [True, True, True]])
     
 
 if __name__ == '__main__':
