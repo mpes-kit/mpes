@@ -657,7 +657,7 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
     """
 
     dtyp = kwds.pop('dtyp', 'float32')
-    sln = kwds.pop('slicename', 'V')
+    sln = kwds.pop('slicename', 'V') # sln = slicename
     save_addr = u.appendformat(save_addr, form)
     otheraxes = kwds.pop('otheraxes', None)
 
@@ -747,7 +747,7 @@ class hdf5Processor(hdf5Reader):
 
         super().__init__(f_addr=self.faddress, **kwds)
 
-    def _addBinners(self, axes=None, nbins=None, ranges=None, binDict=None):
+    def _addBinners(self, axes=None, nbins=None, ranges=None, binDict=None, irregular_bins=False):
         """
         Construct the binning parameters within an instance.
         """
@@ -767,10 +767,11 @@ class hdf5Processor(hdf5Reader):
             self.nbinaxes = len(self.binaxes)
 
             # Collect the number of bins
-            try: # To have the same number of bins on all axes
-                self.bincounts = int(nbins)
-            except: # To have different number of bins on each axis
-                self.bincounts = list(map(int, nbins))
+            if irregular_bins == False:
+                try: # To have the same number of bins on all axes
+                    self.bincounts = int(nbins)
+                except: # To have different number of bins on each axis
+                    self.bincounts = list(map(int, nbins))
 
             self.binranges = ranges
 
@@ -1108,7 +1109,8 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
         pbar : bool | True
             Option to display a progress bar.
         pbenv : str | 'classic'
-            Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
+            Progress bar environment ('classic' for generic version and
+            'notebook' for notebook compatible version).
         jittered : bool | True
             Option to add histogram jittering during binning.
         **kwds : keyword arguments
@@ -1480,7 +1482,7 @@ class dataframeProcessor(MapParser):
             self.edf = readDataframe(folder=self.datafolder, files=[], ftype=ftype, **kwds)
 
         elif source == 'files':
-            if len(self.datafiles) > 0:
+            if len(self.datafiles) > 0: # When filenames are specified
                 self.edf = readDataframe(folder=None, files=self.datafiles, ftype=ftype, **kwds)
             else:
                 # When only the datafolder address is given but needs to read partial files,
@@ -1557,7 +1559,7 @@ class dataframeProcessor(MapParser):
         self.edf = self.edf.drop(colnames, axis=1)
 
 
-    def applyFilter(self, colname, lb=-np.inf, ub=np.inf):
+    def applyFilter(self, colname, lb=-np.inf, ub=np.inf, update='replace', ret=False):
         """ Application of bound filters to a specified column (can be used consecutively).
 
         :Parameters:
@@ -1565,9 +1567,17 @@ class dataframeProcessor(MapParser):
                 Name of the column to filter.
             lb, ub : numeric, numeric | -infinity, infinity
                 The lower and upper bounds used in the filtering.
+            update : str | 'replace'
+                Update option for the filtered dataframe.
+            ret : bool | False
+                Return option for the filtered dataframe.
         """
 
-        self.edf = self.edf[(self.edf[colname] > lb) & (self.edf[colname] < ub)]
+        if ret == True:
+            return self.edf[(self.edf[colname] > lb) & (self.edf[colname] < ub)]
+
+        if update == 'replace':
+            self.edf = self.edf[(self.edf[colname] > lb) & (self.edf[colname] < ub)]
 
     def columnApply(self, mapping, rescolname, **kwds):
         """ Apply a user-defined function (e.g. partial function) to an existing column.
@@ -1578,7 +1588,7 @@ class dataframeProcessor(MapParser):
             rescolname : str
                 Name of the resulting column.
             **kwds : keyword arguments
-                Keyword arguments of the mapping function.
+                Keyword arguments of the user-input mapping function.
         """
 
         self.edf[rescolname] = mapping(**kwds)
