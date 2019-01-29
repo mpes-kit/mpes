@@ -33,6 +33,7 @@ from dask.diagnostics import ProgressBar
 import natsort as nts
 from functools import reduce
 from funcy import project
+import warnings as wn
 
 N_CPU = ps.cpu_count()
 
@@ -1471,6 +1472,7 @@ class dataframeProcessor(MapParser):
                 Type of file to read into dataframe ('h5' or 'hdf5', 'parquet', 'json', 'csv').
             fids : list | []
                 IDs of the files to be selected (see `mpes.base.FileCollection.select()`).
+                Specify 'all' to read all files of the given file type.
             update : str | ''
                 File selection update option (see `mpes.base.FileCollection.select()`).
             **kwds : keyword arguments
@@ -1488,7 +1490,16 @@ class dataframeProcessor(MapParser):
                 # When only the datafolder address is given but needs to read partial files,
                 # first gather files from the folder, then select files and read into dataframe
                 self.gather(folder=self.datafolder, identifier=r'/*.'+ftype, file_sorting=True)
-                self.datafiles = self.select(ids=fids, update='', ret='selected')
+                self.datafiles = self.select(ids=list(range(len(self.files))), update='', ret='selected')
+
+                if len(fids) == 0:
+                    print('Nothing is read since no file IDS (fids) is specified!')
+                    self.datafiles = self.select(ids=fids, update='', ret='selected')
+                elif fids == 'all':
+                    self.datafiles = self.select(ids=list(range(len(self.files))), update='', ret='selected')
+                else:
+                    self.datafiles = self.select(ids=fids, update='', ret='selected')
+
                 self.edf = readDataframe(files=self.datafiles, ftype=ftype, **kwds)
 
         self.npart = self.edf.npartitions
