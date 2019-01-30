@@ -33,7 +33,6 @@ from dask.diagnostics import ProgressBar
 import natsort as nts
 from functools import reduce
 from funcy import project
-import warnings as wn
 
 N_CPU = ps.cpu_count()
 
@@ -1490,10 +1489,9 @@ class dataframeProcessor(MapParser):
                 # When only the datafolder address is given but needs to read partial files,
                 # first gather files from the folder, then select files and read into dataframe
                 self.gather(folder=self.datafolder, identifier=r'/*.'+ftype, file_sorting=True)
-                self.datafiles = self.select(ids=list(range(len(self.files))), update='', ret='selected')
 
                 if len(fids) == 0:
-                    print('Nothing is read since no file IDS (fids) is specified!')
+                    print('Nothing is read since no file IDs (fids) is specified!')
                     self.datafiles = self.select(ids=fids, update='', ret='selected')
                 elif fids == 'all':
                     self.datafiles = self.select(ids=list(range(len(self.files))), update='', ret='selected')
@@ -1631,6 +1629,14 @@ class dataframeProcessor(MapParser):
 
     def transformColumn2D(self, map2D, X, Y, **kwds):
         """ Apply a mapping simultaneously to two dimensions.
+
+        :Parameters:
+            map2D : function
+                2D mapping function.
+            X, Y : series, series
+                The two columns of the dataframe to apply mapping to.
+            **kwds : keyword arguments
+                Additional arguments for the 2D mapping function.
         """
 
         newX = kwds.pop('newX', X)
@@ -1641,6 +1647,12 @@ class dataframeProcessor(MapParser):
     def applyKCorrection(self, X='X', Y='Y', newX='Xm', newY='Ym', **kwds):
         """ Calculate and replace the X and Y values with their distortion-correction version.
         This method can be reused.
+
+        :Parameters:
+            X, Y : str, str | 'X', 'Y'
+                Labels of the columns before momentum distortion correction.
+            newX, newY : str, str | 'Xm', 'Ym'
+                Labels of the columns after momentum distortion correction.
         """
 
         self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
@@ -1655,18 +1667,33 @@ class dataframeProcessor(MapParser):
     def appendEAxis(self, E0, **kwds):
         """ Calculate and append the E axis to the events dataframe.
         This method can be reused.
+
+        :Parameter:
+            E0 : numeric
+                Time-of-flight offset.
         """
 
         self.columnApply(mapping=self.EMap, rescolname='E', E0=E0, **kwds)
 
     # Row operation
-    def appendRow(self, folder=None, df=None, type='parquet', **kwds):
-        """ Append rows read from other parquet files to existing dataframe.
+    def appendRow(self, folder=None, df=None, ftype='parquet', **kwds):
+        """ Append rows read from other files to existing dataframe.
+
+        :Parameters:
+            folder : str | None
+                Folder directory for the files to append to the existing dataframe
+                (i.e. when appending parquet files).
+            df : dataframe | None
+                Dataframe to append to the exisitng dataframe.
+            ftype : str | 'parquet'
+                File type ('parquet', 'dataframe')
+            **kwds : keyword arguments
+                Additional arguments to submit to `dask.dataframe.append()`.
         """
 
-        if type == 'parquet':
+        if ftype == 'parquet':
             return self.edf.append(self.read(folder), **kwds)
-        elif type == 'dataframe':
+        elif ftype == 'dataframe':
             return self.edf.append(df, **kwds)
         else:
             raise NotImplementedError
@@ -1732,7 +1759,7 @@ class dataframeProcessor(MapParser):
             self.edf.to_json(save_addr, **kwds)
 
     def saveHistogram(self, form, save_addr, dictname='histdict', **kwds):
-        """ Export binned histogram as other files.
+        """ Export binned histogram in other formats.
 
         :Parameters:
             See `mpes.fprocessing.saveDict()`.

@@ -31,7 +31,7 @@ from skimage.feature import peak_local_max
 import cv2
 import astropy.stats as astat
 import photutils as pho
-from symmetrize import sym, pointops as po
+from symmetrize import sym, tps, pointops as po
 from fastdtw import fastdtw
 from functools import reduce, partial
 from funcy import project
@@ -2013,7 +2013,7 @@ class MomentumCorrector(object):
 
         return np.roll(pts_cart_trans, shift=1, axis=1)
 
-    def nonlinWarpEstimate(self, image, axis, rand_amp=1, ret=True):
+    def nonlinWarpEstimate(self, image, axis, rand_amp=1, ret=True, center=True):
         """ Estimate the nonlinear deformation field using thin plate spline.
         """
 
@@ -2098,6 +2098,7 @@ class MomentumCorrector(object):
     @staticmethod
     def getWarpFunction(**kwds):
         """ Construct warping function to apply to other datasets.
+        # TODO: turn this into a fully operational method.
         """
 
         warping = kwds.pop('warping', np.eye(3))
@@ -2120,8 +2121,12 @@ class MomentumCorrector(object):
                 Points for annotation.
             annotated : bool | False
                 Option for annotation.
+            display : bool | True
+                Display option when using `bokeh` to render interactively.
             backend : str | 'matplotlib'
-                Visualization backend package to use.
+                Visualization backend specification.
+                :'matplotlib': use static display rendered by matplotlib.
+                :'bokeh': use interactive display rendered by bokeh.
             ret : bool | False
                 Option to return figure and axis objects.
             imkwd : dict | {}
