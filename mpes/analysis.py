@@ -1884,6 +1884,7 @@ class MomentumCorrector(object):
         if type == 'points':
 
             self.center_detection_method = center_det
+            symtype = kwds.pop('symtype', 'rotation')
 
             # Detect the point landmarks
             self.peaks = po.peakdetect2d(image, **kwds)
@@ -1902,7 +1903,7 @@ class MomentumCorrector(object):
 
             # Calculate geometric distances
             self.calcGeometricDistances()
-            self.csm_original = self.calcSymmetryScores()
+            self.csm_original = self.calcSymmetryScores(symtype=symtype)
 
             if self.rotsym == 6:
                 self.mdist = (self.mcvdist + self.mvvdist) / 2
@@ -1917,6 +1918,7 @@ class MomentumCorrector(object):
         """
 
         image = kwds.pop('image', self.slice)
+        symtype = kwds.pop('symtype', 'rotation')
         # Update the point landmarks in the transformed coordinate system
         pks = po.peakdetect2d(image, **kwds)
         self.pcent, self.pouter = po.pointset_center(pks, method=center_det)
@@ -1925,7 +1927,7 @@ class MomentumCorrector(object):
         self.features['verts'] = self.pouter_ord
         self.features['center'] = np.atleast_2d(self.pcent)
         self.calcGeometricDistances()
-        self.csm_current = self.calcSymmetryScores()
+        self.csm_current = self.calcSymmetryScores(symtype=symtype)
 
     def _imageUpdate(self):
         """ Update distortion-corrected images.
@@ -2021,7 +2023,7 @@ class MomentumCorrector(object):
         """ Calculate the symmetry scores from geometric quantities.
         """
 
-        csm = sym.csm(self.pcent, self.pouter_ord, rotsym=self.rotsym, type=symtype)
+        csm = po.csm(self.pcent, self.pouter_ord, rotsym=self.rotsym, type=symtype)
 
         return csm
 
