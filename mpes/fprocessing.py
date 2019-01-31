@@ -646,14 +646,15 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
         save_addr : str | './histogram'
             File path to save the binning result.
         **kwds : keyword arguments
-            =========  ===========  ===========  ========================================
-             keyword    data type     default     meaning
-            =========  ===========  ===========  ========================================
-              dtyp       string      'float32'    Data type of the histogram
-             cutaxis      int            3        The index of axis to cut the 4D data
-            slicename    string         'V'       The shared namestring for the 3D slice
-            otheraxes     dict         None       Values along other or converted axes
-            =========  ===========  ===========  ========================================
+            ================  ===========  ===========  ========================================
+             keyword           data type     default     meaning
+            ================  ===========  ===========  ========================================
+              dtyp              string      'float32'    Data type of the histogram
+             cutaxis             int            3        The index of axis to cut the 4D data
+            slicename           string         'V'       The shared namestring for the 3D slice
+            otheraxes            dict         None       Values along other or converted axes
+            mat_compression      bool        False       Matlab file compression
+            ================  ===========  ===========  ========================================
     """
 
     dtyp = kwds.pop('dtyp', 'float32')
@@ -668,11 +669,19 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
 
     if form == 'mat': # Save as mat file (for Matlab)
 
-        sio.savemat(save_addr, histdict)
+        do_compression = kwds.pop('mat_compression', False)
+        sio.savemat(save_addr, histdict, **kwds)
 
     elif form in ('h5', 'hdf5'): # Save as hdf5 file
 
         cutaxis = kwds.pop('cutaxis', 3)
+        # Change the bit length of data
+        if dtyp not in ('float64', 'float'):
+            for dk, dv in histdict.items():
+                try:
+                    histdict[dk] = dv.astype(dtyp)
+                except:
+                    pass
 
         # Save the binned data
         # Save 1-3D data as single datasets
@@ -691,8 +700,8 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
                 with higher than four dimensions!')
 
             # Save the axes in the same group
-            for k in processor.binaxes:
-                hdf.create_dataset('axes/'+k, data=histdict[k])
+            for bax in processor.binaxes:
+                hdf.create_dataset('axes/'+bax, data=histdict[bax])
 
         finally:
             hdf.close()
