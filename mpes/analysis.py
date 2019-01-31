@@ -1188,7 +1188,8 @@ def regionExpand(mask, **kwds):
             xpos, ypos = kwds.pop('linecoords')
             downshift, upshift = kwds.pop('axoffsets')
             lbl, lbu, ubl, ubu = kwds.pop('clipbounds', [0, np.inf, 0, np.inf])
-            lb, ub = np.clip(ypos - downshift, lbl, lbu).astype('int'), np.clip(ypos + upshift, ubl, ubu).astype('int')
+            lb = np.clip(ypos - downshift, lbl, lbu).astype('int')
+            ub = np.clip(ypos + upshift, ubl, ubu).astype('int')
             for ind, x in enumerate(xpos):
                 mask[x, lb[ind]:ub[ind]] = val
         except KeyError:
@@ -1438,7 +1439,7 @@ def bandpath_map(bsvol, pathr=None, pathc=None, path_coords=None, eaxis=2):
         bsvol : 3D array
             Volumetric band structure data.
         pathr, pathc : 1D array | None, None
-            Row and column pixel coordinates of the band path (ignored if path_coords is given).
+            Row and column pixel coordinates along the band path (ignored if path_coords is given).
         path_coords : 2D array | None
             Combined row and column pixel coordinates of the band path.
         eaxis : int | 2
@@ -1656,7 +1657,7 @@ def fitEllipseParams(*coords, plot=False, img=None, **kwds):
     return center, phi, axes
 
 
-def vertexGenerator(center, fixedvertex=None, cvd=None, arot=None, nside=None, direction=-1, \
+def vertexGenerator(center, fixedvertex=None, cvd=None, arot=None, nside=None, direction=-1,
                     scale=1, diagdir=None, ret='all', rettype='float32'):
     """
     Generation of the vertices of symmetric polygons.
@@ -1816,7 +1817,17 @@ class MomentumCorrector(object):
         self.rotsym_angle = int(360 / self.rotsym)
         self.arot = np.array([0] + [self.rotsym_angle]*(self.rotsym-1))
         self.ascale = np.array([1.0]*self.rotsym)
-        self.features = {}
+
+    @property
+    def features(self):
+        """ Dictionary of detected features for the symmetrization process.
+        `self.features` is a derived attribute from existing ones.
+        """
+
+        feature_dict = {'verts':np.asarray(self.__dict__.get('pouter_ord', [])),
+                        'center':np.asarray(self.__dict__.get('pcent', []))}
+
+        return feature_dict
 
     def selectSlice2D(self, selector, axis=2):
         """ Select (hyper)slice from a (hyper)volume.
@@ -1853,7 +1864,7 @@ class MomentumCorrector(object):
             type : str | 'points'
                 The type of features to extract.
             center_det : str | 'centroidnn'
-                Specification of center detection method ('centroidnn', 'centroid', None)
+                Specification of center detection method ('centroidnn', 'centroid', None).
             **kwds : keyword arguments
                 Extra keyword arguments for `symmetrize.pointops.peakdetect2d()`.
         """
@@ -1872,13 +1883,6 @@ class MomentumCorrector(object):
                 self.pcent = tuple(self.pcent)
             # Order the point landmarks
             self.pouter_ord = po.pointset_order(self.pouter, direction=direction)
-
-            # Construct the feature dictionary
-            self.features['verts'] = self.pouter_ord
-            try:
-                self.features['center'] = np.atleast_2d(self.pcent)
-            except:
-                pass
 
             # Calculate geometric distances
             self.calcGeometricDistances()
@@ -1941,8 +1945,8 @@ class MomentumCorrector(object):
             self._imageUpdate()
             self._featureUpdate(**kwds) # Feature update comes after image update
 
-    def linWarpEstimate(self, weights=(1, 1, 1), niter=50, method='Nelder-Mead',
-                        ret=True, stepsize=0.5, warpkwds={}, **kwds):
+    def linWarpEstimate(self, weights=(1, 1, 1), optfunc='minimize', optmethod='Nelder-Mead',
+                        ret=True, warpkwds={}, **kwds):
         """ Estimate the linear deformation field using landmark correspondences.
 
         :Parameters:
@@ -1950,10 +1954,9 @@ class MomentumCorrector(object):
                 Weights added to the terms in the optimizer. The terms are assigned
                 to the cost functions of (1) centeredness, (2) center-vertex symmetry,
                 (3) vertex-vertex symmetry, respectively.
-            niter : int | 50
-                Maximum number of iterations.
-            method : str | 'Nelder-Mead'
-                Name of the optimization method.
+            optfunc, optmethod : str/func, str | 'minimize', 'Nelder-Mead'
+                Name of the optimizer function and the optimization method.
+                See description in `mpes.analysis.sym.refsetopt()`.
             ret : bool | True
                 Specify if returning the corrected image slice.
             warpkwds : dictionary | {}
@@ -1962,6 +1965,7 @@ class MomentumCorrector(object):
                 ========= ========== =============================================
                 keyword   data type  meaning
                 ========= ========== =============================================
+                niter     int        Maximum number of iterations
                 landmarks list/array Symmetry landmarks selected for registration
                 fitinit   tuple/list Initial conditions for fitting
                 ========= ========== =============================================
@@ -1976,8 +1980,8 @@ class MomentumCorrector(object):
         self.init = kwds.pop('fitinit', fitinit)
 
         self.prefs, _ = sym.refsetopt(self.init, landmarks, self.pcent, self.mcvdist,
-                        self.mvvdist, niter=niter, direction=1, weights=weights,
-                        method=method, stepsize=stepsize, **kwds)
+                        self.mvvdist, direction=1, weights=weights, optfunc=optfunc,
+                        optmethod=optmethod, **kwds)
 
         # Calculate linearly warped image and landmark positions
         self.slice_corrected, self.linwarp = sym.imgWarping(self.slice, landmarks=landmarks,
@@ -2017,7 +2021,7 @@ class MomentumCorrector(object):
         """ Estimate the nonlinear deformation field using thin plate spline.
         """
 
-        self.prefs = sym.vertexGenerator(self.pcent, self.pouter_ord[0,:], self.arot, direction=-1,
+        self.prefs = sym.rotVertexGenerator(self.pcent, self.pouter_ord[0,:], self.arot, direction=-1,
                                          scale=self.ascale, rand_amp=rand_amp, ret='all')[1:,:]
         self.image_corrected, self.nonlinwarp = tps.tpsWarping(self.pouter_ord, self.prefs, image, axis)
 
