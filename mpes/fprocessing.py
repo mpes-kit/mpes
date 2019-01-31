@@ -1567,7 +1567,6 @@ class dataframeProcessor(MapParser):
 
         self.edf = self.edf.drop(colnames, axis=1)
 
-
     def applyFilter(self, colname, lb=-np.inf, ub=np.inf, update='replace', ret=False):
         """ Application of bound filters to a specified column (can be used consecutively).
 
