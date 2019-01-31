@@ -1123,7 +1123,7 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
         jittered : bool | True
             Option to add histogram jittering during binning.
         **kwds : keyword arguments
-            See `mpes.fprocessing.hdf5Processor.localBinning()`.
+            See keyword arguments in `mpes.fprocessing.hdf5Processor.localBinning()`.
 
     :Return:
         histdict : dict
@@ -1214,7 +1214,7 @@ def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
         jittered : bool | True
             Option to add histogram jittering during binning.
         **kwds : keyword arguments
-            See `mpes.fprocessing.hdf5Processor.localBinning()`.
+            See keyword arguments in `mpes.fprocessing.hdf5Processor.localBinning()`.
 
     :Return:
         histdict : dict

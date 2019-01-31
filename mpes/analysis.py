@@ -1829,6 +1829,7 @@ class MomentumCorrector(object):
 
         return feature_dict
 
+    @property
     def symscores(self):
         """ Dictionary of symmetry scores.
         """
@@ -1894,10 +1895,14 @@ class MomentumCorrector(object):
                 self.pcent = tuple(self.pcent)
             # Order the point landmarks
             self.pouter_ord = po.pointset_order(self.pouter, direction=direction)
+            try:
+                self.area_old = po.polyarea(coords=self.pouter_ord, coord_order='rc')
+            except:
+                pass
 
             # Calculate geometric distances
             self.calcGeometricDistances()
-            self.csm_original = self.calcSymmetryMeasure()
+            self.csm_original = self.calcSymmetryScores()
 
             if self.rotsym == 6:
                 self.mdist = (self.mcvdist + self.mvvdist) / 2
@@ -1920,7 +1925,7 @@ class MomentumCorrector(object):
         self.features['verts'] = self.pouter_ord
         self.features['center'] = np.atleast_2d(self.pcent)
         self.calcGeometricDistances()
-        self.csm_current = self.calcSymmetryMeasure()
+        self.csm_current = self.calcSymmetryScores()
 
     def _imageUpdate(self):
         """ Update distortion-corrected images.
