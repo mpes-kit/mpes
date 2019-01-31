@@ -669,8 +669,8 @@ def saveDict(processor, dictname, form='h5', save_addr='./histogram', **kwds):
 
     if form == 'mat': # Save as mat file (for Matlab)
 
-        do_compression = kwds.pop('mat_compression', False)
-        sio.savemat(save_addr, histdict, **kwds)
+        compression = kwds.pop('mat_compression', False)
+        sio.savemat(save_addr, histdict, do_compression=compression, **kwds)
 
     elif form in ('h5', 'hdf5'): # Save as hdf5 file
 
