@@ -1829,6 +1829,17 @@ class MomentumCorrector(object):
 
         return feature_dict
 
+    def symscores(self):
+        """ Dictionary of symmetry scores.
+        """
+
+        sym_dict = {'csm_original':self.__dict__.get('csm_original', ''),
+                    'csm_current':self.__dict__.get('csm_current', ''),
+                    'arm_original':self.__dict__.get('arm_original', ''),
+                    'arm_current':self.__dict__.get('arm_current', '')}
+
+        return sym_dict
+
     def selectSlice2D(self, selector, axis=2):
         """ Select (hyper)slice from a (hyper)volume.
 
@@ -1886,6 +1897,7 @@ class MomentumCorrector(object):
 
             # Calculate geometric distances
             self.calcGeometricDistances()
+            self.csm_original = self.calcSymmetryMeasure()
 
             if self.rotsym == 6:
                 self.mdist = (self.mcvdist + self.mvvdist) / 2
@@ -1908,6 +1920,7 @@ class MomentumCorrector(object):
         self.features['verts'] = self.pouter_ord
         self.features['center'] = np.atleast_2d(self.pcent)
         self.calcGeometricDistances()
+        self.csm_current = self.calcSymmetryMeasure()
 
     def _imageUpdate(self):
         """ Update distortion-corrected images.
@@ -1998,6 +2011,14 @@ class MomentumCorrector(object):
         self.mcvdist = self.cvdist.mean()
         self.vvdist = po.vvdist(self.pouter_ord)
         self.mvvdist = self.vvdist.mean()
+
+    def calcSymmetryScores(self, symtype='rotation'):
+        """ Calculate the symmetry scores from geometric quantities.
+        """
+
+        csm = sym.csm(self.pcent, self.pouter_ord, rotsym=self.rotsym, type=symtype)
+
+        return csm
 
     @staticmethod
     def transform(points, transmat):
