@@ -2152,31 +2152,46 @@ class MomentumCorrector(object):
         self.rdeform_field = coordmat[1,...]
         self.cdeform_field = coordmat[0,...]
 
-    def coordinateTransform(self, type, stackaxis=0, keep=False, ret=False,
-                            interp_order=1, mapkwds={}, **kwds):
+    def coordinateTransform(self, type, keep=False, ret=False, interp_order=1,
+                            mapkwds={}, **kwds):
         """ Apply a pixel-wise coordinate transform to an image.
+
+        :Parameters:
+            type : str
+                Type of deformation to apply to image slice.
+            keep : bool | False
+                Option to keep the specified coordinate transform.
+            ret : bool | False
+                Option to return transformed image slice.
+            interp_order : int | 1
+                Interpolation order for filling in missed pixels.
+            mapkwds : dict | {}
+                Additional arguments passed to `scipy.ndimage.map_coordinates()`.
+            **kwds : keyword arguments
+                Additional arguments in specific deformation field. See `symmetrize.sym` module.
         """
 
         image = kwds.pop('image', self.slice)
-        coordmat = sym.coordinate_matrix_2D(image, coordtype='homogeneous', stackaxis=stackaxis)
+        stackax = kwds.pop('stackaxis', 0)
+        coordmat = sym.coordinate_matrix_2D(image, coordtype='homogeneous', stackaxis=stackax)
 
         if type == 'translation':
-            rdisp, cdisp = sym.translationDF(coordmat, stackaxis=stackaxis, ret='displacement', **kwds)
+            rdisp, cdisp = sym.translationDF(coordmat, stackaxis=stackax, ret='displacement', **kwds)
         elif type == 'rotation':
-            rdisp, cdisp = sym.rotationDF(coordmat, stackaxis=stackaxis, ret='displacement', **kwds)
+            rdisp, cdisp = sym.rotationDF(coordmat, stackaxis=stackax, ret='displacement', **kwds)
         elif type == 'scaling':
-            rdisp, cdisp = sym.scalingDF(coordmat, stackaxis=stackaxis, ret='displacement', **kwds)
+            rdisp, cdisp = sym.scalingDF(coordmat, stackaxis=stackax, ret='displacement', **kwds)
         elif type == 'shearing':
-            rdisp, cdisp = sym.shearingDF(coordmat, stackaxis=stackaxis, ret='displacement', **kwds)
+            rdisp, cdisp = sym.shearingDF(coordmat, stackaxis=stackax, ret='displacement', **kwds)
         elif type == 'homography':
             transform = kwds.pop('transform', np.eye(3))
             rdisp, cdisp = sym.compose_deform_field(coordmat, mat_transform=transform,
-                                stackaxis=stackaxis, ret='displacement', **kwds)
+                                stackaxis=stackax, ret='displacement', **kwds)
 
         # Compute deformation field
-        if stackaxis == 0:
+        if stackax == 0:
             rdeform, cdeform = coordmat[1,...] + rdisp, coordmat[0,...] + cdisp
-        elif stackaxis == -1:
+        elif stackax == -1:
             rdeform, cdeform = coordmat[...,1] + rdisp, coordmat[...,0] + cdisp
 
         # Resample image in the deformation field
