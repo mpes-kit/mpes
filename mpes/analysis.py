@@ -24,6 +24,7 @@ import scipy.optimize as opt
 from scipy.special import wofz
 import scipy.io as sio
 from scipy.spatial import distance
+import scipy.ndimage as ndi
 import pandas as pd
 from skimage import measure, filters, morphology
 from skimage.draw import line, circle, polygon
@@ -1881,6 +1882,8 @@ class MomentumCorrector(object):
                 Extra keyword arguments for `symmetrize.pointops.peakdetect2d()`.
         """
 
+        self.resetDeformation(image=image, coordtype='cartesian')
+
         if type == 'points':
 
             self.center_detection_method = center_det
@@ -2137,6 +2140,55 @@ class MomentumCorrector(object):
         warpfunc = partial(base.correctnd, warping=warping)
 
         return warpfunc
+
+    def resetDeformation(self, **kwds):
+        """ Reset the deformation field.
+        """
+
+        image = kwds.pop('image', self.slice)
+        coordtype = kwds.pop('coordtype', 'cartesian')
+        coordmat = sym.coordinate_matrix_2D(image, coordtype=coordtype, stackaxis=0).astype('float64')
+
+        self.rdeform_field = coordmat[1,...]
+        self.cdeform_field = coordmat[0,...]
+
+    def coordinateTransform(self, type, stackaxis=0, keep=False, ret=False,
+                            interp_order=1, mapkwds={}, **kwds):
+        """ Apply a pixel-wise coordinate transform to an image.
+        """
+
+        image = kwds.pop('image', self.slice)
+        coordmat = sym.coordinate_matrix_2D(image, coordtype='homogeneous', stackaxis=stackaxis)
+
+        if type == 'translation':
+            rdisp, cdisp = sym.translationDF(coordmat, stackaxis=stackaxis, ret='displacement', **kwds)
+        elif type == 'rotation':
+            rdisp, cdisp = sym.rotationDF(coordmat, stackaxis=stackaxis, ret='displacement', **kwds)
+        elif type == 'scaling':
+            rdisp, cdisp = sym.scalingDF(coordmat, stackaxis=stackaxis, ret='displacement', **kwds)
+        elif type == 'shearing':
+            rdisp, cdisp = sym.shearingDF(coordmat, stackaxis=stackaxis, ret='displacement', **kwds)
+        elif type == 'homography':
+            transform = kwds.pop('transform', np.eye(3))
+            rdisp, cdisp = sym.compose_deform_field(coordmat, mat_transform=transform,
+                                stackaxis=stackaxis, ret='displacement', **kwds)
+
+        # Compute deformation field
+        if stackaxis == 0:
+            rdeform, cdeform = coordmat[1,...] + rdisp, coordmat[0,...] + cdisp
+        elif stackaxis == -1:
+            rdeform, cdeform = coordmat[...,1] + rdisp, coordmat[...,0] + cdisp
+
+        # Resample image in the deformation field
+        self.slice_transformed = ndi.map_coordinates(image, [rdeform, cdeform],
+                                    order=interp_order, **mapkwds)
+        # Combine deformation fields
+        if keep == True:
+            self.rdeform_field += rdisp
+            self.cdeform_field += cdisp
+
+        if ret == True:
+            return self.slice_transformed
 
     def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={}, annotated=False,
             display=True, backend='matplotlib', ret=False, imkwds={}, scatterkwds={}, **kwds):

@@ -1610,7 +1610,8 @@ class dataframeProcessor(MapParser):
 
         self.edf[rescolname] = mapping(**kwds)
 
-    def transformColumn(self, oldcolname, mapping, newcolname='Transformed', args=(), update='append', **kwds):
+    def transformColumn(self, oldcolname, mapping, newcolname='Transformed',
+                        args=(), update='append', **kwds):
         """ Apply a simple function to an existing column.
 
         :Parameters:
