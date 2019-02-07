@@ -1059,6 +1059,30 @@ def blocknorm(data, mavg_axis=0, blockwidth=1):
     return np.rollaxis(datanorm, mavg_axis)
 
 
+def curvature2D(image, cx=1, cy=1):
+    """ Implementation of 2D curvature calculation.
+    The formula follows Zhang et al. Rev. Sci. Instrum. 82, 043712 (2011)
+
+    :Parameters:
+        image : 2D array
+            2D image obtained from measurement.
+        cx, cy : numeric, numeric | 1, 1
+            Scaling parameters in x and y directions.
+    """
+
+    fx = np.gradient(image, axis=1)
+    fy = np.gradient(image, axis=0)
+    fxx = np.gradient(fx, axis=1)
+    fyy = np.gradient(fy, axis=0)
+    fxy = np.gradient(fx, axis=0)
+
+    cv_denominator = (1 + cx*fx**2 + cy*fy**2)**(3/2)
+    cv_numerator = (1 + cx*fx**2)*cy*fyy - 2*cx*cy*fx*fy*fxy + (1 + cy*fy**2)*cx*fxx
+    cv = cv_numerator/cv_denominator
+
+    return cv
+
+
 def segment2d(img, nbands=1, **kwds):
     """
     Electronic band segmentation using local thresholding
@@ -1970,7 +1994,7 @@ class MomentumCorrector(object):
 
     def linWarpEstimate(self, weights=(1, 1, 1), optfunc='minimize', optmethod='Nelder-Mead',
                         ret=True, warpkwds={}, **kwds):
-        """ Estimate the linear deformation field using landmark correspondences.
+        """ Estimate the homography-based deformation field using landmark correspondences.
 
         :Parameters:
             weights : tuple/list/array | (1, 1, 1)
@@ -2006,7 +2030,7 @@ class MomentumCorrector(object):
                         self.mvvdist, direction=1, weights=weights, optfunc=optfunc,
                         optmethod=optmethod, **kwds)
 
-        # Calculate linearly warped image and landmark positions
+        # Calculate warped image and landmark positions
         self.slice_corrected, self.linwarp = sym.imgWarping(self.slice, landmarks=landmarks,
                         refs=self.prefs, **warpkwds)
 
@@ -2048,13 +2072,37 @@ class MomentumCorrector(object):
 
         return np.roll(pts_cart_trans, shift=1, axis=1)
 
-    def nonlinWarpEstimate(self, image, axis, rand_amp=1, ret=True, center=True):
-        """ Estimate the nonlinear deformation field using thin plate spline.
+    def splineWarpEstimate(self, image, include_center=True, iterative=False, interp_order=1,
+                            ret=False, **kwds):
+        """ Estimate the spline deformation field using thin plate spline registration.
+
+        :Parameters:
+            image : 2D array
+                Image slice to be corrected.
+            include_center : bool | True
+                Option to include the image center/centroid in the registration process.
+            iterative : bool | False
+                Option to use the iterative approach (may not work in all cases).
+            ret : bool | False
+                Option to return corrected image slice.
         """
 
-        self.prefs = sym.rotVertexGenerator(self.pcent, self.pouter_ord[0,:], self.arot, direction=-1,
-                                         scale=self.ascale, rand_amp=rand_amp, ret='all')[1:,:]
-        self.image_corrected, self.nonlinwarp = tps.tpsWarping(self.pouter_ord, self.prefs, image, axis)
+        landmarks = kwds.pop('landmarks', self.pouter_ord)
+
+        # Generate the reference point set
+        self.prefs = sym.rotVertexGenerator(self.pcent, self.pouter_ord[0,:], self.arot,
+                        direction=-1, scale=self.ascale, ret='all')[1:,:]
+        if include_center == True:
+            self.prefs = np.concatenate((self.pouter_ord, self.pcent[None,:]), axis=0)
+
+        if iterative == False:
+            self.image_corrected, self.splinewarp = tps.tpsWarping(landmarks, self.prefs,
+                            image, axis, interp_order, **kwds)
+
+        else: # Iterative estimation of deformation field
+            # ptsw, H, rst = sym.refsetopt(init, lm, tuple(cen), mcd0, mcd0, ima[None,:,:],
+                        # niter=30, direction=-1, weights=(1, 1, 1), ftol=1e-8)
+            pass
 
         if ret:
             return self.image_corrected
@@ -2097,7 +2145,7 @@ class MomentumCorrector(object):
         if ret:
             return rotmat
 
-    def correct(self, axis, use_composite_transform=False, update=False, **kwds):
+    def correct(self, axis, use_composite_transform=False, update=False, use_deform_field=False, **kwds):
         """ Apply a 2D transform to a stack of 2D images (3D) along a specific axis.
 
         :Parameters:
@@ -2117,13 +2165,19 @@ class MomentumCorrector(object):
         """
 
         image = kwds.pop('image', self.image)
-        if use_composite_transform == True:
-            hgmat = kwds.pop('warping', self.composite_linwarp)
+
+        if use_deform_field == True:
+            dfield = kwds.pop('dfield', [self.rdeform_field, self.cdeform_field])
+            self.image_corrected = sym.applyWarping(image, axis, warptype='deform_field', dfield=dfield)
+
         else:
-            hgmat = kwds.pop('warping', self.linwarp)
+            if use_composite_transform == True:
+                hgmat = kwds.pop('warping', self.composite_linwarp)
+            else:
+                hgmat = kwds.pop('warping', self.linwarp)
+            self.image_corrected = sym.applyWarping(image, axis, warptype='matrix', hgmat=hgmat)
 
-        self.image_corrected = sym.applyWarping(image, axis, hgmat=hgmat)
-
+        # Update image features using corrected image
         if update != False:
             if update == True:
                 self.update('all')
