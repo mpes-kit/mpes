@@ -1059,6 +1059,36 @@ def blocknorm(data, mavg_axis=0, blockwidth=1):
     return np.rollaxis(datanorm, mavg_axis)
 
 
+def gradn(array, axes, **kwds):
+    """ Calculate nth-order gradients of the array along different directions.
+
+    :Parameters:
+        array : numpy array
+            N-dimensional matrix for calculating the gradient.
+        axes : int/list/tuple/1D array
+            A sequence of axes (from first to last) to calculate the gradient.
+            When input a single integer, the gradient is calculated along that particular axis.
+            For example, the 4th-order mixed gradient d4f/(dxdydxdy) requires the sequence (1, 0, 1, 0).
+        **kwds : keyword arguments
+            See `numpy.gradient()`.
+    """
+
+    grad = np.gradient
+
+    try:
+        nax = len(axes)
+    except:
+        nax = 1
+
+    if nax == 1:
+        array = grad(array, axis=axes, **kwds)
+    elif nax > 1:
+        for ax in axes:
+            array = grad(array, axis=ax, **kwds)
+
+    return array
+
+
 def curvature2D(image, cx=1, cy=1):
     """ Implementation of 2D curvature calculation.
     The formula follows Zhang et al. Rev. Sci. Instrum. 82, 043712 (2011)
