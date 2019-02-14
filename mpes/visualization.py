@@ -921,13 +921,15 @@ def trisurf2d(datamat, **kwds):
 #  Movie generation  #
 # ================== #
 
-def moviemaker(folder, imform='png', movform='avi', namestr='movie',
-                file_sorting='forward', ret=False, **kwds):
+def moviemaker(folder, files=None, imform='png', movform='avi', namestr='movie',
+                file_sorting='forward', recursive=False, ret=False, **kwds):
     """ Generate a movie file from a stack of images
 
     :Parameters:
         folder : str
             Directory of the file folder.
+        files : list/tuple
+            Directory of the files to be used for generating a movie.
         imform : str | 'png'
             Format of the images.
         movform : str | 'avi'
@@ -936,6 +938,8 @@ def moviemaker(folder, imform='png', movform='avi', namestr='movie',
             Namestring (including folder path) used to save the generated movie.
         file_sorting : str | 'forward'
             File-sorting direction.
+        recursive : bool | False
+            Option to generate a recursive movie.
         ret : bool | False
             Specify return.
         **kwds : keyword arguments
@@ -949,11 +953,17 @@ def moviemaker(folder, imform='png', movform='avi', namestr='movie',
     fps = kwds.pop('fps', 4)
     loop = kwds.pop('loop', 1)
 
-    fnames = g.glob(folder + r'\*.'+imform) # Not sorted
-    if file_sorting == 'forward':
-        fnames = nts.natsorted(fnames, reverse=False)
-    elif file_sorting == 'backward':
-        fnames = nts.natsorted(fnames, reverse=True)
+    if files is None:
+        fnames = g.glob(folder + r'\*.'+imform) # Not sorted
+        if file_sorting == 'forward':
+            fnames = nts.natsorted(fnames, reverse=False)
+        elif file_sorting == 'backward':
+            fnames = nts.natsorted(fnames, reverse=True)
+    else:
+        fnames = files
+
+    if recursive == True:
+        fnames = fnames + fnames[:-1][::-1]
 
     images = []
     for fid, fn in enumerate(fnames):
