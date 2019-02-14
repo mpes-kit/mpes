@@ -2106,8 +2106,8 @@ class MomentumCorrector(object):
 
         return np.roll(pts_cart_trans, shift=1, axis=1)
 
-    def splineWarpEstimate(self, image, include_center=True, iterative=False, interp_order=1,
-                            ret=False, **kwds):
+    def splineWarpEstimate(self, image, include_center=True, fixed_center=True, iterative=False,
+                            interp_order=1, ret=False, **kwds):
         """ Estimate the spline deformation field using thin plate spline registration.
 
         :Parameters:
@@ -2128,9 +2128,16 @@ class MomentumCorrector(object):
                         direction=-1, scale=self.ascale, ret='all')[1:,:]
 
         if include_center == True:
-            center = np.array(self.pcent)[None,:]
-            landmarks = np.concatenate((landmarks, center), axis=0)
-            self.prefs = np.concatenate((self.prefs, center), axis=0)
+            # Include center of image pattern in the registration-based symmetrization
+            if fixed_center == True: # Add the same center to both the reference and target sets
+
+                landmarks = np.column_stack((landmarks.T, self.pcent)).T
+                self.prefs = np.column_stack((self.prefs.T, self.pcent)).T
+
+            else: # Add different centers to the reference and target sets
+                newcenters = kwds.pop('new_centers', {})
+                landmarks = np.column_stack((landmarks.T, newcenters['lmkcenter'])).T
+                self.prefs = np.column_stack((self.prefs.T, newcenters['refcenter'])).T
 
         if iterative == False: # Non-iterative estimation of deformation field
             self.image_corrected, self.splinewarp = tps.tpsWarping(landmarks, self.prefs,

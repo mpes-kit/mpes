@@ -364,7 +364,12 @@ def bnorm(pval, pmax, pmin):
 
 
 def tqdmenv(env):
-    """ Choose tqdm environment.
+    """ Choose tqdm progress bar executing environment.
+
+    :Parameter:
+        env : str
+            Name of the environment, 'classic' for ordinary environment,
+            'notebook' for Jupyter notebook.
     """
 
     if env == 'classic':
@@ -373,3 +378,19 @@ def tqdmenv(env):
         tqdm = tqdm_notebook
 
     return tqdm
+
+
+def concat(*arrays):
+    """ Concatenate a sequence of (up to 2D) array-like objects along a given axis.
+    """
+
+    array_list = []
+    for ia, array in enumerate(arrays):
+        arrdim = np.ndim(array)
+
+        if arrdim == 1:
+            array = np.asarray(array)[None,...]
+
+        array_list.append(array)
+
+    return np.concatenate(array_list, axis=0)
