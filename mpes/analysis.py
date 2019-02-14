@@ -46,6 +46,7 @@ import warnings as wn
 
 wn.filterwarnings("ignore")
 
+
 # ==================== #
 #  Background removal  #
 # ==================== #
@@ -123,16 +124,14 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
         # Calculate the new k factor (background strength)
         ksum = 0.0
         for i in range(lmidx, imax):
-            ksum += (x[i] - x[i + 1]) * 0.5 * (y[i] + y[i + 1]
-                                               - 2 * yr - B[i] - B[i + 1])
+            ksum += (x[i] - x[i+1]) * 0.5 * (y[i] + y[i+1] - 2 * yr - B[i] - B[i+1])
         k = (yl - yr) / ksum
 
         # Calculate the new B (background shape) at every x position
         for i in range(lmidx, rmidx):
             ysum = 0.0
             for j in range(i, imax):
-                ysum += (x[j] - x[j + 1]) * 0.5 * (y[j] + y[j + 1]
-                                                   - 2 * yr - B[j] - B[j + 1])
+                ysum += (x[j] - x[j+1]) * 0.5 * (y[j] + y[j+1] - 2 * yr - B[j] - B[j+1])
             Bnew[i] = k * ysum
 
         # Test convergence criterion
@@ -203,16 +202,14 @@ def shirley2d(x, y, tol=1e-5, maxiter=20, explicit=False,
         ksum = np.zeros_like(yl)
         #int(lmidx.mean())
         for i in range(lmex, mx):
-            ksum += (x[i] - x[i + 1]) * 0.5 * (y[:, i] + y[:, i + 1]\
-                                               - 2 * yr - B[:, i] - B[:, i + 1])
+            ksum += (x[i] - x[i+1]) * 0.5 * (y[:, i] + y[:, i+1] - 2 * yr - B[:, i] - B[:, i+1])
         k = (yl - yr) / ksum
 
         # Calculate the new B (background shape) at every x position
         for i in range(lmex, rmex):
             ysum = np.zeros_like(yl)
             for j in range(i, mx):
-                ysum += (x[j] - x[j + 1]) * 0.5 * (y[:, j] + y[:, j + 1]\
-                                                   - 2 * yr - B[:, j] - B[:, j + 1])
+                ysum += (x[j] - x[j+1]) * 0.5 * (y[:, j] + y[:, j+1] - 2 * yr - B[:, j] - B[:, j+1])
             Bnew[:, i] = k * ysum
 
         dev = norm(Bnew - B)
@@ -245,8 +242,7 @@ def _datacheck_peakdetect(x_axis, y_axis):
         x_axis = range(len(y_axis))
 
     if len(y_axis) != len(x_axis):
-        raise ValueError(
-                "Input vectors y_axis and x_axis must have same length")
+        raise ValueError("Input vectors y_axis and x_axis must have same length")
 
     # Needs to be a numpy array
     y_axis = np.array(y_axis)
@@ -310,8 +306,8 @@ def peakdetect1d(y_axis, x_axis = None, lookahead = 200, delta=0):
     mn, mx = np.Inf, -np.Inf
 
     # Only detect peak if there is 'lookahead' amount of points after it
-    for index, (x, y) in enumerate(zip(x_axis[:-lookahead],
-                                        y_axis[:-lookahead])):
+    for index, (x, y) in enumerate(zip(x_axis[:-lookahead], y_axis[:-lookahead])):
+
         if y > mx:
             mx = y
             mxpos = x
@@ -1034,19 +1030,19 @@ def rangeConvert(x, xrng, pathcorr):
 
 def blocknorm(data, mavg_axis=0, blockwidth=1):
     """
-    Block-thresholding 2D data
+    Block-thresholding 2D data.
 
     :Parameters:
         data : ndarray
-            data to normalize
+            Data to normalize.
         mavg_axis : int | 0
-            axis to move the block along
+            Axis to move the block along.
         blockwidth : int | 1
-            width of the moving block
+            Width of the moving block.
 
     :Return:
         datanorm : ndarray
-            block-normalized data
+            Block-normalized data.
     """
 
     datar = np.rollaxis(data, mavg_axis)
@@ -1089,9 +1085,9 @@ def gradn(array, axes, **kwds):
     return array
 
 
-def curvature2D(image, cx=1, cy=1):
+def curvature2d(image, cx=1, cy=1):
     """ Implementation of 2D curvature calculation.
-    The formula follows Zhang et al. Rev. Sci. Instrum. 82, 043712 (2011)
+    The formula follows Zhang et al. Rev. Sci. Instrum. 82, 043712 (2011).
 
     :Parameters:
         image : 2D array
@@ -1262,19 +1258,19 @@ def regionExpand(mask, **kwds):
 
 
 def _signedmask(imr, imc, maskr, maskc, sign):
-    """ Generate a binary mask using the masked coordinates
+    """ Generate a binary mask using the masked coordinates.
 
     :Parameters:
         imr, imc : int
-            Row and column size of the image
+            Row and column size of the image.
         maskr, maskc : 1D array
-            Row and column coordinates of the masked pixels
+            Row and column coordinates of the masked pixels.
         sign : int/str
-            Binary sign of the masked region, (0, 1, 'nan')
+            Value of the masked region, (0, 1, 'nan').
 
     :Return:
         mask : 2D array
-            Mask matrix
+            Mask matrix.
     """
 
     if sign == 1:
@@ -1302,7 +1298,8 @@ def _signedmask(imr, imc, maskr, maskc, sign):
 
 
 def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
-    """ Use a circular binary mask to cover an image
+    """ Use a circular binary mask to cover an image.
+
     :Parameters:
         img : 2D array
             Input image to be masked.
@@ -1353,7 +1350,7 @@ def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
 
 
 def rectmask(img, rcent, ccent, shift, direction='row', sign=1, ret='mask', **kwds):
-    """ Use a rectangular binary mask to cover an image
+    """ Use a rectangular binary mask to cover an image.
 
     :Parameters:
         img : 2D array
@@ -1413,7 +1410,7 @@ def rectmask(img, rcent, ccent, shift, direction='row', sign=1, ret='mask', **kw
 
 def apply_mask_along(arr, mask, axes=None):
     """
-    Apply a mask in a low dimensional slice throughout a high-dimensional array
+    Apply a mask in a low dimensional slice throughout a high-dimensional array.
 
     :Parameters:
         arr : nD array
@@ -1532,7 +1529,7 @@ class BoundedArea(object):
     """
 
     def __init__(self, image=None, shape=None, subimage=None):
-        """ Initialization of the
+        """ Initialization of the BoundedArea class.
 
         :Parameters:
             image : 2d array
@@ -1573,7 +1570,7 @@ class BoundedArea(object):
 
     # Logical operations between BoundedArea instances
     def __and__(self, other):
-        """ Logical and operation.
+        """ Logical AND operation.
         """
 
         subimage_and = self.mask & other.mask
@@ -1581,7 +1578,7 @@ class BoundedArea(object):
         return BoundedArea(image=self.image, subimage=subimage_and)
 
     def __or__(self, other):
-        """ Logical or operation.
+        """ Logical OR operation.
         """
 
         subimage_or = self.mask | other.mask
@@ -1589,7 +1586,7 @@ class BoundedArea(object):
         return BoundedArea(image=self.image, subimage=subimage_or)
 
     def __invert__(self):
-        """ Logical invert operation
+        """ Logical INVERT operation
         """
 
         subimage_inv = ~ self.subimage
@@ -2127,14 +2124,17 @@ class MomentumCorrector(object):
         landmarks = kwds.pop('landmarks', self.pouter_ord)
 
         # Generate the reference point set
-        self.prefs = sym.rotVertexGenerator(self.pcent, self.pouter_ord[0,:], self.arot,
+        self.prefs = sym.rotVertexGenerator(self.pcent, fixedvertex=self.pouter_ord[0,:], arot=self.arot,
                         direction=-1, scale=self.ascale, ret='all')[1:,:]
-        if include_center == True:
-            self.prefs = np.concatenate((self.pouter_ord, self.pcent[None,:]), axis=0)
 
-        if iterative == False:
+        if include_center == True:
+            center = np.array(self.pcent)[None,:]
+            landmarks = np.concatenate((landmarks, center), axis=0)
+            self.prefs = np.concatenate((self.prefs, center), axis=0)
+
+        if iterative == False: # Non-iterative estimation of deformation field
             self.image_corrected, self.splinewarp = tps.tpsWarping(landmarks, self.prefs,
-                            image, axis, interp_order, **kwds)
+                            image, None, interp_order, ret='all', **kwds)
 
         else: # Iterative estimation of deformation field
             # ptsw, H, rst = sym.refsetopt(init, lm, tuple(cen), mcd0, mcd0, ima[None,:,:],
