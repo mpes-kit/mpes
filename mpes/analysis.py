@@ -1269,8 +1269,8 @@ def _signedmask(imr, imc, maskr, maskc, sign):
             Row and column size of the image
         maskr, maskc : 1D array
             Row and column coordinates of the masked pixels
-        sign : int
-            Binary sign of the masked region, (0, 1)
+        sign : int/str
+            Binary sign of the masked region, (0, 1, 'nan')
 
     :Return:
         mask : 2D array
@@ -1291,6 +1291,13 @@ def _signedmask(imr, imc, maskr, maskc, sign):
         except:
             pass
 
+    elif sign == 'nan':
+        mask = np.ones((imr, imc))
+        try:
+            mask[maskr, maskc] = np.nan
+        except:
+            pass
+
     return mask
 
 
@@ -1298,15 +1305,15 @@ def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
     """ Use a circular binary mask to cover an image
     :Parameters:
         img : 2D array
-            Input image to be masked
+            Input image to be masked.
         rcent : float
-            Row center position
+            Row center position.
         ccent : float
-            Column center position
+            Column center position.
         rad : float
-            Radius of circle
-        sign : int | 1
-            Binary sign of the masked region
+            Radius of circle.
+        sign : int/str | 1
+            Value of the masked region (0, 1 or 'nan').
         ret : str | 'mask'
             Return type ('mask', 'masked_image')
         kwds : keyword arguments
@@ -1360,8 +1367,8 @@ def rectmask(img, rcent, ccent, shift, direction='row', sign=1, ret='mask', **kw
         direction : str | 'row'
             Direction to apply the shift to, 'row' or 'column' indicates row-wise
             or column-wise shift for generating the rectangular mask
-        sign : int | 1
-            Binary sign of the masked region
+        sign : int/str | 1
+            Value of the masked region (0, 1 or 'nan').
         ret : str | 'mask'
             Return type ('mask', 'masked_image')
         **kwds : keyword arguments
@@ -2578,9 +2585,10 @@ def func_add(*funcs):
     return funcsum
 
 
-def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=False, pbenv='classic', ret='all', **kwds):
+def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=False,
+                pbenv='classic', ret='all', **kwds):
     """
-    Line-by-line fitting via bootstrapping fitted parameters from one line to the next
+    Line-by-line fitting via bootstrapping fitted parameters from one line to the next.
 
     :Parameters:
         data : ndarray
@@ -2598,7 +2606,8 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
         pbar : bool | False
             Progress bar condition.
         pbenv : str | 'classic'
-            Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
+            Progress bar environment ('classic' for generic version, 'notebook' for
+            notebook compatible version).
         **kwds : keyword arguments
             =============  ==========  ===================================
             keyword        data type   meaning
