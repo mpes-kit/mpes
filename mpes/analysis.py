@@ -1890,7 +1890,7 @@ class MomentumCorrector(object):
 
     @property
     def symscores(self):
-        """ Dictionary of symmetry scores.
+        """ Dictionary of symmetry-related scores.
         """
 
         sym_dict = {'csm_original':self.__dict__.get('csm_original', ''),
@@ -1908,7 +1908,6 @@ class MomentumCorrector(object):
                 Selector along the specified axis to extract the slice (image).
                 Use the construct slice(start, stop, step) to select a range of images and sum them.
                 Use an integer to specify only a particular slice.
-
             axis : int | 2
                 Axis along which to select the image.
         """
@@ -1980,6 +1979,7 @@ class MomentumCorrector(object):
 
         image = kwds.pop('image', self.slice)
         symtype = kwds.pop('symtype', 'rotation')
+
         # Update the point landmarks in the transformed coordinate system
         pks = po.peakdetect2d(image, **kwds)
         self.pcent, self.pouter = po.pointset_center(pks, method=center_det)
@@ -2073,6 +2073,7 @@ class MomentumCorrector(object):
 
     def calcGeometricDistances(self):
         """ Calculate geometric distances involving the center and the vertices.
+        Distances calculated include center-vertex and nearest-neighbor vertex-vertex distances.
         """
 
         self.cvdist = po.cvdist(self.pouter_ord, self.pcent)
@@ -2082,6 +2083,10 @@ class MomentumCorrector(object):
 
     def calcSymmetryScores(self, symtype='rotation'):
         """ Calculate the symmetry scores from geometric quantities.
+
+        :Paramters:
+            symtype : str | 'rotation'
+                Type of symmetry.
         """
 
         csm = po.csm(self.pcent, self.pouter_ord, rotsym=self.rotsym, type=symtype)
@@ -2119,8 +2124,16 @@ class MomentumCorrector(object):
                 Option to have a fixed center during registration-based symmetrization.
             iterative : bool | False
                 Option to use the iterative approach (may not work in all cases).
+            interp_order : int | 1
+                Order of interpolation (see `scipy.ndimage.map_coordinates()`).
             ret : bool | False
                 Option to return corrected image slice.
+            **kwds : keyword arguments
+                :landmarks: list/array | self.pouter_ord
+                    Landmark positions (row, column) used for registration.
+                :new_centers: dict | {}
+                    User-specified center positions for the reference and target sets.
+                    {'lmkcenter': (row, col), 'refcenter': (row, col)}
         """
 
         landmarks = kwds.pop('landmarks', self.pouter_ord)
@@ -2206,13 +2219,16 @@ class MomentumCorrector(object):
                 Option to use the composite transform involving the rotation.
             update : bool | False
                 Option to update the existing figure attributes.
+            use_deform_field : bool | False
+                Option to use deformation field for distortion correction.
             **kwds : keyword arguments
-                ======= ========= ===============================
-                keyword data type meaning
-                ======= ========= ===============================
-                image   2d array  3D image for correction
-                warping 2d array  2D transform correction matrix
-                ======= ========= ===============================
+                ======= ========== =================================
+                keyword data type  meaning
+                ======= ========== =================================
+                image   2d array   3D image for correction
+                dfield  list/tuple row and column deformation field
+                warping 2d array   2D transform correction matrix
+                ======= ========== =================================
         """
 
         image = kwds.pop('image', self.image)
