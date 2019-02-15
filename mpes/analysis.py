@@ -2115,6 +2115,8 @@ class MomentumCorrector(object):
                 Image slice to be corrected.
             include_center : bool | True
                 Option to include the image center/centroid in the registration process.
+            fixed_center : bool | True
+                Option to have a fixed center during registration-based symmetrization.
             iterative : bool | False
                 Option to use the iterative approach (may not work in all cases).
             ret : bool | False
@@ -2140,7 +2142,7 @@ class MomentumCorrector(object):
                 self.prefs = np.column_stack((self.prefs.T, newcenters['refcenter'])).T
 
         if iterative == False: # Non-iterative estimation of deformation field
-            self.image_corrected, self.splinewarp = tps.tpsWarping(landmarks, self.prefs,
+            self.slice_transformed, self.splinewarp = tps.tpsWarping(landmarks, self.prefs,
                             image, None, interp_order, ret='all', **kwds)
 
         else: # Iterative estimation of deformation field
@@ -2148,8 +2150,13 @@ class MomentumCorrector(object):
                         # niter=30, direction=-1, weights=(1, 1, 1), ftol=1e-8)
             pass
 
+        # Update the deformation field
+        coordmat = sym.coordinate_matrix_2D(image, coordtype='cartesian', stackaxis=0).astype('float64')
+        self.updateDeformation(self.splinewarp[0] - coordmat[1,...], self.splinewarp[1] - coordmat[0,...],
+                                reset=False, image=image, coordtype='cartesian')
+
         if ret:
-            return self.image_corrected
+            return self.slice_transformed
 
     def rotate(self, angle='auto', ret=False, **kwds):
         """ Rotate 2D image in the homogeneous coordinate.
@@ -2239,6 +2246,25 @@ class MomentumCorrector(object):
 
         return warpfunc
 
+    def applyDeformation(self, image, ret=True, **kwds):
+        """ Apply the deformation field to a specified image slice.
+
+        :Parameters:
+            image : 2D array
+                Image slice to apply the deformation.
+            ret : bool | True
+                Option to return the image after deformation.
+            **kwds : keyword arguments
+        """
+
+        rdeform = kwds.pop('rdeform', self.rdeform_field)
+        cdeform = kwds.pop('cdeform', self.cdeform_field)
+        order = kwds.pop('interp_order', 1)
+        imdeformed = ndi.map_coordinates(image, [rdeform, cdeform], order=order, **kwds)
+
+        if ret == True:
+            return imdeformed
+
     def resetDeformation(self, **kwds):
         """ Reset the deformation field.
         """
@@ -2249,6 +2275,24 @@ class MomentumCorrector(object):
 
         self.rdeform_field = coordmat[1,...]
         self.cdeform_field = coordmat[0,...]
+
+    def updateDeformation(self, rdisp, cdisp, reset=False, **kwds):
+        """ Update the deformation field.
+
+        :Parameters:
+            rdisp, cdisp : 2D array, 2D array
+                Row and columns displacement fields.
+            reset : bool | False
+                Option to reset the deformation field.
+            **kwds : keyword arguments
+                See `mpes.analysis.MomentumCorrector.resetDeformation()`.
+        """
+
+        if reset == True:
+            self.resetDeformation(**kwds)
+
+        self.rdeform_field += rdisp
+        self.cdeform_field += cdisp
 
     def coordinateTransform(self, type, keep=False, ret=False, interp_order=1,
                             mapkwds={}, **kwds):
@@ -2297,8 +2341,7 @@ class MomentumCorrector(object):
                                     order=interp_order, **mapkwds)
         # Combine deformation fields
         if keep == True:
-            self.rdeform_field += rdisp
-            self.cdeform_field += cdisp
+            self.updateDeformation(rdisp, cdisp, reset=False, image=image, coordtype='cartesian')
 
         if ret == True:
             return self.slice_transformed
