@@ -963,7 +963,7 @@ class EnergyCalibrator(base.FileCollection):
 
             if show_legend:
                 f.legend.location = kwds.pop('legend_location', 'top_right')
-                f.legend.spacing= 0
+                f.legend.spacing = 0
                 f.legend.padding = 2
 
             if display:

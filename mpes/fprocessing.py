@@ -14,6 +14,7 @@
 from __future__ import print_function, division
 from .igoribw import loadibw
 from .base import FileCollection, MapParser, saveClassAttributes
+from .visualization import grid_histogram
 from . import utils as u, bandstructure as bs
 import igor.igorpy as igor
 import pandas as pd
@@ -551,6 +552,9 @@ class hdf5Reader(File):
         # Summarize attributes and groups into a dictionary
         elif form == 'dict':
 
+            groups = kwds.pop('groups', self.groupNames)
+            attributes = kwds.pop('attributes', None)
+
             # Retrieve the range of acquired events
             amin = kwds.pop('amin', None)
             amax = kwds.pop('amax', None)
@@ -559,13 +563,14 @@ class hdf5Reader(File):
             # Output as a dictionary
             # Attribute name stays, stream_x rename as their corresponding attribute name
             # Add groups to dictionary
-            hdfdict = self._assembleGroups(self.groupNames, amin=amin, amax=amax,
+            hdfdict = self._assembleGroups(groups, amin=amin, amax=amax,
                             use_alias=use_alias, ret='dict')
 
             # Add attributes to dictionary
-            for an in self.attributeNames:
+            if attributes is not None:
+                for attr in attributes:
 
-                hdfdict[an] = self.readAttribute(self, an)
+                    hdfdict[attr] = self.readAttribute(self, attr)
 
             if ret == True:
                 return hdfdict
@@ -809,12 +814,61 @@ class hdf5Processor(hdf5Reader):
 
         return hist, edges
 
-    def loadMapping(self):
+    def loadMapping(self, energy, momentum):
         """
         Load the mapping parameters
         """
 
+        # TODO: add transform functions to for axes conversion.
         pass
+
+    def viewEventHistogram(self, ncol, axes=['X', 'Y', 't', 'ADC'], bins=[80, 80, 80, 80],
+                ranges=[(0, 1800), (0, 1800), (68000, 74000), (0, 500)], axes_name_type='alias',
+                backend='matplotlib', legend=True, histkwds={}, legkwds={}, **kwds):
+        """
+        Plot individual histograms of specified axes.
+
+        :Parameters:
+            ncol : int
+                Number of columns in the plot grid.
+            axes : list/tuple
+                Name of the axes to view.
+            bins : list/tuple
+                Bin values of all speicified axes.
+            ranges : list
+                Value ranges of all specified axes.
+            axes_name_type : str | 'alias'
+                Type of specified axes names.
+                :'alias': human-comprehensible aliases of the datasets from the hdf5 file (e.g. 'X', 'ADC', etc)
+                :'original': original names of the datasets from the hdf5 file (e.g. 'Stream0', etc).
+            backend : str | 'matplotlib'
+                Backend of the plotting library ('matplotlib' or 'bokeh').
+            legend : bool | True
+                Option to include a legend in the histogram plots.
+            histkwds, legkwds, **kwds : dict, dict, keyword arguments
+                Extra keyword arguments passed to `mpes.visualization.grid_histogram()`.
+        """
+
+        input_types = map(type, [axes, bins, ranges])
+        allowed_types = [list, tuple]
+
+        if set(input_types).issubset(allowed_types):
+
+            # Convert axes names
+            if axes_name_type == 'alias':
+                gnames = [self.nameLookupDict[ax] for ax in axes]
+            elif axes_name_type == 'original':
+                gnames = axes
+
+            # Read out the values for the specified groups
+            group_dict = self.summarize(form='dict', groups=gnames, attributes=None,
+                                        use_alias=True, ret=True)
+            # Plot multiple histograms in a grid
+            grid_histogram(group_dict, ncol=ncol, rvs=axes, rvbins=bins, rvranges=ranges,
+                    backend=backend, legend=legend, histkwds=histkwds, legkwds=legkwds, **kwds)
+
+        else:
+            raise TypeError('Inputs of axes, bins, ranges need to be list or tuple!')
 
     def distributedProcessBinning(self, axes=None, nbins=None, ranges=None,
                                 binDict=None, chunksz=100000, pbar=True, ret=True, **kwds):
@@ -862,7 +916,7 @@ class hdf5Processor(hdf5Reader):
         dsets_distributed = [da.from_array(ds, chunks=(chunksz)) for ds in dsets]
         data_unbinned = da.stack(dsets_distributed, axis=1)
         # if rechunk:
-        #     data_unbineed = data_unbinned.rechunk('auto')
+        #     data_unbinned = data_unbinned.rechunk('auto')
 
         # Compute binned data
         bintask = self._delayedBinning(self, data_unbinned)
@@ -991,7 +1045,8 @@ class hdf5Processor(hdf5Reader):
         self.hdfdict = {}
 
         # Compute binned data locally
-        self.histdict['binned'], ax_vals = np.histogramdd(data_unbinned, bins=self.bincounts, range=self.binranges)
+        self.histdict['binned'], ax_vals = np.histogramdd(data_unbinned,
+                                    bins=self.bincounts, range=self.binranges)
         del data_unbinned
 
         for iax, ax in enumerate(axes):
@@ -1850,11 +1905,11 @@ class parallelHDF5Processor(FileCollection):
 
     def subset(self, file_id):
         """
-        Spawn an instance of hdf5Processor from a specified substituent file.
+        Spawn an instance of `mpes.fprocessing.hdf5Processor` from a specified substituent file.
 
         :Parameter:
             file_id : int
-                Integer-numbered file ID (from 0 to self.nfiles).
+                Integer-numbered file ID (any integer from 0 to self.nfiles - 1).
         """
 
         if self.files:

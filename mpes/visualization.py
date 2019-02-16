@@ -25,8 +25,11 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.tri as mtri
 import matplotlib.colors as colors
 from matplotlib import cm
+from bokeh.layouts import gridplot
+import bokeh.plotting as pbk
 import bokeh.palettes as bp
 from bokeh.colors import RGB
+from bokeh.io import output_notebook
 from copy import copy
 import re, glob2 as g
 from PIL import Image
@@ -180,6 +183,103 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
     plt.tight_layout()
 
     return ax
+
+
+def plot_single_hist(histvals, edges, legend=None, **kwds):
+    """ Bokeh-based plotting of a single histogram with legend and tooltips.
+
+    :Parameters:
+        histvals : 1D array
+            Histogram counts (e.g. vertical axis).
+        edges : 1D array
+            Histogram edge values (e.g. horizontal axis).
+        legend : str
+            Text for the plot legend.
+        **kwds :
+            Keyword arguments for 'bokeh.plotting.figure().quad()'.
+
+    :Return:
+        p : object
+            An instance of 'bokeh.plotting.figure()' as a plot handle.
+    """
+
+    ttp = kwds.pop('tooltip', [('(x, y)', '($x, $y)')])
+
+    p = pbk.figure(background_fill_color='white', tooltips=ttp)
+    p.quad(top=histvals, bottom=0, left=edges[:-1], right=edges[1:],
+           line_color='white', alpha=0.8, legend=legend, **kwds)
+
+    p.y_range.start = 0
+    p.legend.location = 'top_right'
+    p.grid.grid_line_color = 'lightgrey'
+
+    return p
+
+
+def grid_histogram(dct, ncol, rvs=['X', 'Y', 't', 'ADC'], rvbins=[80, 80, 80, 80],
+          rvranges=[(0, 1800), (0, 1800), (68000, 74000), (0, 500)], backend='matplotlib',
+          legend=True, histkwds={}, legkwds={}, **kwds):
+    """
+    Grid plot of multiple 1D histograms.
+
+    :Parameters:
+        dct : dict
+            Dictionary containing the name and values of the random variables.
+        ncol : int
+            Number of columns in the plot grid.
+        rvs : list/tuple
+            List of names for the random variables (rvs).
+        rvbins : list/tuple
+            Bin values for all random variables.
+        rvranges : list/tuple
+            Value ranges of all random variables.
+        backend : str | 'matplotlib'
+            Backend for making the plot ('matplotlib' or 'bokeh').
+        legend : bool | True
+            Option to include a legend in each histogram plot.
+        histkwds : dict | {}
+            Keyword arguments for histogram plots.
+        legkwds: dict | {}
+            Keyword arguments for legends.
+        **kwds : keyword arguments
+    """
+
+    figsz = kwds.pop('figsize', (14, 8))
+
+    if backend == 'matplotlib':
+
+        nrv = len(rvs)
+        nrow = nrv // ncol
+        histtype = kwds.pop('histtype', 'step')
+
+        f, ax = plt.subplots(nrow, ncol, figsize=figsz)
+        for i, zipped in enumerate(zip(rvs, rvbins, rvranges)):
+
+            # Make each histogram plot
+            rvname, rvbin, rvrg = zipped
+            axind = np.unravel_index(i, (nrow, ncol))
+            ax[axind].hist(dct[rvname], bins=rvbin, range=rvrg, label=rvname, histtype=histtype, **histkwds)
+
+            if legend == True:
+                ax[axind].legend(fontsize=15, **legkwds)
+
+    elif backend == 'bokeh':
+
+        output_notebook(hide_banner=True)
+
+        plots = []
+        for i, zipped in enumerate(zip(rvs, rvbins, rvranges)):
+
+            rvname, rvbin, rvrg = zipped
+            histvals, edges = np.histogram(dct[rvname], bins=rvbin, range=rvrg)
+
+            if legend == True:
+                plots.append(plot_single_hist(histvals, edges, legend=rvname, **histkwds))
+            else:
+                plots.append(plot_single_hist(histvals, edges, legend=None, **histkwds))
+
+        # Make grid plot
+        pbk.show(gridplot(plots, ncols=ncol, plot_width=figsz[0]*30, plot_height=figsz[1]*28))
 
 
 # ========== #
