@@ -826,7 +826,7 @@ class hdf5Processor(hdf5Reader):
                 ranges=[(0, 1800), (0, 1800), (68000, 74000), (0, 500)], axes_name_type='alias',
                 backend='matplotlib', legend=True, histkwds={}, legkwds={}, **kwds):
         """
-        Plot individual histograms of specified axes.
+        Plot individual histograms of specified dimensions (axes).
 
         :Parameters:
             ncol : int
@@ -1916,7 +1916,7 @@ class parallelHDF5Processor(FileCollection):
             return hdf5Processor(f_addr=self.files[int(file_id)])
 
         else:
-            raise ValueError("No substituent file is present.")
+            raise ValueError("No substituent file is present (value out of range).")
 
     def summarize(self, form='dataframe', ret=False, **kwds):
         """
@@ -1947,6 +1947,17 @@ class parallelHDF5Processor(FileCollection):
 
             if ret == True:
                 return self.edfhdf
+
+    def viewEventHistogram(self, fid, ncol, **kwds):
+        """
+        Plot individual histograms of specified dimensions (axes) from a substituent file.
+
+        :Parameters:
+            See arguments in 'parallelHDF5Processor.subset()' and 'hdf5Processor.viewEventHistogram()'.
+        """
+
+        subproc = self.subset(fid)
+        subproc.viewEventHistogram(ncol, **kwds)
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):
