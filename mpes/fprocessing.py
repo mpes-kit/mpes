@@ -1788,6 +1788,18 @@ class dataframeProcessor(MapParser):
         else:
             raise NotImplementedError
 
+    def appendMarker(self, source_name='ADC', mapping=u.multithresh, marker_name='Marker',
+                    lower_bounds=[], upper_bounds=[], thresholds=[], update='append', **kwds):
+        """ Append markers to specific ranges in a source column. The mapping of the marker is usually
+        a piecewise defined function. This enables binning in nonequivalent steps as the next step.
+        """
+
+        if len(lower_bounds) == len(upper_bounds) == len(thresholds):
+            self.transformColumn(oldcolname=source_name, mapping=mapping, newcolname=marker_name,
+                    args=(lower_bounds, upper_bounds, thresholds), update=update, **kwds)
+        else:
+            raise ValueError('Length of the bounds and the thresholds should be the same!')
+
     # Complex operation
     def distributedBinning(self, axes, nbins, ranges, binDict=None, pbar=True,
                             binmethod='lean', ret=False, **kwds):
