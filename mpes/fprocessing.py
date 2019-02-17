@@ -601,6 +601,14 @@ class hdf5Reader(File):
             if ret == True:
                 return self.edf
 
+        elif form == 'darray': # Delayed array
+
+            gNames = kwds.pop('groupnames', self.getGroupNames(wexpr='Stream'))
+            darray = d.delayed(self._assembleGroups)(gNames, amin=None, amax=None, ret='array', **kwds)
+
+            if ret == True:
+                return darray
+
     def convert(self, form, save_addr='./summary', pq_append=False, **kwds):
         """ Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor).
 
@@ -1947,6 +1955,24 @@ class parallelHDF5Processor(FileCollection):
 
             if ret == True:
                 return self.edfhdf
+
+        elif form == 'darray':
+
+            test_fid = kwds.pop('test_fid', 0)
+            test_proc = self.subset(test_fid)
+            gnames = kwds.pop('group_names', test_proc.getGroupNames(wexpr='Stream'))
+            colNames = test_proc.name2alias(gnames)
+
+            test_array = test_proc.summarize(form='darray', groupnames=gnames, ret=True).compute()
+
+            arrays = [da.from_delayed(self.subset(i).summarize(form='darray', groupnames=gnames, ret=True),
+                    dtype=test_array.dtype, shape=test_array.shape) for i in range(self.nfiles)]
+            array_stack = da.concatenate(arrays, axis=1).T
+
+            self.edfhdf = ddf.from_dask_array(array_stack, columns=colNames)
+
+            if ret == True:
+                return array_stack
 
     def viewEventHistogram(self, fid, ncol, **kwds):
         """
