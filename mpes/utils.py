@@ -394,3 +394,20 @@ def concat(*arrays):
         array_list.append(array)
 
     return np.concatenate(array_list, axis=0)
+
+
+def multithresh(arr, lbs, ubs, ths):
+    """ Multilevel thresholding of a 1D array. Somewhat similar to bit depth reduction.
+
+    :Parameters:
+        arr : 1D array
+            Array for thresholding.
+        lbs, ubs : list/tuple/array, list/tuple/array
+            Paired lower and upper bounds for each thresholding level.
+        ths : list/tuple/array
+            Thresholds for the values within the paired lower and upper bounds.
+    """
+
+    for lb, ub, th in zip(lbs, ubs, ths):
+        if (arr > lb) & (arr < ub):
+            return th
