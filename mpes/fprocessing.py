@@ -575,7 +575,7 @@ class hdf5Reader(File):
             if ret == True:
                 return hdfdict
 
-        # Gather groups into columns of a dataframe
+        # Load a very large (e.g. > 1GB), single (monolithic) HDF5 file into a dataframe
         elif form == 'dataframe':
 
             self.CHUNK_SIZE = int(kwds.pop('chunksz', 1e6))
@@ -595,13 +595,15 @@ class hdf5Reader(File):
                 dfParts.append(d.delayed(self._assembleGroups)(gNames, amin=eventIDStart, amax=eventIDEnd, **kwds))
 
             # Construct eda (event dask array) and edf (event dask dataframe)
-            eda = da.from_array(np.concatenate(d.compute(*dfParts), axis=1).T, chunks=self.CHUNK_SIZE)
+            # [da.from_delayed(dfParts[i]) for i in range(nPartitions), dtype=np.float, shape=]
+            eda = da.from_array(da.concatenate(d.compute(*dfParts), axis=1).T, chunks=self.CHUNK_SIZE)
             self.edf = ddf.from_dask_array(eda, columns=colNames)
 
             if ret == True:
                 return self.edf
 
-        elif form == 'darray': # Delayed array
+        # Delayed array for loading an HDF5 file of reasonable size (e.g. < 1GB)
+        elif form == 'darray':
 
             gNames = kwds.pop('groupnames', self.getGroupNames(wexpr='Stream'))
             darray = d.delayed(self._assembleGroups)(gNames, amin=None, amax=None, ret='array', **kwds)
@@ -832,7 +834,7 @@ class hdf5Processor(hdf5Reader):
 
     def viewEventHistogram(self, ncol, axes=['X', 'Y', 't', 'ADC'], bins=[80, 80, 80, 80],
                 ranges=[(0, 1800), (0, 1800), (68000, 74000), (0, 500)], axes_name_type='alias',
-                backend='matplotlib', legend=True, histkwds={}, legkwds={}, **kwds):
+                backend='bokeh', legend=True, histkwds={}, legkwds={}, **kwds):
         """
         Plot individual histograms of specified dimensions (axes).
 
