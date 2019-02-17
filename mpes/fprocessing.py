@@ -1479,8 +1479,19 @@ def readDataframe(folder=None, files=None, ftype='parquet', **kwds):
         return ddf.read_parquet(ff, **kwds)
 
     elif ftype in ('h5', 'hdf5'):
-        return ddf.multi.concat_indexed_dataframes([hdf5Processor(f).
-                summarize('dataframe', ret=True, **kwds) for f in files])
+
+        test_fid = kwds.pop('test_fid', 0)
+        test_proc = hdf5Processor(files[test_fid])
+        gnames = kwds.pop('group_names', test_proc.getGroupNames(wexpr='Stream'))
+        colNames = test_proc.name2alias(gnames)
+
+        test_array = test_proc.summarize(form='darray', groupnames=gnames, ret=True).compute()
+
+        arrays = [da.from_delayed(hdf5Processor(f).summarize(form='darray', groupnames=gnames, ret=True),
+                dtype=test_array.dtype, shape=test_array.shape) for f in files]
+        array_stack = da.concatenate(arrays, axis=1).T
+
+        return ddf.from_dask_array(array_stack, columns=colNames)
 
     elif ftype == 'json':
         return ddf.read_json(ff, **kwds)
@@ -1951,28 +1962,11 @@ class parallelHDF5Processor(FileCollection):
                 return self.metadict
 
         elif form == 'dataframe':
-            self.edfhdf = readDataframe(**kwds)
+
+            self.edfhdf = readDataframe(files=self.files, ftype='h5', ret=True, **kwds)
 
             if ret == True:
                 return self.edfhdf
-
-        elif form == 'darray':
-
-            test_fid = kwds.pop('test_fid', 0)
-            test_proc = self.subset(test_fid)
-            gnames = kwds.pop('group_names', test_proc.getGroupNames(wexpr='Stream'))
-            colNames = test_proc.name2alias(gnames)
-
-            test_array = test_proc.summarize(form='darray', groupnames=gnames, ret=True).compute()
-
-            arrays = [da.from_delayed(self.subset(i).summarize(form='darray', groupnames=gnames, ret=True),
-                    dtype=test_array.dtype, shape=test_array.shape) for i in range(self.nfiles)]
-            array_stack = da.concatenate(arrays, axis=1).T
-
-            self.edfhdf = ddf.from_dask_array(array_stack, columns=colNames)
-
-            if ret == True:
-                return array_stack
 
     def viewEventHistogram(self, fid, ncol, **kwds):
         """
