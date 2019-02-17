@@ -249,19 +249,33 @@ def grid_histogram(dct, ncol, rvs=['X', 'Y', 't', 'ADC'], rvbins=[80, 80, 80, 80
     if backend == 'matplotlib':
 
         nrv = len(rvs)
-        nrow = nrv // ncol
+        nrow = int(np.ceil(nrv / ncol))
         histtype = kwds.pop('histtype', 'step')
 
         f, ax = plt.subplots(nrow, ncol, figsize=figsz)
+        otherax = ax.copy()
         for i, zipped in enumerate(zip(rvs, rvbins, rvranges)):
 
             # Make each histogram plot
             rvname, rvbin, rvrg = zipped
-            axind = np.unravel_index(i, (nrow, ncol))
-            ax[axind].hist(dct[rvname], bins=rvbin, range=rvrg, label=rvname, histtype=histtype, **histkwds)
+            try:
+                axind = np.unravel_index(i, (nrow, ncol))
+                ax[axind].hist(dct[rvname], bins=rvbin, range=rvrg, label=rvname, histtype=histtype, **histkwds)
+                if legend == True:
+                    ax[axind].legend(fontsize=15, **legkwds)
 
-            if legend == True:
-                ax[axind].legend(fontsize=15, **legkwds)
+                otherax[axind] = None
+
+            except:
+                ax[i].hist(dct[rvname], bins=rvbin, range=rvrg, label=rvname, histtype=histtype, **histkwds)
+                if legend == True:
+                    ax[i].legend(fontsize=15, **legkwds)
+
+                otherax[i] = None
+
+        for oax in otherax.flatten():
+            if oax is not None:
+                f.delaxes(oax)
 
     elif backend == 'bokeh':
 
