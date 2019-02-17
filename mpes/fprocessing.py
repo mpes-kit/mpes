@@ -1482,6 +1482,7 @@ def readDataframe(folder=None, files=None, ftype='parquet', **kwds):
 
     elif ftype in ('h5', 'hdf5'):
 
+        # Read a file to parse the file structure
         test_fid = kwds.pop('test_fid', 0)
         test_proc = hdf5Processor(files[test_fid])
         gnames = kwds.pop('group_names', test_proc.getGroupNames(wexpr='Stream'))
@@ -1489,9 +1490,13 @@ def readDataframe(folder=None, files=None, ftype='parquet', **kwds):
 
         test_array = test_proc.summarize(form='darray', groupnames=gnames, ret=True).compute()
 
+        # Delay-read all files
         arrays = [da.from_delayed(hdf5Processor(f).summarize(form='darray', groupnames=gnames, ret=True),
-                dtype=test_array.dtype, shape=test_array.shape) for f in files]
+                dtype=test_array.dtype, shape=(test_array.shape[0], np.nan)) for f in files]
         array_stack = da.concatenate(arrays, axis=1).T
+
+        # if rechunksz is not None:
+        #     array_stack = array_stack.rechunk(rechunksz)
 
         return ddf.from_dask_array(array_stack, columns=colNames)
 
