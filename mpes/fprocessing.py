@@ -1892,6 +1892,22 @@ class dataframeProcessor(MapParser):
         else:
             raise ValueError('No binning results are available!')
 
+    def viewEventHistogram(self, fid, ncol, source='folder', fname=None, ftype='h5', **kwds):
+        """
+        Plot individual histograms of specified dimensions (axes) from a substituent file.
+
+        :Parameters:
+            See arguments in `hdf5Processor.viewEventHistogram()`.
+        """
+
+        if source == 'folder':
+            files = g.glob(self.datafolder + r'/*' + ftype)
+            subproc = hdf5Processor(nts.natsorted(files)[fid])
+        elif source == 'files':
+            subproc = hdf5Processor(self.datafiles[fid])
+
+        subproc.viewEventHistogram(ncol, **kwds)
+
 
 class parquetProcessor(dataframeProcessor):
     """
@@ -1992,7 +2008,7 @@ class parallelHDF5Processor(FileCollection):
         Plot individual histograms of specified dimensions (axes) from a substituent file.
 
         :Parameters:
-            See arguments in 'parallelHDF5Processor.subset()' and 'hdf5Processor.viewEventHistogram()'.
+            See arguments in `parallelHDF5Processor.subset()` and `hdf5Processor.viewEventHistogram()`.
         """
 
         subproc = self.subset(fid)

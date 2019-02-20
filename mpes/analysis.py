@@ -1922,7 +1922,8 @@ class MomentumCorrector(object):
         elif self.imgndim == 2:
             raise ValueError('Input image dimension is already 2!')
 
-    def featureExtract(self, image, direction='ccw', type='points', center_det='centroidnn', **kwds):
+    def featureExtract(self, image, direction='ccw', type='points', center_det='centroidnn',
+                        symscores=True, **kwds):
         """ Extract features from the selected 2D slice.
             Currently only point feature detection is implemented.
 
@@ -1963,7 +1964,9 @@ class MomentumCorrector(object):
 
             # Calculate geometric distances
             self.calcGeometricDistances()
-            self.csm_original = self.calcSymmetryScores(symtype=symtype)
+
+            if symscores == True:
+                self.csm_original = self.calcSymmetryScores(symtype=symtype)
 
             if self.rotsym == 6:
                 self.mdist = (self.mcvdist + self.mvvdist) / 2
@@ -2167,6 +2170,9 @@ class MomentumCorrector(object):
         coordmat = sym.coordinate_matrix_2D(image, coordtype='cartesian', stackaxis=0).astype('float64')
         self.updateDeformation(self.splinewarp[0] - coordmat[1,...], self.splinewarp[1] - coordmat[0,...],
                                 reset=False, image=image, coordtype='cartesian')
+
+        if update == True:
+            self.slice_corrected = self.slice_transformed.copy()
 
         if ret:
             return self.slice_transformed
