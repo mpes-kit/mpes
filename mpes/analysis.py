@@ -2209,7 +2209,8 @@ class MomentumCorrector(object):
         if ret:
             return rotmat
 
-    def correct(self, axis, use_composite_transform=False, update=False, use_deform_field=False, **kwds):
+    def correct(self, axis, use_composite_transform=False, update=False, use_deform_field=False,
+                updatekwds={}, **kwds):
         """ Apply a 2D transform to a stack of 2D images (3D) along a specific axis.
 
         :Parameters:
@@ -2247,9 +2248,9 @@ class MomentumCorrector(object):
         # Update image features using corrected image
         if update != False:
             if update == True:
-                self.update('all')
+                self.update('all', **updatekwds)
             else:
-                self.update(update)
+                self.update(update, **updatekwds)
 
     @staticmethod
     def getWarpFunction(**kwds):
