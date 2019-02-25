@@ -2115,7 +2115,7 @@ class MomentumCorrector(object):
         return np.roll(pts_cart_trans, shift=1, axis=1)
 
     def splineWarpEstimate(self, image, include_center=True, fixed_center=True, iterative=False,
-                            interp_order=1, ret=False, **kwds):
+                            interp_order=1, update=False, ret=False, **kwds):
         """ Estimate the spline deformation field using thin plate spline registration.
 
         :Parameters:
@@ -2129,6 +2129,8 @@ class MomentumCorrector(object):
                 Option to use the iterative approach (may not work in all cases).
             interp_order : int | 1
                 Order of interpolation (see `scipy.ndimage.map_coordinates()`).
+            update : bool | False
+                Option to keep the spline-deformed image as corrected one.
             ret : bool | False
                 Option to return corrected image slice.
             **kwds : keyword arguments
