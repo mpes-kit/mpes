@@ -1266,7 +1266,7 @@ def _signedmask(imr, imc, maskr, maskc, sign):
         maskr, maskc : 1D array
             Row and column coordinates of the masked pixels.
         sign : int/str
-            Value of the masked region, (0, 1, 'nan').
+            Value of the masked region, (0, 1, 'nan', or 'xnan').
 
     :Return:
         mask : 2D array
@@ -1294,6 +1294,13 @@ def _signedmask(imr, imc, maskr, maskc, sign):
         except:
             pass
 
+    elif sign == 'xnan':
+        mask = np.ones((imr, imc))*np.nan
+        try:
+            mask[maskr, maskc] = 1
+        except:
+            pass
+
     return mask
 
 
@@ -1310,7 +1317,8 @@ def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
         rad : float
             Radius of circle.
         sign : int/str | 1
-            Value of the masked region (0, 1 or 'nan').
+            Value of the masked region (0, 1, 'nan' or 'xnan').
+            'xnan' means the masked region is 1 and the other region nan.
         ret : str | 'mask'
             Return type ('mask', 'masked_image')
         kwds : keyword arguments
@@ -1365,7 +1373,8 @@ def rectmask(img, rcent, ccent, shift, direction='row', sign=1, ret='mask', **kw
             Direction to apply the shift to, 'row' or 'column' indicates row-wise
             or column-wise shift for generating the rectangular mask
         sign : int/str | 1
-            Value of the masked region (0, 1 or 'nan').
+            Value of the masked region (0, 1, 'nan' or 'xnan').
+            'xnan' means the masked region is 1 and the other region nan.
         ret : str | 'mask'
             Return type ('mask', 'masked_image')
         **kwds : keyword arguments

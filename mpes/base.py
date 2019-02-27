@@ -8,7 +8,7 @@
 from __future__ import print_function, division
 from . import utils as u
 #from . import dictdump as dictdump
-#from silx.io import dictdump
+from silx.io import dictdump
 import deepdish.io as dio
 import numpy as np
 import glob as g
@@ -361,7 +361,7 @@ def saveClassAttributes(clss, form, save_addr):
         sio.savemat(save_addr, clss.__dict__)
 
     elif form in ('h5', 'hdf5'):
-        dio.save(save_addr, clss.__dict__, compression=None)
+        dictdump.dicttoh5(save_addr, clss.__dict__, compression=None)
 
     else:
         raise NotImplementedError
