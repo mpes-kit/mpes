@@ -1,0 +1,956 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Visualization &mdash; mpes 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="mpes 0.1 documentation" href="index.html"/>
+        <link rel="next" title="Utility functions" href="utils.html"/>
+        <link rel="prev" title="Analysis" href="analysis.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> mpes
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utility functions</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mpes</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Visualization</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/visualization.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="visualization">
+<h1>Visualization<a class="headerlink" href="#visualization" title="Permalink to this headline">¶</a></h1>
+<p>Custom methods for visualizing 2D-4D datasets for ARPES and beyond</p>
+<span class="target" id="module-mpes.visualization"></span><p>&#64;author: R. Patrick Xian</p>
+<dl class="function">
+<dt id="mpes.visualization.bandpathplot">
+<code class="descclassname">mpes.visualization.</code><code class="descname">bandpathplot</code><span class="sig-paren">(</span><em>pathmap</em>, <em>symlabel</em>, <em>symid</em>, <em>energytk=None</em>, <em>energylabel=None</em>, <em>vline=True</em>, <em>noends=True</em>, <em>vlinekwds={}</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.bandpathplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Band path map (band dispersion in sampled k path within Brillouin zone).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>pathmap <span class="classifier-delimiter">:</span> <span class="classifier">2D array</span></dt>
+<dd><p class="first last">Band path map.</p>
+</dd>
+<dt>symlabel <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
+<dd><p class="first last">Labels of the symmetry points.</p>
+</dd>
+<dt>symid <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple/array</span></dt>
+<dd><p class="first last">Pixel indices of the symmetry points.</p>
+</dd>
+<dt>energytk <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple/array | None</span></dt>
+<dd><p class="first last">Energy axis ticks.</p>
+</dd>
+<dt>energylabel <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple | None</span></dt>
+<dd><p class="first last">Energy axis label.</p>
+</dd>
+<dt>vline: bool | True</dt>
+<dd><p class="first last">Vertical annotation lines.</p>
+</dd>
+<dt>noends <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
+<dd><p class="first last">No vertical lines at the ends</p>
+</dd>
+<dt>vlinekwds <span class="classifier-delimiter">:</span> <span class="classifier">dict | {}</span></dt>
+<dd><p class="first last">Style directives of the vertical annotation lines.</p>
+</dd>
+<dt><a href="#id1"><span class="problematic" id="id2">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
+<dd><p class="first last">See mpes.visualization._imshow()</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
+<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">AxesObject</span></dt>
+<dd><p class="first last">Axes of the generated plot.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.cm2palette">
+<code class="descclassname">mpes.visualization.</code><code class="descname">cm2palette</code><span class="sig-paren">(</span><em>cmapName</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.cm2palette" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert certain matplotlib colormap (cm) to bokeh palette.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first docutils">
+<dt>cmapName <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Name of the colormap/palette.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
+<dt>palette <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd><p class="first last">List of colors in hex representation (a bokoeh palette).</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.colormesh2d">
+<code class="descclassname">mpes.visualization.</code><code class="descname">colormesh2d</code><span class="sig-paren">(</span><em>data</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.colormesh2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Efficient one-line color mesh plot of a 2D data matrix</p>
+<p><strong>Parameters</strong></p>
+<dl class="docutils">
+<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">numeric 2D array</span></dt>
+<dd>the 2D data to plot</dd>
+<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="13%" />
+<col width="10%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">keyword</th>
+<th class="head">data type</th>
+<th class="head">meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>figsize</td>
+<td>tuple/list</td>
+<td>(horizontal_size, vertical_size)</td>
+</tr>
+<tr class="row-odd"><td>x</td>
+<td>1D array</td>
+<td>x axis coordinates</td>
+</tr>
+<tr class="row-even"><td>y</td>
+<td>1D array</td>
+<td>y axis coordinates</td>
+</tr>
+<tr class="row-odd"><td>xlabel</td>
+<td>str</td>
+<td>x axis label</td>
+</tr>
+<tr class="row-even"><td>ylabel</td>
+<td>str</td>
+<td>y axis label</td>
+</tr>
+<tr class="row-odd"><td>colormap</td>
+<td>str</td>
+<td><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></td>
+</tr>
+<tr class="row-even"><td>cscale</td>
+<td>str/dict</td>
+<td>‘linear’ (default), ‘log’, ‘gammaA-b’, dictionary with keys
+[‘midpoint’, ‘vmin’, ‘vmax’] for bilinear normalization</td>
+</tr>
+<tr class="row-odd"><td>levels</td>
+<td>1D array</td>
+<td>explicit contour levels (ignores ncontour if not None)</td>
+</tr>
+<tr class="row-even"><td>ncontour</td>
+<td>int</td>
+<td>number of contours (ignores levels if not None)</td>
+</tr>
+<tr class="row-odd"><td>plottype</td>
+<td>str</td>
+<td>‘pcolormesh’ or ‘contourf’</td>
+</tr>
+<tr class="row-even"><td>plotaxes</td>
+<td>AxesObject</td>
+<td>supply an existing AxesObject to plot on</td>
+</tr>
+<tr class="row-odd"><td>vmin</td>
+<td>float</td>
+<td>minimum value of colormap</td>
+</tr>
+<tr class="row-even"><td>vmax</td>
+<td>float</td>
+<td>maximum value of colormap</td>
+</tr>
+<tr class="row-odd"><td>ax_labelsize</td>
+<td>int</td>
+<td>font size of axis text labels</td>
+</tr>
+<tr class="row-even"><td>tk_labelsize</td>
+<td>int</td>
+<td>font size of axis tick labels</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="docutils">
+<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">axes object</span></dt>
+<dd>handle for the plot axes</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.fit_parameter_plot">
+<code class="descclassname">mpes.visualization.</code><code class="descname">fit_parameter_plot</code><span class="sig-paren">(</span><em>data</em>, <em>ncol</em>, <em>axis=(0</em>, <em>1)</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.fit_parameter_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot of actual value, absolute and relative changes of the fitting parameters</p>
+<p><strong>*Parameters*</strong></p>
+<dl class="docutils">
+<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">2D numeric array</span></dt>
+<dd>data for plotting</dd>
+<dt>ncol <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>number of columns</dd>
+<dt>axis <span class="classifier-delimiter">:</span> <span class="classifier">tuple | (0, 1)</span></dt>
+<dd>axes for positioning the subplot grid</dd>
+<dt><a href="#id5"><span class="problematic" id="id6">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="13%" />
+<col width="12%" />
+<col width="75%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">keyword</th>
+<th class="head">data type</th>
+<th class="head">meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>mainfigsize</td>
+<td>tuple/list</td>
+<td>(horizontal_size, vertical_size)</td>
+</tr>
+<tr class="row-odd"><td>cmaps</td>
+<td>list of str</td>
+<td><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></td>
+</tr>
+<tr class="row-even"><td>cscales</td>
+<td>mixed list</td>
+<td>specification of color scaling for each plot</td>
+</tr>
+<tr class="row-odd"><td>cbars</td>
+<td>list of bool</td>
+<td>specification of colorbars</td>
+</tr>
+<tr class="row-even"><td>ncontours</td>
+<td>list of int</td>
+<td>number of contours for each subplot</td>
+</tr>
+<tr class="row-odd"><td>plottypes</td>
+<td>list of str</td>
+<td>plottype for each subplot</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p><strong>*Returns*</strong></p>
+<dl class="docutils">
+<dt>f <span class="classifier-delimiter">:</span> <span class="classifier">figure object</span></dt>
+<dd>figure handle</dd>
+<dt>ims <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>list of plot objects</dd>
+<dt>axs <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd>list of axes objects</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.grid_histogram">
+<code class="descclassname">mpes.visualization.</code><code class="descname">grid_histogram</code><span class="sig-paren">(</span><em>dct, ncol, rvs=['X', 'Y', 't', 'ADC'], rvbins=[80, 80, 80, 80], rvranges=[(0, 1800), (0, 1800), (68000, 74000), (0, 500)], backend='matplotlib', legend=True, histkwds={}, legkwds={}, **kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.grid_histogram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grid plot of multiple 1D histograms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>dct <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
+<dd><p class="first last">Dictionary containing the name and values of the random variables.</p>
+</dd>
+<dt>ncol <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd><p class="first last">Number of columns in the plot grid.</p>
+</dd>
+<dt>rvs <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
+<dd><p class="first last">List of names for the random variables (rvs).</p>
+</dd>
+<dt>rvbins <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
+<dd><p class="first last">Bin values for all random variables.</p>
+</dd>
+<dt>rvranges <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
+<dd><p class="first last">Value ranges of all random variables.</p>
+</dd>
+<dt>backend <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘matplotlib’</span></dt>
+<dd><p class="first last">Backend for making the plot (‘matplotlib’ or ‘bokeh’).</p>
+</dd>
+<dt>legend <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
+<dd><p class="first last">Option to include a legend in each histogram plot.</p>
+</dd>
+<dt>histkwds <span class="classifier-delimiter">:</span> <span class="classifier">dict | {}</span></dt>
+<dd><p class="first last">Keyword arguments for histogram plots.</p>
+</dd>
+<dt>legkwds: dict | {}</dt>
+<dd><p class="first last">Keyword arguments for legends.</p>
+</dd>
+</dl>
+<p class="last"><a href="#id8"><span class="problematic" id="id9">**</span></a>kwds : keyword arguments</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.initmpl">
+<code class="descclassname">mpes.visualization.</code><code class="descname">initmpl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.initmpl" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize mpes plot style</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.moviemaker">
+<code class="descclassname">mpes.visualization.</code><code class="descname">moviemaker</code><span class="sig-paren">(</span><em>folder</em>, <em>files=None</em>, <em>imform='png'</em>, <em>movform='avi'</em>, <em>namestr='movie'</em>, <em>file_sorting='forward'</em>, <em>recursive=False</em>, <em>ret=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.moviemaker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a movie file from a stack of images</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>folder <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Directory of the file folder.</p>
+</dd>
+<dt>files <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
+<dd><p class="first last">Directory of the files to be used for generating a movie.</p>
+</dd>
+<dt>imform <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘png’</span></dt>
+<dd><p class="first last">Format of the images.</p>
+</dd>
+<dt>movform <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘avi’</span></dt>
+<dd><p class="first last">Format of the generated movie.</p>
+</dd>
+<dt>namestr <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘movie’</span></dt>
+<dd><p class="first last">Namestring (including folder path) used to save the generated movie.</p>
+</dd>
+<dt>file_sorting <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘forward’</span></dt>
+<dd><p class="first last">File-sorting direction.</p>
+</dd>
+<dt>recursive <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
+<dd><p class="first last">Option to generate a recursive movie.</p>
+</dd>
+<dt>ret <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
+<dd><p class="first last">Specify return.</p>
+</dd>
+<dt><a href="#id10"><span class="problematic" id="id11">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
+<dd><p class="first last">Specific parameter settings for the vocoder.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
+<dt>fnames <span class="classifier-delimiter">:</span> <span class="classifier">list of str</span></dt>
+<dd><p class="first last">List of (un)sorted filenames.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.plot_overlay">
+<code class="descclassname">mpes.visualization.</code><code class="descname">plot_overlay</code><span class="sig-paren">(</span><em>imbot</em>, <em>imtop</em>, <em>origin='lower'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.plot_overlay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make an overlay plot of two images</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>imbot <span class="classifier-delimiter">:</span> <span class="classifier">2D array</span></dt>
+<dd><p class="first last">Image at the lower layer.</p>
+</dd>
+<dt>imtop <span class="classifier-delimiter">:</span> <span class="classifier">2D array</span></dt>
+<dd><p class="first last">Image at the top layer.</p>
+</dd>
+<dt>origin <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘lower’</span></dt>
+<dd><p class="first last">Origin of the image (‘lower’ or ‘upper’), following imshow convention</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
+<dt>f <span class="classifier-delimiter">:</span> <span class="classifier">fig</span></dt>
+<dd><p class="first last">Figure handle</p>
+</dd>
+<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">axes</span></dt>
+<dd><p class="first last">Figure axes object</p>
+</dd>
+<dt>ims <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
+<dd><p class="first last">List of image objects</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.plot_single_hist">
+<code class="descclassname">mpes.visualization.</code><code class="descname">plot_single_hist</code><span class="sig-paren">(</span><em>histvals</em>, <em>edges</em>, <em>legend=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.plot_single_hist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bokeh-based plotting of a single histogram with legend and tooltips.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt>histvals <span class="classifier-delimiter">:</span> <span class="classifier">1D array</span></dt>
+<dd><p class="first last">Histogram counts (e.g. vertical axis).</p>
+</dd>
+<dt>edges <span class="classifier-delimiter">:</span> <span class="classifier">1D array</span></dt>
+<dd><p class="first last">Histogram edge values (e.g. horizontal axis).</p>
+</dd>
+<dt>legend <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first last">Text for the plot legend.</p>
+</dd>
+<dt><a href="#id12"><span class="problematic" id="id13">**</span></a>kwds :</dt>
+<dd><p class="first last">Keyword arguments for ‘bokeh.plotting.figure().quad()’.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
+<dt>p <span class="classifier-delimiter">:</span> <span class="classifier">object</span></dt>
+<dd><p class="first last">An instance of ‘bokeh.plotting.figure()’ as a plot handle.</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.sliceview3d">
+<code class="descclassname">mpes.visualization.</code><code class="descname">sliceview3d</code><span class="sig-paren">(</span><em>datamat</em>, <em>axis=0</em>, <em>numbered=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.sliceview3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3D matrix slices displayed in a grid of subplots
+<strong>Parameters</strong></p>
+<dl class="docutils">
+<dt>datamat <span class="classifier-delimiter">:</span> <span class="classifier">numeric 3D array</span></dt>
+<dd>the 3D data to plot</dd>
+<dt>axis <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>the axis to slice through</dd>
+<dt>numbered <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>condition for numbering the subplots</dd>
+<dt><a href="#id14"><span class="problematic" id="id15">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="10%" />
+<col width="11%" />
+<col width="79%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">keyword</th>
+<th class="head">data type</th>
+<th class="head">meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>aspect</td>
+<td>str/numeric</td>
+<td>aspect ratio of each subplot, from [‘auto’, ‘equal’ or scalar]</td>
+</tr>
+<tr class="row-odd"><td>ncol</td>
+<td>int</td>
+<td>number of columns in subplot grid</td>
+</tr>
+<tr class="row-even"><td>nrow</td>
+<td>int</td>
+<td>number of rows in subplot grid</td>
+</tr>
+<tr class="row-odd"><td>figsize</td>
+<td>tuple/list</td>
+<td>figure size, (vertical_size, horizontal_size)</td>
+</tr>
+<tr class="row-even"><td>flipdir</td>
+<td>str</td>
+<td>flip up-down or left-right of the matrix (‘ud’, ‘lr’)</td>
+</tr>
+<tr class="row-odd"><td>colormap</td>
+<td>str</td>
+<td><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></td>
+</tr>
+<tr class="row-even"><td>cscale</td>
+<td>str</td>
+<td>colormap scaling (‘log’, ‘linear’, ‘midpointx’, or ‘gammaA-b’, see below)</td>
+</tr>
+<tr class="row-odd"><td>vmin</td>
+<td>numeric</td>
+<td>minimum of the color scale</td>
+</tr>
+<tr class="row-even"><td>vmax</td>
+<td>numeric</td>
+<td>maximum of the color scale</td>
+</tr>
+<tr class="row-odd"><td>numcolor</td>
+<td>str</td>
+<td>color code for subplot number</td>
+</tr>
+<tr class="row-even"><td>numpos</td>
+<td>tuple</td>
+<td>(Y, X) position of the text on the subplots</td>
+</tr>
+<tr class="row-odd"><td>numsize</td>
+<td>int</td>
+<td>fontsize of the subtitle within a subplot</td>
+</tr>
+<tr class="row-even"><td>numtext</td>
+<td>str</td>
+<td>subtitle text within a subplot</td>
+</tr>
+<tr class="row-odd"><td>wspace</td>
+<td>float</td>
+<td>width spacing between subplots</td>
+</tr>
+<tr class="row-even"><td>hspace</td>
+<td>float</td>
+<td>height spacing betweens subplots</td>
+</tr>
+<tr class="row-odd"><td>plottype</td>
+<td>str</td>
+<td>‘imshow’ (default) or ‘contourf’</td>
+</tr>
+<tr class="row-even"><td>maintitle</td>
+<td>str</td>
+<td>main title of the plot</td>
+</tr>
+<tr class="row-odd"><td>axisreturn</td>
+<td>str</td>
+<td>‘flattened’ or ‘nested’, return format of axis object</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p><strong>Returns</strong></p>
+<dl class="docutils">
+<dt>ims <span class="classifier-delimiter">:</span> <span class="classifier">AxesImage object</span></dt>
+<dd>handle for the images in each subplot</dd>
+<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">AxesSubplot object</span></dt>
+<dd>handle for the subplot axes</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.stackedlineplot">
+<code class="descclassname">mpes.visualization.</code><code class="descname">stackedlineplot</code><span class="sig-paren">(</span><em>datamat</em>, <em>axis=0</em>, <em>interval=0</em>, <em>binning=1</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.stackedlineplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stacked line plots (used for visualizing energy or momentum dispersion curves)</p>
+<p><strong>Parameters</strong></p>
+<dl class="docutils">
+<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">numeric 2D array</span></dt>
+<dd>the 2D data to plot</dd>
+<dt>axis <span class="classifier-delimiter">:</span> <span class="classifier">int | 0</span></dt>
+<dd>the axis to cut along</dd>
+<dt>interval <span class="classifier-delimiter">:</span> <span class="classifier">float | 0</span></dt>
+<dd>the interval between plots</dd>
+<dt>binning <span class="classifier-delimiter">:</span> <span class="classifier">int | 1 (no binning)</span></dt>
+<dd>number of binned rows/columns</dd>
+<dt><a href="#id17"><span class="problematic" id="id18">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="13%" />
+<col width="10%" />
+<col width="77%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">keyword</th>
+<th class="head">data type</th>
+<th class="head">meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>figsize</td>
+<td>tuple/list</td>
+<td>(horizontal_size, vertical_size)</td>
+</tr>
+<tr class="row-odd"><td>x</td>
+<td>1D array</td>
+<td>x axis values</td>
+</tr>
+<tr class="row-even"><td>xlabel</td>
+<td>str</td>
+<td>x axis label</td>
+</tr>
+<tr class="row-odd"><td>ylabel</td>
+<td>str</td>
+<td>y axis label</td>
+</tr>
+<tr class="row-even"><td>cmap</td>
+<td>str</td>
+<td><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></td>
+</tr>
+<tr class="row-odd"><td>axislabelsize</td>
+<td>int</td>
+<td>font size of axis text labels</td>
+</tr>
+<tr class="row-even"><td>ticklabelsize</td>
+<td>int</td>
+<td>font size of axis tick labels</td>
+</tr>
+<tr class="row-odd"><td>margins</td>
+<td>tuple/list</td>
+<td>(xmargin, ymargin), values between 0 and 1</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="docutils">
+<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">axes object</span></dt>
+<dd>handle for the plot axes</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.surf2d">
+<code class="descclassname">mpes.visualization.</code><code class="descname">surf2d</code><span class="sig-paren">(</span><em>datamat</em>, <em>frame=True</em>, <em>miniaxes=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.surf2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D surface plot
+<strong>Parameters</strong></p>
+<dl class="docutils">
+<dt>datamat <span class="classifier-delimiter">:</span> <span class="classifier">numeric 2D array</span></dt>
+<dd>the 2D data to plot</dd>
+<dt>frame <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
+<dd>controls whether the frame is shown</dd>
+<dt><a href="#id20"><span class="problematic" id="id21">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
+<dd><table border="1" class="first last docutils">
+<colgroup>
+<col width="11%" />
+<col width="11%" />
+<col width="79%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">keyword</th>
+<th class="head">data type</th>
+<th class="head">meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>alpha</td>
+<td>float</td>
+<td>opacity value from 0 to 1</td>
+</tr>
+<tr class="row-odd"><td>azimuth</td>
+<td>float</td>
+<td>azimuthal viewing angle (default = 0)</td>
+</tr>
+<tr class="row-even"><td>cmap</td>
+<td>str</td>
+<td><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></td>
+</tr>
+<tr class="row-odd"><td>elevation</td>
+<td>float</td>
+<td>zenith viewing angle (default = 0)</td>
+</tr>
+<tr class="row-even"><td>bgc</td>
+<td>tuple/list</td>
+<td>background color in RGB values</td>
+</tr>
+<tr class="row-odd"><td>kind</td>
+<td>str</td>
+<td>kind of surface plot, {‘points’, ‘wireframe’, ‘surface’}</td>
+</tr>
+<tr class="row-even"><td>framecolor</td>
+<td>tuple/list</td>
+<td>color of the frame</td>
+</tr>
+<tr class="row-odd"><td>warp_scale</td>
+<td>float</td>
+<td>warp scale value from 0 to 1</td>
+</tr>
+</tbody>
+</table>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="docutils">
+<dt>f <span class="classifier-delimiter">:</span> <span class="classifier">figure object</span></dt>
+<dd>handle for the figure</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.toggle3d">
+<code class="descclassname">mpes.visualization.</code><code class="descname">toggle3d</code><span class="sig-paren">(</span><em>state=True</em>, <em>nb_backend=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.toggle3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switch on/off the mayavi backend
+<strong>Parameters</strong></p>
+<dl class="docutils">
+<dt>state <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
+<dd>on/off state of the mayavi backend</dd>
+<dt>nb_backend <span class="classifier-delimiter">:</span> <span class="classifier">| None</span></dt>
+<dd>type of rendering engine choose from ‘x3d’ (interactive) and ‘png’ (static)</dd>
+<dt><a href="#id23"><span class="problematic" id="id24">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
+<dd>additional arguments to be passed into mayavi.mlab.init_notebook()</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.trisurf2d">
+<code class="descclassname">mpes.visualization.</code><code class="descname">trisurf2d</code><span class="sig-paren">(</span><em>datamat</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.trisurf2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D triangulated surface plot rendered using mplot3d</p>
+<p><strong>Parameters</strong></p>
+<dl class="docutils">
+<dt>datamat <span class="classifier-delimiter">:</span> <span class="classifier">numeric 2d array</span></dt>
+<dd>2D data for plotting</dd>
+</dl>
+<p><strong>Returns</strong></p>
+<dl class="docutils">
+<dt>sf <span class="classifier-delimiter">:</span> <span class="classifier">Poly3DCollection object</span></dt>
+<dd>handle for objects in the plot</dd>
+<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">Axes object</span></dt>
+<dd>handle for the axes of the plot</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="mpes.visualization.ysplitplot">
+<code class="descclassname">mpes.visualization.</code><code class="descname">ysplitplot</code><span class="sig-paren">(</span><em>datamat</em>, <em>xaxis</em>, <em>yaxis</em>, <em>ysplit=160</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.ysplitplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split-screen plot of an ARPES spectrum
+(intensity scaled differently for valence and conduction bands)</p>
+<p><strong>Parameters</strong></p>
+<dl class="docutils">
+<dt>datamat <span class="classifier-delimiter">:</span> <span class="classifier">numeric 2D array</span></dt>
+<dd>the 2D data matrix to plot</dd>
+<dt>xaxis <span class="classifier-delimiter">:</span> <span class="classifier">numeric 1D array</span></dt>
+<dd>the x axis coordinates</dd>
+<dt>yaxis <span class="classifier-delimiter">:</span> <span class="classifier">numeric 1D array</span></dt>
+<dd>the y axis coordinates</dd>
+<dt>ysplit <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
+<dd>the index of the split y position</dd>
+</dl>
+<p><strong>Returns</strong></p>
+<dl class="docutils">
+<dt>axu <span class="classifier-delimiter">:</span> <span class="classifier">axes object</span></dt>
+<dd>handle for the upper subplot axes</dd>
+<dt>axl <span class="classifier-delimiter">:</span> <span class="classifier">axes object</span></dt>
+<dd>handle for the lower subplot axes</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="utils.html" class="btn btn-neutral float-right" title="Utility functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="analysis.html" class="btn btn-neutral" title="Analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017, R. Patrick Xian.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

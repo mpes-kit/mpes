@@ -2261,11 +2261,11 @@ def readBinnedhdf5(fpath, combined=True, typ='float32'):
 
     :Parameters:
         fpath : str
-            File path
+            File path.
         combined : bool | True
             Specify if the volume slices are combined.
         typ : str | 'float32'
-            Data type of the numerical values in the output dictionary
+            Data type of the numerical values in the output dictionary.
 
     :Return:
         out : dict

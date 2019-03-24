@@ -722,9 +722,9 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     numbered : bool
         condition for numbering the subplots
     **kwds : keyword arguments
-        ==========  ===========  =====================================
+        ==========  ===========  =============================================================================
         keyword     data type    meaning
-        ==========  ===========  =====================================
+        ==========  ===========  =============================================================================
         aspect      str/numeric  aspect ratio of each subplot, from ['auto', 'equal' or scalar]
         ncol        int          number of columns in subplot grid
         nrow        int          number of rows in subplot grid
@@ -743,9 +743,9 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
         plottype    str          'imshow' (default) or 'contourf'
         maintitle   str          main title of the plot
         axisreturn  str          'flattened' or 'nested', return format of axis object
-        ==========  ==========   =====================================
+        ==========  ===========  =============================================================================
 
-    **Return**
+    **Returns**
 
     ims : AxesImage object
         handle for the images in each subplot

@@ -1913,7 +1913,7 @@ class MomentumCorrector(object):
         """ Select (hyper)slice from a (hyper)volume.
 
         :Parameters:
-            selector : slice object/int
+            selector : slice object/list/int
                 Selector along the specified axis to extract the slice (image).
                 Use the construct slice(start, stop, step) to select a range of images and sum them.
                 Use an integer to specify only a particular slice.
@@ -2289,6 +2289,12 @@ class MomentumCorrector(object):
             ret : bool | True
                 Option to return the image after deformation.
             **kwds : keyword arguments
+                :rdeform, cdeform: 2D array, 2D array | self.rdeform_field, self.cdeform_field
+                    Row- and column-ordered deformation fields.
+                :interp_order: int | 1
+                    Interpolation order.
+                :others:
+                    See `scipy.ndimage.map_coordinates()`.
         """
 
         rdeform = kwds.pop('rdeform', self.rdeform_field)
@@ -2315,7 +2321,7 @@ class MomentumCorrector(object):
 
         :Parameters:
             rdisp, cdisp : 2D array, 2D array
-                Row and columns displacement fields.
+                Row- and column-ordered displacement fields.
             reset : bool | False
                 Option to reset the deformation field.
             **kwds : keyword arguments
