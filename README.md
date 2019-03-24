@@ -30,7 +30,7 @@ PyPI installation coming soon...
 
 ### Documentation
 
-Documentation and examples are posted [here](http://mpes.readthedocs.io/).
+Documentation and examples are posted [here](https://realpolitix.github.io/mpes/).
 
 ### Dependencies
 
