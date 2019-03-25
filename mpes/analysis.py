@@ -385,7 +385,7 @@ def peakdetect2d(img, method='daofind', **kwds):
         **kwds : keyword arguments
             Arguments passed to the specific methods chosen.
 
-            :daofind: See `astropy.stats.sigma_clipped_stats()` and `photutils.detection.DAOStarFinder()`.
+            :daofind: See ``astropy.stats.sigma_clipped_stats()`` and ``photutils.detection.DAOStarFinder()``.
             sigma : float | 5.0
                 Standard deviation of the clipping Gaussian.
             fwhm : float | 3.0
@@ -393,7 +393,7 @@ def peakdetect2d(img, method='daofind', **kwds):
             threshfactor : float | 8
                 Intensity threshold for background-foreground separation (foreground is above threshold).
 
-            :maxlist: See `skimage.feature.peak_local_max()`.
+            :maxlist: See ``skimage.feature.peak_local_max()``.
             mindist : float | 10
                 Minimal distance between two local maxima.
             numpeaks : int | 7
@@ -527,7 +527,7 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
         method : str | 'range-limited'
             Method for peak-finding ('range-limited' and 'alignment').
         pkwindow : int | 3
-            Window width of a peak(amounts to lookahead in `mpes.analysis.peakdetect1d`).
+            Window width of a peak(amounts to lookahead in ``mpes.analysis.peakdetect1d``).
         plot : bool | False
             Specify whether to display a custom plot of the peak search results.
 
@@ -748,7 +748,7 @@ class EnergyCalibrator(base.FileCollection):
 
         :Parameters:
             **kwds : keyword arguments
-                See the keywords for `mpes.utils.normspec()`.
+                See the keywords for ``mpes.utils.normspec()``.
         """
 
         self.traces_normed = u.normspec(*self.traces, **kwds)
@@ -764,8 +764,8 @@ class EnergyCalibrator(base.FileCollection):
                 Method for 1D signal correspondence detection ('dtw' or 'ptw').
             **kwds : keyword arguments
                 See available keywords for the following functions,
-                (1) `fastdtw.fastdtw()` (when `method=='dtw'`)
-                (2) `ptw.ptw.timeWarp()` (when `method=='ptw'`)
+                (1) ``fastdtw.fastdtw()`` (when ``method=='dtw'``)
+                (2) ``ptw.ptw.timeWarp()`` (when ``method=='ptw'``)
 
         :Return:
             pathcorr : list
@@ -801,7 +801,7 @@ class EnergyCalibrator(base.FileCollection):
             mode : str | 'append'
                 Specification on how to change the feature ranges ('append' or 'replace').
             **kwds : keyword arguments
-                Dictionarized keyword arguments for trace alignment (See `self.findCorrespondence()`)
+                Dictionarized keyword arguments for trace alignment (See ``self.findCorrespondence()``)
         """
 
         if traces is None:
@@ -837,7 +837,7 @@ class EnergyCalibrator(base.FileCollection):
             ranges : list | None
             traces : 2D array | None
             **kwds : keyword arguments
-                See available keywords in `mpes.analysis.peaksearch()`.
+                See available keywords in ``mpes.analysis.peaksearch()``.
         """
 
         if ranges is None:
@@ -859,9 +859,9 @@ class EnergyCalibrator(base.FileCollection):
             refid : int | 0
                 The reference trace index (an integer).
             ret : list | ['coeffs']
-                Options for return values (see `mpes.analysis.calibrateE()`).
+                Options for return values (see ``mpes.analysis.calibrateE()``).
             **kwds : keyword arguments
-                See available keywords for `mpes.analysis.calibrateE()`.
+                See available keywords for ``mpes.analysis.calibrateE()``.
         """
 
         landmarks = kwds.pop('landmarks', self.peaks[:, 0])
@@ -888,11 +888,11 @@ class EnergyCalibrator(base.FileCollection):
             backend : str | 'matplotlib'
                 Backend specification, choose between 'matplotlib' (static) or 'bokeh' (interactive).
             linekwds : dict | {}
-                Keyword arguments for line plotting (see `matplotlib.pyplot.plot()`).
+                Keyword arguments for line plotting (see ``matplotlib.pyplot.plot()``).
             scatterkwds : dict | {}
-                Keyword arguments for scatter plot (see `matplotlib.pyplot.scatter()`).
+                Keyword arguments for scatter plot (see ``matplotlib.pyplot.scatter()``).
             legkwds : dict | {}
-                Keyword arguments for legend (see `matplotlib.pyplot.legend()`).
+                Keyword arguments for legend (see ``matplotlib.pyplot.legend()``).
             **kwds : keyword arguments
                 ===============  ==========  ================================
                 keyword          data type   meaning
@@ -1066,7 +1066,7 @@ def gradn(array, axes, **kwds):
             When input a single integer, the gradient is calculated along that particular axis.
             For example, the 4th-order mixed gradient d4f/(dxdydxdy) requires the sequence (1, 0, 1, 0).
         **kwds : keyword arguments
-            See `numpy.gradient()`.
+            See ``numpy.gradient()``.
     """
 
     grad = np.gradient
@@ -1659,7 +1659,7 @@ class BoundedArea(object):
             axes : bool | True
                 Axes visibility option in plot.
             **kwds : keyword arguments
-                Additional arguments for `matplotlib.pyplot.imshow()`.
+                Additional arguments for ``matplotlib.pyplot.imshow()``.
         """
 
         f, ax = plt.subplots(figsize=(4, 4))
@@ -1889,7 +1889,7 @@ class MomentumCorrector(object):
     @property
     def features(self):
         """ Dictionary of detected features for the symmetrization process.
-        `self.features` is a derived attribute from existing ones.
+        ``self.features`` is a derived attribute from existing ones.
         """
 
         feature_dict = {'verts':np.asarray(self.__dict__.get('pouter_ord', [])),
@@ -1946,7 +1946,7 @@ class MomentumCorrector(object):
             center_det : str | 'centroidnn'
                 Specification of center detection method ('centroidnn', 'centroid', None).
             **kwds : keyword arguments
-                Extra keyword arguments for `symmetrize.pointops.peakdetect2d()`.
+                Extra keyword arguments for ``symmetrize.pointops.peakdetect2d()``.
         """
 
         self.resetDeformation(image=image, coordtype='cartesian')
@@ -2027,7 +2027,7 @@ class MomentumCorrector(object):
                 'image' = update only image-related attributes
                 'all' = update both feature and image-related attributes
             **kwds : keyword arguments
-                Extra keyword arguments passed into `self._featureUpdate()`.
+                Extra keyword arguments passed into ``self._featureUpdate()``.
         """
 
         if content == 'feature':
@@ -2049,11 +2049,11 @@ class MomentumCorrector(object):
                 (3) vertex-vertex symmetry, respectively.
             optfunc, optmethod : str/func, str | 'minimize', 'Nelder-Mead'
                 Name of the optimizer function and the optimization method.
-                See description in `mpes.analysis.sym.refsetopt()`.
+                See description in ``mpes.analysis.sym.refsetopt()``.
             ret : bool | True
                 Specify if returning the corrected image slice.
             warpkwds : dictionary | {}
-                Additional arguments passed to `symmetrize.sym.imgWarping()`.
+                Additional arguments passed to ``symmetrize.sym.imgWarping()``.
             **kwds : keyword arguments
                 ========= ========== =============================================
                 keyword   data type  meaning
@@ -2064,7 +2064,7 @@ class MomentumCorrector(object):
                 ========= ========== =============================================
 
         :Return:
-            Corrected 2D image slice (when `ret=True` is specified in the arguments).
+            Corrected 2D image slice (when ``ret=True`` is specified in the arguments).
         """
 
         landmarks = kwds.pop('landmarks', self.pouter_ord)
@@ -2137,7 +2137,7 @@ class MomentumCorrector(object):
             iterative : bool | False
                 Option to use the iterative approach (may not work in all cases).
             interp_order : int | 1
-                Order of interpolation (see `scipy.ndimage.map_coordinates()`).
+                Order of interpolation (see ``scipy.ndimage.map_coordinates()``).
             update : bool | False
                 Option to keep the spline-deformed image as corrected one.
             ret : bool | False
@@ -2204,7 +2204,7 @@ class MomentumCorrector(object):
                 center  tuple/list pixel coordinates of the image center
                 scale   float      scaling factor in rotation
                 ======= ========== =======================================
-                See `symmetrize.sym.sym_pose_estimate()` for other keywords.
+                See ``symmetrize.sym.sym_pose_estimate()`` for other keywords.
         """
 
         image = kwds.pop('image', self.slice)
@@ -2294,7 +2294,7 @@ class MomentumCorrector(object):
                 :interp_order: int | 1
                     Interpolation order.
                 :others:
-                    See `scipy.ndimage.map_coordinates()`.
+                    See ``scipy.ndimage.map_coordinates()``.
         """
 
         rdeform = kwds.pop('rdeform', self.rdeform_field)
@@ -2325,7 +2325,7 @@ class MomentumCorrector(object):
             reset : bool | False
                 Option to reset the deformation field.
             **kwds : keyword arguments
-                See `mpes.analysis.MomentumCorrector.resetDeformation()`.
+                See ``mpes.analysis.MomentumCorrector.resetDeformation()``.
         """
 
         if reset == True:
@@ -2348,9 +2348,9 @@ class MomentumCorrector(object):
             interp_order : int | 1
                 Interpolation order for filling in missed pixels.
             mapkwds : dict | {}
-                Additional arguments passed to `scipy.ndimage.map_coordinates()`.
+                Additional arguments passed to ``scipy.ndimage.map_coordinates()``.
             **kwds : keyword arguments
-                Additional arguments in specific deformation field. See `symmetrize.sym` module.
+                Additional arguments in specific deformation field. See ``symmetrize.sym`` module.
         """
 
         image = kwds.pop('image', self.slice)
@@ -2402,7 +2402,7 @@ class MomentumCorrector(object):
             annotated : bool | False
                 Option for annotation.
             display : bool | True
-                Display option when using `bokeh` to render interactively.
+                Display option when using ``bokeh`` to render interactively.
             backend : str | 'matplotlib'
                 Visualization backend specification.
                 :'matplotlib': use static display rendered by matplotlib.
@@ -2410,7 +2410,7 @@ class MomentumCorrector(object):
             ret : bool | False
                 Option to return figure and axis objects.
             imkwd : dict | {}
-                Keyword arguments for `matplotlib.pyplot.imshow()`.
+                Keyword arguments for ``matplotlib.pyplot.imshow()``.
             **kwds : keyword arguments
                 General extra arguments for the plotting procedure.
         """
@@ -2485,7 +2485,7 @@ class MomentumCorrector(object):
             ret : str | 'coeffs'
                 Specification of return values ('axes', 'extent', 'coeffs', 'grid', 'func', 'all').
             **kwds : keyword arguments
-                See arguments in `mpes.analysis.calibrateE()`.
+                See arguments in ``mpes.analysis.calibrateE()``.
 
         :Return:
             Specified calibration parameters in a dictionary.
@@ -2510,7 +2510,7 @@ class MomentumCorrector(object):
             dtyp : str | 'float32'
                 Data type (in case conversion if needed).
             **kwds : keyword arguments
-                See keywords from `tifffile.imsave()`.
+                See keywords from ``tifffile.imsave()``.
         """
 
         data = kwds.pop('data', self.image).astype(dtyp)

@@ -260,7 +260,7 @@ def metaReadHDF5(hfile, attributes=[], groups=[]):
 
     :Parameters:
         hfile : HDF5 file instance
-            Instance of the `h5py.File` class.
+            Instance of the ``h5py.File`` class.
         attributes, groups : list, list | [], []
             List of strings representing the names of the specified attribute/group names.
             When specified as None, the components (all attributes or all groups) are ignored.
@@ -380,7 +380,7 @@ class hdf5Reader(File):
             amin, amax : numeric, numeric | None, None
                 Minimum and maximum indice to select from the group (dataset).
             sliced : bool | True
-                Perform slicing on the group (dataset), if `True`.
+                Perform slicing on the group (dataset), if ``True``.
 
         :Return:
             groupContent : list/tuple
@@ -461,7 +461,7 @@ class hdf5Reader(File):
             amin, amax : numeric, numeric | None, None
                 Index selection range for all groups.
             use_alias : bool | True
-                See `hdf5Reader.getGroupNames()`.
+                See ``hdf5Reader.getGroupNames()``.
             dtype : str | 'float32'
                 Data type string.
             ret : str | 'array'
@@ -499,11 +499,11 @@ class hdf5Reader(File):
 
         :Parameters:
             form : str | 'text'
-                Format to summarize the content of the file into. The options include the following,
                 :'dataframe': HDF5 content summarized into a dask dataframe.
                 :'dict': HDF5 content (both data and metadata) summarized into a dictionary.
                 :'metadict': HDF5 metadata summarized into a dictionary.
                 :'text': descriptive text summarizing the HDF5 content.
+                Format to summarize the content of the file into.
             use_alias : bool | True
                 Specify whether to use the alias to rename the groups.
             ret : bool | False
@@ -862,15 +862,15 @@ class hdf5Processor(hdf5Reader):
             ranges : list
                 Value ranges of all specified axes.
             axes_name_type : str | 'alias'
-                Type of specified axes names.
                 :'alias': human-comprehensible aliases of the datasets from the hdf5 file (e.g. 'X', 'ADC', etc)
                 :'original': original names of the datasets from the hdf5 file (e.g. 'Stream0', etc).
+                Type of specified axes names.
             backend : str | 'matplotlib'
                 Backend of the plotting library ('matplotlib' or 'bokeh').
             legend : bool | True
                 Option to include a legend in the histogram plots.
             histkwds, legkwds, **kwds : dict, dict, keyword arguments
-                Extra keyword arguments passed to `mpes.visualization.grid_histogram()`.
+                Extra keyword arguments passed to ``mpes.visualization.grid_histogram()``.
         """
 
         input_types = map(type, [axes, bins, ranges])
@@ -920,7 +920,7 @@ class hdf5Processor(hdf5Reader):
 
         :Return:
             histdict : dict
-                Dictionary containing binned data and the axes values (if `ret = True`).
+                Dictionary containing binned data and the axes values (if ``ret = True``).
         """
 
         # Retrieve the range of acquired events
@@ -961,7 +961,7 @@ class hdf5Processor(hdf5Reader):
         """
         :Parameters:
             axes, nbins, ranges, binDict, pbar
-                See `mpes.fprocessing.binDataframe()`.
+                See ``mpes.fprocessing.binDataframe()``.
             binmethod : str | 'lean'
                 Dataframe binning method ('original' and 'lean').
             ret : bool | True
@@ -1030,7 +1030,7 @@ class hdf5Processor(hdf5Reader):
 
         :Return:
             histdict : dict
-                Dictionary containing binned data and the axes values (if `ret = True`).
+                Dictionary containing binned data and the axes values (if ``ret = True``).
         """
 
         # Retrieve the range of acquired events
@@ -1114,7 +1114,7 @@ class hdf5Processor(hdf5Reader):
 
     def saveHistogram(self, dictname='histdict', form='h5', save_addr='./histogram', **kwds):
         """
-        Save binned histogram and the axes. See `mpes.fprocessing.saveDict()`.
+        Save binned histogram and the axes. See ``mpes.fprocessing.saveDict()``.
         """
 
         try:
@@ -1202,11 +1202,11 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
         jittered : bool | True
             Option to add histogram jittering during binning.
         **kwds : keyword arguments
-            See keyword arguments in `mpes.fprocessing.hdf5Processor.localBinning()`.
+            See keyword arguments in ``mpes.fprocessing.hdf5Processor.localBinning()``.
 
     :Return:
         histdict : dict
-            Dictionary containing binned data and the axes values (if `ret = True`).
+            Dictionary containing binned data and the axes values (if ``ret = True``).
     """
 
     histdict = {}
@@ -1293,11 +1293,11 @@ def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
         jittered : bool | True
             Option to add histogram jittering during binning.
         **kwds : keyword arguments
-            See keyword arguments in `mpes.fprocessing.hdf5Processor.localBinning()`.
+            See keyword arguments in ``mpes.fprocessing.hdf5Processor.localBinning()``.
 
     :Return:
         histdict : dict
-            Dictionary containing binned data and the axes values (if `ret = True`).
+            Dictionary containing binned data and the axes values (if ``ret = True``).
     """
 
     histdict = {}
@@ -1474,7 +1474,7 @@ def readDataframe(folder=None, files=None, ftype='parquet', **kwds):
             If a folder path is given, all files of the specified type are read
             into the dataframe in the reading order.
         **kwds : keyword arguments
-            See the keyword arguments for the specific file parser in `dask.dataframe` module.
+            See the keyword arguments for the specific file parser in ``dask.dataframe`` module.
 
     :Return:
         Dask dataframe read from specified files.
@@ -1574,12 +1574,12 @@ class dataframeProcessor(MapParser):
             ftype : str | 'parquet'
                 Type of file to read into dataframe ('h5' or 'hdf5', 'parquet', 'json', 'csv').
             fids : list | []
-                IDs of the files to be selected (see `mpes.base.FileCollection.select()`).
+                IDs of the files to be selected (see ``mpes.base.FileCollection.select()``).
                 Specify 'all' to read all files of the given file type.
             update : str | ''
-                File selection update option (see `mpes.base.FileCollection.select()`).
+                File selection update option (see ``mpes.base.FileCollection.select()``).
             **kwds : keyword arguments
-                See keyword arguments in `mpes.readDataframe()`.
+                See keyword arguments in ``mpes.readDataframe()``.
         """
 
         # Create the single-event dataframe
@@ -1723,7 +1723,7 @@ class dataframeProcessor(MapParser):
                 'append' = append to the current dask dataframe as a new column with the new column name.
                 'replace' = replace the values of the old column.
             **kwds : keyword arguments
-                Additional arguments for the `dask.dataframe.apply()` function.
+                Additional arguments for the ``dask.dataframe.apply()`` function.
         """
 
         if update == 'append':
@@ -1792,7 +1792,7 @@ class dataframeProcessor(MapParser):
             ftype : str | 'parquet'
                 File type ('parquet', 'dataframe')
             **kwds : keyword arguments
-                Additional arguments to submit to `dask.dataframe.append()`.
+                Additional arguments to submit to ``dask.dataframe.append()``.
         """
 
         if ftype == 'parquet':
@@ -1821,7 +1821,7 @@ class dataframeProcessor(MapParser):
 
         :Parameters:
             axes, nbins, ranges, binDict, pbar
-                See `mpes.fprocessing.binDataframe()`.
+                See ``mpes.fprocessing.binDataframe()``.
             binmethod : str | 'lean'
                 Dataframe binning method ('original' and 'lean').
             ret : bool | False
@@ -1855,11 +1855,11 @@ class dataframeProcessor(MapParser):
             namestr : '/data'
                 Extra namestring attached to the filename.
             pq_append : bool | False
-                Option to append to the existing parquet file (if `True`) in the specified folder,
+                Option to append to the existing parquet file (if ``True``) in the specified folder,
                 otherwise the existing parquet files will be deleted before writing new files in.
             **kwds : keyword arguments
-                See extra keyword arguments in `dask.dataframe.to_parquet()` for parquet conversion,
-                or in `dask.dataframe.to_hdf()` for HDF5 conversion.
+                See extra keyword arguments in ``dask.dataframe.to_parquet()`` for parquet conversion,
+                or in ``dask.dataframe.to_hdf()`` for HDF5 conversion.
         """
 
         if form == 'parquet':
@@ -1878,7 +1878,7 @@ class dataframeProcessor(MapParser):
         """ Export binned histogram in other formats.
 
         :Parameters:
-            See `mpes.fprocessing.saveDict()`.
+            See ``mpes.fprocessing.saveDict()``.
         """
 
         try:
@@ -1890,7 +1890,7 @@ class dataframeProcessor(MapParser):
         """ Convert to the xarray data structure from existing binned data.
 
         :Return:
-            An instance of `BandStructure` or `MPESDataset` from the `mpes.bandstructure` module.
+            An instance of ``BandStructure()`` or ``MPESDataset()`` from the ``mpes.bandstructure`` module.
         """
 
         if bool(self.histdict):
@@ -1911,7 +1911,7 @@ class dataframeProcessor(MapParser):
         Plot individual histograms of specified dimensions (axes) from a substituent file.
 
         :Parameters:
-            See arguments in `hdf5Processor.viewEventHistogram()`.
+            See arguments in ``hdf5Processor.viewEventHistogram()``.
         """
 
         if source == 'folder':
@@ -1925,7 +1925,7 @@ class dataframeProcessor(MapParser):
 
 class parquetProcessor(dataframeProcessor):
     """
-    Legacy version of the `mpes.fprocessing.dataframeProcessor` class.
+    Legacy version of the ``mpes.fprocessing.dataframeProcessor`` class.
     """
 
     def __init__(self, folder, files=[], source='folder', ftype='parquet',
@@ -1964,7 +1964,7 @@ class parallelHDF5Processor(FileCollection):
 
         :Parameters:
             attributes, groups : list, list
-                See `mpes.fprocessing.metaReadHDF5()`.
+                See ``mpes.fprocessing.metaReadHDF5()``.
         """
 
         for fid in range(self.nfiles):
@@ -1973,7 +1973,7 @@ class parallelHDF5Processor(FileCollection):
 
     def subset(self, file_id):
         """
-        Spawn an instance of `mpes.fprocessing.hdf5Processor` from a specified substituent file.
+        Spawn an instance of ``mpes.fprocessing.hdf5Processor`` from a specified substituent file.
 
         :Parameter:
             file_id : int
@@ -1996,7 +1996,7 @@ class parallelHDF5Processor(FileCollection):
             ret : bool | False
                 Specification on value return.
             **kwds : keyword arguments
-                See keyword arguments in `mpes.fprocessing.readDataframe()`.
+                See keyword arguments in ``mpes.fprocessing.readDataframe()``.
         """
 
         if form == 'text':
@@ -2022,7 +2022,7 @@ class parallelHDF5Processor(FileCollection):
         Plot individual histograms of specified dimensions (axes) from a substituent file.
 
         :Parameters:
-            See arguments in `parallelHDF5Processor.subset()` and `hdf5Processor.viewEventHistogram()`.
+            See arguments in ``parallelHDF5Processor.subset()`` and ``hdf5Processor.viewEventHistogram()``.
         """
 
         subproc = self.subset(fid)
@@ -2051,9 +2051,9 @@ class parallelHDF5Processor(FileCollection):
             pbar : bool | true
                 Option to display the progress bar.
             binning_kwds : dict | {}
-                Keyword arguments to be included in `mpes.fprocessing.hdf5Processor.localBinning()`.
+                Keyword arguments to be included in ``mpes.fprocessing.hdf5Processor.localBinning()``.
             compute_kwds : dict | {}
-                Keyword arguments to specify in `dask.compute()`.
+                Keyword arguments to specify in ``dask.compute()``.
         """
 
         binTasks = []
@@ -2123,7 +2123,7 @@ class parallelHDF5Processor(FileCollection):
 
         :Return:
             combinedresult : dict
-                Return combined result dictionary (if `ret == True`).
+                Return combined result dictionary (if ``ret == True``).
         """
 
         try:
@@ -2158,7 +2158,7 @@ class parallelHDF5Processor(FileCollection):
                 Specification of the progress bar environment ('classic' for generic version
                 and 'notebook' for notebook compatible version).
             **kwds : keyword arguments
-                See `mpes.fprocessing.hdf5Processor.convert()`.
+                See ``mpes.fprocessing.hdf5Processor.convert()``.
         """
 
         tqdm = u.tqdmenv(pbenv)
@@ -2212,7 +2212,7 @@ class parallelHDF5Processor(FileCollection):
         Save binned histogram and the axes.
 
         :Parameters:
-            See `mpes.fprocessing.saveDict()`.
+            See ``mpes.fprocessing.saveDict()``.
         """
 
         try:

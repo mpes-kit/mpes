@@ -159,7 +159,7 @@ def normspec(*specs, smooth=False, span=13, order=1):
         smooth : bool | False
             Option to smooth the signals before normalization.
         span, order : int, int | 13, 1
-            Smoothing parameters of the LOESS method (see `scipy.signal.savgol_filter()`).
+            Smoothing parameters of the LOESS method (see ``scipy.signal.savgol_filter()``).
 
     :Return:
         normalized_specs : 2D array
