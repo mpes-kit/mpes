@@ -1244,7 +1244,7 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
             coreTasks.append(d.delayed(binPartition)(dfPartition, axes, nbins, ranges))
 
         if len(coreTasks) > 0:
-            coreResults = d.compute(*coreTasks)
+            coreResults = d.compute(*coreTasks, **kwds)
 
             # Combine all core results for a dataframe partition
             partitionResult = np.zeros_like(coreResults[0])
@@ -1335,7 +1335,7 @@ def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
             coreTasks.append(d.delayed(binPartition)(dfPartition, axes, nbins, ranges))
 
         if len(coreTasks) > 0:
-            coreResults = d.compute(*coreTasks)
+            coreResults = d.compute(*coreTasks, **kwds)
 
             # Combine all core results for a dataframe partition
             partitionResult = reduce(_arraysum, coreResults)
@@ -1826,6 +1826,8 @@ class dataframeProcessor(MapParser):
                 Dataframe binning method ('original' and 'lean').
             ret : bool | False
                 Option to return binning results as a dictionary.
+            **kwds : keyword arguments
+                See ``mpes.fprocessing.binDataframe()`` or ``mpes.fprocessing.binDataframe_lean()``
         """
 
         # Set up the binning parameters
