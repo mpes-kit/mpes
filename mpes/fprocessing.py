@@ -1758,23 +1758,25 @@ class dataframeProcessor(MapParser):
                 Additional parameters to use for the correction.
         """
 
-        corraxis = kwds.pop('corraxis', 'ADC')
-        ycenter, xcenter = kwds.pop('center', (600, 600))
+        corraxis = kwds.pop('corraxis', 't')
+        ycenter, xcenter = kwds.pop('center', (650, 650))
         amplitude = kwds.pop('amplitude', -1)
 
         if type == 'spherical':
-            d = kwds.pop('d', 1)
-            t0 = kwds.pop('t0', 5e-7)
+            d = kwds.pop('d', 0.9)
+            t0 = kwds.pop('t0', 0.06)
             self.edf[corraxis] += (np.sqrt(1 + ((self.edf['X'] - xcenter)**2 +
                             (self.edf['Y'] - ycenter)**2)/d**2) - 1) * t0 * amplitude
 
         elif type == 'Lorentzian':
-            gam = kwds.pop('gam', 300)
+            gam = kwds.pop('gamma', 300)
             self.edf[corraxis] += amplitude/(gam * np.pi) * (gam**2 / ((self.edf['X'] -
                         xcenter)**2 + (self.edf['Y'] - ycenter)**2 + gam**2))
 
         elif type == 'Gaussian':
-            raise NotImplementedError
+            sig = kwds.pop('sigma', 300)
+            self.edf[corraxis] += amplitude/np.sqrt(2*np.pi*sig**2) *
+                np.exp(-((self.edf['X'] - xcenter)**2 + (self.edf['Y'] - ycenter)**2) / (2*sig**2))
 
         else:
             raise NotImplementedError
