@@ -1748,8 +1748,39 @@ class dataframeProcessor(MapParser):
 
         self.edf[newX], self.edf[newY] = map2D(self.edf[X], self.edf[Y], **kwds)
 
+    def applyECorrection(self, type, **kwds):
+        """ Apply correction to the time-of-flight (TOF) axis of single-event data.
+
+        :Parameters:
+            type : str
+                Type of correction to apply to the TOF axis.
+            **kwds : keyword arguments
+                Additional parameters to use for the correction.
+        """
+
+        corraxis = kwds.pop('corraxis', 'ADC')
+        ycenter, xcenter = kwds.pop('center', (600, 600))
+        amplitude = kwds.pop('amplitude', -1)
+
+        if type == 'spherical':
+            d = kwds.pop('d', 1)
+            t0 = kwds.pop('t0', 5e-7)
+            self.edf[corraxis] += (np.sqrt(1 + ((self.edf['X'] - xcenter)**2 +
+                            (self.edf['Y'] - ycenter)**2)/d**2) - 1) * t0 * amplitude
+
+        elif type == 'Lorentzian':
+            gam = kwds.pop('gam', 300)
+            self.edf[corraxis] += amplitude/(gam * np.pi) * (gam**2 / ((self.edf['X'] -
+                        xcenter)**2 + (self.edf['Y'] - ycenter)**2 + gam**2))
+
+        elif type == 'Gaussian':
+            raise NotImplementedError
+
+        else:
+            raise NotImplementedError
+
     def applyKCorrection(self, X='X', Y='Y', newX='Xm', newY='Ym', **kwds):
-        """ Calculate and replace the X and Y values with their distortion-correction version.
+        """ Calculate and replace the X and Y values with their distortion-corrected version.
         This method can be reused.
 
         :Parameters:
@@ -1888,7 +1919,7 @@ class dataframeProcessor(MapParser):
         except:
             raise Exception('Saving histogram was unsuccessful!')
 
-    def toDataStructure(self):
+    def toBandStructure(self):
         """ Convert to the xarray data structure from existing binned data.
 
         :Return:
