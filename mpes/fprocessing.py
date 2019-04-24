@@ -1756,6 +1756,21 @@ class dataframeProcessor(MapParser):
                 Type of correction to apply to the TOF axis.
             **kwds : keyword arguments
                 Additional parameters to use for the correction.
+                :corraxis: str | 't'
+                    String name of the axis to correct.
+                :center: list/tuple | (650, 650)
+                    Image center pixel positions in (row, column) format.
+                :amplitude: numeric | -1
+                    Amplitude of the time-of-flight correction term
+                    (negative sign meaning subtracting the curved wavefront).
+                :d: numeric | 0.9
+                    Field-free drift distance.
+                :t0: numeric | 0.06
+                    Time zero position corresponding to the tip of the valence band.
+                :gam: numeric
+                    Linewidth value for correction using a 2D Lorentz profile.
+                :sig: numeric
+                    Standard deviation for correction using a 2D Gaussian profile.
         """
 
         corraxis = kwds.pop('corraxis', 't')
