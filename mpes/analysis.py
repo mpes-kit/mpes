@@ -872,15 +872,15 @@ class EnergyCalibrator(base.FileCollection):
         if calibret == True:
             return self.calibration
 
-    def view(self, traces, segs=None, ranges=None, peaks=None, show_legend=True, ret=False, display=True,
+    def view(self, traces, segs=None, peaks=None, show_legend=True, ret=False, display=True,
             backend='matplotlib', linekwds={}, linesegkwds={}, scatterkwds={}, legkwds={}, **kwds):
         """ Display a plot showing line traces with annotation.
 
         :Parameters:
             traces : 2d array
                 Matrix of traces to visualize.
-            segs :
-            ranges :
+            segs : list/tuple
+                Segments to be highlighted in the visualization.
             peaks : 2d array
                 Peak positions for labelling the traces.
             ret : bool
@@ -1791,7 +1791,7 @@ def vertexGenerator(center, fixedvertex=None, cvd=None, arot=None, nside=None, d
     if type(scale) in (int, float):
         scale = np.ones((nangles,)) * scale
 
-    # Generate reference points by rotation and scaling
+    # Generate target points by rotation and scaling
     for ira, ra in enumerate(rotangles):
 
         rmat = cv2.getRotationMatrix2D(center, ra, scale[ira])
@@ -1801,17 +1801,17 @@ def vertexGenerator(center, fixedvertex=None, cvd=None, arot=None, nside=None, d
     return np.asarray(vertices, dtype=rettype)
 
 
-def affineWarping(img, landmarks, refs, ret='image'):
+def perspectiveWarping(img, landmarks, targs, ret='image'):
     """
     Perform image warping based on a generic affine transform (homography).
 
     :Parameters:
         img : 2D array
-            Input image (distorted)
+            Input image (distorted).
         landmarks : list/array
-            List of pixel positions of the
-        refs : list/array
-            List of pixel positions of regular
+            List of pixel positions of the reference points.
+        targs : list/array
+            List of pixel positions of the target points.
 
     :Returns:
         imgaw : 2D array
@@ -1821,9 +1821,9 @@ def affineWarping(img, landmarks, refs, ret='image'):
     """
 
     landmarks = np.asarray(landmarks, dtype='float32')
-    refs = np.asarray(refs, dtype='float32')
+    targs = np.asarray(targs, dtype='float32')
 
-    maw, _ = cv2.findHomography(landmarks, refs)
+    maw, _ = cv2.findHomography(landmarks, targs)
     imgaw = cv2.warpPerspective(img, maw, img.shape)
 
     if ret == 'image':
@@ -1885,6 +1885,7 @@ class MomentumCorrector(object):
         self.rotsym_angle = int(360 / self.rotsym)
         self.arot = np.array([0] + [self.rotsym_angle]*(self.rotsym-1))
         self.ascale = np.array([1.0]*self.rotsym)
+        self.adjust_params = {}
 
     @property
     def features(self):
@@ -2049,7 +2050,7 @@ class MomentumCorrector(object):
                 (3) vertex-vertex symmetry, respectively.
             optfunc, optmethod : str/func, str | 'minimize', 'Nelder-Mead'
                 Name of the optimizer function and the optimization method.
-                See description in ``mpes.analysis.sym.refsetopt()``.
+                See description in ``mpes.analysis.sym.target_set_optimize()``.
             ret : bool | True
                 Specify if returning the corrected image slice.
             warpkwds : dictionary | {}
@@ -2072,13 +2073,13 @@ class MomentumCorrector(object):
         fitinit = np.asarray([self.arot, self.ascale]).ravel()
         self.init = kwds.pop('fitinit', fitinit)
 
-        self.prefs, _ = sym.refsetopt(self.init, landmarks, self.pcent, self.mcvdist,
+        self.ptargs, _ = sym.target_set_optimize(self.init, landmarks, self.pcent, self.mcvdist,
                         self.mvvdist, direction=1, weights=weights, optfunc=optfunc,
                         optmethod=optmethod, **kwds)
 
         # Calculate warped image and landmark positions
         self.slice_corrected, self.linwarp = sym.imgWarping(self.slice, landmarks=landmarks,
-                        refs=self.prefs, **warpkwds)
+                        targs=self.ptargs, **warpkwds)
 
         if ret:
             return self.slice_corrected
@@ -2147,13 +2148,13 @@ class MomentumCorrector(object):
                     Landmark positions (row, column) used for registration.
                 :new_centers: dict | {}
                     User-specified center positions for the reference and target sets.
-                    {'lmkcenter': (row, col), 'refcenter': (row, col)}
+                    {'lmkcenter': (row, col), 'targcenter': (row, col)}
         """
 
         landmarks = kwds.pop('landmarks', self.pouter_ord)
 
-        # Generate the reference point set
-        self.prefs = sym.rotVertexGenerator(self.pcent, fixedvertex=self.pouter_ord[0,:], arot=self.arot,
+        # Generate the target point set
+        self.ptargs = sym.rotVertexGenerator(self.pcent, fixedvertex=self.pouter_ord[0,:], arot=self.arot,
                         direction=-1, scale=self.ascale, ret='all')[1:,:]
 
         if include_center == True:
@@ -2161,19 +2162,19 @@ class MomentumCorrector(object):
             if fixed_center == True: # Add the same center to both the reference and target sets
 
                 landmarks = np.column_stack((landmarks.T, self.pcent)).T
-                self.prefs = np.column_stack((self.prefs.T, self.pcent)).T
+                self.ptargs = np.column_stack((self.ptargs.T, self.pcent)).T
 
             else: # Add different centers to the reference and target sets
                 newcenters = kwds.pop('new_centers', {})
                 landmarks = np.column_stack((landmarks.T, newcenters['lmkcenter'])).T
-                self.prefs = np.column_stack((self.prefs.T, newcenters['refcenter'])).T
+                self.ptargs = np.column_stack((self.ptargs.T, newcenters['targcenter'])).T
 
         if iterative == False: # Non-iterative estimation of deformation field
-            self.slice_transformed, self.splinewarp = tps.tpsWarping(landmarks, self.prefs,
+            self.slice_transformed, self.splinewarp = tps.tpsWarping(landmarks, self.ptargs,
                             image, None, interp_order, ret='all', **kwds)
 
         else: # Iterative estimation of deformation field
-            # ptsw, H, rst = sym.refsetopt(init, lm, tuple(cen), mcd0, mcd0, ima[None,:,:],
+            # ptsw, H, rst = sym.target_set_optimize(init, lm, tuple(cen), mcd0, mcd0, ima[None,:,:],
                         # niter=30, direction=-1, weights=(1, 1, 1), ftol=1e-8)
             pass
 
@@ -2361,14 +2362,23 @@ class MomentumCorrector(object):
             rdisp, cdisp = sym.translationDF(coordmat, stackaxis=stackax, ret='displacement', **kwds)
         elif type == 'rotation':
             rdisp, cdisp = sym.rotationDF(coordmat, stackaxis=stackax, ret='displacement', **kwds)
+        elif type == 'rotation_auto':
+            center = kwds.pop('center', (0, 0))
+            # Estimate the optimal rotation angle using intensity symmetry
+            angle_auto, _ = sym.sym_pose_estimate(image/image.max(), center=center, **kwds)
+            self.adjust_params = u.dictmerge(self.adjust_params, {'center': center, 'angle': angle_auto})
+            rdisp, cdisp = sym.rotationDF(coordmat, stackaxis=stackax, ret='displacement', angle=angle_auto)
         elif type == 'scaling':
             rdisp, cdisp = sym.scalingDF(coordmat, stackaxis=stackax, ret='displacement', **kwds)
+        elif type == 'scaling_auto': # Compare scaling to a reference image
+            pass
         elif type == 'shearing':
             rdisp, cdisp = sym.shearingDF(coordmat, stackaxis=stackax, ret='displacement', **kwds)
         elif type == 'homography':
             transform = kwds.pop('transform', np.eye(3))
             rdisp, cdisp = sym.compose_deform_field(coordmat, mat_transform=transform,
                                 stackaxis=stackax, ret='displacement', **kwds)
+        self.adjust_params = u.dictmerge(self.adjust_params, kwds)
 
         # Compute deformation field
         if stackax == 0:
@@ -2385,6 +2395,29 @@ class MomentumCorrector(object):
 
         if ret == True:
             return self.slice_transformed
+
+    def intensityTransform(self, type='rot_sym', **kwds):
+        """ Apply pixel-wise intensity transform.
+
+        :Parameters:
+            type : str | 'rot_sym'
+                Type of intensity transform.
+            **kwds : keyword arguments
+        """
+        import fuller
+        image = kwds.pop('image', self.slice)
+
+        if type == 'rot_sym':
+            rotsym = kwds.pop('rotsym', None)
+            if rotsym is not None:
+                rotsym = int(rotsym)
+                angles = np.linspace(0, 360, rotsym, endpoint=False)
+
+            # Generate symmetry equivalents
+            rotoeqs = []
+            for angle in angles:
+                rotoeqs.append(fuller.generator.rotodeform(imbase=image, angle=angle, **kwds))
+            self.slice_transformed = np.asarray(rotoeqs).mean(axis=0)
 
     def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={}, annotated=False,
             display=True, backend='matplotlib', ret=False, imkwds={}, scatterkwds={}, **kwds):
@@ -2699,9 +2732,9 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
             Progress bar environment ('classic' for generic version, 'notebook' for
             notebook compatible version).
         **kwds : keyword arguments
-            =============  ==========  ===================================
+            =============  ==========  ====================================================================
             keyword        data type   meaning
-            =============  ==========  ===================================
+            =============  ==========  ====================================================================
             maxiter        int         maximum iteration per fit (default = 20)
             concat         bool        concatenate the fit parameters to DataFrame input
                                        False (default) = no concatenation, use an empty DataFrame to start
@@ -2711,7 +2744,7 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
                                        (if flipped, fitting start from the last line)
             limpropagate   bool
             verbose        bool        toggle for output message (default = False)
-            =============  ==========  ===================================
+            =============  ==========  ====================================================================
 
     :Returns:
         df_fit : pandas DataFrame
