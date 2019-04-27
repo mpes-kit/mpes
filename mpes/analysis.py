@@ -22,6 +22,7 @@ from numpy.linalg import norm, lstsq
 from scipy.sparse.linalg import lsqr
 import scipy.optimize as opt
 from scipy.special import wofz
+import scipy.interpolate as scip
 import scipy.io as sio
 from scipy.spatial import distance
 import scipy.ndimage as ndi
@@ -1455,7 +1456,68 @@ def apply_mask_along(arr, mask, axes=None):
     return maskedarr
 
 
-def points2path(pointsr, pointsc, ret='separated'):
+def line_generator(A, B, npoints, endpoint=True, ret='separated'):
+    """ Generate intermediate points in a line segment AB given endpoints.
+    """
+
+    ndim = len(A)
+    points = []
+
+    for i in range(ndim):
+        points.append(np.linspace(A[i], B[i], npoints, endpoint=endpoint))
+
+    point_coords = np.asarray(points).T
+
+    if ret == 'separated':
+        return np.split(point_coords, ndim, axis=1)
+    elif ret == 'joined':
+        return point_coords
+
+
+def image_interpolator(image, iptype='RGI'):
+    """ Construction of an image interpolator.
+    """
+
+    dims = image.shape
+    dimaxes = [list(range(d)) for d in dims]
+
+    if iptype == 'RGI':
+        interp = scip.RegularGridInterpolator(dimaxes, image)
+
+    elif iptype == 'NNGI':
+        raise NotImplementedError
+
+    return interp
+
+
+def interp_slice(data, pathr=None, pathc=None, path_coords=None, iptype='RGI'):
+    """ Slicing 2D/3D data through interpolation.
+    """
+
+    ndim = data.ndim
+    interp = image_interpolator(data, iptype=iptype)
+
+    # When the full sampling path coordinates are given
+    if path_coords is not None:
+        interp_data = interp(path_coords)
+
+    # When only the sampling path coordinates in two dimensions are given
+    else:
+        pathlength = np.asarray(pathr).size
+        if ndim == 2:
+            coords = np.concatenate((pathr, pathc), axis=1)
+        elif ndim == 3:
+            nstack = data.shape[-1]
+            coords = [np.concatenate((pathr, pathc, np.zeros((pathlength, 1))+i),
+                        axis=1) for i in range(nstack)]
+            coords = np.concatenate(coords, axis=0)
+
+        interp_data = interp(coords)
+
+    return interp_data
+
+
+def points2path(pointsr, pointsc, method='analog', npoints=None, ret='separated'):
     """
     Calculate ordered pixel cooridnates along a path defined by specific intermediate points.
     The approach constructs the path using a set of line segments bridging the specified points,
@@ -1464,6 +1526,10 @@ def points2path(pointsr, pointsc, ret='separated'):
     :Parameters:
         pointsr, pointsc : list/tuple/array
             The row and column pixel coordinates of the special points along the sampling path.
+        method : str | 'analog'
+            Method of sampling.
+        npoints : list/tuple | None
+            Number of points along each segment.
         ret : str | 'separated'
             Specify if return combined ('combined') or separated ('separated') row and column coordinates.
 
@@ -1482,14 +1548,20 @@ def points2path(pointsr, pointsc, ret='separated'):
 
     for i in range(npts-1):
 
-        lsegr, lsegc = line(pointsr[i], pointsc[i], pointsr[i+1], pointsc[i+1])
+        if method == 'digital':
+            lsegr, lsegc = line(pointsr[i], pointsc[i], pointsr[i+1], pointsc[i+1])
+        elif method == 'analog':
+            lsegr, lsegc = line_generator([pointsr[i], pointsc[i]], [pointsr[i+1], pointsc[i+1]],
+                            npoints=npoints[i], endpoint=True, ret='separated')
 
         # Attached all but the last element to the coordinate list to avoid
         # double inclusion (from the beginning of the next line segment)
-        polyr.append(lsegr[:-1])
-        polyc.append(lsegc[:-1])
-        pid[i+1] = len(lsegr[:-1]) + pid.max()
+        if i < npts-2:
+            lsegr, lsegc = lsegr[:-1], lsegc[:-1]
 
+        polyr.append(lsegr)
+        polyc.append(lsegc)
+        pid[i+1] = len(lsegr) + pid.max()
     # Concatenate all line segments comprising the path
     polyr, polyc = map(np.concatenate, (polyr, polyc))
 
@@ -1499,12 +1571,12 @@ def points2path(pointsr, pointsc, ret='separated'):
         return polyr, polyc, pid
 
 
-def bandpath_map(bsvol, pathr=None, pathc=None, path_coords=None, eaxis=2):
+def bandpath_map(bsvol, pathr=None, pathc=None, path_coords=None, eaxis=2, method='analog'):
     """
-    Extract band diagram map from volumetric data.
+    Extract band diagram map from 2D/3D data.
 
     :Parameters:
-        bsvol : 3D array
+        bsvol : 2D/3D array
             Volumetric band structure data.
         pathr, pathc : 1D array | None, None
             Row and column pixel coordinates along the band path (ignored if path_coords is given).
@@ -1512,22 +1584,33 @@ def bandpath_map(bsvol, pathr=None, pathc=None, path_coords=None, eaxis=2):
             Combined row and column pixel coordinates of the band path.
         eaxis : int | 2
             Energy axis index.
+        method : str | 'analog'
+            Method for generating band path map ('analog' or 'digital').
+            :'analog': Using an interpolation scheme to calculate the exact pixel values.
+            :'digital': Using only the approximating pixel values (Bresenham's algorithm).
 
     :Return:
         bpm : 2D array
-            Band path map sampled from the volumetric data.
+            Band path map (BPM) sampled from the volumetric data.
     """
 
-    bsvol = np.moveaxis(bsvol, eaxis, 2)
-
-    if path_coords is not None:
-        axid = np.where(np.array(path_coords.shape) == 2)[0][0]
-        pathr, pathc = np.split(path_coords, 2, axis=axid)
-    pathr, pathc = map(np.ravel, [pathr, pathc])
+    try: # Shift axis for 3D data
+        edim = bsvol.shape[eaxis]
+        bsvol = np.moveaxis(bsvol, eaxis, 2)
+    except:
+        pass
 
     # TODO: add path width
+    if method == 'digital':
+        if path_coords is not None:
+            axid = np.where(np.array(path_coords.shape) == 2)[0][0]
+            pathr, pathc = np.split(path_coords, 2, axis=axid)
+            pathr, pathc = map(np.ravel, [pathr, pathc])
+        bpm = bsvol[pathr, pathc, :]
 
-    bpm = bsvol[pathc, pathr, :]
+    elif method == 'analog':
+        bpm = interp_slice(bsvol, pathr=pathr, pathc=pathc, path_coords=path_coords)
+        bpm = bpm.reshape((edim, bpm.size // edim))
 
     return bpm
 
