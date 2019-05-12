@@ -1457,10 +1457,21 @@ def apply_mask_along(arr, mask, axes=None):
 
 
 def line_generator(A, B, npoints, endpoint=True, ret='separated'):
-    """ Generate intermediate points in a line segment AB given endpoints.
+    """ Generate intermediate points in a line segment AB (A to B) given endpoints.
+
+    :Parameters:
+        A, B : tuple/list, tuple/list
+            Pixel coordinates of the endpoints of the line segment.
+        npoints : numeric
+            Number of points in the line segment.
+        endpoint : bool | True
+            Option to include the endpoint (B) in the line coordinates.
+        ret : str | 'separated'
+            Option to return line coordinates ('separated' or 'joined').
     """
 
     ndim = len(A)
+    npoints = int(npoints)
     points = []
 
     for i in range(ndim):
@@ -1476,6 +1487,16 @@ def line_generator(A, B, npoints, endpoint=True, ret='separated'):
 
 def image_interpolator(image, iptype='RGI'):
     """ Construction of an image interpolator.
+
+    :Parameters:
+        image : 2D array
+            2D image for interpolation.
+        iptype : str | 'RGI'
+            Type of the interpolator.
+
+    :Return:
+        interp : interpolator instance
+            Instance of an interpolator.
     """
 
     dims = image.shape
@@ -1492,9 +1513,20 @@ def image_interpolator(image, iptype='RGI'):
 
 def interp_slice(data, pathr=None, pathc=None, path_coords=None, iptype='RGI'):
     """ Slicing 2D/3D data through interpolation.
+
+    :Parameters:
+        data : 2D/3D array
+            Data array for slicing.
+        pathr, pathc : list/tuple/array, list/tuple/array
+            Row and column coordinates of the interpolated path.
+        path_coords : array
+            Cartesian coordinates of the interpolated path.
+        iptype : str | 'RGI'
+            Type of interpolator.
     """
 
     ndim = data.ndim
+    # Construct an image interpolator
     interp = image_interpolator(data, iptype=iptype)
 
     # When the full sampling path coordinates are given
