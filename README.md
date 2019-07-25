@@ -18,19 +18,19 @@ The package supports file I/O of standard file formats (.pxp and .ibw) from [Igo
 1. Install from scratch
 
 ```
-pip install git+https://github.com/RealPolitiX/mpes.git
+pip install git+https://github.com/mpes-kit/mpes.git
 ```
 2. Upgrade existing installation
 
 ```
-pip install --upgrade git+https://github.com/RealPolitiX/mpes.git
+pip install --upgrade git+https://github.com/mpes-kit/mpes.git
 ```
 
 PyPI installation coming soon...
 
 ### Documentation
 
-Documentation and examples are posted [here](https://realpolitix.github.io/mpes/).
+Documentation and examples are posted [here](https://mpes-kit.github.io/mpes/).
 
 ### Dependencies
 
