@@ -1151,7 +1151,7 @@ class hdf5Processor(hdf5Reader):
         pass
 
 
-def binPartition(partition, binaxes, nbins, binranges):
+def binPartition(partition, binaxes, nbins, binranges, jittered=False, jitter_params={}):
     """ Bin the data within a file partition (e.g. dask dataframe).
 
     :Parameters:
@@ -1163,13 +1163,31 @@ def binPartition(partition, binaxes, nbins, binranges):
             Number of bins for each binning axis.
         binranges : list
             The range of each axis to bin.
+        jittered : bool | False
+            Option to include jittering in binning.
+        jitter_params : dict | {}
+            Parameters used to set jittering.
 
     :Return:
         hist_partition : ndarray
             Histogram from the binning process.
     """
 
+    if jittered:
+        # Add jittering to values
+        jitter_bins = jitter_params['jitter_bins']
+        jitter_axes = jitter_params['jitter_axes']
+        jitter_amplitude = jitter_params['jitter_amplitude']
+        jitter_ranges = jitter_params['jitter_ranges']
+
+        for jb, jax, jamp, jr in zip(jitter_bins, jitter_axes, jitter_amplitude, jitter_ranges):
+            # Calculate the bar size of the histogram in every dimension
+            binsize = abs(jr[0] - jr[1])/jb
+            # Jitter as random uniformly distributed noise (W. S. Cleveland)
+            applyJitter(partition, amp=jamp*binsize, col=jax)
+
     cols = partition.columns
+    # Locate columns for binning operation
     binColumns = [cols.get_loc(binax) for binax in binaxes]
     vals = partition.values[:, binColumns]
 
@@ -1228,7 +1246,7 @@ def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
             # Calculate the bar size of the histogram in every dimension
             binsize = abs(jr[0] - jr[1])/jb
             # Jitter as random uniformly distributed noise (W. S. Cleveland)
-            df[jax] += df.map_partitions(getJitter, amp=jamp*binsize, col=jax)
+            df.map_partitions(applyJitter, amp=jamp*binsize, col=jax)
 
     # Main loop for binning
     for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
@@ -1304,22 +1322,16 @@ def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
     fullResult = np.zeros(tuple(nbins)) # Partition-level results
     tqdm = u.tqdmenv(pbenv)
 
-    # Add jitter to all the partitions before binning
+    # Construct jitter specifications
+    jitter_params = {}
     if jittered:
         # Retrieve parameters for histogram jittering, the ordering of the jittering
         # parameters is the same as that for the binning
-        jitter_axes = kwds.pop('jitter_axes', axes)
-        jitter_bins = kwds.pop('jitter_bins', nbins)
-        jitter_amplitude = kwds.pop('jitter_amplitude', 0.5*np.ones(len(jitter_axes)))
-        jitter_ranges = kwds.pop('jitter_ranges', ranges)
-
-        # Add jitter to the specified dimensions of the data
-        for jb, jax, jamp, jr in zip(jitter_bins, jitter_axes, jitter_amplitude, jitter_ranges):
-
-            # Calculate the bar size of the histogram in every dimension
-            binsize = abs(jr[0] - jr[1])/jb
-            # Jitter as random uniformly distributed noise (W. S. Cleveland)
-            df[jax] += df.map_partitions(getJitter, amp=jamp*binsize, col=jax)
+        jaxes = kwds.pop('jitter_axes', axes)
+        jitter_params = {'jitter_axes': jaxes,
+                         'jitter_bins': kwds.pop('jitter_bins', nbins),
+                         'jitter_amplitude': kwds.pop('jitter_amplitude', 0.5*np.ones(len(jaxes))),
+                         'jitter_ranges': kwds.pop('jitter_ranges', ranges)}
 
     # Main loop for binning
     for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
@@ -1332,7 +1344,7 @@ def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
                 break
 
             dfPartition = df.get_partition(ij) # Obtain dataframe partition
-            coreTasks.append(d.delayed(binPartition)(dfPartition, axes, nbins, ranges))
+            coreTasks.append(d.delayed(binPartition)(dfPartition, axes, nbins, ranges, jittered, jitter_params))
 
         if len(coreTasks) > 0:
             coreResults = d.compute(*coreTasks, **kwds)
@@ -1354,8 +1366,8 @@ def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
     return histdict
 
 
-def getJitter(df, amp, col):
-    """ Calculate jittering for a dataframe column.
+def applyJitter(df, amp, col):
+    """ Add jittering to a dataframe column.
 
     :Parameters:
         df : dataframe
@@ -1370,7 +1382,7 @@ def getJitter(df, amp, col):
     """
 
     colsize = df[col].size
-    return amp*np.random.uniform(low=-1, high=1, size=colsize)
+    df[col] += amp*np.random.uniform(low=-1, high=1, size=colsize)
 
 
 class hdf5Splitter(hdf5Reader):
