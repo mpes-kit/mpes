@@ -2267,9 +2267,11 @@ class MomentumCorrector(object):
         """
 
         landmarks = kwds.pop('landmarks', self.pouter_ord)
+        self.targs = kwds.pop('targets', [])
 
         # Generate the target point set
-        self.ptargs = sym.rotVertexGenerator(self.pcent, fixedvertex=self.pouter_ord[0,:], arot=self.arot,
+        if not self.ptargs:
+            self.ptargs = sym.rotVertexGenerator(self.pcent, fixedvertex=self.pouter_ord[0,:], arot=self.arot,
                         direction=-1, scale=self.ascale, ret='all')[1:,:]
 
         if include_center == True:
