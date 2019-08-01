@@ -452,7 +452,7 @@ class hdf5Reader(File):
 
         return aliases
 
-    def _assembleGroups(self, gnames, amin=None, amax=None, use_alias=True, dtyp='float32', ret='array'):
+    def _assembleGroups(self, gnames, amin=None, amax=None, use_alias=True, dtyp='float32', timeStamps = False, ret='array'):
         """ Assemble the content values of the selected groups.
 
         :Parameters:
@@ -487,12 +487,32 @@ class hdf5Reader(File):
                 gdict[gn] = g_values
 
             # print('{}: {}'.format(g_name, g_values.dtype))
+            
+        # calculate time Stamps
+        if timeStamps == True:
+            # create target array for time stamps
+            ts = np.zeros(len(gdict[self.readAttribute(g_dataset, 'Name', nullval=gnames[0])]))
+            # get the start time of the file from its modification date for now
+            startTime = os.path.getmtime(self.filename) * 1000 #convert to ms
+            # the ms marker contains a list of events that occurred at full ms intervals. It's monotonically increasing, and can contain duplicates
+            msMarker = self.readGroup(self, 'msMarkers', sliced=False)
+            # the modification time points to the time when the file was finished, so we need to correct for the length it took to write the file
+            startTime -= len(msMarker)
+            for n in range(len(msMarker)-1):
+                # linear interpolation between ms: Disabled, because it takes a lot of time, and external signals are anyway not better synchronized than 1 ms
+                # ts[msMarker[n]:msMarker[n+1]] = np.linspace(startTime+n, startTime+n+1, msMarker[n+1]-msMarker[n])
+                ts[msMarker[n]:msMarker[n+1]] = startTime+n
+            # fill any remaining points
+            ts[msMarker[len(msMarker)-1]:len(ts)] = startTime + len(msMarker)
+                
+            gdict['timeStamps'] = ts
+            
         if ret == 'array':
             return np.asarray(list(gdict.values()))
         elif ret == 'dict':
             return gdict
 
-    def summarize(self, form='text', use_alias=True, ret=False, **kwds):
+    def summarize(self, form='text', use_alias=True, timeStamps=False, ret=False, **kwds):
         """
         Summarize the content of the hdf5 file (names of the groups,
         attributes and the selected contents. Output in various user-specified formats.)
@@ -606,7 +626,8 @@ class hdf5Reader(File):
         elif form == 'darray':
 
             gNames = kwds.pop('groupnames', self.getGroupNames(wexpr='Stream'))
-            darray = d.delayed(self._assembleGroups)(gNames, amin=None, amax=None, ret='array', **kwds)
+            darray = d.delayed(self._assembleGroups)(gNames, amin=None, amax=None, timeStamps=timeStamps, ret='array', **kwds)
+            
 
             if ret == True:
                 return darray
@@ -1474,7 +1495,7 @@ class hdf5Splitter(hdf5Reader):
         return hdf5Processor(f_addr=self.faddress)
 
 
-def readDataframe(folder=None, files=None, ftype='parquet', **kwds):
+def readDataframe(folder=None, files=None, ftype='parquet', timeStamps=False, **kwds):
     """ Read stored files from a folder into a dataframe.
 
     :Parameters:
@@ -1514,10 +1535,13 @@ def readDataframe(folder=None, files=None, ftype='parquet', **kwds):
         gnames = kwds.pop('group_names', test_proc.getGroupNames(wexpr='Stream'))
         colNames = test_proc.name2alias(gnames)
 
-        test_array = test_proc.summarize(form='darray', groupnames=gnames, ret=True).compute()
+        if timeStamps == True:
+            colNames.append('timeStamps')
+
+        test_array = test_proc.summarize(form='darray', groupnames=gnames, timeStamps=timeStamps, ret=True).compute()
 
         # Delay-read all files
-        arrays = [da.from_delayed(hdf5Processor(f).summarize(form='darray', groupnames=gnames, ret=True),
+        arrays = [da.from_delayed(hdf5Processor(f).summarize(form='darray', groupnames=gnames, timeStamps=timeStamps, ret=True),
                 dtype=test_array.dtype, shape=(test_array.shape[0], np.nan)) for f in files]
         array_stack = da.concatenate(arrays, axis=1).T
 
@@ -1575,7 +1599,7 @@ class dataframeProcessor(MapParser):
 
         return len(self.edf.columns)
 
-    def read(self, source='folder', ftype='parquet', fids=[], update='', **kwds):
+    def read(self, source='folder', ftype='parquet', fids=[], update='', timeStamps=False, **kwds):
         """ Read into distributed dataframe.
 
         :Parameters:
@@ -1596,11 +1620,11 @@ class dataframeProcessor(MapParser):
 
         # Create the single-event dataframe
         if source == 'folder':
-            self.edf = readDataframe(folder=self.datafolder, files=[], ftype=ftype, **kwds)
+            self.edf = readDataframe(folder=self.datafolder, files=[], ftype=ftype, timeStamps=timeStamps, **kwds)
 
         elif source == 'files':
             if len(self.datafiles) > 0: # When filenames are specified
-                self.edf = readDataframe(folder=None, files=self.datafiles, ftype=ftype, **kwds)
+                self.edf = readDataframe(folder=None, files=self.datafiles, ftype=ftype, timeStamps=timeStamps, **kwds)
             else:
                 # When only the datafolder address is given but needs to read partial files,
                 # first gather files from the folder, then select files and read into dataframe
@@ -1614,7 +1638,7 @@ class dataframeProcessor(MapParser):
                 else:
                     self.datafiles = self.select(ids=fids, update='', ret='selected')
 
-                self.edf = readDataframe(files=self.datafiles, ftype=ftype, **kwds)
+                self.edf = readDataframe(files=self.datafiles, ftype=ftype, timeStamps=timeStamps, **kwds)
 
         self.npart = self.edf.npartitions
 
