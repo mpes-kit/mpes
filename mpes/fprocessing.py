@@ -495,9 +495,11 @@ class hdf5Reader(File):
             # get the start time of the file from its modification date for now
             startTime = os.path.getmtime(self.filename) * 1000 #convert to ms
             # the ms marker contains a list of events that occurred at full ms intervals. It's monotonically increasing, and can contain duplicates
-            msMarker = self.readGroup(self, 'msMarkers', sliced=False)
+            msMarker_ds = self.readGroup(self, 'msMarkers', sliced=False)
+            # convert into numpy array
+            msMarker = msMarker_ds[slice(None, None)]
             # the modification time points to the time when the file was finished, so we need to correct for the length it took to write the file
-            startTime -= len(msMarker)
+            startTime -= len(msMarker_ds)
             for n in range(len(msMarker)-1):
                 # linear interpolation between ms: Disabled, because it takes a lot of time, and external signals are anyway not better synchronized than 1 ms
                 # ts[msMarker[n]:msMarker[n+1]] = np.linspace(startTime+n, startTime+n+1, msMarker[n+1]-msMarker[n])
