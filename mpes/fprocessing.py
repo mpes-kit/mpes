@@ -978,13 +978,13 @@ class hdf5Processor(hdf5Reader):
             return self.histdict
 
     def distributedBinning(self, axes=None, nbins=None, ranges=None, binDict=None,
-                            binmethod='lean', pbar=True, ret=True, **kwds):
+                            binmethod='fast', pbar=True, ret=True, **kwds):
         """
         :Parameters:
             axes, nbins, ranges, binDict, pbar
                 See ``mpes.fprocessing.binDataframe()``.
-            binmethod : str | 'lean'
-                Dataframe binning method ('original' and 'lean').
+            binmethod : str | 'fast'
+                Dataframe binning method ('original', 'lean' and 'fast').
             ret : bool | True
                 :True: returns the dictionary containing binned data explicitly
                 :False: no explicit return of the binned data, the dictionary
@@ -1007,6 +1007,9 @@ class hdf5Processor(hdf5Reader):
                             ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
         elif binmethod == 'lean':
             self.histdict = binDataframe_lean(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
+                            ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
+        elif binmethod == 'fast':
+            self.histdict = binDataframe_fast(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
                             ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
 
         if ret:
@@ -1373,7 +1376,8 @@ def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
             # Combine all core results for a dataframe partition
             partitionResult = reduce(_arraysum, coreResults)
             fullResult += partitionResult
-            # del partitionResult
+            del partitionResult
+            del coreResults
 
         del coreTasks
 
@@ -1386,6 +1390,98 @@ def binDataframe_lean(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
 
     return histdict
 
+def binDataframe_fast(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
+                binDict=None, pbar=True, jittered=True, pbenv='classic', jpart=True, **kwds):
+    """
+    Calculate multidimensional histogram from columns of a dask dataframe.
+
+    :Paramters:
+        axes : (list of) strings | None
+            Names the axes to bin.
+        nbins : (list of) int | None
+            Number of bins along each axis.
+        ranges : (list of) tuples | None
+            Ranges of binning along every axis.
+        binDict : dict | None
+            Dictionary with specifications of axes, nbins and ranges. If binDict
+            is not None. It will override the specifications from other arguments.
+        pbar : bool | True
+            Option to display a progress bar.
+        pbenv : str | 'classic'
+            Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
+        jittered : bool | True
+            Option to add histogram jittering during binning.
+        **kwds : keyword arguments
+            See keyword arguments in ``mpes.fprocessing.hdf5Processor.localBinning()``.
+
+    :Return:
+        histdict : dict
+            Dictionary containing binned data and the axes values (if ``ret = True``).
+    """
+
+    histdict = {}
+    fullResult = np.zeros(tuple(nbins)) # Partition-level results
+    tqdm = u.tqdmenv(pbenv)
+
+    # Construct jitter specifications
+    jitter_params = {}
+    if jittered:
+        # Retrieve parameters for histogram jittering, the ordering of the jittering
+        # parameters is the same as that for the binning
+        jaxes = kwds.pop('jitter_axes', axes)
+        jitter_params = {'jitter_axes': jaxes,
+                         'jitter_bins': kwds.pop('jitter_bins', nbins),
+                         'jitter_amplitude': kwds.pop('jitter_amplitude', 0.5*np.ones(len(jaxes))),
+                         'jitter_ranges': kwds.pop('jitter_ranges', ranges)}
+
+    # Main loop for binning
+    for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
+
+        coreTasks = [] # Core-level jobs
+        for j in range(0, ncores):
+
+            ij = i + j
+            if ij >= df.npartitions:
+                break
+
+            dfPartition = df.get_partition(ij) # Obtain dataframe partition
+            coreTasks.append(d.delayed(binPartition)(dfPartition, axes, nbins, ranges, jittered, jitter_params))
+
+        if len(coreTasks) > 0:
+            coreResults = d.compute(*coreTasks, **kwds)
+
+            combineTasks = []
+            for j in range(0, ncores):
+                combineParts = []
+                # split results along the first dimension among worker threads
+                for r in coreResults:
+                    combineParts.append(r[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...])
+                
+                combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
+
+            combineResults = d.compute(*combineTasks)
+
+            partitionResult = reduce(_arrayconcatenate, combineResults)
+
+            fullResult += partitionResult
+            
+            del combineParts
+            del partitionResult
+            del combineTasks
+            del combineResults
+            del coreResults            
+
+        del coreTasks
+
+    # Load into dictionary
+    histdict['binned'] = fullResult.astype('float32')
+    # Calculate axes values
+    for iax, ax in enumerate(axes):
+        axrange = ranges[iax]
+        histdict[ax] = np.linspace(axrange[0], axrange[1], nbins[iax])
+
+    return histdict
+    
 
 def applyJitter(df, amp, col):
     """ Add jittering to a dataframe column.
@@ -1900,14 +1996,14 @@ class dataframeProcessor(MapParser):
 
     # Complex operation
     def distributedBinning(self, axes, nbins, ranges, binDict=None, pbar=True,
-                            binmethod='lean', ret=False, **kwds):
+                            binmethod='fast', ret=False, **kwds):
         """ Binning the dataframe to a multidimensional histogram.
 
         :Parameters:
             axes, nbins, ranges, binDict, pbar
                 See ``mpes.fprocessing.binDataframe()``.
-            binmethod : str | 'lean'
-                Dataframe binning method ('original' and 'lean').
+            binmethod : str | 'fast'
+                Dataframe binning method ('original', 'lean' and 'fast').
             ret : bool | False
                 Option to return binning results as a dictionary.
             **kwds : keyword arguments
@@ -1925,6 +2021,9 @@ class dataframeProcessor(MapParser):
                             ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
         elif binmethod == 'lean':
             self.histdict = binDataframe_lean(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
+                            ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
+        elif binmethod == 'fast':
+            self.histdict = binDataframe_fast(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
                             ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
 
         if ret:
@@ -2030,6 +2129,13 @@ def _arraysum(array_a, array_b):
     """
 
     return array_a + array_b
+    
+def _arrayconcatenate(array_a, array_b):
+    """
+    Concatenate two arrays, compatible with reduce.
+    """
+    
+    return np.concatenate((array_a, array_b))
 
 
 class parallelHDF5Processor(FileCollection):
@@ -2037,12 +2143,17 @@ class parallelHDF5Processor(FileCollection):
     Class for parallel processing of hdf5 files.
     """
 
-    def __init__(self, files=[], file_sorting=True, folder=None):
+    def __init__(self, files=[], file_sorting=True, folder=None, ncores=None):
 
         super().__init__(files=files, file_sorting=file_sorting, folder=folder)
         self.metadict = {}
         self.results = {}
         self.combinedresult = {}
+        
+        if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
+            self.ncores = N_CPU
+        else:
+            self.ncores = int(ncores)
 
     def _parse_metadata(self, attributes, groups):
         """
@@ -2115,6 +2226,103 @@ class parallelHDF5Processor(FileCollection):
         subproc.viewEventHistogram(ncol, **kwds)
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
+    histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, pbenv='classic', ret=False):
+        """
+        Parallel computation of the multidimensional histogram from file segments.
+
+        :Parameters:
+            axes : (list of) strings | None
+                Names the axes to bin.
+            nbins : (list of) int | None
+                Number of bins along each axis.
+            ranges : (list of) tuples | None
+                Ranges of binning along every axis.
+            scheduler : str | 'threads'
+                Type of distributed scheduler ('threads', 'processes', 'synchronous')
+            histcoord : string | 'midpoint'
+                The coordinates of the histogram. Specify 'edge' to get the bar edges (every
+                dimension has one value more), specify 'midpoint' to get the midpoint of the
+                bars (same length as the histogram dimensions).
+            pbar : bool | true
+                Option to display the progress bar.
+            binning_kwds : dict | {}
+                Keyword arguments to be included in ``mpes.fprocessing.hdf5Processor.localBinning()``.
+            compute_kwds : dict | {}
+                Keyword arguments to specify in ``dask.compute()``.
+        """
+
+        self.binaxes = axes
+        self.nbinaxes = len(axes)
+        self.bincounts = nbins
+        self.binranges = ranges
+
+        # Construct binning steps
+        self.binsteps = []
+        for bc, (lrange, rrange) in zip(self.bincounts, self.binranges):
+            self.binsteps.append((rrange - lrange) / bc)
+
+        # Reset containers of results
+        self.results = {}
+        self.combinedresult = {}
+        self.combinedresult['binned'] = np.zeros(tuple(nbins))
+        tqdm = u.tqdmenv(pbenv)
+        
+        ncores = self.ncores
+
+        # Execute binning tasks
+        binning_kwds = u.dictmerge({'ret':'histogram'}, binning_kwds)
+        # Construct binning tasks
+        for i in tqdm(range(0, len(self.files), ncores), disable=not(pbar)):
+            coreTasks = [] # Core-level jobs
+            for j in range(0, ncores):
+                # Fill up worker threads
+                ij = i + j
+                if ij >= len(self.files):
+                    break
+                
+                file = self.files[ij]
+                coreTasks.append(d.delayed(hdf5Processor(file).localBinning)(axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
+            
+            if len(coreTasks) > 0:
+                coreResults = d.compute(*coreTasks)
+                # Combine all core results for a dataframe partition
+                # old, slow version
+                #partitionResult = reduce(_arraysum, coreResults)
+                #self.combinedresult['binned'] += partitionResult
+                # Fast parallel version with Dask 
+                combineTasks = []
+                for j in range(0, ncores):
+                     combineParts = []
+                     # Split up results along first bin axis
+                     for r in coreResults:
+                           combineParts.append(r[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...])
+                     # Fill up worker threads
+                     combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
+
+                combineResults = d.compute(*combineTasks)
+
+                # parallel concatenation of results
+                partitionResult = reduce(_arrayconcatenate, combineResults)
+                
+                self.combinedresult['binned'] += partitionResult
+                
+                del combineParts
+                del partitionResult
+                del combineTasks
+                del combineResults
+                del coreResults 
+
+            del coreTasks
+
+        # Calculate and store values of the axes
+        for iax, ax in enumerate(self.binaxes):
+            p_start, p_end = self.binranges[iax]
+            self.combinedresult[ax] = u.calcax(p_start, p_end, self.bincounts[iax], ret=histcoord)
+
+        if ret:
+            return self.combinedresult
+            
+    def parallelBinning_depricated(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):
         """
         Parallel computation of the multidimensional histogram from file segments.
