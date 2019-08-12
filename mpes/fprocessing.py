@@ -2231,6 +2231,7 @@ class parallelHDF5Processor(FileCollection):
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, pbenv='classic', ret=False):
         """
         Parallel computation of the multidimensional histogram from file segments.
+        Version with serialized loop over processor threads and parallel recombination to save memory.
 
         :Parameters:
             axes : (list of) strings | None
@@ -2324,10 +2325,12 @@ class parallelHDF5Processor(FileCollection):
         if ret:
             return self.combinedresult
             
-    def parallelBinning_depricated(self, axes, nbins, ranges, scheduler='threads', combine=True,
+    def parallelBinning_old(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):
         """
         Parallel computation of the multidimensional histogram from file segments.
+        Old version with completely parallel binning with unlimited memory consumption.
+        Crashes for very large data sets.
 
         :Parameters:
             axes : (list of) strings | None
@@ -2539,7 +2542,7 @@ def extractEDC(folder=None, files=[], axes=['t'], bins=[1000], ranges=[(65000, 1
     pp = parallelHDF5Processor(folder=folder, files=files)
     if len(files) == 0:
         pp.gather(identifier='/*.h5')
-    pp.parallelBinning(axes=axes, nbins=bins, ranges=ranges, combine=False, ret=False,
+    pp.parallelBinning_old(axes=axes, nbins=bins, ranges=ranges, combine=False, ret=False,
                         binning_kwds=binning_kwds, **kwds)
 
     edcs = [pp.results[i]['binned'] for i in range(len(pp.results))]
