@@ -1679,7 +1679,9 @@ class dataframeProcessor(MapParser):
         super().__init__(file_sorting=False, folder=paramfolder)
 
         if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
-            self.ncores = N_CPU
+            #self.ncores = N_CPU
+            # Change the default to use 10 cores, as the speedup is negligible above
+            self.ncores = min(10,N_CPU)
         else:
             self.ncores = int(ncores)
 
@@ -2093,21 +2095,51 @@ class dataframeProcessor(MapParser):
         else:
             raise ValueError('No binning results are available!')
 
-    def viewEventHistogram(self, fid, ncol, source='folder', fname=None, ftype='h5', **kwds):
-        """
-        Plot individual histograms of specified dimensions (axes) from a substituent file.
 
+    def viewEventHistogram(self, dfpid, ncol, axes=['X', 'Y', 't', 'ADC'], bins=[80, 80, 80, 80],
+                ranges=[(0, 1800), (0, 1800), (68000, 74000), (0, 500)],
+                backend='bokeh', legend=True, histkwds={}, legkwds={}, **kwds):
+        """
+        Plot individual histograms of specified dimensions (axes) from a substituent dataframe partition.
+        
         :Parameters:
-            See arguments in ``hdf5Processor.viewEventHistogram()``.
+            dfpid : int
+                Number of the data frame partition to look at.
+            ncol : int
+                Number of columns in the plot grid.
+            axes : list/tuple
+                Name of the axes to view.
+            bins : list/tuple
+                Bin values of all speicified axes.
+            ranges : list
+                Value ranges of all specified axes.
+            backend : str | 'matplotlib'
+                Backend of the plotting library ('matplotlib' or 'bokeh').
+            legend : bool | True
+                Option to include a legend in the histogram plots.
+            histkwds, legkwds, **kwds : dict, dict, keyword arguments
+                Extra keyword arguments passed to ``mpes.visualization.grid_histogram()``.
         """
 
-        if source == 'folder':
-            files = g.glob(self.datafolder + r'/*' + ftype)
-            subproc = hdf5Processor(nts.natsorted(files)[fid])
-        elif source == 'files':
-            subproc = hdf5Processor(self.datafiles[fid])
+        input_types = map(type, [axes, bins, ranges])
+        allowed_types = [list, tuple]
+        
+        if set(input_types).issubset(allowed_types):
+        
+            # Read out the values for the specified groups
+            group_dict = {}
+            dfpart = self.edf.get_partition(dfpid)
+            cols = dfpart.columns
+            for ax in axes:
+                group_dict[ax] = dfpart.values[:, cols.get_loc(ax)]
+            
+            # Plot multiple histograms in a grid
+            grid_histogram(group_dict, ncol=ncol, rvs=axes, rvbins=bins, rvranges=ranges,
+                    backend=backend, legend=legend, histkwds=histkwds, legkwds=legkwds, **kwds)
+        
+        else:
+            raise TypeError('Inputs of axes, bins, ranges need to be list or tuple!')
 
-        subproc.viewEventHistogram(ncol, **kwds)
 
 
 class parquetProcessor(dataframeProcessor):
@@ -2153,7 +2185,9 @@ class parallelHDF5Processor(FileCollection):
         self.combinedresult = {}
         
         if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
-            self.ncores = N_CPU
+            #self.ncores = N_CPU
+            # Change the default to use 10 cores, as the speedup is negligible above
+            self.ncores = min(10,N_CPU)
         else:
             self.ncores = int(ncores)
 
