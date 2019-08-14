@@ -2266,8 +2266,8 @@ class MomentumCorrector(object):
                     {'lmkcenter': (row, col), 'targcenter': (row, col)}
         """
 
-        landmarks = kwds.pop('landmarks', self.pouter_ord)
-        self.targs = kwds.pop('targets', [])
+        self.prefs = kwds.pop('landmarks', self.pouter_ord)
+        self.ptargs = kwds.pop('targets', [])
 
         # Generate the target point set
         if not self.ptargs:
@@ -2278,16 +2278,16 @@ class MomentumCorrector(object):
             # Include center of image pattern in the registration-based symmetrization
             if fixed_center == True: # Add the same center to both the reference and target sets
 
-                landmarks = np.column_stack((landmarks.T, self.pcent)).T
+                self.prefs = np.column_stack((self.prefs.T, self.pcent)).T
                 self.ptargs = np.column_stack((self.ptargs.T, self.pcent)).T
 
             else: # Add different centers to the reference and target sets
                 newcenters = kwds.pop('new_centers', {})
-                landmarks = np.column_stack((landmarks.T, newcenters['lmkcenter'])).T
+                self.prefs = np.column_stack((self.prefs.T, newcenters['lmkcenter'])).T
                 self.ptargs = np.column_stack((self.ptargs.T, newcenters['targcenter'])).T
 
         if iterative == False: # Non-iterative estimation of deformation field
-            self.slice_transformed, self.splinewarp = tps.tpsWarping(landmarks, self.ptargs,
+            self.slice_transformed, self.splinewarp = tps.tpsWarping(self.prefs, self.ptargs,
                             image, None, interp_order, ret='all', **kwds)
 
         else: # Iterative estimation of deformation field
