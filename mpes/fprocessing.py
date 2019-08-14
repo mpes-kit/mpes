@@ -16,6 +16,7 @@ from .igoribw import loadibw
 from .base import FileCollection, MapParser, saveClassAttributes
 from .visualization import grid_histogram
 from . import utils as u, bandstructure as bs
+from . import dask_tps as tpsd
 import igor.igorpy as igor
 import pandas as pd
 import os
@@ -487,7 +488,7 @@ class hdf5Reader(File):
                 gdict[gn] = g_values
 
             # print('{}: {}'.format(g_name, g_values.dtype))
-            
+
         # calculate time Stamps
         if timeStamps == True:
             # create target array for time stamps
@@ -506,9 +507,9 @@ class hdf5Reader(File):
                 ts[msMarker[n]:msMarker[n+1]] = startTime+n
             # fill any remaining points
             ts[msMarker[len(msMarker)-1]:len(ts)] = startTime + len(msMarker)
-                
+
             gdict['timeStamps'] = ts
-            
+
         if ret == 'array':
             return np.asarray(list(gdict.values()))
         elif ret == 'dict':
@@ -629,7 +630,7 @@ class hdf5Reader(File):
 
             gNames = kwds.pop('groupnames', self.getGroupNames(wexpr='Stream'))
             darray = d.delayed(self._assembleGroups)(gNames, amin=None, amax=None, timeStamps=timeStamps, ret='array', **kwds)
-            
+
 
             if ret == True:
                 return darray
@@ -1458,7 +1459,7 @@ def binDataframe_fast(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
                 # split results along the first dimension among worker threads
                 for r in coreResults:
                     combineParts.append(r[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...])
-                
+
                 combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
 
             combineResults = d.compute(*combineTasks)
@@ -1466,12 +1467,12 @@ def binDataframe_fast(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
             partitionResult = reduce(_arrayconcatenate, combineResults)
 
             fullResult += partitionResult
-            
+
             del combineParts
             del partitionResult
             del combineTasks
             del combineResults
-            del coreResults            
+            del coreResults
 
         del coreTasks
 
@@ -1483,7 +1484,7 @@ def binDataframe_fast(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
         histdict[ax] = np.linspace(axrange[0], axrange[1], nbins[iax])
 
     return histdict
-    
+
 
 def applyJitter(df, amp, col):
     """ Add jittering to a dataframe column.
@@ -1932,7 +1933,7 @@ class dataframeProcessor(MapParser):
         else:
             raise NotImplementedError
 
-    def applyKCorrection(self, X='X', Y='Y', newX='Xm', newY='Ym', **kwds):
+    def applyKCorrection(self, X='X', Y='Y', newX='Xm', newY='Ym', type='mattrans', **kwds):
         """ Calculate and replace the X and Y values with their distortion-corrected version.
         This method can be reused.
 
@@ -1943,7 +1944,10 @@ class dataframeProcessor(MapParser):
                 Labels of the columns after momentum distortion correction.
         """
 
-        self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
+        if type == 'mattrans': # Apply matrix transform
+            self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
+        elif type == 'tps':
+            self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
 
     def appendKAxis(self, x0, y0, X='X', Y='Y', newX='kx', newY='ky', **kwds):
         """ Calculate and append the k axis coordinates (kx, ky) to the events dataframe.
@@ -2101,7 +2105,7 @@ class dataframeProcessor(MapParser):
                 backend='bokeh', legend=True, histkwds={}, legkwds={}, **kwds):
         """
         Plot individual histograms of specified dimensions (axes) from a substituent dataframe partition.
-        
+
         :Parameters:
             dfpid : int
                 Number of the data frame partition to look at.
@@ -2123,20 +2127,20 @@ class dataframeProcessor(MapParser):
 
         input_types = map(type, [axes, bins, ranges])
         allowed_types = [list, tuple]
-        
+
         if set(input_types).issubset(allowed_types):
-        
+
             # Read out the values for the specified groups
             group_dict = {}
             dfpart = self.edf.get_partition(dfpid)
             cols = dfpart.columns
             for ax in axes:
                 group_dict[ax] = dfpart.values[:, cols.get_loc(ax)]
-            
+
             # Plot multiple histograms in a grid
             grid_histogram(group_dict, ncol=ncol, rvs=axes, rvbins=bins, rvranges=ranges,
                     backend=backend, legend=legend, histkwds=histkwds, legkwds=legkwds, **kwds)
-        
+
         else:
             raise TypeError('Inputs of axes, bins, ranges need to be list or tuple!')
 
@@ -2163,12 +2167,12 @@ def _arraysum(array_a, array_b):
     """
 
     return array_a + array_b
-    
+
 def _arrayconcatenate(array_a, array_b):
     """
     Concatenate two arrays, compatible with reduce.
     """
-    
+
     return np.concatenate((array_a, array_b))
 
 
@@ -2183,7 +2187,7 @@ class parallelHDF5Processor(FileCollection):
         self.metadict = {}
         self.results = {}
         self.combinedresult = {}
-        
+
         if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
             #self.ncores = N_CPU
             # Change the default to use 10 cores, as the speedup is negligible above
@@ -2303,7 +2307,7 @@ class parallelHDF5Processor(FileCollection):
         self.combinedresult = {}
         self.combinedresult['binned'] = np.zeros(tuple(nbins))
         tqdm = u.tqdmenv(pbenv)
-        
+
         ncores = self.ncores
 
         # Execute binning tasks
@@ -2316,17 +2320,17 @@ class parallelHDF5Processor(FileCollection):
                 ij = i + j
                 if ij >= len(self.files):
                     break
-                
+
                 file = self.files[ij]
                 coreTasks.append(d.delayed(hdf5Processor(file).localBinning)(axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
-            
+
             if len(coreTasks) > 0:
                 coreResults = d.compute(*coreTasks)
                 # Combine all core results for a dataframe partition
                 # old, slow version
                 #partitionResult = reduce(_arraysum, coreResults)
                 #self.combinedresult['binned'] += partitionResult
-                # Fast parallel version with Dask 
+                # Fast parallel version with Dask
                 combineTasks = []
                 for j in range(0, ncores):
                      combineParts = []
@@ -2340,14 +2344,14 @@ class parallelHDF5Processor(FileCollection):
 
                 # parallel concatenation of results
                 partitionResult = reduce(_arrayconcatenate, combineResults)
-                
+
                 self.combinedresult['binned'] += partitionResult
-                
+
                 del combineParts
                 del partitionResult
                 del combineTasks
                 del combineResults
-                del coreResults 
+                del coreResults
 
             del coreTasks
 
@@ -2358,7 +2362,7 @@ class parallelHDF5Processor(FileCollection):
 
         if ret:
             return self.combinedresult
-            
+
     def parallelBinning_old(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, ret=False):
         """
