@@ -15,7 +15,7 @@ from __future__ import print_function, division
 from .igoribw import loadibw
 from .base import FileCollection, MapParser, saveClassAttributes
 from .visualization import grid_histogram
-from . import utils as u, bandstructure as bs
+from . import utils as u, bandstructure as bs, base as b
 from . import dask_tps as tpsd
 import igor.igorpy as igor
 import pandas as pd
@@ -1945,7 +1945,12 @@ class dataframeProcessor(MapParser):
         """
 
         if type == 'mattrans': # Apply matrix transform
-            self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
+            if ('warping' in kwds):
+                self.warping = kwds.pop('warping')
+                self.transformColumn2D(map2D=b.perspectiveTransform, X=X, Y=Y, newX=newX, newY=newY, M=self.warping, **kwds)
+            else:        
+                self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
+                self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
         elif type == 'tps':
             self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
 
@@ -1954,7 +1959,13 @@ class dataframeProcessor(MapParser):
         This method can be reused.
         """
 
-        self.transformColumn2D(map2D=self.kMap, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0, **kwds)
+        if ('fr' in kwds and 'fc' in kwds):
+            self.fr = kwds.pop('fr')
+            self.fc = kwds.pop('fc')
+            self.transformColumn2D(map2D=b.detrc2krc, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0, fr=self.fr, fc=self.fc, **kwds)
+            
+        else:        
+            self.transformColumn2D(map2D=self.kMap, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0, **kwds)
 
     def appendEAxis(self, E0, **kwds):
         """ Calculate and append the E axis to the events dataframe.
@@ -1964,8 +1975,14 @@ class dataframeProcessor(MapParser):
             E0 : numeric
                 Time-of-flight offset.
         """
+        
+        t = kwds.pop('t', self.edf['t'])
 
-        self.columnApply(mapping=self.EMap, rescolname='E', E0=E0, **kwds)
+        if ('a' in kwds):
+            self.poly_a = kwds.pop('a')
+            self.columnApply(mapping=b.tof2evpoly, rescolname='E', E0=E0, a=self.poly_a, t=t, **kwds)
+        else:        
+            self.columnApply(mapping=self.EMap, rescolname='E', E0=E0, t=t, **kwds)
 
     # Row operation
     def appendRow(self, folder=None, df=None, ftype='parquet', **kwds):
