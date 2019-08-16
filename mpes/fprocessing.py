@@ -1842,6 +1842,30 @@ class dataframeProcessor(MapParser):
 
         self.edf[rescolname] = mapping(**kwds)
 
+
+    def mapColumn(self, mapping, *args, **kwds):
+        """ Apply a dataframe-partition based mapping function to an existing column.
+
+        :Parameters:
+            oldcolname : str
+                The name of the column to use for computation.
+            mapping : function
+                Functional map to apply to the values of the old column. Takes the data frame as first argument. Further arguments are passed by **kwds
+            newcolname : str | 'Transformed'
+                New column name to be added to the dataframe.
+            args : tuple | ()
+                Additional arguments of the functional map.
+            update : str | 'append'
+                Updating option.
+                'append' = append to the current dask dataframe as a new column with the new column name.
+                'replace' = replace the values of the old column.
+            **kwds : keyword arguments
+                Additional arguments for the ``dask.dataframe.apply()`` function.
+        """
+
+        self.edf = self.edf.map_partitions(mapping, *args, **kwds)
+        
+        
     def transformColumn(self, oldcolname, mapping, newcolname='Transformed',
                         args=(), update='append', **kwds):
         """ Apply a simple function to an existing column.
@@ -1953,6 +1977,18 @@ class dataframeProcessor(MapParser):
                 self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
         elif type == 'tps':
             self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
+        elif type == 'tps_matrix':
+            if ('dfield' in kwds):
+                self.dfield = kwds.pop('dfield')
+                self.mapColumn(b.dfieldapply, self.dfield, X=X, Y=Y, newX=newX, newY=newY)
+            elif ('rdeform_field' in kwds and 'cdeform_field' in kwds):
+                rdeform_field = kwds.pop('rdeform_field')
+                cdeform_field = kwds.pop('cdeform_field')
+                print('Calculating inverse Displacement Field, might take a moment...')
+                self.dfield = b.generateDfield(rdeform_field, cdeform_field)
+                self.mapColumn(b.dfieldapply, self.dfield, X=X, Y=Y, newX=newX, newY=newY)
+            else:
+                print('Not implemented.')
 
     def appendKAxis(self, x0, y0, X='X', Y='Y', newX='kx', newY='ky', **kwds):
         """ Calculate and append the k axis coordinates (kx, ky) to the events dataframe.

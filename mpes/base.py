@@ -16,6 +16,7 @@ import natsort as nts
 import cv2
 from functools import partial
 import scipy.io as sio
+from scipy.interpolate import griddata
 
 
 class FileCollection(object):
@@ -458,6 +459,51 @@ def detrc2krc(rdet, cdet, rstart, cstart, r0, c0, fr, fc, rstep, cstep):
     kc = fc * ((cdet - cdet0) / cstep)
 
     return (kr, kc)
+
+
+def dfieldapply(edf, dfield, X='X', Y='Y', newX='Xm', newY='Ym'):
+    """
+    Application of the inverse displacement-field to the dataframe coordinates
+    """
+    
+    x = edf[X]
+    y = edf[Y]
+     
+    edf[newX], edf[newY] = dfield[0,np.int16(x),np.int16(y)], dfield[1,np.int16(x),np.int16(y)]
+    return edf
+
+def generateDfield(rdeform_field, cdeform_field):
+    """
+    Generate inverse deformation field using inperpolation with griddata
+    Assuming the binning range of the input rdeform_field and cdeform_field covers the whole detector
+    """
+    # Interpolate to 2048x2048 grid of the detector coordinates
+    grid_x, grid_y = np.mgrid[0:cdeform_field.shape[0]:(cdeform_field.shape[0]/2048), 0:cdeform_field.shape[1]:(cdeform_field.shape[1]/2048)]
+    XY = []
+    Z = []
+    for i in np.arange(cdeform_field.shape[0]):
+        for j in np.arange(cdeform_field.shape[1]):  
+            XY.append([rdeform_field[i,j],cdeform_field[i,j]])
+            Z.append(2048/cdeform_field.shape[0]*i)
+            
+    inv_rdeform_field = griddata(np.asarray(XY), Z, (grid_x, grid_y))
+
+    XY = []
+    Z = []
+    for i in np.arange(cdeform_field.shape[0]):
+        for j in np.arange(cdeform_field.shape[1]):  
+            XY.append([rdeform_field[i,j],cdeform_field[i,j]])
+            Z.append(2048/cdeform_field.shape[1]*j)
+            
+    inv_cdeform_field = griddata(np.asarray(XY), Z, (grid_x, grid_y))
+
+    # TODO: what to do about the nans at the boundary? leave or fill with zeros?
+    #inv_rdeform_field = np.nan_to_num(inv_rdeform_field)
+    #inv_rdeform_field = np.nan_to_num(inv_cdeform_field)
+    
+    dfield = np.asarray([inv_rdeform_field, inv_cdeform_field])
+    
+    return dfield
 
 
 def reshape2d(data, apply_axis):
