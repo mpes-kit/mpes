@@ -15,7 +15,7 @@
 # =======================================
 
 from __future__ import print_function, division
-from . import base, utils as u, ellipsefit as elf, visualization as vis
+from . import base, utils as u, visualization as vis
 from math import cos, pi
 import numpy as np
 from numpy.linalg import norm, lstsq
@@ -1808,37 +1808,6 @@ class BoundedArea(object):
 # ================ #
 # Image correction #
 # ================ #
-
-def fitEllipseParams(*coords, plot=False, img=None, **kwds):
-    """
-    Direct least-squares method for fitting ellipse from scattered points
-    """
-
-    rcoords, ccoords = coords
-    fitvec = elf.fitEllipse(rcoords, ccoords)
-
-    # Calculate the ellipse parameters
-    center = elf.ellipse_center(fitvec)
-    phi = elf.ellipse_angle_of_rotation(fitvec)
-    axes = elf.ellipse_axis_length(fitvec)
-
-    if plot:    # Generate a diagnostic plot of the fitting result
-        a, b = axes
-        R = np.arange(0, 2*np.pi, 0.01)
-        x = center[0] + a*np.cos(R)*np.cos(phi) - b*np.sin(R)*np.sin(phi)
-        y = center[1] + a*np.cos(R)*np.sin(phi) + b*np.sin(R)*np.cos(phi)
-
-        fsize = kwds.pop('figsize', (6, 6))
-        f, ax = plt.subplots(figsize=fsize)
-        try:
-            ax.imshow(img, origin='lower', cmap='terrain_r')
-        except:
-            raise ValueError('Need to supply an image for plotting!')
-        ax.scatter(rcoords, ccoords, 15, 'k')
-        ax.plot(x, y, color = 'red')
-
-    return center, phi, axes
-
 
 def vertexGenerator(center, fixedvertex=None, cvd=None, arot=None, nside=None, direction=-1,
                     scale=1, diagdir=None, ret='all', rettype='float32'):
