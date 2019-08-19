@@ -95,9 +95,12 @@ class Structure (struct.Struct):
     def set_byte_order(self, byte_order):
         """Allow changing the format byte_order on the fly.
         """
-        if (hasattr(self, 'format') and self.format != None
-            and self.format.startswith(byte_order)):
-            return  # no need to change anything
+        try:
+            if (hasattr(self, 'format') and self.format != None
+                    and self.format.startswith(byte_order)):
+                return  # no need to change anything
+        except:
+            pass
         format = []
         for field in self.fields:
             format.extend([field.format]*field.total_count)
