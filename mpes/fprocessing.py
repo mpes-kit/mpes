@@ -21,6 +21,7 @@ import igor.igorpy as igor
 import pandas as pd
 import os
 import re
+import gc
 import glob as g
 import numpy as np
 import numpy.fft as nft
@@ -2012,7 +2013,7 @@ class dataframeProcessor(MapParser):
                 Time-of-flight offset.
         """
         
-        t = kwds.pop('t', self.edf['t'])
+        t = kwds.pop('t', self.edf['t'].astype('float64'))
 
         if ('a' in kwds):
             self.poly_a = kwds.pop('a')
@@ -2086,6 +2087,9 @@ class dataframeProcessor(MapParser):
         elif binmethod == 'fast':
             self.histdict = binDataframe_fast(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
                             ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
+
+        # clean up memory
+        gc.collect()
 
         if ret:
             return self.histdict
@@ -2412,6 +2416,9 @@ class parallelHDF5Processor(FileCollection):
         for iax, ax in enumerate(self.binaxes):
             p_start, p_end = self.binranges[iax]
             self.combinedresult[ax] = u.calcax(p_start, p_end, self.bincounts[iax], ret=histcoord)
+
+        # clean up memory
+        gc.collect()
 
         if ret:
             return self.combinedresult
