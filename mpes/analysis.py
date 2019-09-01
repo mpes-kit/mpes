@@ -2473,8 +2473,12 @@ class MomentumCorrector(object):
             rdeform, cdeform = coordmat[...,1] + rdisp, coordmat[...,0] + cdisp
 
         # Resample image in the deformation field
-        self.slice_transformed = ndi.map_coordinates(image, [rdeform, cdeform],
+        if (image is self.slice): # resample using all previous displacement fields
+            self.slice_transformed = ndi.map_coordinates(image, [self.rdeform_field + rdisp, self.cdeform_field + cdisp],
                                     order=interp_order, **mapkwds)
+        else: # if external image is provided, apply only the new addional tranformation
+            self.slice_transformed = ndi.map_coordinates(image, [rdeform, cdeform],order=interp_order, **mapkwds)
+            
         # Combine deformation fields
         if keep == True:
             self.updateDeformation(rdisp, cdisp, reset=False, image=image, coordtype='cartesian')
