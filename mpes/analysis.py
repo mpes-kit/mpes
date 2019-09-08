@@ -649,6 +649,7 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None, aug=1, 
     ecalibdict['bvec'] = bvec
     if (E0 is not None) and (t is not None):
         ecalibdict['axis'] = pfunc(E0, t)
+        ecalibdict['E0'] = E0
 
     if ret == 'all':
         return ecalibdict
@@ -2267,7 +2268,7 @@ class MomentumCorrector(object):
         # Update the deformation field
         coordmat = sym.coordinate_matrix_2D(image, coordtype='cartesian', stackaxis=0).astype('float64')
         self.updateDeformation(self.splinewarp[0] - coordmat[1,...], self.splinewarp[1] - coordmat[0,...],
-                                reset=False, image=image, coordtype='cartesian')
+                                reset=True, image=image, coordtype='cartesian')
 
         if update == True:
             self.slice_corrected = self.slice_transformed.copy()
