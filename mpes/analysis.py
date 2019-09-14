@@ -2267,8 +2267,7 @@ class MomentumCorrector(object):
 
         # Update the deformation field
         coordmat = sym.coordinate_matrix_2D(image, coordtype='cartesian', stackaxis=0).astype('float64')
-        self.updateDeformation(self.splinewarp[0] - coordmat[1,...], self.splinewarp[1] - coordmat[0,...],
-                                reset=True, image=image, coordtype='cartesian')
+        self.updateDeformation(self.splinewarp[0], self.splinewarp[1], reset=True, image=image, coordtype='cartesian')
 
         if update == True:
             self.slice_corrected = self.slice_transformed.copy()
@@ -2404,12 +2403,12 @@ class MomentumCorrector(object):
         self.rdeform_field = coordmat[1,...]
         self.cdeform_field = coordmat[0,...]
 
-    def updateDeformation(self, rdisp, cdisp, reset=False, **kwds):
+    def updateDeformation(self, rdeform, cdeform, reset=False, **kwds):
         """ Update the deformation field.
 
         :Parameters:
-            rdisp, cdisp : 2D array, 2D array
-                Row- and column-ordered displacement fields.
+            rdeform, cdeform : 2D array, 2D array
+                Row- and column-ordered deformation fields.
             reset : bool | False
                 Option to reset the deformation field.
             **kwds : keyword arguments
@@ -2419,8 +2418,8 @@ class MomentumCorrector(object):
         if reset == True:
             self.resetDeformation(**kwds)
 
-        self.rdeform_field += rdisp
-        self.cdeform_field += cdisp
+        self.rdeform_field = ndi.map_coordinates(self.rdeform_field, [rdeform, cdeform], order=1)
+        self.cdeform_field = ndi.map_coordinates(self.cdeform_field, [rdeform, cdeform], order=1)
 
     def coordinateTransform(self, type, keep=False, ret=False, interp_order=1,
                             mapkwds={}, **kwds):
@@ -2475,14 +2474,16 @@ class MomentumCorrector(object):
 
         # Resample image in the deformation field
         if (image is self.slice): # resample using all previous displacement fields
-            self.slice_transformed = ndi.map_coordinates(image, [self.rdeform_field + rdisp, self.cdeform_field + cdisp],
+            total_rdeform = ndi.map_coordinates(self.rdeform_field, [rdeform, cdeform], order=1)
+            total_cdeform = ndi.map_coordinates(self.cdeform_field, [rdeform, cdeform], order=1)
+            self.slice_transformed = ndi.map_coordinates(image, [total_rdeform, total_cdeform],
                                     order=interp_order, **mapkwds)
         else: # if external image is provided, apply only the new addional tranformation
             self.slice_transformed = ndi.map_coordinates(image, [rdeform, cdeform],order=interp_order, **mapkwds)
             
         # Combine deformation fields
         if keep == True:
-            self.updateDeformation(rdisp, cdisp, reset=False, image=image, coordtype='cartesian')
+            self.updateDeformation(rdeform, cdeform, reset=False, image=image, coordtype='cartesian')
 
         if ret == True:
             return self.slice_transformed
