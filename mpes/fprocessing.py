@@ -1467,7 +1467,7 @@ def binDataframe_fast(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
 
                 combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
 
-            combineResults = d.compute(*combineTasks)
+            combineResults = d.compute(*combineTasks, **kwds)
 
             partitionResult = reduce(_arrayconcatenate, combineResults)
 
@@ -1691,8 +1691,8 @@ class dataframeProcessor(MapParser):
 
         if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
             #self.ncores = N_CPU
-            # Change the default to use 10 cores, as the speedup is negligible above
-            self.ncores = min(10,N_CPU)
+            # Change the default to use 20 cores, as the speedup is small above
+            self.ncores = min(20,N_CPU)
         else:
             self.ncores = int(ncores)
 
@@ -1994,7 +1994,7 @@ class dataframeProcessor(MapParser):
             elif ('rdeform_field' in kwds and 'cdeform_field' in kwds):
                 rdeform_field = kwds.pop('rdeform_field')
                 cdeform_field = kwds.pop('cdeform_field')
-                print('Calculating inverse Displacement Field, might take a moment...')
+                print('Calculating inverse Deformation Field, might take a moment...')
                 self.dfield = b.generateDfield(rdeform_field, cdeform_field)
                 self.mapColumn(b.dfieldapply, self.dfield, X=X, Y=Y, newX=newX, newY=newY)
             else:
@@ -2256,8 +2256,8 @@ class parallelHDF5Processor(FileCollection):
 
         if (ncores is None) or (ncores > N_CPU) or (ncores < 0):
             #self.ncores = N_CPU
-            # Change the default to use 10 cores, as the speedup is negligible above
-            self.ncores = min(10,N_CPU)
+            # Change the default to use 20 cores, as the speedup is small above
+            self.ncores = min(20,N_CPU)
         else:
             self.ncores = int(ncores)
 
@@ -2391,7 +2391,7 @@ class parallelHDF5Processor(FileCollection):
                 coreTasks.append(d.delayed(hdf5Processor(file).localBinning)(axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
 
             if len(coreTasks) > 0:
-                coreResults = d.compute(*coreTasks)
+                coreResults = d.compute(*coreTasks, scheduler=scheduler, **compute_kwds)
                 # Combine all core results for a dataframe partition
                 # old, slow version
                 #partitionResult = reduce(_arraysum, coreResults)
@@ -2406,7 +2406,7 @@ class parallelHDF5Processor(FileCollection):
                      # Fill up worker threads
                      combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
 
-                combineResults = d.compute(*combineTasks)
+                combineResults = d.compute(*combineTasks, scheduler=scheduler, **compute_kwds)
 
                 # parallel concatenation of results
                 partitionResult = reduce(_arrayconcatenate, combineResults)
