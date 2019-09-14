@@ -13,16 +13,15 @@ class CopyTool(object):
     """ File collecting and sorting class.
     """
 
-    def __init__(self, source='/', dest='/', forceCopy=False, **kwds):
+    def __init__(self, source='/', dest='/', **kwds):
 
         self.source = source
         self.dest = dest
-        self.forceCopy = forceCopy
-        self.safetyMargin = kwds.pop('safetyMargin', 2 * 2**30) # Default 10 GB safety margin
+        self.safetyMargin = kwds.pop('safetyMargin', 500 * 2**30) # Default 500 GB safety margin
         self.pbenv = kwds.pop('pbenv', 'classic')
         
 
-    def copy(self, sdir):
+    def copy(self, sdir, forceCopy=False):
 
         tqdm = u.tqdmenv(self.pbenv)
         numFiles = countFiles(sdir)
@@ -41,7 +40,7 @@ class CopyTool(object):
                 for sfile in filenames:
                     if (not os.path.exists(os.path.join(path.replace(sdir, ddir), sfile))):
                         size += os.path.getsize(os.path.join(sdir,sfile))
-                if (size == 0 and not self.forceCopy):
+                if (size == 0 and not forceCopy):
                     # nothing to copy, just return directory
                     return ddir
                 else:
@@ -59,7 +58,7 @@ class CopyTool(object):
 
                         destFile = os.path.join(path.replace(sdir, ddir), sfile)
 
-                        if (not os.path.exists(destFile) or self.forceCopy):
+                        if (not os.path.exists(destFile) or forceCopy):
                             shutil.copy2(srcFile, destFile)
 
                         numCopied += 1
