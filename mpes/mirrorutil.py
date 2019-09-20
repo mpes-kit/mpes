@@ -8,20 +8,27 @@
 import os
 from . import utils as u
 import shutil
+import dask as d
 
 class CopyTool(object):
     """ File collecting and sorting class.
     """
 
-    def __init__(self, source='/', dest='/', **kwds):
+    def __init__(self, source='/', dest='/', ntasks=None, **kwds):
 
         self.source = source
         self.dest = dest
-        self.safetyMargin = kwds.pop('safetyMargin', 500 * 2**30) # Default 500 GB safety margin
+        self.safetyMargin = kwds.pop('safetyMargin', 1 * 2**30) # Default 500 GB safety margin
         self.pbenv = kwds.pop('pbenv', 'classic')
         
+        if (ntasks is None) or (ntasks < 0):
+            # Default to 20 concurrent copy tasks
+            self.ntasks = 20
+        else:
+            self.ntasks = int(ntasks)
+        
 
-    def copy(self, sdir, forceCopy=False):
+    def copy(self, sdir, forceCopy=False, scheduler='threads', **compute_kwds):
 
         tqdm = u.tqdmenv(self.pbenv)
         numFiles = countFiles(sdir)
@@ -53,15 +60,22 @@ class CopyTool(object):
                         makedirs(os.path.join(destDir, directory))
 
                     print("Copy Files...")
-                    for sfile in tqdm(filenames):
-                        srcFile = os.path.join(path, sfile)
+                    for i in tqdm(range(0, len(filenames), self.ntasks)):
+                        copyTasks = [] # Core-level jobs
+                        for j in range(0, self.ntasks):
+                            ij = i + j
+                            if ij >= len(filenames):
+                                break
 
-                        destFile = os.path.join(path.replace(sdir, ddir), sfile)
-
-                        if (not os.path.exists(destFile) or forceCopy):
-                            shutil.copy2(srcFile, destFile)
-
-                        numCopied += 1
+                            sfile = filenames[ij]
+                            srcFile = os.path.join(path, sfile)
+                            destFile = os.path.join(path.replace(sdir, ddir), sfile)
+                            if (not os.path.exists(destFile) or forceCopy):
+                                copyTasks.append(d.delayed(shutil.copy2)(srcFile, destFile))
+                            
+                        if len(copyTasks) > 0:
+                            d.compute(*copyTasks, scheduler=scheduler, **compute_kwds)
+                        
                     print("Copy finished!")
 
                 return ddir
