@@ -25,6 +25,7 @@ import gc
 import glob as g
 import numpy as np
 import numpy.fft as nft
+import numba
 import scipy.io as sio
 import skimage.io as skio
 from PIL import Image as pim
@@ -1119,6 +1120,106 @@ class hdf5Processor(hdf5Reader):
         elif ret == False:
             return
 
+    def localBinning_numba(self, axes=None, nbins=None, ranges=None, binDict=None,
+        jittered=False, histcoord='midpoint', ret='dict', **kwds):
+        """
+        Compute the photoelectron intensity histogram locally after loading all data into RAM.
+
+        :Paramters:
+            axes : (list of) strings | None
+                Names the axes to bin.
+            nbins : (list of) int | None
+                Number of bins along each axis.
+            ranges : (list of) tuples | None
+                Ranges of binning along every axis.
+            binDict : dict | None
+                Dictionary with specifications of axes, nbins and ranges. If binDict
+                is not None. It will override the specifications from other arguments.
+            jittered : bool | False
+                Determines whether to add jitter to the data to avoid rebinning artefact.
+            histcoord : string | 'midpoint'
+                The coordinates of the histogram. Specify 'edge' to get the bar edges (every
+                dimension has one value more), specify 'midpoint' to get the midpoint of the
+                bars (same length as the histogram dimensions).
+            ret : bool | True
+                :True: returns the dictionary containing binned data explicitly
+                :False: no explicit return of the binned data, the dictionary
+                generated in the binning is still retained as an instance attribute.
+            **kwds : keyword argument
+                ================  ==============  ===========  ==========================================
+                     keyword         data type      default     meaning
+                ================  ==============  ===========  ==========================================
+                     amin          numeric/None      None       minimum value of electron sequence
+                     amax          numeric/None      None       maximum value of electron sequence
+                  jitter_axes          list          axes       list of axes to jitter
+                  jitter_bins          list          nbins      list of the number of bins
+                jitter_amplitude   numeric/array     0.5        jitter amplitude (single number for all)
+                 jitter_ranges         list         ranges      list of the binning ranges
+                ================  ==============  ===========  ==========================================
+
+        :Return:
+            histdict : dict
+                Dictionary containing binned data and the axes values (if ``ret = True``).
+        """
+
+        # Retrieve the range of acquired events
+        amin = kwds.pop('amin', None)
+        amax = kwds.pop('amax', None)
+        amin, amax = u.intify(amin, amax)
+
+        # Assemble the data for binning, assuming they can be completely loaded into RAM
+        self.hdfdict = self.summarize(form='dict', use_alias=self.ua, amin=amin, amax=amax, ret=True)
+
+        # Set up binning parameters
+        self._addBinners(axes, nbins, ranges, binDict)
+
+        # Add jitter to the data streams before binning
+        if jittered:
+            # Retrieve parameters for histogram jittering, the ordering of the jittering
+            # parameters is the same as that for the binning
+            jitter_axes = kwds.pop('jitter_axes', axes)
+            jitter_bins = kwds.pop('jitter_bins', nbins)
+            jitter_amplitude = kwds.pop('jitter_amplitude', 0.5*np.ones(len(jitter_axes)))
+            jitter_ranges = kwds.pop('jitter_ranges', ranges)
+
+            # Add jitter to the specified dimensions of the data
+            for jb, jax, jamp, jr in zip(jitter_bins, jitter_axes, jitter_amplitude, jitter_ranges):
+
+                sz = self.hdfdict[jax].size
+                # Calculate the bar size of the histogram in every dimension
+                binsize = abs(jr[0] - jr[1])/jb
+                self.hdfdict[jax] = self.hdfdict[jax].astype('float32')
+                # Jitter as random uniformly distributed noise (W. S. Cleveland)
+                self.hdfdict[jax] += jamp * binsize * np.random.uniform(low=-1,
+                                        high=1, size=sz).astype('float32')
+
+        # Stack up data from unbinned axes
+        data_unbinned = np.stack((self.hdfdict[ax] for ax in axes), axis=1)
+        self.hdfdict = {}
+
+        # Compute binned data locally
+        self.histdict['binned'], ax_vals = numba_histogramdd(data_unbinned,
+                                    bins=self.bincounts, ranges=self.binranges)
+        del data_unbinned
+
+        for iax, ax in enumerate(axes):
+            if histcoord == 'midpoint':
+                ax_edge = ax_vals[iax]
+                ax_midpoint = (ax_edge[1:] + ax_edge[:-1])/2
+                self.histdict[ax] = ax_midpoint
+            elif histcoord == 'edge':
+                self.histdict[ax] = ax_vals[iax]
+
+        if ret == 'dict':
+            return self.histdict
+        elif ret == 'histogram':
+            histogram = self.histdict.pop('binned')
+            self.axesdict = self.histdict.copy()
+            self.histdict = {}
+            return histogram
+        elif ret == False:
+            return
+
     def updateHistogram(self, axes=None, sliceranges=None, ret=False):
         """
         Update the dimensional sizes of the binning results.
@@ -1223,6 +1324,61 @@ def binPartition(partition, binaxes, nbins, binranges, jittered=False, jitter_pa
     hist_partition, _ = np.histogramdd(vals, bins=nbins, range=binranges)
 
     return hist_partition
+
+def binPartition_numba(partition, binaxes, nbins, binranges, jittered=False, jitter_params={}):
+    """ Bin the data within a file partition (e.g. dask dataframe).
+
+    :Parameters:
+        partition : dataframe partition
+            Partition of a dataframe.
+        binaxes : list
+            List of axes to bin.
+        nbins : list
+            Number of bins for each binning axis.
+        binranges : list
+            The range of each axis to bin.
+        jittered : bool | False
+            Option to include jittering in binning.
+        jitter_params : dict | {}
+            Parameters used to set jittering.
+
+    :Return:
+        hist_partition : ndarray
+            Histogram from the binning process.
+    """
+
+    if jittered:
+        # Add jittering to values
+        jitter_bins = jitter_params['jitter_bins']
+        jitter_axes = jitter_params['jitter_axes']
+        jitter_amplitude = jitter_params['jitter_amplitude']
+        jitter_ranges = jitter_params['jitter_ranges']
+        jitter_type = jitter_params['jitter_type']
+
+        colsize = partition[jitter_axes[0]].size
+        if (jitter_type == 'uniform'):
+            jitter = np.random.uniform(low=-1, high=1, size=colsize)
+        elif (jitter_type == 'normal'):
+            jitter = np.random.standard_normal(size=colsize)
+        else:
+            jitter = 0
+
+        for jb, jax, jamp, jr in zip(jitter_bins, jitter_axes, jitter_amplitude, jitter_ranges):
+            # Calculate the bar size of the histogram in every dimension
+            binsize = abs(jr[0] - jr[1])/jb
+            # Apply same jitter to all columns to save time
+            partition[jax] += jamp*binsize*jitter
+
+    cols = partition.columns
+    # Locate columns for binning operation
+    binColumns = [cols.get_loc(binax) for binax in binaxes]
+    vals = partition.values[:, binColumns]
+
+    hist_partition, _ = numba_histogramdd(vals, bins=nbins, ranges=binranges)
+
+    return hist_partition
+
+
 
 
 def binDataframe(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
@@ -1490,6 +1646,98 @@ def binDataframe_fast(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
 
     return histdict
 
+def binDataframe_numba(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
+                binDict=None, pbar=True, jittered=True, pbenv='classic', jpart=True, **kwds):
+    """
+    Calculate multidimensional histogram from columns of a dask dataframe.
+
+    :Paramters:
+        axes : (list of) strings | None
+            Names the axes to bin.
+        nbins : (list of) int | None
+            Number of bins along each axis.
+        ranges : (list of) tuples | None
+            Ranges of binning along every axis.
+        binDict : dict | None
+            Dictionary with specifications of axes, nbins and ranges. If binDict
+            is not None. It will override the specifications from other arguments.
+        pbar : bool | True
+            Option to display a progress bar.
+        pbenv : str | 'classic'
+            Progress bar environment ('classic' for generic version and 'notebook' for notebook compatible version).
+        jittered : bool | True
+            Option to add histogram jittering during binning.
+        **kwds : keyword arguments
+            See keyword arguments in ``mpes.fprocessing.hdf5Processor.localBinning()``.
+
+    :Return:
+        histdict : dict
+            Dictionary containing binned data and the axes values (if ``ret = True``).
+    """
+
+    histdict = {}
+    fullResult = np.zeros(tuple(nbins)) # Partition-level results
+    tqdm = u.tqdmenv(pbenv)
+
+    # Construct jitter specifications
+    jitter_params = {}
+    if jittered:
+        # Retrieve parameters for histogram jittering, the ordering of the jittering
+        # parameters is the same as that for the binning
+        jaxes = kwds.pop('jitter_axes', axes)
+        jitter_params = {'jitter_axes': jaxes,
+                         'jitter_bins': kwds.pop('jitter_bins', nbins),
+                         'jitter_amplitude': kwds.pop('jitter_amplitude', 0.5*np.ones(len(jaxes))),
+                         'jitter_ranges': kwds.pop('jitter_ranges', ranges),
+                         'jitter_type': kwds.pop('jitter_type', 'normal')}
+
+    # Main loop for binning
+    for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
+
+        coreTasks = [] # Core-level jobs
+        for j in range(0, ncores):
+
+            ij = i + j
+            if ij >= df.npartitions:
+                break
+
+            dfPartition = df.get_partition(ij) # Obtain dataframe partition
+            coreTasks.append(d.delayed(binPartition_numba)(dfPartition, axes, nbins, ranges, jittered, jitter_params))
+
+        if len(coreTasks) > 0:
+            coreResults = d.compute(*coreTasks, **kwds)
+
+            combineTasks = []
+            for j in range(0, ncores):
+                combineParts = []
+                # split results along the first dimension among worker threads
+                for r in coreResults:
+                    combineParts.append(r[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...])
+
+                combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
+
+            combineResults = d.compute(*combineTasks, **kwds)
+
+            partitionResult = reduce(_arrayconcatenate, combineResults)
+
+            fullResult += partitionResult
+
+            del combineParts
+            del partitionResult
+            del combineTasks
+            del combineResults
+            del coreResults
+
+        del coreTasks
+
+    # Load into dictionary
+    histdict['binned'] = fullResult.astype('float32')
+    # Calculate axes values
+    for iax, ax in enumerate(axes):
+        axrange = ranges[iax]
+        histdict[ax] = np.linspace(axrange[0], axrange[1], nbins[iax])
+
+    return histdict
 
 def applyJitter(df, amp, col, type):
     """ Add jittering to a dataframe column.
@@ -2067,14 +2315,14 @@ class dataframeProcessor(MapParser):
 
     # Complex operation
     def distributedBinning(self, axes, nbins, ranges, binDict=None, pbar=True,
-                            binmethod='fast', ret=False, **kwds):
+                            binmethod='numba', ret=False, **kwds):
         """ Binning the dataframe to a multidimensional histogram.
 
         :Parameters:
             axes, nbins, ranges, binDict, pbar
                 See ``mpes.fprocessing.binDataframe()``.
-            binmethod : str | 'fast'
-                Dataframe binning method ('original', 'lean' and 'fast').
+            binmethod : str | 'numba'
+                Dataframe binning method ('original', 'lean', 'fast' and 'numba').
             ret : bool | False
                 Option to return binning results as a dictionary.
             **kwds : keyword arguments
@@ -2095,6 +2343,9 @@ class dataframeProcessor(MapParser):
                             ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
         elif binmethod == 'fast':
             self.histdict = binDataframe_fast(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
+                            ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
+        elif binmethod == 'numba':
+            self.histdict = binDataframe_numba(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
                             ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
 
         # clean up memory
@@ -2742,3 +2993,155 @@ def fftfilter2d(datamat):
     fltrmat = np.abs(nft.ifft2((1 - zm) * ftmat))
 
     return fltrmat
+
+
+# =================== #
+#    Numba Binning    #
+# =================== #
+
+@numba.jit(nogil=True, parallel=False)
+def _hist1d_numba_seq(sample, bins, ranges):
+    """
+    1D Binning function, precompiled by Numba for performance.
+    Behaves much like numpy.histogramdd
+    """
+    H = np.zeros((bins[0]), dtype=np.uint64)
+    delta = 1/((ranges[:,1] - ranges[:,0]) / bins)
+
+    if (sample.shape[1] != 1):
+            raise ValueError(
+                'The dimension of bins must be equal to the dimension of the sample x.')
+
+    for t in range(sample.shape[0]):
+        i = (sample[t,0] - ranges[0,0]) * delta[0]
+        if 0 <= i < bins[0]:
+            H[int(i)] += 1
+
+    return H
+
+@numba.jit(nogil=True, parallel=False)
+def _hist2d_numba_seq(sample, bins, ranges):
+    """
+    2D Binning function, precompiled by Numba for performance.
+    Behaves much like numpy.histogramdd
+    """
+    H = np.zeros((bins[0], bins[1]), dtype=np.uint64)
+    delta = 1/((ranges[:,1] - ranges[:,0]) / bins)
+
+    if (sample.shape[1] != 2):
+            raise ValueError(
+                'The dimension of bins must be equal to the dimension of the sample x.')
+
+    for t in range(sample.shape[0]):
+        i = (sample[t,0] - ranges[0,0]) * delta[0]
+        j = (sample[t,1] - ranges[1,0]) * delta[1]
+        if 0 <= i < bins[0] and 0 <= j < bins[1]:
+            H[int(i),int(j)] += 1
+
+    return H
+    return H
+
+@numba.jit(nogil=True, parallel=False)
+def _hist3d_numba_seq(sample, bins, ranges):
+    """
+    3D Binning function, precompiled by Numba for performance.
+    Behaves much like numpy.histogramdd
+    """
+    H = np.zeros((bins[0], bins[1], bins[2]), dtype=np.uint64)
+    delta = 1/((ranges[:,1] - ranges[:,0]) / bins)
+
+    if (sample.shape[1] != 3):
+            raise ValueError(
+                'The dimension of bins must be equal to the dimension of the sample x.')
+
+    for t in range(sample.shape[0]):
+        i = (sample[t,0] - ranges[0,0]) * delta[0]
+        j = (sample[t,1] - ranges[1,0]) * delta[1]
+        k = (sample[t,2] - ranges[2,0]) * delta[2]
+        if 0 <= i < bins[0] and 0 <= j < bins[1] and 0 <= k < bins[2]:
+            H[int(i),int(j), int(k)] += 1
+
+    return H
+
+@numba.jit(nogil=True, parallel=False)
+def _hist4d_numba_seq(sample, bins, ranges):
+    """
+    4D Binning function, precompiled by Numba for performance.
+    Behaves much like numpy.histogramdd
+    """
+    H = np.zeros((bins[0], bins[1], bins[2], bins[3]), dtype=np.uint64)
+    delta = 1/((ranges[:,1] - ranges[:,0]) / bins)
+
+    if (sample.shape[1] != 4):
+            raise ValueError(
+                'The dimension of bins must be equal to the dimension of the sample x.')
+
+    for t in range(sample.shape[0]):
+        i = (sample[t,0] - ranges[0,0]) * delta[0]
+        j = (sample[t,1] - ranges[1,0]) * delta[1]
+        k = (sample[t,2] - ranges[2,0]) * delta[2]
+        l = (sample[t,3] - ranges[2,0]) * delta[2]
+        if 0 <= i < bins[0] and 0 <= j < bins[1] and 0 <= k < bins[2] and 0 <= l < bins[3]:
+            H[int(i),int(j),int(k),int(l)] += 1
+
+    return H
+
+def numba_histogramdd(sample, bins, ranges):
+    """
+    Wrapper for the Number precompiled binning functions. Behaves in total much like numpy.histogramdd.
+    """
+    try:
+        # Sample is an ND-array.
+        N, D = sample.shape
+    except (AttributeError, ValueError):
+        # Sample is a sequence of 1D arrays.
+        sample = np.atleast_2d(sample).T
+        N, D = sample.shape
+
+    try:
+        M = len(bins)
+        if M != D:
+            raise ValueError(
+                'The dimension of bins must be equal to the dimension of the '
+                ' sample x.')
+    except TypeError:
+        # bins is an integer
+        bins = D*[bins]
+
+    nbin = np.empty(D, int)
+    edges = D*[None]
+    dedges = D*[None]
+
+    # normalize the ranges argument
+    if ranges is None:
+        ranges = (None,) * D
+    elif len(ranges) != D:
+        raise ValueError('range argument must have one entry per dimension')
+
+    ranges = np.asarray(ranges)
+    bins = np.asarray(bins)
+
+    # Create edge arrays
+    for i in range(D):
+        edges[i] = np.linspace(*ranges[i,:], bins[i]+1)
+
+        nbin[i] = len(edges[i]) + 1  # includes an outlier on each end
+
+    if (D == 1):
+        hist = _hist1d_numba_seq(sample, bins , ranges)
+    elif (D == 2):
+        hist = _hist2d_numba_seq(sample, bins , ranges)
+    elif (D == 3):
+        hist = _hist3d_numba_seq(sample, bins , ranges)
+    elif (D == 4):
+        hist = _hist4d_numba_seq(sample, bins , ranges)
+    else:
+        raise ValueError('Only implemented for up to 4 dimensions currently.')
+
+    hist = hist.astype(float, casting='safe')
+
+    if (hist.shape != nbin - 2).any():
+        raise RuntimeError(
+            "Internal Shape Error")
+
+    return hist, edges
