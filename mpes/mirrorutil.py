@@ -6,9 +6,9 @@
 """
 
 import os
-from . import utils as u
 import shutil
 import dask as d
+from dask.diagnostics import ProgressBar
 
 class CopyTool(object):
     """ File collecting and sorting class.
@@ -22,15 +22,14 @@ class CopyTool(object):
         self.pbenv = kwds.pop('pbenv', 'classic')
         
         if (ntasks is None) or (ntasks < 0):
-            # Default to 20 concurrent copy tasks
-            self.ntasks = 20
+            # Default to 25 concurrent copy tasks
+            self.ntasks = 25
         else:
             self.ntasks = int(ntasks)
         
 
     def copy(self, sdir, forceCopy=False, scheduler='threads', **compute_kwds):
 
-        tqdm = u.tqdmenv(self.pbenv)
         numFiles = countFiles(sdir)
 
         if numFiles > 0:
@@ -59,26 +58,28 @@ class CopyTool(object):
                         destDir = path.replace(sdir,ddir)
                         makedirs(os.path.join(destDir, directory))
 
-                    print("Copy Files...")
-                    for i in tqdm(range(0, len(filenames), self.ntasks)):
-                        copyTasks = [] # Core-level jobs
-                        for j in range(0, self.ntasks):
-                            ij = i + j
-                            if ij >= len(filenames):
-                                break
+                    copyTasks = [] # Core-level jobs
+                    for sfile in filenames:
 
-                            sfile = filenames[ij]
                             srcFile = os.path.join(path, sfile)
                             destFile = os.path.join(path.replace(sdir, ddir), sfile)
                             if (not os.path.exists(destFile) or forceCopy):
                                 copyTasks.append(d.delayed(shutil.copy2)(srcFile, destFile))
-                            
-                        if len(copyTasks) > 0:
-                            d.compute(*copyTasks, scheduler=scheduler, **compute_kwds)
                         
+                    print("Copy Files...")
+                    with ProgressBar():
+                        d.compute(*copyTasks, scheduler=scheduler, num_workers=self.ntasks, **compute_kwds)
                     print("Copy finished!")
 
                 return ddir
+
+    def size(self, sdir):
+        for path, dirs, filenames in os.walk(sdir):
+            # Check space left
+            size = 0
+            for sfile in filenames:
+                size += os.path.getsize(os.path.join(sdir,sfile))
+            return size
                 
     def cleanUpOldestScan(self, remove = None, force = False):
         
