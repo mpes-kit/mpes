@@ -562,7 +562,7 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
     return pkmaxs
 
 
-def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None, aug=1, method='lstsq', **kwds):
+def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, Eref=None, t=None, aug=1, method='lstsq', **kwds):
     """
     Energy calibration by nonlinear least squares fitting of spectral landmarks on
     a set of (energy dispersion curves (EDCs). This amounts to solving for the
@@ -648,6 +648,11 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, t=None, aug=1, 
     ecalibdict['Tmat'] = Tmat
     ecalibdict['bvec'] = bvec
     if (E0 is not None) and (t is not None):
+        ecalibdict['axis'] = pfunc(E0, t)
+        ecalibdict['E0'] = E0
+        
+    elif (Eref is not None) and (t is not None):
+        E0 = -pfunc(-Eref, pos[refid])
         ecalibdict['axis'] = pfunc(E0, t)
         ecalibdict['E0'] = E0
 
