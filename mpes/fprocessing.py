@@ -3080,7 +3080,7 @@ def _hist4d_numba_seq(sample, bins, ranges):
         i = (sample[t,0] - ranges[0,0]) * delta[0]
         j = (sample[t,1] - ranges[1,0]) * delta[1]
         k = (sample[t,2] - ranges[2,0]) * delta[2]
-        l = (sample[t,3] - ranges[2,0]) * delta[2]
+        l = (sample[t,3] - ranges[3,0]) * delta[3]
         if 0 <= i < bins[0] and 0 <= j < bins[1] and 0 <= k < bins[2] and 0 <= l < bins[3]:
             H[int(i),int(j),int(k),int(l)] += 1
 
