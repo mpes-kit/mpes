@@ -1100,6 +1100,7 @@ class hdf5Processor(hdf5Reader):
         # Compute binned data locally
         self.histdict['binned'], ax_vals = np.histogramdd(data_unbinned,
                                     bins=self.bincounts, range=self.binranges)
+        self.histdict['binned'] = self.histdict['binned'].astype('float32')
         del data_unbinned
 
         for iax, ax in enumerate(axes):
@@ -1200,6 +1201,8 @@ class hdf5Processor(hdf5Reader):
         # Compute binned data locally
         self.histdict['binned'], ax_vals = numba_histogramdd(data_unbinned,
                                     bins=self.bincounts, ranges=self.binranges)
+        self.histdict['binned'] = self.histdict['binned'].astype('float32')
+
         del data_unbinned
 
         for iax, ax in enumerate(axes):
@@ -3002,10 +3005,10 @@ def fftfilter2d(datamat):
 @numba.jit(nogil=True, parallel=False)
 def _hist1d_numba_seq(sample, bins, ranges):
     """
-    1D Binning function, precompiled by Numba for performance.
-    Behaves much like numpy.histogramdd
+    1D Binning function, pre-compiled by Numba for performance.
+    Behaves much like numpy.histogramdd, but calculates and returns unsigned 32 bit integers
     """
-    H = np.zeros((bins[0]), dtype=np.uint64)
+    H = np.zeros((bins[0]), dtype=np.uint32)
     delta = 1/((ranges[:,1] - ranges[:,0]) / bins)
 
     if (sample.shape[1] != 1):
@@ -3022,10 +3025,10 @@ def _hist1d_numba_seq(sample, bins, ranges):
 @numba.jit(nogil=True, parallel=False)
 def _hist2d_numba_seq(sample, bins, ranges):
     """
-    2D Binning function, precompiled by Numba for performance.
-    Behaves much like numpy.histogramdd
+    2D Binning function, pre-compiled by Numba for performance.
+    Behaves much like numpy.histogramdd, but calculates and returns unsigned 32 bit integers
     """
-    H = np.zeros((bins[0], bins[1]), dtype=np.uint64)
+    H = np.zeros((bins[0], bins[1]), dtype=np.uint32)
     delta = 1/((ranges[:,1] - ranges[:,0]) / bins)
 
     if (sample.shape[1] != 2):
@@ -3044,10 +3047,10 @@ def _hist2d_numba_seq(sample, bins, ranges):
 @numba.jit(nogil=True, parallel=False)
 def _hist3d_numba_seq(sample, bins, ranges):
     """
-    3D Binning function, precompiled by Numba for performance.
-    Behaves much like numpy.histogramdd
+    3D Binning function, pre-compiled by Numba for performance.
+    Behaves much like numpy.histogramdd, but calculates and returns unsigned 32 bit integers
     """
-    H = np.zeros((bins[0], bins[1], bins[2]), dtype=np.uint64)
+    H = np.zeros((bins[0], bins[1], bins[2]), dtype=np.uint32)
     delta = 1/((ranges[:,1] - ranges[:,0]) / bins)
 
     if (sample.shape[1] != 3):
@@ -3066,10 +3069,10 @@ def _hist3d_numba_seq(sample, bins, ranges):
 @numba.jit(nogil=True, parallel=False)
 def _hist4d_numba_seq(sample, bins, ranges):
     """
-    4D Binning function, precompiled by Numba for performance.
-    Behaves much like numpy.histogramdd
+    4D Binning function, pre-compiled by Numba for performance.
+    Behaves much like numpy.histogramdd, but calculates and returns unsigned 32 bit integers
     """
-    H = np.zeros((bins[0], bins[1], bins[2], bins[3]), dtype=np.uint64)
+    H = np.zeros((bins[0], bins[1], bins[2], bins[3]), dtype=np.uint32)
     delta = 1/((ranges[:,1] - ranges[:,0]) / bins)
 
     if (sample.shape[1] != 4):
@@ -3088,7 +3091,10 @@ def _hist4d_numba_seq(sample, bins, ranges):
 
 def numba_histogramdd(sample, bins, ranges):
     """
-    Wrapper for the Number precompiled binning functions. Behaves in total much like numpy.histogramdd.
+    Wrapper for the Number pre-compiled binning functions. Behaves in total much like numpy.histogramdd.
+    Returns uint32 arrays. This was chosen because it has a significant performance improvement over uint64
+    for large binning volumes. Be aware that this can cause overflows for very large sample sets exceeding 3E9 counts
+    in a single bin. This should never happen in a realistic photoemission experiment with useful bin sizes.
     """
     try:
         # Sample is an ND-array.
@@ -3137,8 +3143,6 @@ def numba_histogramdd(sample, bins, ranges):
         hist = _hist4d_numba_seq(sample, bins , ranges)
     else:
         raise ValueError('Only implemented for up to 4 dimensions currently.')
-
-    hist = hist.astype(float, casting='safe')
 
     if (hist.shape != nbin - 2).any():
         raise RuntimeError(
