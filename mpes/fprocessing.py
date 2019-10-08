@@ -1982,7 +1982,10 @@ class dataframeProcessor(MapParser):
 
         # Create the single-event dataframe
         if source == 'folder':
-            self.edf = readDataframe(folder=self.datafolder, files=[], ftype=ftype, timeStamps=timeStamps, **kwds)
+            # gather files first to get a sorted list.
+            self.gather(folder=self.datafolder, identifier=r'/*.'+ftype, file_sorting=True)
+            self.datafiles = self.files
+            self.edf = readDataframe(files=self.datafiles, ftype=ftype, timeStamps=timeStamps, **kwds)
 
         elif source == 'files':
             if len(self.datafiles) > 0: # When filenames are specified
