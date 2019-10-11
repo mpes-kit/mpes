@@ -620,8 +620,7 @@ class hdf5Reader(File):
                 dfParts.append(d.delayed(self._assembleGroups)(gNames, amin=eventIDStart, amax=eventIDEnd, **kwds))
 
             # Construct eda (event dask array) and edf (event dask dataframe)
-            # [da.from_delayed(dfParts[i]) for i in range(nPartitions), dtype=np.float, shape=]
-            eda = da.from_array(da.concatenate(d.compute(*dfParts), axis=1).T, chunks=self.CHUNK_SIZE)
+            eda = da.from_array(np.concatenate(d.compute(*dfParts), axis=1).T, chunks=self.CHUNK_SIZE)
             self.edf = ddf.from_dask_array(eda, columns=colNames)
 
             if ret == True:
