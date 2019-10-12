@@ -2464,7 +2464,7 @@ class dataframeProcessor(MapParser):
             dfpart = self.edf.get_partition(dfpid)
             cols = dfpart.columns
             for ax in axes:
-                group_dict[ax] = dfpart.values[:, cols.get_loc(ax)]
+                group_dict[ax] = dfpart.values[:, cols.get_loc(ax)].compute()
 
             # Plot multiple histograms in a grid
             grid_histogram(group_dict, ncol=ncol, rvs=axes, rvbins=bins, rvranges=ranges,
