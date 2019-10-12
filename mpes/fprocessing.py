@@ -37,6 +37,7 @@ from dask.diagnostics import ProgressBar
 import natsort as nts
 from functools import reduce
 from funcy import project
+from threadpoolctl import threadpool_limits
 
 N_CPU = ps.cpu_count()
 
@@ -1600,44 +1601,47 @@ def binDataframe_fast(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
                          'jitter_ranges': kwds.pop('jitter_ranges', ranges),
                          'jitter_type': kwds.pop('jitter_type', 'normal')}
 
-    # Main loop for binning
-    for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
+    # limit multithreading in worker threads
+    nthreads_per_worker = kwds.pop('nthreads_per_worker', 4)
+    threadpool_api = kwds.pop('threadpool_api', 'blas')
+    with threadpool_limits(limits=nthreads_per_worker, user_api=threadpool_api):
+        # Main loop for binning
+        for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
 
-        coreTasks = [] # Core-level jobs
-        for j in range(0, ncores):
-
-            ij = i + j
-            if ij >= df.npartitions:
-                break
-
-            dfPartition = df.get_partition(ij) # Obtain dataframe partition
-            coreTasks.append(d.delayed(binPartition)(dfPartition, axes, nbins, ranges, jittered, jitter_params))
-
-        if len(coreTasks) > 0:
-            coreResults = d.compute(*coreTasks, **kwds)
-
-            combineTasks = []
+            coreTasks = [] # Core-level jobs
             for j in range(0, ncores):
-                combineParts = []
-                # split results along the first dimension among worker threads
-                for r in coreResults:
-                    combineParts.append(r[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...])
 
-                combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
+                ij = i + j
+                if ij >= df.npartitions:
+                    break
 
-            combineResults = d.compute(*combineTasks, **kwds)
+                dfPartition = df.get_partition(ij) # Obtain dataframe partition
+                coreTasks.append(d.delayed(binPartition)(dfPartition, axes, nbins, ranges, jittered, jitter_params))
 
-            partitionResult = reduce(_arrayconcatenate, combineResults)
+            if len(coreTasks) > 0:
+                coreResults = d.compute(*coreTasks, **kwds)
 
-            fullResult += partitionResult
+                combineTasks = []
+                for j in range(0, ncores):
+                    combineParts = []
+                    # split results along the first dimension among worker threads
+                    for r in coreResults:
+                        combineParts.append(r[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...])
 
-            del combineParts
-            del partitionResult
-            del combineTasks
-            del combineResults
-            del coreResults
+                    combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
 
-        del coreTasks
+                combineResults = d.compute(*combineTasks, **kwds)
+
+                # Directly fill into target array. This is much faster than the (not so parallel) reduce/concatenation used before, and uses less memory.
+                for j in range(0, ncores):
+                    fullResult[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...] += combineResults[j]
+
+                del combineParts
+                del combineTasks
+                del combineResults
+                del coreResults
+
+            del coreTasks
 
     # Load into dictionary
     histdict['binned'] = fullResult.astype('float32')
@@ -1693,44 +1697,47 @@ def binDataframe_numba(df, ncores=N_CPU, axes=None, nbins=None, ranges=None,
                          'jitter_ranges': kwds.pop('jitter_ranges', ranges),
                          'jitter_type': kwds.pop('jitter_type', 'normal')}
 
-    # Main loop for binning
-    for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
+    # limit multithreading in worker threads
+    nthreads_per_worker = kwds.pop('nthreads_per_worker', 4)
+    threadpool_api = kwds.pop('threadpool_api', 'blas')
+    with threadpool_limits(limits=nthreads_per_worker, user_api=threadpool_api):
+        # Main loop for binning
+        for i in tqdm(range(0, df.npartitions, ncores), disable=not(pbar)):
 
-        coreTasks = [] # Core-level jobs
-        for j in range(0, ncores):
-
-            ij = i + j
-            if ij >= df.npartitions:
-                break
-
-            dfPartition = df.get_partition(ij) # Obtain dataframe partition
-            coreTasks.append(d.delayed(binPartition_numba)(dfPartition, axes, nbins, ranges, jittered, jitter_params))
-
-        if len(coreTasks) > 0:
-            coreResults = d.compute(*coreTasks, **kwds)
-
-            combineTasks = []
+            coreTasks = [] # Core-level jobs
             for j in range(0, ncores):
-                combineParts = []
-                # split results along the first dimension among worker threads
-                for r in coreResults:
-                    combineParts.append(r[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...])
 
-                combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
+                ij = i + j
+                if ij >= df.npartitions:
+                    break
 
-            combineResults = d.compute(*combineTasks, **kwds)
+                dfPartition = df.get_partition(ij) # Obtain dataframe partition
+                coreTasks.append(d.delayed(binPartition_numba)(dfPartition, axes, nbins, ranges, jittered, jitter_params))
 
-            partitionResult = reduce(_arrayconcatenate, combineResults)
+            if len(coreTasks) > 0:
+                coreResults = d.compute(*coreTasks, **kwds)
 
-            fullResult += partitionResult
+                combineTasks = []
+                for j in range(0, ncores):
+                    combineParts = []
+                    # split results along the first dimension among worker threads
+                    for r in coreResults:
+                        combineParts.append(r[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...])
 
-            del combineParts
-            del partitionResult
-            del combineTasks
-            del combineResults
-            del coreResults
+                    combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
 
-        del coreTasks
+                combineResults = d.compute(*combineTasks, **kwds)
+
+                # Directly fill into target array. This is much faster than the (not so parallel) reduce/concatenation used before, and uses less memory.
+                for j in range(0, ncores):
+                    fullResult[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...] += combineResults[j]
+
+                del combineParts
+                del combineTasks
+                del combineResults
+                del coreResults
+
+            del coreTasks
 
     # Load into dictionary
     histdict['binned'] = fullResult.astype('float32')
@@ -2490,13 +2497,6 @@ def _arraysum(array_a, array_b):
 
     return array_a + array_b
 
-def _arrayconcatenate(array_a, array_b):
-    """
-    Concatenate two arrays, compatible with reduce.
-    """
-
-    return np.concatenate((array_a, array_b))
-
 
 class parallelHDF5Processor(FileCollection):
     """
@@ -2634,48 +2634,48 @@ class parallelHDF5Processor(FileCollection):
 
         # Execute binning tasks
         binning_kwds = u.dictmerge({'ret':'histogram'}, binning_kwds)
-        # Construct binning tasks
-        for i in tqdm(range(0, len(self.files), ncores), disable=not(pbar)):
-            coreTasks = [] # Core-level jobs
-            for j in range(0, ncores):
-                # Fill up worker threads
-                ij = i + j
-                if ij >= len(self.files):
-                    break
-
-                file = self.files[ij]
-                coreTasks.append(d.delayed(hdf5Processor(file).localBinning)(axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
-
-            if len(coreTasks) > 0:
-                coreResults = d.compute(*coreTasks, scheduler=scheduler, **compute_kwds)
-                # Combine all core results for a dataframe partition
-                # old, slow version
-                #partitionResult = reduce(_arraysum, coreResults)
-                #self.combinedresult['binned'] += partitionResult
-                # Fast parallel version with Dask
-                combineTasks = []
+        
+        # limit multithreading in worker threads
+        nthreads_per_worker = binning_kwds.pop('nthreads_per_worker', 1)
+        threadpool_api = binning_kwds.pop('threadpool_api', 'blas')
+        with threadpool_limits(limits=nthreads_per_worker, user_api=threadpool_api):        
+            # Construct binning tasks
+            for i in tqdm(range(0, len(self.files), ncores), disable=not(pbar)):
+                coreTasks = [] # Core-level jobs
                 for j in range(0, ncores):
-                     combineParts = []
-                     # Split up results along first bin axis
-                     for r in coreResults:
-                           combineParts.append(r[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...])
-                     # Fill up worker threads
-                     combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
+                    # Fill up worker threads
+                    ij = i + j
+                    if ij >= len(self.files):
+                        break
 
-                combineResults = d.compute(*combineTasks, scheduler=scheduler, **compute_kwds)
+                    file = self.files[ij]
+                    coreTasks.append(d.delayed(hdf5Processor(file).localBinning)(axes=axes, nbins=nbins, ranges=ranges, **binning_kwds))
 
-                # parallel concatenation of results
-                partitionResult = reduce(_arrayconcatenate, combineResults)
+                if len(coreTasks) > 0:
+                    coreResults = d.compute(*coreTasks, scheduler=scheduler, **compute_kwds)
+                    # Combine all core results for a dataframe partition
+                    # Fast parallel version with Dask
+                    combineTasks = []
+                    for j in range(0, ncores):
+                         combineParts = []
+                         # Split up results along first bin axis
+                         for r in coreResults:
+                               combineParts.append(r[int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...])
+                         # Fill up worker threads
+                         combineTasks.append(d.delayed(reduce)(_arraysum, combineParts))
 
-                self.combinedresult['binned'] += partitionResult
+                    combineResults = d.compute(*combineTasks, scheduler=scheduler, **compute_kwds)
 
-                del combineParts
-                del partitionResult
-                del combineTasks
-                del combineResults
-                del coreResults
+                    # Directly fill into target array. This is much faster than the (not so parallel) reduce/concatenation used before, and uses less memory.
+                    for j in range(0, ncores):
+                        self.combinedresult['binned'][int(j*nbins[0]/ncores):int((j+1)*nbins[0]/ncores),...] += combineResults[j]
 
-            del coreTasks
+                    del combineParts
+                    del combineTasks
+                    del combineResults
+                    del coreResults
+
+                del coreTasks
 
         # Calculate and store values of the axes
         for iax, ax in enumerate(self.binaxes):
