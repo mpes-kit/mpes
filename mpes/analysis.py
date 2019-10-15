@@ -1970,6 +1970,8 @@ class MomentumCorrector(object):
         self.imgndim = image.ndim
         if (self.imgndim > 3) or (self.imgndim < 2):
             raise ValueError('The input image dimension need to be 2 or 3!')
+        if (self.imgndim == 2):
+            self.slice = self.image
 
         self.rotsym = int(rotsym)
         self.rotsym_angle = int(360 / self.rotsym)
