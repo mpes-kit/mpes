@@ -27,6 +27,7 @@ import numpy as np
 import numpy.fft as nft
 import numba
 import scipy.io as sio
+import scipy.interpolate as sint
 import skimage.io as skio
 from PIL import Image as pim
 import warnings as wn
@@ -844,26 +845,6 @@ class hdf5Processor(hdf5Reader):
         for bc, (lrange, rrange) in zip(self.bincounts, self.binranges):
             self.binsteps.append((rrange - lrange) / bc)
 
-    @d.delayed
-    def _delayedBinning(self, data):
-        """
-        Lazily evaluated multidimensional binning.
-
-        :Parameters:
-            data : numpy array
-                Data to bin.
-
-        :Returns:
-            hist : numpy array
-                Binned histogram.
-            edges : list of numpy array
-                Bins along each axis of the histogram.
-        """
-
-        hist, edges = np.histogramdd(data, bins=self.bincounts, range=self.binranges)
-
-        return hist, edges
-
     def loadMapping(self, energy, momentum):
         """
         Load the mapping parameters
@@ -920,105 +901,25 @@ class hdf5Processor(hdf5Reader):
         else:
             raise TypeError('Inputs of axes, bins, ranges need to be list or tuple!')
 
-    def distributedProcessBinning(self, axes=None, nbins=None, ranges=None,
-                                binDict=None, chunksz=100000, pbar=True, ret=True, **kwds):
+    def getCountRate(self, plot=False):
         """
-        Compute the photoelectron intensity histogram using dask array.
+        Create count rate trace from the msMarker field in the hdf5 file.
 
-        :Paramters:
-            axes : (list of) strings | None
-                Names the axes to bin.
-            nbins : (list of) int | None
-                Number of bins along each axis.
-            ranges : (list of) tuples | None
-                Ranges of binning along every axis.
-            binDict : dict | None
-                Dictionary with specifications of axes, nbins and ranges. If binDict
-                is not None. It will override the specifications from other arguments.
-            chunksz : numeric (single numeric or tuple)
-                Size of the chunk to distribute.
-            pbar : bool | True
-                Option to display a progress bar.
-            ret : bool | True
-                :True: returns the dictionary containing binned data explicitly
-                :False: no explicit return of the binned data, the dictionary
-                generated in the binning is still retained as an instance attribute.
-
-        :Return:
-            histdict : dict
-                Dictionary containing binned data and the axes values (if ``ret = True``).
-        """
-
-        # Retrieve the range of acquired events
-        amin = kwds.pop('amin', None)
-        amax = kwds.pop('amax', None)
-        amin, amax = u.intify(amin, amax)
-
-        # Set up the binning parameters
-        self._addBinners(axes, nbins, ranges, binDict)
-
-        # Assemble the data to bin in a distributed way
-        if (amin is None) and (amax is None):
-            dsets = [self[self.nameLookupDict[ax]] for ax in axes]
-        else:
-            dsets = [self[self.nameLookupDict[ax]][slice(amin, amax)] for ax in axes]
-
-        dsets_distributed = [da.from_array(ds, chunks=(chunksz)) for ds in dsets]
-        data_unbinned = da.stack(dsets_distributed, axis=1)
-        # if rechunk:
-        #     data_unbinned = data_unbinned.rechunk('auto')
-
-        # Compute binned data
-        bintask = self._delayedBinning(self, data_unbinned)
-        if pbar:
-            with ProgressBar():
-                self.histdict['binned'], ax_vals = bintask.compute()
-        else:
-            self.histdict['binned'], ax_vals = bintask.compute()
-
-        for iax, ax in enumerate(axes):
-            self.histdict[ax] = ax_vals[iax]
-
-        if ret:
-            return self.histdict
-
-    def distributedBinning(self, axes=None, nbins=None, ranges=None, binDict=None,
-                            binmethod='fast', pbar=True, ret=True, **kwds):
-        """
         :Parameters:
-            axes, nbins, ranges, binDict, pbar
-                See ``mpes.fprocessing.binDataframe()``.
-            binmethod : str | 'fast'
-                Dataframe binning method ('original', 'lean' and 'fast').
-            ret : bool | True
-                :True: returns the dictionary containing binned data explicitly
-                :False: no explicit return of the binned data, the dictionary
-                generated in the binning is still retained as an instance attribute.
-            **kwds : keyword arguments
+            plot=False|True
+            No function yet.
+
+            return: countRate: the count rate in Hz
+                    secs: the seconds into the scan.
+
         """
+        msMarkers=self.readGroup(self, 'msMarkers', sliced=True)
+        secs = np.asarray(range(0,len(msMarkers)))/1000
+        f = sint.InterpolatedUnivariateSpline(secs, msMarkers, k=1)
+        fprime = f.derivative()
+        countRate = fprime(secs)
 
-        # Retrieve the range of acquired events
-        amin = kwds.pop('amin', None)
-        amax = kwds.pop('amax', None)
-        amin, amax = u.intify(amin, amax)
-
-        # Set up the binning parameters
-        self._addBinners(axes, nbins, ranges, binDict)
-        self.summarize(form='dataframe')
-        self.edf = self.edf[amin:amax] # Select event range for binning
-
-        if binmethod == 'original':
-            self.histdict = binDataframe(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
-                            ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
-        elif binmethod == 'lean':
-            self.histdict = binDataframe_lean(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
-                            ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
-        elif binmethod == 'fast':
-            self.histdict = binDataframe_fast(self.edf, ncores=self.ncores, axes=axes, nbins=nbins,
-                            ranges=ranges, binDict=binDict, pbar=pbar, **kwds)
-
-        if ret:
-            return self.histdict
+        return countRate, secs
 
     def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None,
         jittered=False, histcoord='midpoint', ret='dict', **kwds):
@@ -2586,6 +2487,32 @@ class parallelHDF5Processor(FileCollection):
 
         subproc = self.subset(fid)
         subproc.viewEventHistogram(ncol, **kwds)
+
+    def getCountRate(self, fids='all', plot=False):
+        """
+        Create count rate data for the files in the parallel hdf5 processor specified in 'fids'
+
+        :Parameters:
+            See arguments in ``parallelHDF5Processor.subset()`` and ``hdf5Processor.getCountRate()``.
+        """
+        if fids == 'all':
+            fids = range(0, len(self.files))
+
+        secs = []
+        countRate = []
+        accumulated_time = 0
+        for fid in fids:
+            subproc = self.subset(fid)
+            countRate_, secs_ = subproc.getCountRate(plot=False)
+            secs.append((accumulated_time + secs_).T)
+            countRate.append(countRate_.T)
+            accumulated_time += secs_[len(secs_)-1]
+
+        countRate = np.concatenate(np.asarray(countRate))
+        secs = np.concatenate(np.asarray(secs))
+
+        return countRate, secs
+
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, pbenv='classic', ret=False):
