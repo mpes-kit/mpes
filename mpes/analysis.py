@@ -2519,7 +2519,7 @@ class MomentumCorrector(object):
             self.slice_transformed = np.asarray(rotoeqs).mean(axis=0)
 
     def view(self, origin='lower', cmap='terrain_r', figsize=(4, 4), points={}, annotated=False,
-            display=True, backend='matplotlib', ret=False, imkwds={}, scatterkwds={}, **kwds):
+            display=True, backend='matplotlib', ret=False, imkwds={}, scatterkwds={}, crosshair=False, radii=[50,100,150], crosshair_thickness=1, **kwds):
         """ Display image slice with specified annotations.
 
         :Parameters:
@@ -2543,6 +2543,12 @@ class MomentumCorrector(object):
                 Option to return figure and axis objects.
             imkwd : dict | {}
                 Keyword arguments for ``matplotlib.pyplot.imshow()``.
+            crosshair : bool | False
+                Display option to plot circles around center self.pcent. Works only in bokeh backend.
+            radii  : list  |  [50,100,150]
+                Radii of circles to plot when crosshair optin is activated.
+            crosshair_thickness  :  int  |  1
+                Thickness of crosshair circles.
             **kwds : keyword arguments
                 General extra arguments for the plotting procedure.
         """
@@ -2594,6 +2600,10 @@ class MomentumCorrector(object):
                         xcirc, ycirc = pvs[1], pvs[0]
                         f.scatter(xcirc, ycirc, size=8, color=next(colors), **scatterkwds)
 
+            if crosshair:
+              for radius in radii:
+                f.annulus(x=[self.pcent[1]], y=[self.pcent[0]], inner_radius=radius-crosshair_thickness, outer_radius=radius, color="red", alpha=0.6)
+                                
             if display:
                 pbk.show(f)
 
