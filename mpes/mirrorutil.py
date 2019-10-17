@@ -20,6 +20,7 @@ class CopyTool(object):
         self.dest = dest
         self.safetyMargin = kwds.pop('safetyMargin', 1 * 2**30) # Default 500 GB safety margin
         self.pbenv = kwds.pop('pbenv', 'classic')
+        self.gid = kwds.pop('gid', 1001)
         
         if (ntasks is None) or (ntasks < 0):
             # Default to 25 concurrent copy tasks
@@ -34,9 +35,7 @@ class CopyTool(object):
 
         if numFiles > 0:
 
-            ddir = getTargetDir(sdir, self.source, self.dest)
-
-            makedirs(ddir)
+            ddir = getTargetDir(sdir, self.source, self.dest, create=True, gid=1001)
 
             numCopied = 0
 
@@ -60,7 +59,6 @@ class CopyTool(object):
 
                     copyTasks = [] # Core-level jobs
                     for sfile in filenames:
-
                             srcFile = os.path.join(path, sfile)
                             destFile = os.path.join(path.replace(sdir, ddir), sfile)
                             if (not os.path.exists(destFile) or forceCopy):
@@ -70,6 +68,10 @@ class CopyTool(object):
                     with ProgressBar():
                         d.compute(*copyTasks, scheduler=scheduler, num_workers=self.ntasks, **compute_kwds)
                     print("Copy finished!")
+                    # fix permissions and group ownership:
+                    for sfile in filenames:
+                        os.chown(os.path.join(path.replace(sdir, ddir), sfile), -1, self.gid)
+                        os.chmod(os.path.join(path.replace(sdir, ddir), sfile), 0o664)
 
                 return ddir
 
@@ -116,7 +118,7 @@ class CopyTool(object):
                 
 
 # private Functions
-def getTargetDir(sdir, source, dest):
+def getTargetDir(sdir, source, dest, create=False, gid=1001):
     if (not os.path.isdir(sdir)):
         print ("Only works for Directories!")
         return
@@ -136,6 +138,9 @@ def getTargetDir(sdir, source, dest):
     ddir = dest
     for d in dirs:
         ddir =  os.path.join(ddir,d)
+        if create==True and not os.path.exists(ddir):
+            os.makedirs(ddir, 0o775)
+            os.chown(ddir, -1, gid)
     return ddir
 
 def countFiles(directory):
@@ -146,10 +151,3 @@ def countFiles(directory):
             files.extend(filenames)
  
     return len(files)
-    
-def makedirs(dest):
-    if not os.path.exists(dest):
-        os.makedirs(dest)
-        
-        
-        
