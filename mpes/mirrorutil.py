@@ -118,7 +118,7 @@ class CopyTool(object):
                 
 
 # private Functions
-def getTargetDir(sdir, source, dest, create=False, gid=1001):
+def getTargetDir(sdir, source, dest, create=False, gid=1001, mode=0o775):
     if (not os.path.isdir(sdir)):
         print ("Only works for Directories!")
         return
@@ -139,8 +139,7 @@ def getTargetDir(sdir, source, dest, create=False, gid=1001):
     for d in dirs:
         ddir =  os.path.join(ddir,d)
         if create==True and not os.path.exists(ddir):
-            os.makedirs(ddir, 0o775)
-            os.chown(ddir, -1, gid)
+            mymakedirs(ddir, mode, gid)
     return ddir
 
 def countFiles(directory):
@@ -151,3 +150,15 @@ def countFiles(directory):
             files.extend(filenames)
  
     return len(files)
+    
+# replacement for os.makedirs, which is independent of umask
+def mymakedirs(path, mode, gid):
+    if not path or os.path.exists(path):
+        return []
+    (head, tail) = os.path.split(path)
+    res = mymakedirs(head, mode, gid)
+    os.mkdir(path)
+    os.chmod(path, mode)
+    os.chown(path, -1, gid)
+    res += [path]
+    return res
