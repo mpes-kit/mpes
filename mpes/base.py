@@ -17,6 +17,7 @@ import cv2
 from functools import partial
 import scipy.io as sio
 from scipy.interpolate import griddata
+import pickle
 
 
 class FileCollection(object):
@@ -351,7 +352,7 @@ def saveClassAttributes(clss, form, save_addr):
         clss : instance
             Handle of the instance to be saved.
         form : str
-            Format to save in ('h5' or 'mat').
+            Format to save in ('h5'/'hdf5', 'mat', or 'dmp'/'dump').
         save_addr : str
             The address to save the attributes in.
     """
@@ -366,9 +367,39 @@ def saveClassAttributes(clss, form, save_addr):
             dictdump.dicttoh5(clss.__dict__, save_addr)
         except:
             dio.save(save_addr, clss.__dict__, compression=None)
+            
+    elif form in ('dmp', 'dump'):
+        fh = open(save_addr, 'wb')
+        pickle.dump(clss, fh)
+        fh.close()
 
     else:
         raise NotImplementedError
+        
+        
+def loadClassAttributes(form, load_addr):
+    """ Load class from saved attributes.
+
+    :Parameters:
+        form : dump
+            Format to load from (only works for 'dump' right now).
+        load_addr : str
+            The address to load the attributes from.
+            
+        returns the loaded class
+    """
+
+    load_addr = u.appendformat(load_addr, form)
+        
+    if form in ('dmp', 'dump'):
+        fh = open(load_addr, 'rb')
+        clss = pickle.load(fh)
+        fh.close()
+
+    else:
+        raise NotImplementedError
+        
+    return clss
 
 
 def tof2evpoly(a, E0, t):

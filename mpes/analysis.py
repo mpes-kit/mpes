@@ -721,7 +721,7 @@ class EnergyCalibrator(base.FileCollection):
         """
 
         return int(np.round(self.nranges / self.ntraces))
-
+        
     def read(self, form='h5', tracename='', tofname='ToF'):
         """ Read traces (e.g. energy dispersion curves) from files.
 
@@ -2024,6 +2024,22 @@ class MomentumCorrector(object):
         elif self.imgndim == 2:
             raise ValueError('Input image dimension is already 2!')
 
+            
+    def importBinningParameters(self, parp):
+        """ Import parameters of binning used for correction image from parallelHDF5Processor Class instance
+        
+        :Parameters:
+            parp: instance of the ParallelHDF5Processor class used for creation of the correction image
+            
+        """
+        
+        if hasattr(parp, '__class__'):
+            self.binranges = parp.binranges
+            self.binsteps = parp.binsteps
+        else:
+            raise ValueError('Not a valid parallelHDF5Processor class instance!')
+            
+
     def featureExtract(self, image, direction='ccw', type='points', center_det='centroidnn',
                         symscores=True, **kwds):
         """ Extract features from the selected 2D slice.
@@ -2634,6 +2650,9 @@ class MomentumCorrector(object):
         """
 
         self.calibration = calibrateK(image, point_from, point_to, dist, ret='all', **kwds)
+        
+        # Store coordinates of BZ center
+        self.BZcenter = point_to
 
         if ret != False:
             try:
