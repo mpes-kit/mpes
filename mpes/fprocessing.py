@@ -913,6 +913,7 @@ class hdf5Processor(hdf5Reader):
                     secs: the seconds into the scan.
 
         """
+
         msMarkers=self.readGroup(self, 'msMarkers', sliced=True)
         secs = np.asarray(range(0,len(msMarkers)))/1000
         f = sint.InterpolatedUnivariateSpline(secs, msMarkers, k=1)
@@ -920,6 +921,16 @@ class hdf5Processor(hdf5Reader):
         countRate = fprime(secs)
 
         return countRate, secs
+
+    def getElapsedTime(self):
+        """
+        Return the elapsed time in the file from the msMarkers wave
+
+            return: secs: the length of the the file in seconds.
+        """ 
+        
+        secs = self.get('msMarkers').len()/1000
+        return secs
 
     def localBinning(self, axes=None, nbins=None, ranges=None, binDict=None,
         jittered=False, histcoord='midpoint', ret='dict', **kwds):
@@ -2375,6 +2386,51 @@ class dataframeProcessor(MapParser):
             raise TypeError('Inputs of axes, bins, ranges need to be list or tuple!')
 
 
+    def getCountRate(self, fids='all', plot=False):
+        """
+        Create count rate data for the files in the data frame processor specified in 'fids'
+
+        :Parameters:
+            fids: the file ids to include. 'all' | list of file ids.
+            See arguments in ``parallelHDF5Processor.subset()`` and ``hdf5Processor.getCountRate()``.
+        """
+        if fids == 'all':
+            fids = range(0, len(self.datafiles))
+
+        secs = []
+        countRate = []
+        accumulated_time = 0
+        for fid in fids:
+            subproc = hdf5Processor(self.datafiles[fid])
+            countRate_, secs_ = subproc.getCountRate(plot=False)
+            secs.append((accumulated_time + secs_).T)
+            countRate.append(countRate_.T)
+            accumulated_time += secs_[len(secs_)-1]
+
+        countRate = np.concatenate(np.asarray(countRate))
+        secs = np.concatenate(np.asarray(secs))
+
+        return countRate, secs
+
+
+    def getElapsedTime(self, fids='all'):
+        """
+        Return the elapsed time in the file from the msMarkers wave
+
+            return: secs: the length of the the file in seconds.
+        """
+        
+        if fids == 'all':
+            fids = range(0, len(self.datafiles))
+        
+        secs = 0
+        for fid in fids:
+            subproc = hdf5Processor(self.datafiles[fid])
+            secs += subproc.get('msMarkers').len()/1000
+            
+        return secs
+
+
 
 class parquetProcessor(dataframeProcessor):
     """
@@ -2493,6 +2549,7 @@ class parallelHDF5Processor(FileCollection):
         Create count rate data for the files in the parallel hdf5 processor specified in 'fids'
 
         :Parameters:
+            fids: the file ids to include. 'all' | list of file ids.
             See arguments in ``parallelHDF5Processor.subset()`` and ``hdf5Processor.getCountRate()``.
         """
         if fids == 'all':
@@ -2513,6 +2570,22 @@ class parallelHDF5Processor(FileCollection):
 
         return countRate, secs
 
+    def getElapsedTime(self, fids='all'):
+        """
+        Return the elapsed time in the file from the msMarkers wave
+
+            return: secs: the length of the the file in seconds.
+        """
+        
+        if fids == 'all':
+            fids = range(0, len(self.files))
+        
+        secs = 0
+        for fid in fids:
+            subproc = self.subset(fid)
+            secs += subproc.get('msMarkers').len()/1000
+            
+        return secs
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
     histcoord='midpoint', pbar=True, binning_kwds={}, compute_kwds={}, pbenv='classic', ret=False):
