@@ -12,7 +12,6 @@
 # =========================
 
 from __future__ import print_function, division
-from .igoribw import loadibw
 from .base import FileCollection, MapParser, saveClassAttributes
 from .visualization import grid_histogram
 from . import utils as u, bandstructure as bs, base as b
@@ -172,6 +171,7 @@ def readIgorBinFile(fdir, **kwds):
     elif ftype == 'ibw':
 
         try:
+            from .igoribw import loadibw
             igfile = loadibw(fdir)
         except IOError:
             print(errmsg)
