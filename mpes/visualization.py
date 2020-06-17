@@ -710,7 +710,7 @@ def bandpathplot(pathmap, symlabel, symid, energytk=None, energylabel=None, \
     return ax
 
 
-def sliceview3d(datamat, axis=0, numbered=True, **kwds):
+def sliceview3d(datamat, axis=0, numbered=True, imkwds={}, **kwds):
     """
     3D matrix slices displayed in a grid of subplots
     **Parameters**
@@ -774,6 +774,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
     asp = kwds.pop('aspect', 'auto')
     origin = kwds.pop('origin', 'lower')
     plottype = kwds.pop('plottype','imshow')
+    xaxvis, yaxvis = kwds.pop('ax_visible', [False, False])
 
     # Text annotation on each plot, effective when numbered == True
     numcolor = kwds.pop('numcolor', 'black')
@@ -829,7 +830,7 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
             # Make subplot
             if plottype[i] == 'imshow':
                 im = axcurr.imshow(img, cmap=cmap, vmin=vmin, vmax=vmax,
-                        aspect=asp, origin=origin)
+                        aspect=asp, origin=origin, **imkwds)
 
                 # Set color scaling for each image individually
                 if cscale == 'log':  # log scale
@@ -849,14 +850,14 @@ def sliceview3d(datamat, axis=0, numbered=True, **kwds):
 
             elif plottype[i] == 'contourf':
                 im = axcurr.contourf(xgrid, ygrid, img, cmap=cmap,
-                        levels=lvls, vmin=vmin, vmax=vmax, origin=origin)
+                        levels=lvls, vmin=vmin, vmax=vmax, origin=origin, **imkwds)
 
             ims.append(im)
 
             # to do: set global color scaling for 3D matrix
 
-            axcurr.get_xaxis().set_visible(False)
-            axcurr.get_yaxis().set_visible(False)
+            axcurr.get_xaxis().set_visible(xaxvis)
+            axcurr.get_yaxis().set_visible(yaxvis)
 
             if numbered:
                 axcurr.text(
