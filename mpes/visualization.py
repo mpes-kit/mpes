@@ -31,7 +31,7 @@ import bokeh.palettes as bp
 from bokeh.colors import RGB
 from bokeh.io import output_notebook
 from copy import copy
-import re, glob2 as g
+import re, glob as g
 from PIL import Image
 import imageio as imio
 import natsort as nts

@@ -5,7 +5,6 @@ scipy
 matplotlib
 bokeh
 scikit-image
-glob2
 sphinx
 nose
 coverage
