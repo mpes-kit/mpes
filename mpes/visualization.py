@@ -393,7 +393,7 @@ def colormesh2d(data, **kwds):
     try:
         ax = kwds.pop('plotaxes')
     except:
-        figure, ax = plt.subplots(1, figsize=(fw, fh))
+        _, ax = plt.subplots(1, figsize=(fw, fh))
 
     # Use pcolormesh or contourf to render 2D plot
     xgrid, ygrid = np.meshgrid(yaxis, xaxis)
@@ -454,7 +454,7 @@ def colormesh2d(data, **kwds):
 
 def fit_parameter_plot(data, ncol, axis=(0, 1), **kwds):
     """
-    Plot of actual value, absolute and relative changes of the fitting parameters
+    Plot of actual value, absolute and relative changes of the fitting parameters.
 
     ***Parameters***
 
@@ -515,7 +515,7 @@ def fit_parameter_plot(data, ncol, axis=(0, 1), **kwds):
 def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
     """
     Split-screen plot of an ARPES spectrum
-    (intensity scaled differently for valence and conduction bands)
+    (intensity scaled differently for valence and conduction bands).
 
     **Parameters**
 
@@ -689,7 +689,7 @@ def bandpathplot(pathmap, symlabel, symid, energytk=None, energylabel=None, \
             Axes of the generated plot.
     """
 
-    fs = kwds.pop('fontsize', 15)
+    # fs = kwds.pop('fontsize', 15)
 
     # Make plot
     ax = _imshow(pathmap, xtk=symid, xtklb=symlabel, ytk=energytk, ytklb=energylabel, **kwds)
@@ -712,15 +712,17 @@ def bandpathplot(pathmap, symlabel, symid, energytk=None, energylabel=None, \
 
 def sliceview3d(datamat, axis=0, numbered=True, imkwds={}, **kwds):
     """
-    3D matrix slices displayed in a grid of subplots
+    3D matrix slices displayed in a grid of subplots.
     **Parameters**
 
     datamat : numeric 3D array
-            the 3D data to plot
+        The 3D data to plot.
     axis : int
-        the axis to slice through
+        The axis to slice through.
     numbered : bool
-        condition for numbering the subplots
+        Option to print numbering onto the subplots.
+    imkwds : dict
+        Additional arguments for the image plotting functions (`imshow` and `contourf`).
     **kwds : keyword arguments
         ==========  ===========  =============================================================================
         keyword     data type    meaning
@@ -931,7 +933,7 @@ def toggle3d(state=True, nb_backend=None, **kwds):
 
 def surf2d(datamat, frame=True, miniaxes=False, **kwds):
     """
-    2D surface plot
+    Make 2D surface plot.
     **Parameters**
 
     datamat : numeric 2D array
@@ -1066,7 +1068,7 @@ def moviemaker(folder, files=None, imform='png', movform='avi', namestr='movie',
     """
 
     fps = kwds.pop('fps', 4)
-    loop = kwds.pop('loop', 1)
+    # loop = kwds.pop('loop', 1)
 
     if files is None:
         fnames = g.glob(folder + r'\*.'+imform) # Not sorted
@@ -1081,7 +1083,7 @@ def moviemaker(folder, files=None, imform='png', movform='avi', namestr='movie',
         fnames = fnames + fnames[:-1][::-1]
 
     images = []
-    for fid, fn in enumerate(fnames):
+    for _, fn in enumerate(fnames):
 
         im = Image.open(fn)
         images.append(np.asarray(im))
