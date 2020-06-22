@@ -345,7 +345,7 @@ def colormesh2d(data, **kwds):
         xlabel         str         x axis label
         ylabel         str         y axis label
         colormap       str         `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
-        cscale         str/dict    'linear' (default), 'log', 'gammaA-b', dictionary with keys
+        cscale         str/dict    '' (default), 'linear', 'log', 'gammaA-b', dictionary with keys
                                    ['midpoint', 'vmin', 'vmax'] for bilinear normalization
         levels         1D array    explicit contour levels (ignores ncontour if not None)
         ncontour       int         number of contours (ignores levels if not None)
@@ -374,7 +374,7 @@ def colormesh2d(data, **kwds):
     figuresize = kwds.pop('figsize', 1.)
     # default colormap is reverse terrain
     cmap = kwds.pop('colormap', 'terrain_r')
-    cscale = kwds.pop('cscale', 'linear')
+    cscale = kwds.pop('cscale', '') # Nonspecific scale doesn't interfere with intensity bounds (vmax, vmin)
     vmin = kwds.pop('vmin', None)
     vmax = kwds.pop('vmax', None)
     xlabel = kwds.pop('xlabel', '')
@@ -724,16 +724,16 @@ def sliceview3d(datamat, axis=0, numbered=True, imkwds={}, **kwds):
     imkwds : dict
         Additional arguments for the image plotting functions (`imshow` and `contourf`).
     **kwds : keyword arguments
-        ==========  ===========  =============================================================================
+        ==========  ===========  ======================================================================================
         keyword     data type    meaning
-        ==========  ===========  =============================================================================
+        ==========  ===========  ======================================================================================
         aspect      str/numeric  aspect ratio of each subplot, from ['auto', 'equal' or scalar]
         ncol        int          number of columns in subplot grid
         nrow        int          number of rows in subplot grid
         figsize     tuple/list   figure size, (vertical_size, horizontal_size)
         flipdir     str          flip up-down or left-right of the matrix ('ud', 'lr')
         colormap    str          `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
-        cscale      str          colormap scaling ('log', 'linear', 'midpointx', or 'gammaA-b', see below)
+        cscale      str          colormap scaling (''(default), log', 'linear', 'midpointx', or 'gammaA-b', see below)
         vmin        numeric      minimum of the color scale
         vmax        numeric      maximum of the color scale
         numcolor    str          color code for subplot number
@@ -745,7 +745,7 @@ def sliceview3d(datamat, axis=0, numbered=True, imkwds={}, **kwds):
         plottype    str          'imshow' (default) or 'contourf'
         maintitle   str          main title of the plot
         axisreturn  str          'flattened' or 'nested', return format of axis object
-        ==========  ===========  =============================================================================
+        ==========  ===========  ======================================================================================
 
     **Returns**
 
@@ -768,7 +768,7 @@ def sliceview3d(datamat, axis=0, numbered=True, imkwds={}, **kwds):
 
     # Parameters at the subfigure level
     cmap = kwds.pop('colormap', 'Greys')
-    cscale = kwds.pop('cscale', 'linear')
+    cscale = kwds.pop('cscale', '') # Nonspecific scale doesn't interfere with intensity bounds (vmax, vmin)
     figuresize = kwds.pop('figsize', '')
     flipdir = kwds.pop('flipdir', '')
     vmin = kwds.pop('vmin', None)
