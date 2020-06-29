@@ -55,7 +55,7 @@ class CopyTool(object):
                         return
                     for directory in dirs:
                         destDir = path.replace(sdir,ddir)
-                        makedirs(os.path.join(destDir, directory))
+                        mymakedirs(os.path.join(destDir, directory), gid=self.gid, mode=0o775)
 
                     copyTasks = [] # Core-level jobs
                     for sfile in filenames:
