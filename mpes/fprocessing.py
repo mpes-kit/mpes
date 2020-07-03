@@ -2114,6 +2114,10 @@ class dataframeProcessor(MapParser):
                     Linewidth value for correction using a 2D Lorentz profile.
                 :sig: numeric
                     Standard deviation for correction using a 2D Gaussian profile.
+                :gam2: numeric
+                    Linewidth value for correction using an asymmetric 2D Lorentz profile, X-direction.   
+                :amplitude2: numeric
+                    Amplitude value for correction using an asymmetric 2D Lorentz profile, X-direction.                 
         """
 
         corraxis = kwds.pop('corraxis', 't')
@@ -2135,6 +2139,13 @@ class dataframeProcessor(MapParser):
             sig = kwds.pop('sigma', 300)
             self.edf[corraxis] += amplitude/np.sqrt(2*np.pi*sig**2) *\
                 np.exp(-((self.edf['X'] - xcenter)**2 + (self.edf['Y'] - ycenter)**2) / (2*sig**2))
+                
+        elif type == 'Lorentzian_asymmetric':
+            gam = kwds.pop('gamma', 300)
+            gam2 = kwds.pop('gamma2', 300)
+            amplitude2 = kwds.pop('amplitude2', -1)
+            self.edf[corraxis] += amplitude/(gam * np.pi) * (gam**2 / ((self.edf['Y'] - ycenter)**2 + gam**2))
+            self.edf[corraxis] += amplitude2/(gam2 * np.pi) * (gam2**2 / ((self.edf['X'] - xcenter)**2 + gam2**2))
 
         else:
             raise NotImplementedError
