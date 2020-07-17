@@ -20,7 +20,7 @@ class CopyTool(object):
         self.dest = dest
         self.safetyMargin = kwds.pop('safetyMargin', 1 * 2**30) # Default 500 GB safety margin
         self.pbenv = kwds.pop('pbenv', 'classic')
-        self.gid = kwds.pop('gid', 1001)
+        self.gid = kwds.pop('gid', 5050)
         
         if (ntasks is None) or (ntasks < 0):
             # Default to 25 concurrent copy tasks
@@ -35,7 +35,7 @@ class CopyTool(object):
 
         if numFiles > 0:
 
-            ddir = getTargetDir(sdir, self.source, self.dest, create=True, gid=1001)
+            ddir = getTargetDir(sdir, self.source, self.dest, gid=self.gid, mode=0o775, create=True, )
 
             numCopied = 0
 
@@ -118,7 +118,7 @@ class CopyTool(object):
                 
 
 # private Functions
-def getTargetDir(sdir, source, dest, create=False, gid=1001, mode=0o775):
+def getTargetDir(sdir, source, dest, gid, mode, create=False):
     if (not os.path.isdir(sdir)):
         print ("Only works for Directories!")
         return
