@@ -91,6 +91,9 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis</a></li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
@@ -169,6 +172,7 @@
  | <a href="#G"><strong>G</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
@@ -178,6 +182,7 @@
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  | <a href="#Y"><strong>Y</strong></a>
  
 </div>
@@ -185,8 +190,6 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.addFeatures">addFeatures() (mpes.analysis.EnergyCalibrator method)</a>
-</li>
-      <li><a href="analysis.html#mpes.analysis.affineWarping">affineWarping() (in module mpes.analysis)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.appendColumn">appendColumn() (mpes.fprocessing.dataframeProcessor method)</a>
 </li>
@@ -198,15 +201,19 @@
 </li>
       <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.appendMarker">appendMarker() (mpes.fprocessing.dataframeProcessor method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.appendRow">appendRow() (mpes.fprocessing.dataframeProcessor method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="analysis.html#mpes.analysis.apply_mask_along">apply_mask_along() (in module mpes.analysis)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.MomentumCorrector.applyDeformation">applyDeformation() (mpes.analysis.MomentumCorrector method)</a>
 </li>
+      <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.applyECorrection">applyECorrection() (mpes.fprocessing.dataframeProcessor method)</a>
+</li>
       <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.applyFilter">applyFilter() (mpes.fprocessing.dataframeProcessor method)</a>
+</li>
+      <li><a href="file_io.html#mpes.fprocessing.applyJitter">applyJitter() (in module mpes.fprocessing)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.applyKCorrection">applyKCorrection() (mpes.fprocessing.dataframeProcessor method)</a>
 </li>
@@ -224,14 +231,22 @@
 </li>
       <li><a href="visualization.html#mpes.visualization.bandpathplot">bandpathplot() (in module mpes.visualization)</a>
 </li>
+      <li><a href="base.html#mpes.base.MapParser.bfile">bfile() (mpes.base.MapParser property)</a>
+</li>
       <li><a href="file_io.html#mpes.fprocessing.binDataframe">binDataframe() (in module mpes.fprocessing)</a>
+</li>
+      <li><a href="file_io.html#mpes.fprocessing.binDataframe_fast">binDataframe_fast() (in module mpes.fprocessing)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.binDataframe_lean">binDataframe_lean() (in module mpes.fprocessing)</a>
 </li>
-      <li><a href="file_io.html#mpes.fprocessing.binPartition">binPartition() (in module mpes.fprocessing)</a>
+      <li><a href="file_io.html#mpes.fprocessing.binDataframe_numba">binDataframe_numba() (in module mpes.fprocessing)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="file_io.html#mpes.fprocessing.binPartition">binPartition() (in module mpes.fprocessing)</a>
+</li>
+      <li><a href="file_io.html#mpes.fprocessing.binPartition_numba">binPartition_numba() (in module mpes.fprocessing)</a>
+</li>
       <li><a href="analysis.html#mpes.analysis.blocknorm">blocknorm() (in module mpes.analysis)</a>
 </li>
       <li><a href="utils.html#mpes.utils.bnorm">bnorm() (in module mpes.utils)</a>
@@ -268,10 +283,10 @@
 </li>
       <li><a href="visualization.html#mpes.visualization.cm2palette">cm2palette() (in module mpes.visualization)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="visualization.html#mpes.visualization.colormesh2d">colormesh2d() (in module mpes.visualization)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.columnApply">columnApply() (mpes.fprocessing.dataframeProcessor method)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.parallelHDF5Processor.combineResults">combineResults() (mpes.fprocessing.parallelHDF5Processor method)</a>
@@ -290,6 +305,8 @@
 </li>
       <li><a href="analysis.html#mpes.analysis.MomentumCorrector.correct">correct() (mpes.analysis.MomentumCorrector method)</a>
 </li>
+      <li><a href="base.html#mpes.base.correctnd">correctnd() (in module mpes.base)</a>
+</li>
       <li><a href="analysis.html#mpes.analysis.curvature2d">curvature2d() (in module mpes.analysis)</a>
 </li>
   </ul></td>
@@ -302,19 +319,19 @@
 </li>
       <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.deleteColumn">deleteColumn() (mpes.fprocessing.dataframeProcessor method)</a>
 </li>
-      <li><a href="utils.html#mpes.utils.dictmerge">dictmerge() (in module mpes.utils)</a>
+      <li><a href="base.html#mpes.base.detrc2krc">detrc2krc() (in module mpes.base)</a>
+</li>
+      <li><a href="base.html#mpes.base.detxy2kxy">detxy2kxy() (in module mpes.base)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="base.html#mpes.base.dfieldapply">dfieldapply() (in module mpes.base)</a>
+</li>
+      <li><a href="utils.html#mpes.utils.dictmerge">dictmerge() (in module mpes.utils)</a>
+</li>
       <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.distributedBinning">distributedBinning() (mpes.fprocessing.dataframeProcessor method)</a>
-
-      <ul>
-        <li><a href="file_io.html#mpes.fprocessing.hdf5Processor.distributedBinning">(mpes.fprocessing.hdf5Processor method)</a>
 </li>
-      </ul></li>
-      <li><a href="file_io.html#mpes.fprocessing.hdf5Processor.distributedProcessBinning">distributedProcessBinning() (mpes.fprocessing.hdf5Processor method)</a>
-</li>
-      <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.dup">dup (mpes.analysis.EnergyCalibrator attribute)</a>
+      <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.dup">dup() (mpes.analysis.EnergyCalibrator property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -322,10 +339,14 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="analysis.html#mpes.analysis.EnergyCalibrator">EnergyCalibrator (class in mpes.analysis)</a>
+      <li><a href="base.html#mpes.base.MapParser.Efile">Efile() (mpes.base.MapParser property)</a>
+</li>
+      <li><a href="base.html#mpes.base.MapParser.EMap">EMap() (mpes.base.MapParser property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="analysis.html#mpes.analysis.EnergyCalibrator">EnergyCalibrator (class in mpes.analysis)</a>
+</li>
       <li><a href="file_io.html#mpes.fprocessing.extractEDC">extractEDC() (in module mpes.fprocessing)</a>
 </li>
   </ul></td>
@@ -340,19 +361,23 @@
         <li><a href="analysis.html#mpes.analysis.MomentumCorrector.featureExtract">(mpes.analysis.MomentumCorrector method)</a>
 </li>
       </ul></li>
-      <li><a href="analysis.html#mpes.analysis.MomentumCorrector.features">features (mpes.analysis.MomentumCorrector attribute)</a>
+      <li><a href="analysis.html#mpes.analysis.MomentumCorrector.features">features() (mpes.analysis.MomentumCorrector property)</a>
 </li>
+      <li><a href="base.html#mpes.base.FileCollection">FileCollection (class in mpes.base)</a>
+</li>
+      <li><a href="base.html#mpes.base.FileCollection.fileID">fileID() (mpes.base.FileCollection property)</a>
+</li>
+      <li><a href="base.html#mpes.base.FileCollection.filter">filter() (mpes.base.FileCollection method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#mpes.utils.find_nearest">find_nearest() (in module mpes.utils)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.findCorrespondence">findCorrespondence() (mpes.analysis.EnergyCalibrator static method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="analysis.html#mpes.analysis.Model.fit">fit() (mpes.analysis.Model method)</a>
 </li>
       <li><a href="visualization.html#mpes.visualization.fit_parameter_plot">fit_parameter_plot() (in module mpes.visualization)</a>
-</li>
-      <li><a href="analysis.html#mpes.analysis.fitEllipseParams">fitEllipseParams() (in module mpes.analysis)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.func_add">func_add() (in module mpes.analysis)</a>
 </li>
@@ -364,15 +389,33 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="base.html#mpes.base.FileCollection.gather">gather() (mpes.base.FileCollection method)</a>
+</li>
       <li><a href="analysis.html#mpes.analysis.gaussian">gaussian() (in module mpes.analysis)</a>
+</li>
+      <li><a href="base.html#mpes.base.generateDfield">generateDfield() (in module mpes.base)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.hdf5Reader.getAttributeNames">getAttributeNames() (mpes.fprocessing.hdf5Reader method)</a>
 </li>
-      <li><a href="file_io.html#mpes.fprocessing.hdf5Reader.getGroupNames">getGroupNames() (mpes.fprocessing.hdf5Reader method)</a>
+      <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.getCountRate">getCountRate() (mpes.fprocessing.dataframeProcessor method)</a>
+
+      <ul>
+        <li><a href="file_io.html#mpes.fprocessing.hdf5Processor.getCountRate">(mpes.fprocessing.hdf5Processor method)</a>
 </li>
+        <li><a href="file_io.html#mpes.fprocessing.parallelHDF5Processor.getCountRate">(mpes.fprocessing.parallelHDF5Processor method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="file_io.html#mpes.fprocessing.getJitter">getJitter() (in module mpes.fprocessing)</a>
+      <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.getElapsedTime">getElapsedTime() (mpes.fprocessing.dataframeProcessor method)</a>
+
+      <ul>
+        <li><a href="file_io.html#mpes.fprocessing.hdf5Processor.getElapsedTime">(mpes.fprocessing.hdf5Processor method)</a>
+</li>
+        <li><a href="file_io.html#mpes.fprocessing.parallelHDF5Processor.getElapsedTime">(mpes.fprocessing.parallelHDF5Processor method)</a>
+</li>
+      </ul></li>
+      <li><a href="file_io.html#mpes.fprocessing.hdf5Reader.getGroupNames">getGroupNames() (mpes.fprocessing.hdf5Reader method)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.MomentumCorrector.getWarpFunction">getWarpFunction() (mpes.analysis.MomentumCorrector static method)</a>
 </li>
@@ -402,11 +445,35 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="file_io.html#mpes.fprocessing.im2mat">im2mat() (in module mpes.fprocessing)</a>
 </li>
+      <li><a href="analysis.html#mpes.analysis.image_interpolator">image_interpolator() (in module mpes.analysis)</a>
+</li>
+      <li><a href="analysis.html#mpes.analysis.MomentumCorrector.importBinningParameters">importBinningParameters() (mpes.analysis.MomentumCorrector method)</a>
+</li>
+      <li><a href="base.html#mpes.base.imrc2krc">imrc2krc() (in module mpes.base)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="base.html#mpes.base.imxy2kxy">imxy2kxy() (in module mpes.base)</a>
+</li>
       <li><a href="visualization.html#mpes.visualization.initmpl">initmpl() (in module mpes.visualization)</a>
 </li>
+      <li><a href="analysis.html#mpes.analysis.MomentumCorrector.intensityTransform">intensityTransform() (mpes.analysis.MomentumCorrector method)</a>
+</li>
+      <li><a href="analysis.html#mpes.analysis.interp_slice">interp_slice() (in module mpes.analysis)</a>
+</li>
       <li><a href="utils.html#mpes.utils.intify">intify() (in module mpes.utils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="base.html#mpes.base.MapParser.kfile">kfile() (mpes.base.MapParser property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="base.html#mpes.base.MapParser.kMap">kMap() (mpes.base.MapParser property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -414,13 +481,21 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="analysis.html#mpes.analysis.line_generator">line_generator() (in module mpes.analysis)</a>
+</li>
       <li><a href="analysis.html#mpes.analysis.MomentumCorrector.linWarpEstimate">linWarpEstimate() (mpes.analysis.MomentumCorrector method)</a>
+</li>
+      <li><a href="base.html#mpes.base.MapParser.listfind">listfind() (mpes.base.MapParser static method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="base.html#mpes.base.loadClassAttributes">loadClassAttributes() (in module mpes.base)</a>
+</li>
       <li><a href="file_io.html#mpes.fprocessing.hdf5Processor.loadMapping">loadMapping() (mpes.fprocessing.hdf5Processor method)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.hdf5Processor.localBinning">localBinning() (mpes.fprocessing.hdf5Processor method)</a>
+</li>
+      <li><a href="file_io.html#mpes.fprocessing.hdf5Processor.localBinning_numba">localBinning_numba() (mpes.fprocessing.hdf5Processor method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -428,30 +503,82 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="analysis.html#mpes.analysis.BoundedArea.mask">mask (mpes.analysis.BoundedArea attribute)</a>
+      <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.mapColumn">mapColumn() (mpes.fprocessing.dataframeProcessor method)</a>
+</li>
+      <li><a href="base.html#mpes.base.MapParser.mapConstruct">mapConstruct() (mpes.base.MapParser static method)</a>
+</li>
+      <li><a href="base.html#mpes.base.MapParser">MapParser (class in mpes.base)</a>
+</li>
+      <li><a href="base.html#mpes.base.mapping">mapping() (in module mpes.base)</a>
+</li>
+      <li><a href="analysis.html#mpes.analysis.BoundedArea.mask">mask() (mpes.analysis.BoundedArea property)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.mat2im">mat2im() (in module mpes.fprocessing)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.metaReadHDF5">metaReadHDF5() (in module mpes.fprocessing)</a>
 </li>
+      <li><a href="visualization.html#mpes.visualization.MidpointNormalize">MidpointNormalize (class in mpes.visualization)</a>
+</li>
       <li><a href="analysis.html#mpes.analysis.Model">Model (class in mpes.analysis)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.Model.model_eval">model_eval() (mpes.analysis.Model method)</a>
 </li>
-      <li><a href="analysis.html#mpes.analysis.MomentumCorrector">MomentumCorrector (class in mpes.analysis)</a>
+      <li>
+    module
+
+      <ul>
+        <li><a href="analysis.html#module-mpes.analysis">mpes.analysis</a>
 </li>
+        <li><a href="base.html#module-mpes.base">mpes.base</a>
+</li>
+        <li><a href="file_io.html#module-mpes.fprocessing">mpes.fprocessing</a>
+</li>
+        <li><a href="utils.html#module-mpes.utils">mpes.utils</a>
+</li>
+        <li><a href="visualization.html#module-mpes.visualization">mpes.visualization</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="analysis.html#mpes.analysis.MomentumCorrector">MomentumCorrector (class in mpes.analysis)</a>
+</li>
       <li><a href="visualization.html#mpes.visualization.moviemaker">moviemaker() (in module mpes.visualization)</a>
 </li>
-      <li><a href="analysis.html#module-mpes.analysis">mpes.analysis (module)</a>
+      <li>
+    mpes.analysis
+
+      <ul>
+        <li><a href="analysis.html#module-mpes.analysis">module</a>
 </li>
-      <li><a href="file_io.html#module-mpes.fprocessing">mpes.fprocessing (module)</a>
+      </ul></li>
+      <li>
+    mpes.base
+
+      <ul>
+        <li><a href="base.html#module-mpes.base">module</a>
 </li>
-      <li><a href="utils.html#module-mpes.utils">mpes.utils (module)</a>
+      </ul></li>
+      <li>
+    mpes.fprocessing
+
+      <ul>
+        <li><a href="file_io.html#module-mpes.fprocessing">module</a>
 </li>
-      <li><a href="visualization.html#module-mpes.visualization">mpes.visualization (module)</a>
+      </ul></li>
+      <li>
+    mpes.utils
+
+      <ul>
+        <li><a href="utils.html#module-mpes.utils">module</a>
 </li>
+      </ul></li>
+      <li>
+    mpes.visualization
+
+      <ul>
+        <li><a href="visualization.html#module-mpes.visualization">module</a>
+</li>
+      </ul></li>
       <li><a href="utils.html#mpes.utils.multithresh">multithresh() (in module mpes.utils)</a>
 </li>
   </ul></td>
@@ -460,12 +587,18 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="base.html#mpes.base.FileCollection.nallfiles">nallfiles() (mpes.base.FileCollection property)</a>
+</li>
       <li><a href="file_io.html#mpes.fprocessing.hdf5Reader.name2alias">name2alias() (mpes.fprocessing.hdf5Reader method)</a>
 </li>
-      <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.ncol">ncol (mpes.fprocessing.dataframeProcessor attribute)</a>
+      <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.ncol">ncol() (mpes.fprocessing.dataframeProcessor property)</a>
 </li>
-      <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.nfiles">nfiles (mpes.analysis.EnergyCalibrator attribute)</a>
+      <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.nfiles">nfiles() (mpes.analysis.EnergyCalibrator property)</a>
+
+      <ul>
+        <li><a href="base.html#mpes.base.FileCollection.nfiles">(mpes.base.FileCollection property)</a>
 </li>
+      </ul></li>
       <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.normalize">normalize() (mpes.analysis.EnergyCalibrator method)</a>
 
       <ul>
@@ -476,11 +609,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#mpes.utils.normspec">normspec() (in module mpes.utils)</a>
 </li>
-      <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.nranges">nranges (mpes.analysis.EnergyCalibrator attribute)</a>
+      <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.nranges">nranges() (mpes.analysis.EnergyCalibrator property)</a>
 </li>
-      <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.nrow">nrow (mpes.fprocessing.dataframeProcessor attribute)</a>
+      <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.nrow">nrow() (mpes.fprocessing.dataframeProcessor property)</a>
 </li>
-      <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.ntraces">ntraces (mpes.analysis.EnergyCalibrator attribute)</a>
+      <li><a href="analysis.html#mpes.analysis.EnergyCalibrator.ntraces">ntraces() (mpes.analysis.EnergyCalibrator property)</a>
+</li>
+      <li><a href="file_io.html#mpes.fprocessing.numba_histogramdd">numba_histogramdd() (in module mpes.fprocessing)</a>
 </li>
       <li><a href="utils.html#mpes.utils.numFormatConversion">numFormatConversion() (in module mpes.utils)</a>
 </li>
@@ -492,19 +627,35 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="file_io.html#mpes.fprocessing.parallelHDF5Processor.parallelBinning">parallelBinning() (mpes.fprocessing.parallelHDF5Processor method)</a>
 </li>
+      <li><a href="file_io.html#mpes.fprocessing.parallelHDF5Processor.parallelBinning_old">parallelBinning_old() (mpes.fprocessing.parallelHDF5Processor method)</a>
+</li>
       <li><a href="file_io.html#mpes.fprocessing.parallelHDF5Processor">parallelHDF5Processor (class in mpes.fprocessing)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.parquetProcessor">parquetProcessor (class in mpes.fprocessing)</a>
 </li>
+      <li><a href="base.html#mpes.base.MapParser.parse">parse() (mpes.base.MapParser static method)</a>
+</li>
+      <li><a href="base.html#mpes.base.MapParser.parse_bfile">parse_bfile() (mpes.base.MapParser method)</a>
+</li>
+      <li><a href="base.html#mpes.base.MapParser.parse_Emap">parse_Emap() (mpes.base.MapParser method)</a>
+</li>
+      <li><a href="base.html#mpes.base.MapParser.parse_kmap">parse_kmap() (mpes.base.MapParser method)</a>
+</li>
+      <li><a href="base.html#mpes.base.MapParser.parse_wmap">parse_wmap() (mpes.base.MapParser method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="analysis.html#mpes.analysis.Model.partial_eval">partial_eval() (mpes.analysis.Model method)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.peakdetect1d">peakdetect1d() (in module mpes.analysis)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="analysis.html#mpes.analysis.peakdetect2d">peakdetect2d() (in module mpes.analysis)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.peaksearch">peaksearch() (in module mpes.analysis)</a>
+</li>
+      <li><a href="base.html#mpes.base.perspectiveTransform">perspectiveTransform() (in module mpes.base)</a>
+</li>
+      <li><a href="analysis.html#mpes.analysis.perspectiveWarping">perspectiveWarping() (in module mpes.analysis)</a>
 </li>
       <li><a href="visualization.html#mpes.visualization.plot_overlay">plot_overlay() (in module mpes.visualization)</a>
 </li>
@@ -552,6 +703,8 @@
 </li>
       <li><a href="analysis.html#mpes.analysis.MomentumCorrector.resetDeformation">resetDeformation() (mpes.analysis.MomentumCorrector method)</a>
 </li>
+      <li><a href="base.html#mpes.base.reshape2d">reshape2d() (in module mpes.base)</a>
+</li>
       <li><a href="utils.html#mpes.utils.revaxis">revaxis() (in module mpes.utils)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.ridgeDetect">ridgeDetect() (in module mpes.analysis)</a>
@@ -568,6 +721,8 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="base.html#mpes.base.saveClassAttributes">saveClassAttributes() (in module mpes.base)</a>
+</li>
       <li><a href="file_io.html#mpes.fprocessing.saveDict">saveDict() (in module mpes.fprocessing)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.saveHistogram">saveHistogram() (mpes.fprocessing.dataframeProcessor method)</a>
@@ -592,16 +747,18 @@
       </ul></li>
       <li><a href="analysis.html#mpes.analysis.segment2d">segment2d() (in module mpes.analysis)</a>
 </li>
+      <li><a href="base.html#mpes.base.FileCollection.select">select() (mpes.base.FileCollection method)</a>
+</li>
       <li><a href="analysis.html#mpes.analysis.MomentumCorrector.selectSlice2D">selectSlice2D() (mpes.analysis.MomentumCorrector method)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.BoundedArea.setBoundary">setBoundary() (mpes.analysis.BoundedArea method)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.sgfltr2d">sgfltr2d() (in module mpes.fprocessing)</a>
 </li>
-      <li><a href="analysis.html#mpes.analysis.shirley">shirley() (in module mpes.analysis)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="analysis.html#mpes.analysis.shirley">shirley() (in module mpes.analysis)</a>
+</li>
       <li><a href="analysis.html#mpes.analysis.shirley2d">shirley2d() (in module mpes.analysis)</a>
 </li>
       <li><a href="utils.html#mpes.utils.shuffleaxis">shuffleaxis() (in module mpes.utils)</a>
@@ -616,7 +773,7 @@
 </li>
       <li><a href="visualization.html#mpes.visualization.stackedlineplot">stackedlineplot() (in module mpes.visualization)</a>
 </li>
-      <li><a href="analysis.html#mpes.analysis.BoundedArea.subgrid">subgrid (mpes.analysis.BoundedArea attribute)</a>
+      <li><a href="analysis.html#mpes.analysis.BoundedArea.subgrid">subgrid() (mpes.analysis.BoundedArea property)</a>
 </li>
       <li><a href="file_io.html#mpes.fprocessing.hdf5Splitter.subset">subset() (mpes.fprocessing.hdf5Splitter method)</a>
 
@@ -632,7 +789,7 @@
       </ul></li>
       <li><a href="visualization.html#mpes.visualization.surf2d">surf2d() (in module mpes.visualization)</a>
 </li>
-      <li><a href="analysis.html#mpes.analysis.MomentumCorrector.symscores">symscores (mpes.analysis.MomentumCorrector attribute)</a>
+      <li><a href="analysis.html#mpes.analysis.MomentumCorrector.symscores">symscores() (mpes.analysis.MomentumCorrector property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -642,9 +799,13 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utils.html#mpes.utils.to_odd">to_odd() (in module mpes.utils)</a>
 </li>
-      <li><a href="file_io.html#mpes.fprocessing.hdf5Processor.toBandStructure">toBandStructure() (mpes.fprocessing.hdf5Processor method)</a>
+      <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.toBandStructure">toBandStructure() (mpes.fprocessing.dataframeProcessor method)</a>
+
+      <ul>
+        <li><a href="file_io.html#mpes.fprocessing.hdf5Processor.toBandStructure">(mpes.fprocessing.hdf5Processor method)</a>
 </li>
-      <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.toDataStructure">toDataStructure() (mpes.fprocessing.dataframeProcessor method)</a>
+      </ul></li>
+      <li><a href="base.html#mpes.base.tof2evpoly">tof2evpoly() (in module mpes.base)</a>
 </li>
       <li><a href="visualization.html#mpes.visualization.toggle3d">toggle3d() (in module mpes.visualization)</a>
 </li>
@@ -717,6 +878,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="base.html#mpes.base.MapParser.wMap">wMap() (mpes.base.MapParser property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="Y">Y</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -771,7 +940,7 @@
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
 
   
 
