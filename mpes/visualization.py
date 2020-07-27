@@ -733,7 +733,7 @@ def sliceview3d(datamat, axis=0, numbered=True, imkwds={}, **kwds):
         figsize     tuple/list   figure size, (vertical_size, horizontal_size)
         flipdir     str          flip up-down or left-right of the matrix ('ud', 'lr')
         colormap    str          `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
-        cscale      str          colormap scaling (''(default), log', 'linear', 'midpointx', or 'gammaA-b', see below)
+        cscale      str          colormap scaling (''(default), 'log', 'linear', 'midpointx', or 'gammaA-b', see below)
         vmin        numeric      minimum of the color scale
         vmax        numeric      maximum of the color scale
         numcolor    str          color code for subplot number

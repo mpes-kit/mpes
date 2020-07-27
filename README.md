@@ -28,9 +28,11 @@ pip install --upgrade git+https://github.com/mpes-kit/mpes.git
 
 PyPI installation coming soon...
 
-### Documentation
+### Documentation & citation
 
 Documentation and examples are posted [here](https://mpes-kit.github.io/mpes/).
+
+If you use it in your work, please cite the paper [arXiv:1909.07714](https://arxiv.org/abs/1909.07714).
 
 ### Dependencies
 
