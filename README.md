@@ -54,6 +54,10 @@ import mpes.fprocessing as fp
 import mpes.analysis as aly
 import mpes.visualization as vis
 ```
+which can also be done without using the aliases simply as (not recommended)
+```
+from mpes import *
+```
 
 ### Using mayavi in Jupyter notebook
 For 3D rendering of multidimensional dataset, the mpes package takes advantage of the recent version of mayavi (4.5.0 and above) with jupyter notebook support through [x3dom](https://www.x3dom.org/). Follow the steps below on the command line to allow mayavi output to be displayed on jupyter/ipython notebook
