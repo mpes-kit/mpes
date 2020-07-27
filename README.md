@@ -34,18 +34,18 @@ Documentation and examples are posted [here](https://mpes-kit.github.io/mpes/).
 
 If you use it in your work, please cite the paper [arXiv:1909.07714](https://arxiv.org/abs/1909.07714).
 
-### Dependencies
+### Selected dependencies
 
 ```
 numpy = 0.13.0 +
 scipy = 0.19.0 +
 scikit-image = 0.13.0 +
 pandas = 0.19.2 +
-mayavi = 4.5.0 +
 dask >= 0.18.0
 xarray
 opencv
 ```
+Others are described in the [requirements](https://github.com/mpes-kit/mpes/blob/master/requirements.txt).
 
 ### Overview of submodules  
 The mpes package contains the following major submodules. They are listed here along with suggested import conventions
