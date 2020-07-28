@@ -94,17 +94,18 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">How to start</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#file-formats">File formats</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="I02_overview.html">Overview of submodules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="I03_notes_packages.html">Usage notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="I03_usenotes.html">Usage notes</a></li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="base.html">Base classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="utils.html">Utility functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis  <code class="docutils literal notranslate"><span class="pre">(mpes.analysis)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization  <code class="docutils literal notranslate"><span class="pre">(mpes.visualization)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utility functions  <code class="docutils literal notranslate"><span class="pre">(mpes.utils)</span></code></a></li>
 </ul>
 
             
@@ -195,6 +196,10 @@ opencv
 </pre></div>
 </div>
 <p>Other dependencies essential for loading the submodules are described in the <a class="reference external" href="https://github.com/mpes-kit/mpes/blob/master/requirements.txt">requirements</a> file. There are situations where additional dependencies are needed to execute certain functionalities that are not essential for general use. The users need to install the dependencies separately should they wish to use them, otherwise a warning would be thrown to remind the user. This construct reduces the potential conflicts between dependencies and permits the main functionalities of the package to be run without being affected by minor dependencies.</p>
+</div>
+<div class="section" id="file-formats">
+<h2>File formats<a class="headerlink" href="#file-formats" title="Permalink to this headline">¶</a></h2>
+<p>The main format of the raw data from an MPES experiment is in HDF5, which stored the single-electron events as 2D arrays (electron index vs measured axis values) and associated machine parameters. The package also supports file I/O of standard file formats (.pxp and .ibw) from <a class="reference external" href="https://www.wavemetrics.com/products/igorpro/igorpro.htm">Igor Pro</a>, the “native language” of photoemission data analysis. This allows to use some of the functionalities of the <code class="docutils literal notranslate"><span class="pre">mpes</span></code> package for analyzing ARPES data generated from hemispherical analyzers, if needed.</p>
 </div>
 </div>
 
