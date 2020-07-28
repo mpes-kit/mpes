@@ -28,6 +28,6 @@ PyPI installation coming soon...
 
 ### Documentation & citation
 
-Documentation and examples are posted [here](https://mpes-kit.github.io/mpes/).
+Documentation on the usage is posted [here](https://mpes-kit.github.io/mpes/) and examples are provided in [Jupyter notebooks](https://github.com/mpes-kit/mpes/tree/master/examples).
 
 If you use it in your work, please cite the latest version of the paper [arXiv:1909.07714](https://arxiv.org/abs/1909.07714).
