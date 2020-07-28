@@ -1,5 +1,9 @@
-Installation
+How to start
 ============
+
+
+Installation
+#############
 
 
 The ``mpes`` package and its main dependencies can be installed in the following ways:
@@ -19,6 +23,10 @@ Install and upgrade to the latest version
 .. code-block:: bash
 
 	pip install --upgrade git+https://github.com/mpes-kit/mpes.git
+
+
+Dependencies
+#############
 
 
 The following are the main dependencies

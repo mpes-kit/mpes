@@ -3,12 +3,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-mpes documentation
+``mpes`` documentation
 ################################
 Distributed data processing routines for multidimensional photoemission spectroscopy (MPES).
 
 
-(tr)ARPES concepts:
+MPES concepts:
 ================================
 In a photoemission process, an extreme UV or X-ray photon liberates an electron from the confines of the electronic potential within the material. `ARPES <https://en.wikipedia.org/wiki/Angle-resolved_photoemission_spectroscopy>`_ directly measures the electronic energy and momentum parallel to the surface of the sample under study to infer the electronic states of the material. For a tutorial review on ARPES and its applications in physics and material science, see `here <http://www.phas.ubc.ca/~damascel/ARPES_Intro.pdf>`_. The data structure of ARPES is a stack of 2D images measured at different sample geometries, which are used to reconstruct the full static 3D band structure of the material.
 
@@ -22,9 +22,9 @@ Instructions:
 .. toctree::
    :maxdepth: 1
    
-   I01_installation
+   I01_start
    I02_overview
-   I03_notes_packages
+   I03_usenotes
 
 
 API documentation:
