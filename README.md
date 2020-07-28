@@ -1,6 +1,6 @@
 # mpes
 
-![Build Status](https://www.travis-ci.org/RealPolitiX/mpes.svg?branch=master)
+![Build Status](https://www.travis-ci.org/RealPolitiX/mpes.svg?branch=master) ![License](https://img.shields.io/github/license/mpes-kit/mpes?color=lightgrey)
 
 Python-based data processing routines for multidimensional photoemission spectroscopy (MPES). An upgrade of the angle-resolved photoemission spectroscopy (ARPES) to achieve parallel data acquisition on multiple parameters by the use of a time-of-flight tube and a multichannel delay-line detector.
 
