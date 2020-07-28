@@ -22,7 +22,9 @@ Instructions:
 .. toctree::
    :maxdepth: 1
    
-   installation
+   I01_installation
+   I02_overview
+   I03_notes_packages
 
 
 API documentation:
