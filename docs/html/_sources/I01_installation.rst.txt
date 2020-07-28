@@ -13,6 +13,14 @@ Install from git repository
 	pip install git+https://github.com/RealPolitiX/mpes.git
 
 
+Install and upgrade to the latest version
+
+
+.. code-block:: bash
+
+	pip install --upgrade git+https://github.com/mpes-kit/mpes.git
+
+
 The following are the main dependencies
 
 

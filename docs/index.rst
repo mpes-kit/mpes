@@ -5,7 +5,7 @@
 
 mpes documentation
 ################################
-the data processing package for (tr)ARPES data
+Distributed data processing routines for multidimensional photoemission spectroscopy (MPES).
 
 
 (tr)ARPES concepts:
