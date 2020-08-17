@@ -1,0 +1,3 @@
+ECalib_EDCs.mat contains energy calibration data (a set of energy distribution curves and their the respective bias voltages they are measured at).
+
+MomentumCalib.mat contains momentum calibration data (momentum-resolved constant energy cut, landmarks used for calibration and the calibration coefficients).
