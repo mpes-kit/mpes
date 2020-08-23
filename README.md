@@ -32,4 +32,4 @@ Documentation on the usage is posted [here](https://mpes-kit.github.io/mpes/) an
 
 If you use it in your work, please cite the latest version of the paper [arXiv:1909.07714](https://arxiv.org/abs/1909.07714).
 
-Due to the size of the single-event data, they will be made available on a [Zenodo repository](https://doi.org/10.5281/zenodo.3987304).
+The size of the single-event data is in the GB to TB range, some datasets used for the example [notebooks](https://github.com/mpes-kit/mpes/tree/master/examples) are made available on a [Zenodo repository](https://doi.org/10.5281/zenodo.3987303). Please always use the latest version of the datasets.
