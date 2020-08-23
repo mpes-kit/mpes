@@ -20,11 +20,11 @@ dependency_links = [x.strip().replace('git+', '') for x in all_reqs if x.startsw
 setup(
     name='mpes',
     version=__version__,
-    description='Python-based data processing routines for static and time- and angle-resolved photoemission spectroscopy (ARPES & trARPES)',
+    description='Distributed data processing routines for multidimensional photoemission spectroscopy (MPES)',
     long_description=long_description,
-    url='https://github.com/RealPolitiX/mpes',
-    download_url='https://github.com/RealPolitiX/mpes/tarball/' + __version__,
-    license='BSD',
+    url='https://github.com/mpes-kit/mpes',
+    download_url='https://github.com/mpes-kit/mpes/tarball/' + __version__,
+    license='MIT',
     classifiers=[
       'Development Status :: 3 - Alpha',
       'Intended Audience :: Developers',
