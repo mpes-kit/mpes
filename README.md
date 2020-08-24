@@ -24,7 +24,11 @@ pip install git+https://github.com/mpes-kit/mpes.git
 pip install --upgrade git+https://github.com/mpes-kit/mpes.git
 ```
 
-PyPI installation coming soon...
+3. PyPI installation
+
+```
+pip install mpes
+```
 
 ### Documentation & citation
 

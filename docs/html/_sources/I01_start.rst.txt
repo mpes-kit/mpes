@@ -17,12 +17,20 @@ Install from git repository
 	pip install git+https://github.com/RealPolitiX/mpes.git
 
 
-Install and upgrade to the latest version
+Install and upgrade to the latest version from git repository
 
 
 .. code-block:: bash
 
 	pip install --upgrade git+https://github.com/mpes-kit/mpes.git
+
+
+Install the latest packaged version on PyPI
+
+
+.. code-block:: bash
+
+	pip install mpes
 
 
 Dependencies
