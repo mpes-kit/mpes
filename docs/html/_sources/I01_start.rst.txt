@@ -49,4 +49,6 @@ Other dependencies essential for loading the submodules are described in the `re
 File formats
 #############
 
-The main format of the raw data from an MPES experiment is in HDF5, which stored the single-electron events as 2D arrays (electron index vs measured axis values) and associated machine parameters. The package also supports file I/O of standard file formats (.pxp and .ibw) from `Igor Pro <https://www.wavemetrics.com/products/igorpro/igorpro.htm>`_, the "native language" of photoemission data analysis. This allows to use some of the functionalities of the ``mpes`` package for analyzing ARPES data generated from hemispherical analyzers, if needed.
+The main format of the raw data from an MPES experiment is in HDF5, which store the single-electron events as 2D arrays (electron index vs measured axis values) and associated machine parameters. Examples can be found in the `repository <https://doi.org/10.5281/zenodo.3987303>`_ on Zenodo.
+
+The package also supports file I/O of standard file formats (.pxp and .ibw) from `Igor Pro <https://www.wavemetrics.com/products/igorpro/igorpro.htm>`_, the "native language" of photoemission data analysis. This allows to use some of the functionalities of the ``mpes`` package for analyzing ARPES data generated from hemispherical analyzers, if needed.
