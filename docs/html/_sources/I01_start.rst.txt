@@ -14,7 +14,7 @@ Install from git repository
 
 .. code-block:: bash
 
-	pip install git+https://github.com/RealPolitiX/mpes.git
+	pip install git+https://github.com/mpes-kit/mpes.git
 
 
 Install and upgrade to the latest version from git repository, or override existing version
