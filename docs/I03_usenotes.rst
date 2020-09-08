@@ -31,3 +31,17 @@ To reduce the installation requirements, mayavi is not loaded at start. Use mpes
     import mpes.visualization as vis
     vis.toggle3d(state=True, nb_backend)  # Switch on, nb_backend can be 'x3d', 'png', or blank
     vis.toggle3d(state=False)  # Switch off
+
+
+Documentation
+###################
+
+The documentation is currently built using the ``sphinx`` package and rendered online as GitHub pages. To update the documentation, first, apply changes to existing (or create new) reStructuredText (rst) files in the ``/docs`` folder. Next, go to the ``/docs`` folder at the command line and type the following,
+
+
+.. code-block:: bash
+
+    make html
+
+
+to execute the documentation building process. Most of the warnings related to line breaks may be ignored, except the fatal ones that terminates the building process. Then, check the ``/docs/index.html`` file using any standard web browser. If the changes are correctly rendered locally, update the changes to the online repository and check the outcome at the `documentation site <https://mpes-kit.github.io/mpes/>`_. Some tens of seconds of latency is expected for the changes to be included on the associated GitHub pages.

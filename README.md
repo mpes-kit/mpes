@@ -18,7 +18,7 @@ The MPES instrument enables sampling of the multidimensional parameter space ass
 ```
 pip install git+https://github.com/mpes-kit/mpes.git
 ```
-2. Upgrade or override an existing installation
+2. Upgrade or overwrite an existing installation
 
 ```
 pip install --upgrade git+https://github.com/mpes-kit/mpes.git

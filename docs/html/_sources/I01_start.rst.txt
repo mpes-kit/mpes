@@ -17,7 +17,7 @@ Install from git repository
 	pip install git+https://github.com/mpes-kit/mpes.git
 
 
-Install and upgrade to the latest version from git repository, or override existing version
+Install and upgrade to the latest version from git repository, or overwrite an existing version
 
 
 .. code-block:: bash
