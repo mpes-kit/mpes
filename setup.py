@@ -22,6 +22,7 @@ setup(
     version=__version__,
     description='Distributed data processing routines for multidimensional photoemission spectroscopy (MPES)',
     long_description=long_description,
+    long_description_content_type='text/markdown',
     url='https://github.com/mpes-kit/mpes',
     download_url='https://github.com/mpes-kit/mpes/tarball/' + __version__,
     license='MIT',
