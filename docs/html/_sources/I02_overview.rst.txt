@@ -29,6 +29,8 @@ Description
 
 ``mpes.analysis``: Contains components for data calibration, data slicing (e.g. along momentum path, or volumetric cut-out), artifact correction, peak detection, lineshape and background models for elementary data fitting and simulation.
 
-``mpes.utils`` and ``mpes.mirrorutil``: Contain utility functions supporting various other modules.
+``mpes.bandstructure``: Contains data structure classes (subclasses of ``xarray.DataArray``) that support multidimensional data manipulation befitting photoemission spectroscopy.
 
 ``mpes.visualization``: Contains functions for visualization (static and dynamic or movie).
+
+``mpes.utils`` and ``mpes.mirrorutil``: Contain utility functions supporting various other modules.

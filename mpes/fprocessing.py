@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-@author: R. Patrick Xian
+@author: R. Patrick Xian, L. Rettig
 """
 # =========================
 # Sections:

@@ -36,6 +36,7 @@ API documentation
    base
    file_io
    analysis
+   bandstructure
    visualization
    utils
 
