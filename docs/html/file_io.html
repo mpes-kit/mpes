@@ -90,11 +90,13 @@
               
             
             
-              <ul>
+              <p class="caption"><span class="caption-text">Instructions</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="I01_start.html">How to start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="I02_overview.html">Overview of modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="I03_usenotes.html">Usage notes</a></li>
 </ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="base.html">Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code></a></li>
@@ -169,6 +171,40 @@
 <h1>File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code><a class="headerlink" href="#file-i-o-processing-mpes-fprocessing" title="Permalink to this headline">¶</a></h1>
 <p>Custom methods to handle ARPES data I/O and standard data processing methods (filtering, dewarping, etc.)</p>
 <span class="target" id="module-mpes.fprocessing"></span><p>&#64;author: R. Patrick Xian, L. Rettig</p>
+<dl class="py function">
+<dt id="mpes.fprocessing._arraysum">
+<code class="sig-prename descclassname">mpes.fprocessing.</code><code class="sig-name descname">_arraysum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array_a</span></em>, <em class="sig-param"><span class="n">array_b</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing._arraysum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the sum of two arrays.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.fprocessing._hist1d_numba_seq">
+<code class="sig-prename descclassname">mpes.fprocessing.</code><code class="sig-name descname">_hist1d_numba_seq</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample</span></em>, <em class="sig-param"><span class="n">bins</span></em>, <em class="sig-param"><span class="n">ranges</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing._hist1d_numba_seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>1D Binning function, pre-compiled by Numba for performance.
+Behaves much like numpy.histogramdd, but calculates and returns unsigned 32 bit integers</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.fprocessing._hist2d_numba_seq">
+<code class="sig-prename descclassname">mpes.fprocessing.</code><code class="sig-name descname">_hist2d_numba_seq</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample</span></em>, <em class="sig-param"><span class="n">bins</span></em>, <em class="sig-param"><span class="n">ranges</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing._hist2d_numba_seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D Binning function, pre-compiled by Numba for performance.
+Behaves much like numpy.histogramdd, but calculates and returns unsigned 32 bit integers</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.fprocessing._hist3d_numba_seq">
+<code class="sig-prename descclassname">mpes.fprocessing.</code><code class="sig-name descname">_hist3d_numba_seq</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample</span></em>, <em class="sig-param"><span class="n">bins</span></em>, <em class="sig-param"><span class="n">ranges</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing._hist3d_numba_seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>3D Binning function, pre-compiled by Numba for performance.
+Behaves much like numpy.histogramdd, but calculates and returns unsigned 32 bit integers</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.fprocessing._hist4d_numba_seq">
+<code class="sig-prename descclassname">mpes.fprocessing.</code><code class="sig-name descname">_hist4d_numba_seq</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sample</span></em>, <em class="sig-param"><span class="n">bins</span></em>, <em class="sig-param"><span class="n">ranges</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing._hist4d_numba_seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>4D Binning function, pre-compiled by Numba for performance.
+Behaves much like numpy.histogramdd, but calculates and returns unsigned 32 bit integers</p>
+</dd></dl>
+
 <dl class="py function">
 <dt id="mpes.fprocessing.applyJitter">
 <code class="sig-prename descclassname">mpes.fprocessing.</code><code class="sig-name descname">applyJitter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">amp</span></em>, <em class="sig-param"><span class="n">col</span></em>, <em class="sig-param"><span class="n">type</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.applyJitter" title="Permalink to this definition">¶</a></dt>
@@ -396,6 +432,12 @@ is not None. It will override the specifications from other arguments.</p>
 <dt id="mpes.fprocessing.dataframeProcessor">
 <em class="property">class </em><code class="sig-prename descclassname">mpes.fprocessing.</code><code class="sig-name descname">dataframeProcessor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datafolder</span></em>, <em class="sig-param"><span class="n">paramfolder</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">datafiles</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">ncores</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.dataframeProcessor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Processs the parquet file converted from single events data.</p>
+<dl class="py method">
+<dt id="mpes.fprocessing.dataframeProcessor._addBinners">
+<code class="sig-name descname">_addBinners</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nbins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ranges</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">binDict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.dataframeProcessor._addBinners" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the binning parameters within an instance.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="mpes.fprocessing.dataframeProcessor.appendColumn">
 <code class="sig-name descname">appendColumn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">colnames</span></em>, <em class="sig-param"><span class="n">colvals</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.dataframeProcessor.appendColumn" title="Permalink to this definition">¶</a></dt>
@@ -821,6 +863,12 @@ Specify ‘all’ to read all files of the given file type.</p>
 <em class="property">class </em><code class="sig-prename descclassname">mpes.fprocessing.</code><code class="sig-name descname">hdf5Processor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f_addr</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.hdf5Processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class for generating multidimensional histogram from hdf5 files.</p>
 <dl class="py method">
+<dt id="mpes.fprocessing.hdf5Processor._addBinners">
+<code class="sig-name descname">_addBinners</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nbins</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ranges</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">binDict</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">irregular_bins</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.hdf5Processor._addBinners" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct the binning parameters within an instance.</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mpes.fprocessing.hdf5Processor.getCountRate">
 <code class="sig-name descname">getCountRate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">plot</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.hdf5Processor.getCountRate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create count rate trace from the msMarker field in the hdf5 file.</p>
@@ -1117,6 +1165,28 @@ bars (same length as the histogram dimensions).</p>
 <em class="property">class </em><code class="sig-prename descclassname">mpes.fprocessing.</code><code class="sig-name descname">hdf5Reader</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f_addr</span></em>, <em class="sig-param"><span class="n">ncores</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.hdf5Reader" title="Permalink to this definition">¶</a></dt>
 <dd><p>HDF5 reader class</p>
 <dl class="py method">
+<dt id="mpes.fprocessing.hdf5Reader._assembleGroups">
+<code class="sig-name descname">_assembleGroups</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gnames</span></em>, <em class="sig-param"><span class="n">amin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">amax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">use_alias</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">dtyp</span><span class="o">=</span><span class="default_value">'float32'</span></em>, <em class="sig-param"><span class="n">timeStamps</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">'array'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.hdf5Reader._assembleGroups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assemble the content values of the selected groups.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>gnames<span class="classifier">list</span></dt><dd><p>List of group names.</p>
+</dd>
+<dt>amin, amax<span class="classifier">numeric, numeric | None, None</span></dt><dd><p>Index selection range for all groups.</p>
+</dd>
+<dt>use_alias<span class="classifier">bool | True</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">hdf5Reader.getGroupNames()</span></code>.</p>
+</dd>
+<dt>dtype<span class="classifier">str | ‘float32’</span></dt><dd><p>Data type string.</p>
+</dd>
+<dt>ret<span class="classifier">str | ‘array’</span></dt><dd><p>Return type specification (‘array’ or ‘dict’).</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mpes.fprocessing.hdf5Reader.convert">
 <code class="sig-name descname">convert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">form</span></em>, <em class="sig-param"><span class="n">save_addr</span><span class="o">=</span><span class="default_value">'./summary'</span></em>, <em class="sig-param"><span class="n">pq_append</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.hdf5Reader.convert" title="Permalink to this definition">¶</a></dt>
 <dd><p>Format conversion from hdf5 to mat (for Matlab/Python) or ibw (for Igor).</p>
@@ -1378,6 +1448,20 @@ in a single bin. This should never happen in a realistic photoemission experimen
 <dt id="mpes.fprocessing.parallelHDF5Processor">
 <em class="property">class </em><code class="sig-prename descclassname">mpes.fprocessing.</code><code class="sig-name descname">parallelHDF5Processor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">file_sorting</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ncores</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.parallelHDF5Processor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class for parallel processing of hdf5 files.</p>
+<dl class="py method">
+<dt id="mpes.fprocessing.parallelHDF5Processor._parse_metadata">
+<code class="sig-name descname">_parse_metadata</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">attributes</span></em>, <em class="sig-param"><span class="n">groups</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.parallelHDF5Processor._parse_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse the metadata from all HDF5 files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>attributes, groups<span class="classifier">list, list</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">mpes.fprocessing.metaReadHDF5()</span></code>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt id="mpes.fprocessing.parallelHDF5Processor.combineResults">
 <code class="sig-name descname">combineResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.fprocessing.parallelHDF5Processor.combineResults" title="Permalink to this definition">¶</a></dt>

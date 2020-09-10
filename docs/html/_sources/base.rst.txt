@@ -4,3 +4,4 @@ Information about the base classes, the building blocks of data processing class
 
 .. automodule:: mpes.base
    :members:
+   :private-members:

@@ -90,11 +90,13 @@
               
             
             
-              <ul>
+              <p class="caption"><span class="caption-text">Instructions</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="I01_start.html">How to start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="I02_overview.html">Overview of modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="I03_usenotes.html">Usage notes</a></li>
 </ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code></a></li>
@@ -173,6 +175,25 @@
 <dt id="mpes.base.FileCollection">
 <em class="property">class </em><code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">FileCollection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">file_sorting</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">folder</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection" title="Permalink to this definition">¶</a></dt>
 <dd><p>File collecting and sorting class.</p>
+<dl class="py method">
+<dt id="mpes.base.FileCollection._sort_terms">
+<em class="property">static </em><code class="sig-name descname">_sort_terms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">terms</span></em>, <em class="sig-param"><span class="n">parameter</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection._sort_terms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort terms according to parameter value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>terms<span class="classifier">list</span></dt><dd><p>List of terms (e.g. strings).</p>
+</dd>
+<dt>parameter<span class="classifier">bool</span></dt><dd><p>Decision parameter for sorting.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return</dt>
+<dd class="field-even"><p>Sorted or unsorted terms.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt id="mpes.base.FileCollection.fileID">
 <em class="property">property </em><code class="sig-name descname">fileID</code><a class="headerlink" href="#mpes.base.FileCollection.fileID" title="Permalink to this definition">¶</a></dt>

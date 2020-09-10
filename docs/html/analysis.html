@@ -482,6 +482,12 @@ traces : 2D array | None
 <em class="property">class </em><code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">Model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span></em>, <em class="sig-param"><span class="n">xvar</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.Model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class of fitting curve models</p>
 <dl class="py method">
+<dt id="mpes.analysis.Model._costfunc">
+<code class="sig-name descname">_costfunc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inits</span></em>, <em class="sig-param"><span class="n">xv</span></em>, <em class="sig-param"><span class="n">form</span><span class="o">=</span><span class="default_value">'original'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.Model._costfunc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the cost function of the optimization process</p>
+</dd></dl>
+
+<dl class="py method">
 <dt id="mpes.analysis.Model.fit">
 <code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">inits</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'leastsq'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">fitkwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.Model.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Run the optimization</p>
@@ -511,6 +517,18 @@ traces : 2D array | None
 <dt id="mpes.analysis.MomentumCorrector">
 <em class="property">class </em><code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">MomentumCorrector</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">rotsym</span><span class="o">=</span><span class="default_value">6</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Momentum distortion correction and momentum calibration workflow.</p>
+<dl class="py method">
+<dt id="mpes.analysis.MomentumCorrector._featureUpdate">
+<code class="sig-name descname">_featureUpdate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">center_det</span><span class="o">=</span><span class="default_value">'centroidnn'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector._featureUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update selected features.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.analysis.MomentumCorrector._imageUpdate">
+<code class="sig-name descname">_imageUpdate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector._imageUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update distortion-corrected images.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="mpes.analysis.MomentumCorrector.applyDeformation">
 <code class="sig-name descname">applyDeformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.applyDeformation" title="Permalink to this definition">¶</a></dt>
@@ -1024,6 +1042,64 @@ User-specified center positions for the reference and target sets.
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.analysis._datacheck_peakdetect">
+<code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">_datacheck_peakdetect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x_axis</span></em>, <em class="sig-param"><span class="n">y_axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis._datacheck_peakdetect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Input format checking</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.analysis._rotate2d">
+<code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">_rotate2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">center</span></em>, <em class="sig-param"><span class="n">angle</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis._rotate2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D matrix scaled rotation carried out in the homogenous coordinate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>image<span class="classifier">2d array</span></dt><dd><p>Image matrix.</p>
+</dd>
+<dt>center<span class="classifier">tuple/list</span></dt><dd><p>Center of the image (row pixel, column pixel).</p>
+</dd>
+<dt>angle<span class="classifier">numeric</span></dt><dd><p>Angle of image rotation.</p>
+</dd>
+<dt>scale<span class="classifier">numeric | 1</span></dt><dd><p>Scale of image rotation.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt>image_rot<span class="classifier">2d array</span></dt><dd><p>Rotated image matrix.</p>
+</dd>
+<dt>rotmat<span class="classifier">2d array</span></dt><dd><p>Rotation matrix in the homogeneous coordinate system.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.analysis._signedmask">
+<code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">_signedmask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">imr</span></em>, <em class="sig-param"><span class="n">imc</span></em>, <em class="sig-param"><span class="n">maskr</span></em>, <em class="sig-param"><span class="n">maskc</span></em>, <em class="sig-param"><span class="n">sign</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis._signedmask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a binary mask using the masked coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt>imr, imc<span class="classifier">int</span></dt><dd><p>Row and column size of the image.</p>
+</dd>
+<dt>maskr, maskc<span class="classifier">1D array</span></dt><dd><p>Row and column coordinates of the masked pixels.</p>
+</dd>
+<dt>sign<span class="classifier">int/str</span></dt><dd><p>Value of the masked region, (0, 1, ‘nan’, or ‘xnan’).</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Return</dt>
+<dd class="field-even"><dl class="simple">
+<dt>mask<span class="classifier">2D array</span></dt><dd><p>Mask matrix.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">

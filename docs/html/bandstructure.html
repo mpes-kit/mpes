@@ -90,11 +90,13 @@
               
             
             
-              <ul>
+              <p class="caption"><span class="caption-text">Instructions</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="I01_start.html">How to start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="I02_overview.html">Overview of modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="I03_usenotes.html">Usage notes</a></li>
 </ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="base.html">Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code></a></li>
@@ -175,6 +177,12 @@
 <dd><p>Data structure for storage and manipulation of a single band structure (1-3D) dataset.
 Instantiation of the BandStructure class can be done by specifying a (HDF5 or mat) file path
 or by separately specify the data, the axes values and their names.</p>
+<dl class="py method">
+<dt id="mpes.bandstructure.BandStructure._view_result">
+<code class="sig-name descname">_view_result</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">5, 5</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'terrain_r'</span></em>, <em class="sig-param"><span class="n">origin</span><span class="o">=</span><span class="default_value">'lower'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure._view_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D visualization of intermediate result.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt id="mpes.bandstructure.BandStructure.keypoint_estimate">
 <code class="sig-name descname">keypoint_estimate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">'E'</span></em>, <em class="sig-param"><span class="n">pdmethod</span><span class="o">=</span><span class="default_value">'daofind'</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">update</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure.keypoint_estimate" title="Permalink to this definition">¶</a></dt>

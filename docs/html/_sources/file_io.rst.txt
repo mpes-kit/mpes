@@ -4,3 +4,4 @@ Custom methods to handle ARPES data I/O and standard data processing methods (fi
 
 .. automodule:: mpes.fprocessing
    :members:
+   :private-members:
