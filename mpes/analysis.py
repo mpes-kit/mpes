@@ -65,23 +65,23 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
 
     **Parameters**
 
-    x : 1D numeric array
-        the photoelectron energy axis
-    y : 1D numeric array
-        the photoemission intensity axis
-    tol : float | 1e-5
-        fitting tolerance
-    maxiter : int | 20
-        maximal iteration
-    explicit : bool | False
-        explicit display of iteration number
-    warning : bool | False
-        display of warnings during calculation
+    x: 1D numeric array
+        The photoelectron energy axis.
+    y: 1D numeric array
+        The photoemission intensity axis.
+    tol: float | 1e-5
+        The fitting tolerance.
+    maxiter: int | 20
+        The maximal iteration.
+    explicit: bool | False
+        Option for explicit display of iteration number.
+    warning: bool | False
+        Option to display of warnings during calculation.
 
     **Return**
 
-    sbg : 1D numeric array
-        Calculated Shirley background
+    sbg: 1D numeric array
+        Calculated Shirley background.
     """
 
     # Set the energy values in decreasing order
@@ -156,6 +156,21 @@ def shirley2d(x, y, tol=1e-5, maxiter=20, explicit=False,
             warning=False):
     """
     2D Shirley background removal
+
+    **Parameters**
+
+    x: 1D numeric array
+        Photoemission energy axis.
+    y: 2D numeric array
+        Photoemission intensity matrix.
+    tol: float | 1e-5
+        The fitting tolerance.
+    maxiter: int | 20
+        The maximal iteration.
+    explicit: bool | False
+        Option for explicit display of iteration number.
+    warning: bool | False
+        Option to display of warnings during calculation.
     """
 
     nx = y.shape[0]
@@ -1494,15 +1509,17 @@ def line_generator(A, B, npoints, endpoint=True, ret='separated'):
 def image_interpolator(image, iptype='RGI'):
     """ Construction of an image interpolator.
 
-    :Parameters:
-        image : 2D array
-            2D image for interpolation.
-        iptype : str | 'RGI'
-            Type of the interpolator.
+    **Parameters**
 
-    :Return:
-        interp : interpolator instance
-            Instance of an interpolator.
+    image: 2D array
+        2D image for interpolation.
+    iptype: str | 'RGI'
+        Type of the interpolator.
+
+    **Return**
+
+    interp: interpolator instance
+        Instance of an interpolator.
     """
 
     dims = image.shape
@@ -1520,15 +1537,16 @@ def image_interpolator(image, iptype='RGI'):
 def interp_slice(data, pathr=None, pathc=None, path_coords=None, iptype='RGI'):
     """ Slicing 2D/3D data through interpolation.
 
-    :Parameters:
-        data : 2D/3D array
-            Data array for slicing.
-        pathr, pathc : list/tuple/array, list/tuple/array
-            Row and column coordinates of the interpolated path.
-        path_coords : array
-            Cartesian coordinates of the interpolated path.
-        iptype : str | 'RGI'
-            Type of interpolator.
+    **Parameters**
+
+    data: 2D/3D array
+        Data array for slicing.
+    pathr, pathc: list/tuple/array, list/tuple/array
+        Row and column coordinates of the interpolated path.
+    path_coords: array
+        Cartesian coordinates of the interpolated path.
+    iptype: str | 'RGI'
+        Type of interpolator.
     """
 
     ndim = data.ndim
@@ -2744,7 +2762,18 @@ SQ2PI = np.sqrt(2*np.pi)
 
 
 def gaussian(feval=False, vardict=None):
-    """ Gaussian model
+    """1D Gaussian lineshape model. Returns numerical values if ``feval=True``.
+
+    **Parameters**
+
+    feval: bool | False
+        Option to evaluate function.
+    vardict: dict | None
+        Dictionary containing values for the variables named as follows (as dictionary keys).\n
+        ``amp`` function amplitude or scaling factor.\n
+        ``xvar`` x values (energy values in a lineshape).\n
+        ``ctr`` center position.\n
+        ``sig`` standard deviation.\n
     """
 
     asvars = ['amp', 'xvar', 'ctr', 'sig']
@@ -2757,7 +2786,19 @@ def gaussian(feval=False, vardict=None):
 
 
 def voigt(feval=False, vardict=None):
-    """ Voigt model
+    """1D Voigt lineshape model. Returns numerical values if ``feval=True``.
+
+    **Parameters**
+
+    feval: bool | False
+        Option to evaluate function.
+    vardict: dict | None
+        Dictionary containing values for the variables named as follows (as dictionary keys).\n
+        ``amp`` function amplitude or scaling factor.\n
+        ``xvar`` x values (energy values in a lineshape).\n        
+        ``ctr`` center position.\n        
+        ``sig`` standard deviation of the Gaussian component.\n
+        ``gam`` linewidth of the Lorentzian component.
     """
 
     asvars = ['amp', 'xvar', 'ctr', 'sig', 'gam']
@@ -2776,16 +2817,16 @@ def func_update(func, suffix=''):
 
     ***Parameters***
 
-    func : function
+    func: function
         input function
-    suffix : str | ''
+    suffix: str | ''
         suffix to attach to parameter names
 
     ***Returns***
 
-    params : list of str
+    params: list of str
         updated function parameters
-    expr : str
+    expr: str
         updated function expression
     """
 
@@ -2807,12 +2848,12 @@ def func_add(*funcs):
 
     ***Parameters***
 
-    *funcs : list/tuple
+    *funcs: list/tuple
         functions to combine
 
     ***Returns***
 
-    funcsum : function
+    funcsum: function
         functional sum
     """
 
@@ -3047,21 +3088,21 @@ class Model(object):
 
 def build_dynamic_matrix(fitparams, display_range=slice(None, None, None), pre_t0_range=slice(None, 1, None)):
     """
-    Construct the dynamic matrix from the fitting results:
-    for each fitting parameter, construct time-dependent value,
-    time-dependent absolute and relative changes
+    Construct the dynamic matrix from the fitting results. For each fitting parameter, construct time-dependent value, time-dependent absolute and relative changes.
 
-    :Parameters:
-        fitparams : 3D ndarray
-            fitting output
-        display_range : slice object | slice(None, None, None)
-            display time range of the fitting parameters (default = full range)
-        pre_t0_range : slice object | slice(None, 1, None)
-            time range regarded as before time-zero
+    **Parameters**
 
-    :Returns:
-        dyn_matrix : 4D ndarray
-            calculated dynamic matrix
+    fitparams: 3D ndarray
+        fitting output
+    display_range: slice object | slice(None, None, None)
+        display time range of the fitting parameters (default = full range)
+    pre_t0_range: slice object | slice(None, 1, None)
+        time range regarded as before time-zero
+
+    **Returns**
+
+    dyn_matrix : 4D ndarray
+        calculated dynamic matrix
     """
 
     if np.ndim(fitparams) != 3:

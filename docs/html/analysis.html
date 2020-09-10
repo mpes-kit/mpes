@@ -90,11 +90,13 @@
               
             
             
-              <ul>
+              <p class="caption"><span class="caption-text">Instructions</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="I01_start.html">How to start</a></li>
 <li class="toctree-l1"><a class="reference internal" href="I02_overview.html">Overview of modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="I03_usenotes.html">Usage notes</a></li>
 </ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="base.html">Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code></a></li>
@@ -1209,25 +1211,19 @@ True = with concatenation to input DataFrame</p></td>
 <dl class="py function">
 <dt id="mpes.analysis.build_dynamic_matrix">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">build_dynamic_matrix</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fitparams</span></em>, <em class="sig-param"><span class="n">display_range</span><span class="o">=</span><span class="default_value">slice(None, None, None)</span></em>, <em class="sig-param"><span class="n">pre_t0_range</span><span class="o">=</span><span class="default_value">slice(None, 1, None)</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.build_dynamic_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Construct the dynamic matrix from the fitting results:
-for each fitting parameter, construct time-dependent value,
-time-dependent absolute and relative changes</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>fitparams<span class="classifier">3D ndarray</span></dt><dd><p>fitting output</p>
+<dd><p>Construct the dynamic matrix from the fitting results. For each fitting parameter, construct time-dependent value, time-dependent absolute and relative changes.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>fitparams: 3D ndarray</dt><dd><p>fitting output</p>
 </dd>
-<dt>display_range<span class="classifier">slice object | slice(None, None, None)</span></dt><dd><p>display time range of the fitting parameters (default = full range)</p>
+<dt>display_range: slice object | slice(None, None, None)</dt><dd><p>display time range of the fitting parameters (default = full range)</p>
 </dd>
-<dt>pre_t0_range<span class="classifier">slice object | slice(None, 1, None)</span></dt><dd><p>time range regarded as before time-zero</p>
+<dt>pre_t0_range: slice object | slice(None, 1, None)</dt><dd><p>time range regarded as before time-zero</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
+<p><strong>Returns</strong></p>
+<dl class="simple">
 <dt>dyn_matrix<span class="classifier">4D ndarray</span></dt><dd><p>calculated dynamic matrix</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -1412,12 +1408,12 @@ The formula follows Zhang et al. Rev. Sci. Instrum. 82, 043712 (2011).</p>
 <dd><p>Addition of an arbitray number of functions</p>
 <p><strong>*Parameters*</strong></p>
 <dl class="simple">
-<dt><a href="#id45"><span class="problematic" id="id46">*</span></a>funcs<span class="classifier">list/tuple</span></dt><dd><p>functions to combine</p>
+<dt><a href="#id45"><span class="problematic" id="id46">*</span></a>funcs: list/tuple</dt><dd><p>functions to combine</p>
 </dd>
 </dl>
 <p><strong>*Returns*</strong></p>
 <dl class="simple">
-<dt>funcsum<span class="classifier">function</span></dt><dd><p>functional sum</p>
+<dt>funcsum: function</dt><dd><p>functional sum</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1429,16 +1425,16 @@ The formula follows Zhang et al. Rev. Sci. Instrum. 82, 043712 (2011).</p>
 in the expression of a function</p>
 <p><strong>*Parameters*</strong></p>
 <dl class="simple">
-<dt>func<span class="classifier">function</span></dt><dd><p>input function</p>
+<dt>func: function</dt><dd><p>input function</p>
 </dd>
-<dt>suffix<span class="classifier">str | ‘’</span></dt><dd><p>suffix to attach to parameter names</p>
+<dt>suffix: str | ‘’</dt><dd><p>suffix to attach to parameter names</p>
 </dd>
 </dl>
 <p><strong>*Returns*</strong></p>
 <dl class="simple">
-<dt>params<span class="classifier">list of str</span></dt><dd><p>updated function parameters</p>
+<dt>params: list of str</dt><dd><p>updated function parameters</p>
 </dd>
-<dt>expr<span class="classifier">str</span></dt><dd><p>updated function expression</p>
+<dt>expr: str</dt><dd><p>updated function expression</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1446,7 +1442,18 @@ in the expression of a function</p>
 <dl class="py function">
 <dt id="mpes.analysis.gaussian">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">gaussian</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">feval</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">vardict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.gaussian" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gaussian model</p>
+<dd><p>1D Gaussian lineshape model. Returns numerical values if <code class="docutils literal notranslate"><span class="pre">feval=True</span></code>.</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>feval: bool | False</dt><dd><p>Option to evaluate function.</p>
+</dd>
+<dt>vardict: dict | None</dt><dd><p>Dictionary containing values for the variables named as follows (as dictionary keys).</p>
+<p><code class="docutils literal notranslate"><span class="pre">amp</span></code> function amplitude or scaling factor.</p>
+<p><code class="docutils literal notranslate"><span class="pre">xvar</span></code> x values (energy values in a lineshape).</p>
+<p><code class="docutils literal notranslate"><span class="pre">ctr</span></code> center position.</p>
+<p><code class="docutils literal notranslate"><span class="pre">sig</span></code> standard deviation.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1473,20 +1480,16 @@ For example, the 4th-order mixed gradient d4f/(dxdydxdy) requires the sequence (
 <dt id="mpes.analysis.image_interpolator">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">image_interpolator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">iptype</span><span class="o">=</span><span class="default_value">'RGI'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.image_interpolator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Construction of an image interpolator.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>image<span class="classifier">2D array</span></dt><dd><p>2D image for interpolation.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>image: 2D array</dt><dd><p>2D image for interpolation.</p>
 </dd>
-<dt>iptype<span class="classifier">str | ‘RGI’</span></dt><dd><p>Type of the interpolator.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>interp<span class="classifier">interpolator instance</span></dt><dd><p>Instance of an interpolator.</p>
+<dt>iptype: str | ‘RGI’</dt><dd><p>Type of the interpolator.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>interp: interpolator instance</dt><dd><p>Instance of an interpolator.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1495,18 +1498,15 @@ For example, the 4th-order mixed gradient d4f/(dxdydxdy) requires the sequence (
 <dt id="mpes.analysis.interp_slice">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">interp_slice</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">pathr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pathc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">path_coords</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">iptype</span><span class="o">=</span><span class="default_value">'RGI'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.interp_slice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Slicing 2D/3D data through interpolation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>data<span class="classifier">2D/3D array</span></dt><dd><p>Data array for slicing.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>data: 2D/3D array</dt><dd><p>Data array for slicing.</p>
 </dd>
-<dt>pathr, pathc<span class="classifier">list/tuple/array, list/tuple/array</span></dt><dd><p>Row and column coordinates of the interpolated path.</p>
+<dt>pathr, pathc: list/tuple/array, list/tuple/array</dt><dd><p>Row and column coordinates of the interpolated path.</p>
 </dd>
-<dt>path_coords<span class="classifier">array</span></dt><dd><p>Cartesian coordinates of the interpolated path.</p>
+<dt>path_coords: array</dt><dd><p>Cartesian coordinates of the interpolated path.</p>
 </dd>
-<dt>iptype<span class="classifier">str | ‘RGI’</span></dt><dd><p>Type of interpolator.</p>
-</dd>
-</dl>
+<dt>iptype: str | ‘RGI’</dt><dd><p>Type of interpolator.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1902,22 +1902,22 @@ of the Shirley background.
 reach the tolerance level (tol).</p>
 <p><strong>Parameters</strong></p>
 <dl class="simple">
-<dt>x<span class="classifier">1D numeric array</span></dt><dd><p>the photoelectron energy axis</p>
+<dt>x: 1D numeric array</dt><dd><p>The photoelectron energy axis.</p>
 </dd>
-<dt>y<span class="classifier">1D numeric array</span></dt><dd><p>the photoemission intensity axis</p>
+<dt>y: 1D numeric array</dt><dd><p>The photoemission intensity axis.</p>
 </dd>
-<dt>tol<span class="classifier">float | 1e-5</span></dt><dd><p>fitting tolerance</p>
+<dt>tol: float | 1e-5</dt><dd><p>The fitting tolerance.</p>
 </dd>
-<dt>maxiter<span class="classifier">int | 20</span></dt><dd><p>maximal iteration</p>
+<dt>maxiter: int | 20</dt><dd><p>The maximal iteration.</p>
 </dd>
-<dt>explicit<span class="classifier">bool | False</span></dt><dd><p>explicit display of iteration number</p>
+<dt>explicit: bool | False</dt><dd><p>Option for explicit display of iteration number.</p>
 </dd>
-<dt>warning<span class="classifier">bool | False</span></dt><dd><p>display of warnings during calculation</p>
+<dt>warning: bool | False</dt><dd><p>Option to display of warnings during calculation.</p>
 </dd>
 </dl>
 <p><strong>Return</strong></p>
 <dl class="simple">
-<dt>sbg<span class="classifier">1D numeric array</span></dt><dd><p>Calculated Shirley background</p>
+<dt>sbg: 1D numeric array</dt><dd><p>Calculated Shirley background.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1926,6 +1926,21 @@ reach the tolerance level (tol).</p>
 <dt id="mpes.analysis.shirley2d">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">shirley2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">tol</span><span class="o">=</span><span class="default_value">1e-05</span></em>, <em class="sig-param"><span class="n">maxiter</span><span class="o">=</span><span class="default_value">20</span></em>, <em class="sig-param"><span class="n">explicit</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">warning</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.shirley2d" title="Permalink to this definition">¶</a></dt>
 <dd><p>2D Shirley background removal</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>x: 1D numeric array</dt><dd><p>Photoemission energy axis.</p>
+</dd>
+<dt>y: 2D numeric array</dt><dd><p>Photoemission intensity matrix.</p>
+</dd>
+<dt>tol: float | 1e-5</dt><dd><p>The fitting tolerance.</p>
+</dd>
+<dt>maxiter: int | 20</dt><dd><p>The maximal iteration.</p>
+</dd>
+<dt>explicit: bool | False</dt><dd><p>Option for explicit display of iteration number.</p>
+</dd>
+<dt>warning: bool | False</dt><dd><p>Option to display of warnings during calculation.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1968,7 +1983,19 @@ returns only the generated ones (without the fixedvertex in the argument).</p>
 <dl class="py function">
 <dt id="mpes.analysis.voigt">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">voigt</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">feval</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">vardict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.voigt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Voigt model</p>
+<dd><p>1D Voigt lineshape model. Returns numerical values if <code class="docutils literal notranslate"><span class="pre">feval=True</span></code>.</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>feval: bool | False</dt><dd><p>Option to evaluate function.</p>
+</dd>
+<dt>vardict: dict | None</dt><dd><p>Dictionary containing values for the variables named as follows (as dictionary keys).</p>
+<p><code class="docutils literal notranslate"><span class="pre">amp</span></code> function amplitude or scaling factor.</p>
+<p><code class="docutils literal notranslate"><span class="pre">xvar</span></code> x values (energy values in a lineshape).</p>
+<p><code class="docutils literal notranslate"><span class="pre">ctr</span></code> center position.</p>
+<p><code class="docutils literal notranslate"><span class="pre">sig</span></code> standard deviation of the Gaussian component.</p>
+<p><code class="docutils literal notranslate"><span class="pre">gam</span></code> linewidth of the Lorentzian component.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
