@@ -15,30 +15,27 @@ The MPES instrument enables sampling of the multidimensional parameter space ass
 
 1. Install from scratch
 
-```
-pip install git+https://github.com/mpes-kit/mpes.git
-```
+<pre><code class="console"> pip install git+https://github.com/mpes-kit/mpes.git
+</code></pre>
+
 2. Upgrade or overwrite an existing installation
 
-```
-pip install --upgrade git+https://github.com/mpes-kit/mpes.git
-```
+<pre><code class="console"> pip install --upgrade git+https://github.com/mpes-kit/mpes.git
+</code></pre>
 
-3. PyPI installation
+3. [PyPI](https://pypi.org/project/mpes/) installation
 
-```
-pip install mpes
-```
+<pre><code class="console"> pip install mpes
+</code></pre>
 
 4. Install a specific version
 
-```
-# version 1.0.9 from PyPI
+<pre><code class="console"> # version 1.0.9 from PyPI
 pip install mpes==1.0.9
 
 # version 0.9.8 from GitHub
 pip install --upgrade git+https://github.com/mpes-kit/mpes.git@0.9.8
-```
+</code></pre>
 
 ### Documentation & citation
 
