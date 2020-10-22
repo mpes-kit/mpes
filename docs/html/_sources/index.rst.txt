@@ -40,5 +40,6 @@ The MPES instrument enables sampling of the multidimensional parameter space ass
    analysis
    bandstructure
    visualization
+   mirrorutil
    utils
 

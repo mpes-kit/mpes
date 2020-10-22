@@ -101,6 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis  <code class="docutils literal notranslate"><span class="pre">(mpes.analysis)</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="bandstructure.html">Band-mapping data classes  <code class="docutils literal notranslate"><span class="pre">(mpes.bandstructure)</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization  <code class="docutils literal notranslate"><span class="pre">(mpes.visualization)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirrorutil.html">Local file copying  <code class="docutils literal notranslate"><span class="pre">(mpes.mirrorutil)</span></code></a></li>
 <li class="toctree-l1"><a class="reference internal" href="utils.html">Utility functions  <code class="docutils literal notranslate"><span class="pre">(mpes.utils)</span></code></a></li>
 </ul>
 
@@ -333,14 +334,16 @@
 </li>
       <li><a href="analysis.html#mpes.analysis.circmask">circmask() (in module mpes.analysis)</a>
 </li>
+      <li><a href="mirrorutil.html#mpes.mirrorutil.CopyTool.cleanUpOldestScan">cleanUpOldestScan() (mpes.mirrorutil.CopyTool method)</a>
+</li>
       <li><a href="visualization.html#mpes.visualization.cm2palette">cm2palette() (in module mpes.visualization)</a>
 </li>
       <li><a href="visualization.html#mpes.visualization.colormesh2d">colormesh2d() (in module mpes.visualization)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="file_io.html#mpes.fprocessing.dataframeProcessor.columnApply">columnApply() (mpes.fprocessing.dataframeProcessor method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="file_io.html#mpes.fprocessing.parallelHDF5Processor.combineResults">combineResults() (mpes.fprocessing.parallelHDF5Processor method)</a>
 </li>
       <li><a href="utils.html#mpes.utils.concat">concat() (in module mpes.utils)</a>
@@ -355,9 +358,15 @@
       </ul></li>
       <li><a href="analysis.html#mpes.analysis.MomentumCorrector.coordinateTransform">coordinateTransform() (mpes.analysis.MomentumCorrector method)</a>
 </li>
+      <li><a href="mirrorutil.html#mpes.mirrorutil.CopyTool.copy">copy() (mpes.mirrorutil.CopyTool method)</a>
+</li>
+      <li><a href="mirrorutil.html#mpes.mirrorutil.CopyTool">CopyTool (class in mpes.mirrorutil)</a>
+</li>
       <li><a href="analysis.html#mpes.analysis.MomentumCorrector.correct">correct() (mpes.analysis.MomentumCorrector method)</a>
 </li>
       <li><a href="base.html#mpes.base.correctnd">correctnd() (in module mpes.base)</a>
+</li>
+      <li><a href="mirrorutil.html#mpes.mirrorutil.countFiles">countFiles() (in module mpes.mirrorutil)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.curvature2d">curvature2d() (in module mpes.analysis)</a>
 </li>
@@ -468,6 +477,8 @@
 </li>
       </ul></li>
       <li><a href="file_io.html#mpes.fprocessing.hdf5Reader.getGroupNames">getGroupNames() (mpes.fprocessing.hdf5Reader method)</a>
+</li>
+      <li><a href="mirrorutil.html#mpes.mirrorutil.getTargetDir">getTargetDir() (in module mpes.mirrorutil)</a>
 </li>
       <li><a href="analysis.html#mpes.analysis.MomentumCorrector.getWarpFunction">getWarpFunction() (mpes.analysis.MomentumCorrector static method)</a>
 </li>
@@ -591,6 +602,8 @@
 </li>
         <li><a href="file_io.html#module-mpes.fprocessing">mpes.fprocessing</a>
 </li>
+        <li><a href="mirrorutil.html#module-mpes.mirrorutil">mpes.mirrorutil</a>
+</li>
         <li><a href="utils.html#module-mpes.utils">mpes.utils</a>
 </li>
         <li><a href="visualization.html#module-mpes.visualization">mpes.visualization</a>
@@ -631,6 +644,13 @@
 </li>
       </ul></li>
       <li>
+    mpes.mirrorutil
+
+      <ul>
+        <li><a href="mirrorutil.html#module-mpes.mirrorutil">module</a>
+</li>
+      </ul></li>
+      <li>
     mpes.utils
 
       <ul>
@@ -647,6 +667,8 @@
       <li><a href="bandstructure.html#mpes.bandstructure.MPESDataset">MPESDataset (class in mpes.bandstructure)</a>
 </li>
       <li><a href="utils.html#mpes.utils.multithresh">multithresh() (in module mpes.utils)</a>
+</li>
+      <li><a href="mirrorutil.html#mpes.mirrorutil.mymakedirs">mymakedirs() (in module mpes.mirrorutil)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -845,6 +867,8 @@
       <li><a href="analysis.html#mpes.analysis.shirley2d">shirley2d() (in module mpes.analysis)</a>
 </li>
       <li><a href="utils.html#mpes.utils.shuffleaxis">shuffleaxis() (in module mpes.utils)</a>
+</li>
+      <li><a href="mirrorutil.html#mpes.mirrorutil.CopyTool.size">size() (mpes.mirrorutil.CopyTool method)</a>
 </li>
       <li><a href="bandstructure.html#mpes.bandstructure.MPESDataset.slicediff">slicediff() (mpes.bandstructure.MPESDataset method)</a>
 </li>
