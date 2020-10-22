@@ -179,19 +179,17 @@
 <dt id="mpes.base.FileCollection._sort_terms">
 <em class="property">static </em><code class="sig-name descname">_sort_terms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">terms</span></em>, <em class="sig-param"><span class="n">parameter</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection._sort_terms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sort terms according to parameter value.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>terms<span class="classifier">list</span></dt><dd><p>List of terms (e.g. strings).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>terms: list</dt><dd><p>List of terms (e.g. strings).</p>
 </dd>
-<dt>parameter<span class="classifier">bool</span></dt><dd><p>Decision parameter for sorting.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><p>Sorted or unsorted terms.</p>
+<dt>parameter: bool</dt><dd><p>Decision parameter for sorting.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>Sorted or unsorted terms.</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -204,22 +202,18 @@
 <dt id="mpes.base.FileCollection.filter">
 <code class="sig-name descname">filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">wexpr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">woexpr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">str_start</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">str_end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection.filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filter filenames by keywords.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>wexpr<span class="classifier">str | None</span></dt><dd><p>Expression in a name to leave in the filename list (w = with).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>wexpr: str | None</dt><dd><p>Expression in a name to leave in the filename list (w = with).</p>
 </dd>
-<dt>woexpr<span class="classifier">str | None</span></dt><dd><p>Expression in a name to leave out of the filename list (wo = without).</p>
+<dt>woexpr: str | None</dt><dd><p>Expression in a name to leave out of the filename list (wo = without).</p>
 </dd>
-<dt>str_start, str_end<span class="classifier">int, int | None, None</span></dt><dd><p>Starting and ending indices of the filename string.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>filteredFiles<span class="classifier">list</span></dt><dd><p>List of filtered filenames.</p>
+<dt>str_start, str_end: int, int | None, None</dt><dd><p>Starting and ending indices of the filename string.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>filteredFiles: list</dt><dd><p>List of filtered filenames.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -228,16 +222,13 @@
 <dt id="mpes.base.FileCollection.gather">
 <code class="sig-name descname">gather</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">folder</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">identifier</span><span class="o">=</span><span class="default_value">'/*.h5'</span></em>, <em class="sig-param"><span class="n">f_start</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">f_end</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">f_step</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">file_sorting</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection.gather" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gather files from a folder (specified at instantiation).</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt>identifier<span class="classifier">str | r’/<a href="#id1"><span class="problematic" id="id2">*</span></a>.h5’</span></dt><dd><p>File identifier used for glob.glob().</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>identifier: str | r’/<a href="#id1"><span class="problematic" id="id2">*</span></a>.h5’</dt><dd><p>File identifier used for glob.glob().</p>
 </dd>
-<dt>f_start, f_end, f_step<span class="classifier">int, int, int | None, None, 1</span></dt><dd><p>Starting, ending file id and the step. Used to construct a file selector.</p>
+<dt>f_start, f_end, f_step: int, int, int | None, None, 1</dt><dd><p>Starting, ending file id and the step. Used to construct a file selector.</p>
 </dd>
-<dt>file_sorting<span class="classifier">bool | True</span></dt><dd><p>Option to sort the files by their names.</p>
-</dd>
-</dl>
+<dt>file_sorting: bool | True</dt><dd><p>Option to sort the files by their names.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -259,24 +250,21 @@
 <dt id="mpes.base.FileCollection.select">
 <code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ids</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">update</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection.select" title="Permalink to this definition">¶</a></dt>
 <dd><p>Select gathered files by the filename ids.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>ids<span class="classifier">list/1D array | []</span></dt><dd><p>File IDs for selection.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>ids: list/1D array | []</dt><dd><p>File IDs for selection.</p>
 </dd>
-<dt>update<span class="classifier">str | ‘’</span></dt><dd><p>File address list update condition,
+<dt>update: str | ‘’</dt><dd><p>File address list update condition,
 ‘remove’ = remove the selected files.
 ‘keep’ = keep the selected files and remove the rest.
 others strings or no action = do nothing.
 ‘’ = nothing happens (can be used in combination with <cite>ret=True</cite>
 to retrieve filtered file names).</p>
 </dd>
-<dt>ret<span class="classifier">str | ‘selected’</span></dt><dd><p>Return option,
+<dt>ret: str | ‘selected’</dt><dd><p>Return option,
 :’selected’: Return of the selected files.
 :’rest’: Return the rest of the files (not selected).
 :False: No action (return).</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -291,12 +279,9 @@ to retrieve filtered file names).</p>
 <dt id="mpes.base.MapParser.EMap">
 <em class="property">property </em><code class="sig-name descname">EMap</code><a class="headerlink" href="#mpes.base.MapParser.EMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>The ToF to energy coordinate transform function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameter</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>parse_key<span class="classifier">str | ‘coeffs’</span></dt><dd><p>Parsing key for extracting parameters.</p>
-</dd>
-</dl>
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>parse_key: str | ‘coeffs’</dt><dd><p>Parsing key for extracting parameters.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -342,18 +327,14 @@ known parameters.</p>
 <dt id="mpes.base.MapParser.parse">
 <em class="property">static </em><code class="sig-name descname">parse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parse_map</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">mapkeys</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.MapParser.parse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse map parameters stored in files.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameter</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>parse_map<span class="classifier">function</span></dt><dd><p>Run parse_map function to populate the class namespace.</p>
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>parse_map: function</dt><dd><p>Run parse_map function to populate the class namespace.</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>flag<span class="classifier">int (0 or 1)</span></dt><dd><p>Returns 1 if successful, 0 if not.</p>
-</dd>
-</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>flag: int (0 or 1)</dt><dd><p>Returns 1 if successful, 0 if not.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -406,21 +387,18 @@ known parameters.</p>
 <dt id="mpes.base.detxy2kxy">
 <code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">detxy2kxy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xdet</span></em>, <em class="sig-param"><span class="n">ydet</span></em>, <em class="sig-param"><span class="n">xstart</span></em>, <em class="sig-param"><span class="n">ystart</span></em>, <em class="sig-param"><span class="n">x0</span></em>, <em class="sig-param"><span class="n">y0</span></em>, <em class="sig-param"><span class="n">fx</span></em>, <em class="sig-param"><span class="n">fy</span></em>, <em class="sig-param"><span class="n">xstep</span></em>, <em class="sig-param"><span class="n">ystep</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.detxy2kxy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>xdet, ydet<span class="classifier">numeric, numeric</span></dt><dd><p>Pixel coordinates in the detector coordinate system.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>xdet, ydet: numeric, numeric</dt><dd><p>Pixel coordinates in the detector coordinate system.</p>
 </dd>
-<dt>xstart, ystart<span class="classifier">numeric, numeric</span></dt><dd><p>The starting pixel number in the detector coordinate system
+<dt>xstart, ystart: numeric, numeric</dt><dd><p>The starting pixel number in the detector coordinate system
 along the x and y axes used in the binning.</p>
 </dd>
-<dt>x0, y0<span class="classifier">numeric, numeric</span></dt><dd><p>The center pixel position in binned image used in calibration.</p>
+<dt>x0, y0: numeric, numeric</dt><dd><p>The center pixel position in binned image used in calibration.</p>
 </dd>
-<dt>fx, fy<span class="classifier">numeric, numeric</span></dt><dd><p>Scaling factor along the x and y axes (in binned image).</p>
+<dt>fx, fy: numeric, numeric</dt><dd><p>Scaling factor along the x and y axes (in binned image).</p>
 </dd>
-<dt>xstep, ystep<span class="classifier">numeric, numeric</span></dt><dd><p>Binning step size along x and y directions.</p>
-</dd>
-</dl>
+<dt>xstep, ystep: numeric, numeric</dt><dd><p>Binning step size along x and y directions.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -434,8 +412,13 @@ along the x and y axes used in the binning.</p>
 <dl class="py function">
 <dt id="mpes.base.generateDfield">
 <code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">generateDfield</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rdeform_field</span></em>, <em class="sig-param"><span class="n">cdeform_field</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.generateDfield" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate inverse deformation field using inperpolation with griddata
-Assuming the binning range of the input rdeform_field and cdeform_field covers the whole detector</p>
+<dd><p>Generate inverse deformation field using inperpolation with griddata.
+Assuming the binning range of the input <code class="docutils literal notranslate"><span class="pre">rdeform_field</span></code> and <code class="docutils literal notranslate"><span class="pre">cdeform_field</span></code> covers the whole detector.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>rdeform_field, cdeform_field: 2d array, 2d array</dt><dd><p>Row-wise and column-wise deformation fields.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -448,23 +431,32 @@ Assuming the binning range of the input rdeform_field and cdeform_field covers t
 <dt id="mpes.base.imxy2kxy">
 <code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">imxy2kxy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">x0</span></em>, <em class="sig-param"><span class="n">y0</span></em>, <em class="sig-param"><span class="n">fx</span></em>, <em class="sig-param"><span class="n">fy</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.imxy2kxy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Conversion from Cartesian coordinate in binned image (x, y) to momentum coordinates (kx, ky).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>x, y: numeric, numeric</dt><dd><p>Components of the Cartesian coordinates.</p>
+</dd>
+<dt>x0, y0: numeric, numeric</dt><dd><p>Origins of the Cartesian coordinates.</p>
+</dd>
+<dt>fx, fy: numeric numeric</dt><dd><p>Numerical scaling in the conversion.</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt id="mpes.base.loadClassAttributes">
 <code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">loadClassAttributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">form</span></em>, <em class="sig-param"><span class="n">load_addr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.loadClassAttributes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load class from saved attributes.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>form<span class="classifier">dump</span></dt><dd><p>Format to load from (only works for ‘dump’ right now).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>form: dump</dt><dd><p>Format to load from (only works for ‘dump’ right now).</p>
 </dd>
-<dt>load_addr<span class="classifier">str</span></dt><dd><p>The address to load the attributes from.</p>
-</dd>
-</dl>
-<p>returns the loaded class</p>
+<dt>load_addr: str</dt><dd><p>The address to load the attributes from.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>Returns the loaded class</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
@@ -472,16 +464,13 @@ Assuming the binning range of the input rdeform_field and cdeform_field covers t
 <code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">mapping</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.mapping" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mapping a generic function to multidimensional data with
 the possibility to supply keyword arguments.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameter</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>data<span class="classifier">numpy.ndarray</span></dt><dd><p>Data to map the function to.</p>
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>data: numpy.ndarray</dt><dd><p>Data to map the function to.</p>
 </dd>
-<dt>f<span class="classifier">function</span></dt><dd><p>Function to map to data.</p>
+<dt>f: function</dt><dd><p>Function to map to data.</p>
 </dd>
-<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>Keyword arguments of the function map.</p>
-</dd>
-</dl>
+<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwds: keyword arguments</dt><dd><p>Keyword arguments of the function map.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -490,20 +479,16 @@ the possibility to supply keyword arguments.</p>
 <dt id="mpes.base.perspectiveTransform">
 <code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">perspectiveTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">M</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.perspectiveTransform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implementation of the perspective transform (homography) in 2D.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>x, y<span class="classifier">numeric, numeric</span></dt><dd><p>Pixel coordinates of the original point.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>x, y: numeric, numeric</dt><dd><p>Pixel coordinates of the original point.</p>
 </dd>
-<dt>M<span class="classifier">2d array</span></dt><dd><p>Perspective transform matrix.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>xtrans, ytrans<span class="classifier">numeric, numeric</span></dt><dd><p>Pixel coordinates after projective/perspective transform.</p>
+<dt>M: 2d array</dt><dd><p>Perspective transform matrix.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>xtrans, ytrans: numeric, numeric</dt><dd><p>Pixel coordinates after projective/perspective transform.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -512,20 +497,16 @@ the possibility to supply keyword arguments.</p>
 <dt id="mpes.base.reshape2d">
 <code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">reshape2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">apply_axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.reshape2d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reshape matrix to apply 2D function to.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>data<span class="classifier">numpy.ndarray</span></dt><dd><p>N-dimensional numerical array.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>data: numpy.ndarray</dt><dd><p>N-dimensional numerical array.</p>
 </dd>
-<dt>apply_axis<span class="classifier">tuple/list of int</span></dt><dd><p>The index of the axes to apply the transform to.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>data<span class="classifier">numpy.ndarray</span></dt><dd><p>Reshaped n-dimensional array.</p>
+<dt>apply_axis: tuple/list of int</dt><dd><p>The index of the axes to apply the transform to.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>data: numpy.ndarray</dt><dd><p>Reshaped n-dimensional array.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -534,16 +515,13 @@ the possibility to supply keyword arguments.</p>
 <dt id="mpes.base.saveClassAttributes">
 <code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">saveClassAttributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clss</span></em>, <em class="sig-param"><span class="n">form</span></em>, <em class="sig-param"><span class="n">save_addr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.saveClassAttributes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save class attributes.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>clss<span class="classifier">instance</span></dt><dd><p>Handle of the instance to be saved.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>clss: instance</dt><dd><p>Handle of the instance to be saved.</p>
 </dd>
-<dt>form<span class="classifier">str</span></dt><dd><p>Format to save in (‘h5’/’hdf5’, ‘mat’, or ‘dmp’/’dump’).</p>
+<dt>form: str</dt><dd><p>Format to save in (‘h5’/’hdf5’, ‘mat’, or ‘dmp’/’dump’).</p>
 </dd>
-<dt>save_addr<span class="classifier">str</span></dt><dd><p>The address to save the attributes in.</p>
-</dd>
-</dl>
+<dt>save_addr: str</dt><dd><p>The address to save the attributes in.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -553,22 +531,18 @@ the possibility to supply keyword arguments.</p>
 <code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">tof2evpoly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">E0</span></em>, <em class="sig-param"><span class="n">t</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.tof2evpoly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Polynomial approximation of the time-of-flight to electron volt
 conversion formula.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>a<span class="classifier">1D array</span></dt><dd><p>Polynomial coefficients.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>a: 1D array</dt><dd><p>Polynomial coefficients.</p>
 </dd>
-<dt>E0<span class="classifier">float</span></dt><dd><p>Energy offset.</p>
+<dt>E0: float</dt><dd><p>Energy offset.</p>
 </dd>
-<dt>t<span class="classifier">numeric array</span></dt><dd><p>Drift time of electron.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>E<span class="classifier">numeric array</span></dt><dd><p>Converted energy</p>
+<dt>t: numeric array</dt><dd><p>Drift time of electron.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>E: numeric array</dt><dd><p>Converted energy</p>
 </dd>
 </dl>
 </dd></dl>
