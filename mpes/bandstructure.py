@@ -99,19 +99,19 @@ class BandStructure(DataArray):
         """
         Scaling and masking of band structure data.
 
-        :Parameters:
-            axis : str/tuple
-                Axes along which to apply the intensity transform.
-            scale_array : nD array
-                Scale array to be applied to data.
-            update : bool | True
-                Options to update the existing array with the intensity-transformed version.
-            ret : bool | False
-                Options to return the intensity-transformed data.
+        **Parameters**\n
+        axis: str/tuple
+            Axes along which to apply the intensity transform.
+        scale_array: nD array
+            Scale array to be applied to data.
+        update: bool | True
+            Options to update the existing array with the intensity-transformed version.
+        ret: bool | False
+            Options to return the intensity-transformed data.
 
-        :Return:
-            scdata : nD array
-                Data after intensity scaling.
+        **Return**\n
+        scdata: nD array
+            Data after intensity scaling.
         """
 
         scdata = aly.apply_mask_along(self.data, mask=scale_array, axes=axis)
@@ -126,13 +126,13 @@ class BandStructure(DataArray):
         """
         Update the values of multiple axes.
 
-        :Parameters:
-            axes : list/tuple | None
-                Collection of axis names.
-            vals : list/tuple | None
-                Collection of axis values.
-            axesdict : dict | None
-                Axis-value pair for update.
+        **Parameters**\n
+        axes: list/tuple | None
+            Collection of axis names.
+        vals: list/tuple | None
+            Collection of axis values.
+        axesdict: dict | None
+            Axis-value pair for update.
         """
 
         if axesdict:
@@ -146,19 +146,19 @@ class BandStructure(DataArray):
         """
         Reduce the size (shape-changing operation) of the axis through rebinning.
 
-        :Parameters:
-            data : nD array
-                Data to resize (e.g. self.data).
-            axes : dict
-                Axis values of the original data structure (e.g. self.coords).
-            factor : list/tuple of int
-                Resizing factor for each dimension (e.g. 2 means reduce by a factor of 2).
-            method : str | 'mean'
-                Numerical operation used for resizing ('mean' or 'sum').
-            ret : bool | False
-                Option to return the resized data array.
+        **Parameters**\n
+        data: nD array
+            Data to resize (e.g. self.data).
+        axes: dict
+            Axis values of the original data structure (e.g. self.coords).
+        factor: list/tuple of int
+            Resizing factor for each dimension (e.g. 2 means reduce by a factor of 2).
+        method: str | 'mean'
+            Numerical operation used for resizing ('mean' or 'sum').
+        ret: bool | False
+            Option to return the resized data array.
 
-        :Return:
+        **Return**\n
             Instance of resized n-dimensional array along with downsampled axis coordinates.
         """
 
@@ -269,21 +269,21 @@ class MPESDataset(BandStructure):
         """
         Calculate the difference of two hyperslices (hs), hsa - hsb.
 
-        :Parameters:
-            slicea, sliceb : dict
-                Dictionaries for slicing.
-            slicetype : str | 'index'
-                Type of slicing, 'index' (DataArray.isel) or 'value' (DataArray.sel)
-            axreduce : tuple of int | None
-                Axes to sum over.
-            ret : bool | False
-                Options for return.
-            **kwds : keyword arguments
-                Those passed into DataArray.isel() and DataArray.sel()
+        **Parameters**\n
+        slicea, sliceb: dict
+            Dictionaries for slicing.
+        slicetype: str | 'index'
+            Type of slicing, 'index' (DataArray.isel) or 'value' (DataArray.sel).
+        axreduce: tuple of int | None
+            Axes to sum over.
+        ret: bool | False
+            Options for return.
+        **kwds: keyword arguments
+            Those passed into DataArray.isel() and DataArray.sel().
 
-        :Return:
-            sldiff : class
-                Sliced class instance.
+        **Return**\n
+        sldiff: class
+            Sliced class instance.
         """
 
         drop = kwds.pop('drop', False)
@@ -323,14 +323,14 @@ class MPESDataset(BandStructure):
         """
         Spawn an instance of the BandStructure class from axis slicing.
 
-        :Parameters:
-            axis : str/list
-                Axes to subset from.
-            axisrange : slice object/list
-                The value range of axes to be sliced out.
+        **Parameters**\n
+        axis: str/list
+            Axes to subset from.
+        axisrange: slice object/list
+            The value range of axes to be sliced out.
 
-        :Return:
-            An instances of BandStructure, MPESDataset or DataArray class.
+        **Return**\n
+            An instances of ``BandStructure``, ``MPESDataset`` or ``DataArray`` class.
         """
 
         # Determine the remaining coordinate keys using set operations

@@ -16,15 +16,15 @@ def find_nearest(val, narray):
     """
     Find the value closest to a given one in a 1D array.
 
-    :Parameters:
-        val : float
-            Value of interest.
-        narray : 1D numeric array
-            The array to look for the nearest value.
+    **Parameters**\n
+    val: float
+        Value of interest.
+    narray: 1D numeric array
+        The array to look for the nearest value.
 
-    :Return:
-        ind : int
-            Array index of the value nearest to the given one.
+    **Return**\n
+    ind: int
+        Array index of the value nearest to the given one.
     """
 
     return np.argmin(np.abs(narray - val))
@@ -36,15 +36,15 @@ def numFormatConversion(seq, form='int', **kwds):
     returns a format-converted sequence of numbers. The function returns
     nothing when the conversion fails due to errors.
 
-    :Parameters:
-        seq : 1D numeric array
-            The numeric array to be converted.
-        form : str | 'int'
-            The format to convert into.
+    **Parameters**\n
+    seq: 1D numeric array
+        The numeric array to be converted.
+    form: str | 'int'
+        The format to convert into.
 
-    :Return:
-        numseq : converted numeric type
-            The format-converted array.
+    **Return**\n
+    numseq: converted numeric type
+        The format-converted array.
     """
 
     try:
@@ -70,13 +70,13 @@ def to_odd(num):
     """
     Convert a single number to its nearest odd number.
 
-    :Parameters:
-        num : float/int
-            Number to convert.
+    **Parameters**\n
+    num: float/int
+        Number to convert.
 
-    :Return:
-        oddnum : int
-            The nearest odd number.
+    **Return**\n
+    oddnum: int
+        The nearest odd number.
     """
 
     rnum = int(num)
@@ -89,13 +89,13 @@ def to_odd(num):
 def intify(*nums):
     """ Safely convert to integer (avoiding None).
 
-    :Parameter:
-        nums : list/tuple/1D array
-            Numeric array to convert to integer.
+    **Parameter**\n
+    nums: list/tuple/1D array
+        Numeric array to convert to integer.
 
-    :Return:
-        intnums : list
-            Converted list of numerics.
+    **Return**\n
+    intnums : list
+        Converted list of numerics.
     """
 
     intnums = list(nums) # Make a copy of the to-be-converted list
@@ -112,15 +112,15 @@ def revaxis(arr, axis=-1):
     """
     Reverse an ndarray along certain axis.
 
-    :Parameters:
-        arr : nD numeric array
-            array to invert
-        axis : int | -1
-            the axis along which to invert
+    **Parameters**\n
+    arr: nD numeric array
+        array to invert
+    axis: int | -1
+        the axis along which to invert
 
-    :Return:
-        revarr : nD numeric array
-            axis-inverted nD array
+    **Return**\n
+    revarr: nD numeric array
+        axis-inverted nD array
     """
 
     arr = np.asarray(arr).swapaxes(axis, 0)
@@ -134,16 +134,16 @@ def replist(entry, row, column):
     Generator of nested lists with identical entries.
     Generated values are independent of one another.
 
-    :Parameters:
-        entry : numeric/str
-            repeated item in nested list
-        row : int
-            number of rows in nested list
-        column : int
-            number of columns in nested list
+    **Parameters**\n
+    entry: numeric/str
+        Repeated item in nested list.
+    row: int
+        Number of rows in nested list.
+    column: int
+        Number of columns in nested list.
 
-    :Return:
-        Nested list
+    **Return**\n
+        Nested list.
     """
 
     return [[entry]*column for _ in range(row)]
@@ -153,17 +153,17 @@ def normspec(*specs, smooth=False, span=13, order=1):
     """
     Normalize a series of 1D signals.
 
-    :Parameters:
-        *specs : list/2D array
-            Collection of 1D signals.
-        smooth : bool | False
-            Option to smooth the signals before normalization.
-        span, order : int, int | 13, 1
-            Smoothing parameters of the LOESS method (see ``scipy.signal.savgol_filter()``).
+    **Parameters**\n
+    *specs: list/2D array
+        Collection of 1D signals.
+    smooth: bool | False
+        Option to smooth the signals before normalization.
+    span, order: int, int | 13, 1
+        Smoothing parameters of the LOESS method (see ``scipy.signal.savgol_filter()``).
 
-    :Return:
-        normalized_specs : 2D array
-            The matrix assembled from a list of maximum-normalized signals.
+    **Return**\n
+    normalized_specs: 2D array
+        The matrix assembled from a list of maximum-normalized signals.
     """
 
     nspec = len(specs)
@@ -190,13 +190,13 @@ def normspec(*specs, smooth=False, span=13, order=1):
 
 def appendformat(filepath, form):
     """
-    Append a format string to the end of a file path
+    Append a format string to the end of a file path.
 
-    :Parameters:
-        filepath : str
-            File path of interest
-        form : str
-            File format of interest
+    **Parameters**\n
+    filepath: str
+        File path of interest.
+    form: str
+        File format of interest.
     """
 
     format_string = '.'+form
@@ -210,19 +210,19 @@ def appendformat(filepath, form):
 def shuffleaxis(arr, axes, direction='front'):
     """
     Move multiple axes of a multidimensional array simultaneously
-    to the front or end of its axis order
+    to the front or end of its axis order.
 
-    :Parameters:
-        arr : ndarray
-            array to be shuffled
-        axes : tuple of int
-            dimensions to be shuffled
-        direction : str | 'front'
-            direction of shuffling ('front' or 'end')
+    **Parameters**\n
+    arr: ndarray
+        Array to be shuffled.
+    axes: tuple of int
+        Dimensions to be shuffled.
+    direction: str | 'front'
+        Direction of shuffling ('front' or 'end').
 
-    :Return:
-        sharr : ndarray
-            dimension-shuffled array
+    **Return**\n
+    sharr: ndarray
+        Dimension-shuffled array.
     """
 
     nax, maxaxes, minaxes = len(axes), max(axes), min(axes)
@@ -245,17 +245,17 @@ def shuffleaxis(arr, axes, direction='front'):
 
 def dictmerge(D, others):
     """
-    Merge a dictionary with other dictionaries
+    Merge a dictionary with other dictionaries.
 
-    :Parameters:
-        D : dict
-            Main dictionary.
-        others : list/tuple/dict
-            Other dictionary or composite dictionarized elements.
+    **Parameters**\n
+    D: dict
+        Main dictionary.
+    others: list/tuple/dict
+        Other dictionary or composite dictionarized elements.
 
-    :Return:
-        D : dict
-            Merged dictionary.
+    **Return**\n
+    D: dict
+        Merged dictionary.
     """
 
     if type(others) in (list, tuple): # Merge D with a list or tuple of dictionaries
@@ -272,13 +272,13 @@ def riffle(*arr):
     """
     Interleave multiple arrays of the same number of elements.
 
-    :Parameter:
-        *arr : array
-            A number of arrays
+    **Parameter**\n
+    *arr: array
+        A number of arrays.
 
-    :Return:
-        riffarr : 1D array
-            An array with interleaving elements from each input array.
+    **Return**\n
+    riffarr: 1D array
+        An array with interleaving elements from each input array.
     """
 
     arr = (map(np.ravel, arr))
@@ -296,16 +296,17 @@ def arraybin(arr, bins, method='mean'):
     """
     Resize an nD array by binning.
 
-    :Parameters:
-        arr : nD array
-            N-dimensional array for binning.
-        bins : list/tuple of int
-            Bins/Size shrinkage along every axis.
-        method : str
-            Method for binning, 'mean' or 'sum'.
+    **Parameters**\n
+    arr: nD array
+        N-dimensional array for binning.
+    bins: list/tuple of int
+        Bins/Size shrinkage along every axis.
+    method: str
+        Method for binning, 'mean' or 'sum'.
 
-    :Return:
-        arrbinned : nD array
+    **Return**\n
+    arrbinned: numpy array
+        Array after resizing.
 
     """
 
@@ -334,6 +335,12 @@ def arraybin(arr, bins, method='mean'):
 
 def calcax(start, end, steps, ret='midpoint'):
     """ Calculate the positions of the axes values.
+
+    **Parameters**\n
+    start, end, steps: numeric, numeric, numeric
+        Start, end positions and the steps.
+    ret: str | 'midpoints'
+        Specification of positions.
     """
 
     edges = np.linspace(start, end, steps+1, endpoint=True)
@@ -349,13 +356,13 @@ def calcax(start, end, steps, ret='midpoint'):
 def bnorm(pval, pmax, pmin):
     """ Normalize parameters by the bounds of the given values.
 
-    :Parameters:
-        pval : array/numeric
-            A single value/collection of values to normalize.
-        pmax, pmin : numeric, numeric
-            The maximum and the minimum of the values.
+    **Parameters**\n
+    pval: array/numeric
+        A single value/collection of values to normalize.
+    pmax, pmin: numeric, numeric
+        The maximum and the minimum of the values.
 
-    :Return:
+    **Return**\n
         Normalized values (with the same dimensions as pval).
 
     """
@@ -366,10 +373,10 @@ def bnorm(pval, pmax, pmin):
 def tqdmenv(env):
     """ Choose tqdm progress bar executing environment.
 
-    :Parameter:
-        env : str
-            Name of the environment, 'classic' for ordinary environment,
-            'notebook' for Jupyter notebook.
+    **Parameter**\n
+    env: str
+        Name of the environment, 'classic' for ordinary environment,
+        'notebook' for Jupyter notebook.
     """
 
     if env == 'classic':
@@ -399,13 +406,13 @@ def concat(*arrays):
 def multithresh(arr, lbs, ubs, ths):
     """ Multilevel thresholding of a 1D array. Somewhat similar to bit depth reduction.
 
-    :Parameters:
-        arr : 1D array
-            Array for thresholding.
-        lbs, ubs : list/tuple/array, list/tuple/array
-            Paired lower and upper bounds for each thresholding level.
-        ths : list/tuple/array
-            Thresholds for the values within the paired lower and upper bounds.
+    **Parameters**\n
+    arr: 1D array
+        Array for thresholding.
+    lbs, ubs: list/tuple/array, list/tuple/array
+        Paired lower and upper bounds for each thresholding level.
+    ths: list/tuple/array
+        Thresholds for the values within the paired lower and upper bounds.
     """
 
     for lb, ub, th in zip(lbs, ubs, ths):

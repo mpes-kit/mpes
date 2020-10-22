@@ -185,17 +185,14 @@
 <dt id="mpes.analysis.BoundedArea.setBoundary">
 <code class="sig-name descname">setBoundary</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pmz</span><span class="o">=</span><span class="default_value">'linear'</span></em>, <em class="sig-param"><span class="n">boundtype</span><span class="o">=</span><span class="default_value">'&gt;'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.BoundedArea.setBoundary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add bound to grid to redefine subgrid.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>pmz<span class="classifier">str | ‘linear’</span></dt><dd><p>Parametrization (pmz) of the decision boundary (‘linear’ or ‘circular’).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>pmz: str | ‘linear’</dt><dd><p>Parametrization (pmz) of the decision boundary (‘linear’ or ‘circular’).</p>
 </dd>
-<dt>boundtype<span class="classifier">str | ‘&gt;’</span></dt><dd><p>Bound region specification (‘&gt;’ or ‘&lt;’).</p>
-</dd>
-</dl>
-<p><a href="#id1"><span class="problematic" id="id2">**</span></a>kwds : keyword arguments</p>
+<dt>boundtype: str | ‘&gt;’</dt><dd><p>Bound region specification (‘&gt;’ or ‘&lt;’).</p>
 </dd>
 </dl>
+<p><a href="#id1"><span class="problematic" id="id2">**</span></a>kwds: keyword arguments</p>
 </dd></dl>
 
 <dl class="py method">
@@ -208,20 +205,16 @@
 <dt id="mpes.analysis.BoundedArea.toMask">
 <code class="sig-name descname">toMask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inbound</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">exbound</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.BoundedArea.toMask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a scaled mask from existing shape.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>inbound<span class="classifier">float | 1</span></dt><dd><p>Value for the pixels within the boundary.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>inbound: float | 1</dt><dd><p>Value for the pixels within the boundary.</p>
 </dd>
-<dt>exbound<span class="classifier">float | 0</span></dt><dd><p>Value for the pixels outside the boundary.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>modmask<span class="classifier">2d array</span></dt><dd><p>Modified mask as a 2d array.</p>
+<dt>exbound: float | 0</dt><dd><p>Value for the pixels outside the boundary.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>modmask: 2d array</dt><dd><p>Modified mask as a 2d array.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -230,18 +223,15 @@
 <dt id="mpes.analysis.BoundedArea.view">
 <code class="sig-name descname">view</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">origin</span><span class="o">=</span><span class="default_value">'lower'</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'terrain_r'</span></em>, <em class="sig-param"><span class="n">axes</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.BoundedArea.view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display the current mask.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>origin<span class="classifier">str | ‘lower’</span></dt><dd><p>Location of the image origin.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>origin: str | ‘lower’</dt><dd><p>Location of the image origin.</p>
 </dd>
-<dt>cmap<span class="classifier">str | ‘terrain_r’</span></dt><dd><p>Color map</p>
+<dt>cmap: str | ‘terrain_r’</dt><dd><p>Color map</p>
 </dd>
-<dt>axes<span class="classifier">bool | True</span></dt><dd><p>Axes visibility option in plot.</p>
+<dt>axes: bool | True</dt><dd><p>Axes visibility option in plot.</p>
 </dd>
-<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>Additional arguments for <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.imshow()</span></code>.</p>
-</dd>
-</dl>
+<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwds: keyword arguments</dt><dd><p>Additional arguments for <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.imshow()</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -256,23 +246,20 @@
 <dt id="mpes.analysis.EnergyCalibrator.addFeatures">
 <code class="sig-name descname">addFeatures</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ranges</span></em>, <em class="sig-param"><span class="n">refid</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">traces</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">infer_others</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">mode</span><span class="o">=</span><span class="default_value">'append'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.EnergyCalibrator.addFeatures" title="Permalink to this definition">¶</a></dt>
 <dd><p>Select or extract the equivalent landmarks (e.g. peaks) among all traces.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>ranges<span class="classifier">list/tuple</span></dt><dd><p>Collection of feature detection ranges, within which an algorithm
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>ranges: list/tuple</dt><dd><p>Collection of feature detection ranges, within which an algorithm
 (i.e. 1D peak detector) with look for the feature.</p>
 </dd>
-<dt>refid<span class="classifier">int | 0</span></dt><dd><p>Index of the reference trace (EDC).</p>
+<dt>refid: int | 0</dt><dd><p>Index of the reference trace (EDC).</p>
 </dd>
-<dt>traces<span class="classifier">2D array | None</span></dt><dd><p>Collection of energy dispersion curves (EDCs).</p>
+<dt>traces: 2D array | None</dt><dd><p>Collection of energy dispersion curves (EDCs).</p>
 </dd>
-<dt>infer_others<span class="classifier">bool | True</span></dt><dd><p>Option to infer the feature detection range in other traces (EDCs) from a given one.</p>
+<dt>infer_others: bool | True</dt><dd><p>Option to infer the feature detection range in other traces (EDCs) from a given one.</p>
 </dd>
-<dt>mode<span class="classifier">str | ‘append’</span></dt><dd><p>Specification on how to change the feature ranges (‘append’ or ‘replace’).</p>
+<dt>mode: str | ‘append’</dt><dd><p>Specification on how to change the feature ranges (‘append’ or ‘replace’).</p>
 </dd>
-<dt><a href="#id5"><span class="problematic" id="id6">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>Dictionarized keyword arguments for trace alignment (See <code class="docutils literal notranslate"><span class="pre">self.findCorrespondence()</span></code>)</p>
-</dd>
-</dl>
+<dt><a href="#id5"><span class="problematic" id="id6">**</span></a>kwds: keyword arguments</dt><dd><p>Dictionarized keyword arguments for trace alignment (See <code class="docutils literal notranslate"><span class="pre">self.findCorrespondence()</span></code>)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -282,16 +269,13 @@
 <code class="sig-name descname">calibrate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">refid</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">['coeffs']</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.EnergyCalibrator.calibrate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the functional mapping between time-of-flight and the energy
 scale using optimization methods.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>refid<span class="classifier">int | 0</span></dt><dd><p>The reference trace index (an integer).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>refid: int | 0</dt><dd><p>The reference trace index (an integer).</p>
 </dd>
-<dt>ret<span class="classifier">list | [‘coeffs’]</span></dt><dd><p>Options for return values (see <code class="docutils literal notranslate"><span class="pre">mpes.analysis.calibrateE()</span></code>).</p>
+<dt>ret: list | [‘coeffs’]</dt><dd><p>Options for return values (see <code class="docutils literal notranslate"><span class="pre">mpes.analysis.calibrateE()</span></code>).</p>
 </dd>
-<dt><a href="#id7"><span class="problematic" id="id8">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>See available keywords for <code class="docutils literal notranslate"><span class="pre">mpes.analysis.calibrateE()</span></code>.</p>
-</dd>
-</dl>
+<dt><a href="#id7"><span class="problematic" id="id8">**</span></a>kwds: keyword arguments</dt><dd><p>See available keywords for <code class="docutils literal notranslate"><span class="pre">mpes.analysis.calibrateE()</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -306,14 +290,13 @@ scale using optimization methods.</p>
 <dt id="mpes.analysis.EnergyCalibrator.featureExtract">
 <code class="sig-name descname">featureExtract</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ranges</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">traces</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.EnergyCalibrator.featureExtract" title="Permalink to this definition">¶</a></dt>
 <dd><p>Select or extract the equivalent landmarks (e.g. peaks) among all traces.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p>ranges : list | None
-traces : 2D array | None
-<a href="#id9"><span class="problematic" id="id10">**</span></a>kwds : keyword arguments</p>
-<blockquote>
-<div><p>See available keywords in <code class="docutils literal notranslate"><span class="pre">mpes.analysis.peaksearch()</span></code>.</p>
-</div></blockquote>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>ranges: list/tuple | None</dt><dd><p>Range in each trace to look for the peak feature, [start, end].</p>
+</dd>
+<dt>traces: 2D array | None</dt><dd><p>Collection of 1D spectra to use for calibration.</p>
+</dd>
+<dt><a href="#id9"><span class="problematic" id="id10">**</span></a>kwds: keyword arguments</dt><dd><p>See available keywords in <code class="docutils literal notranslate"><span class="pre">mpes.analysis.peaksearch()</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -322,24 +305,20 @@ traces : 2D array | None
 <dt id="mpes.analysis.EnergyCalibrator.findCorrespondence">
 <em class="property">static </em><code class="sig-name descname">findCorrespondence</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sig_still</span></em>, <em class="sig-param"><span class="n">sig_mov</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'dtw'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.EnergyCalibrator.findCorrespondence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine the correspondence between two 1D traces by alignment.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>sig_still, sig_mov<span class="classifier">1D array, 1D array</span></dt><dd><p>Input 1D signals.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>sig_still, sig_mov: 1D array, 1D array</dt><dd><p>Input 1D signals.</p>
 </dd>
-<dt>method<span class="classifier">str | ‘dtw’</span></dt><dd><p>Method for 1D signal correspondence detection (‘dtw’ or ‘ptw’).</p>
+<dt>method: str | ‘dtw’</dt><dd><p>Method for 1D signal correspondence detection (‘dtw’ or ‘ptw’).</p>
 </dd>
-<dt><a href="#id11"><span class="problematic" id="id12">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>See available keywords for the following functions,
+<dt><a href="#id11"><span class="problematic" id="id12">**</span></a>kwds: keyword arguments</dt><dd><p>See available keywords for the following functions,
 (1) <code class="docutils literal notranslate"><span class="pre">fastdtw.fastdtw()</span></code> (when <code class="docutils literal notranslate"><span class="pre">method=='dtw'</span></code>)
 (2) <code class="docutils literal notranslate"><span class="pre">ptw.ptw.timeWarp()</span></code> (when <code class="docutils literal notranslate"><span class="pre">method=='ptw'</span></code>)</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>pathcorr<span class="classifier">list</span></dt><dd><p>Pixel-wise path correspondences between two input 1D arrays (sig_still, sig_mov).</p>
-</dd>
-</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>pathcorr: list</dt><dd><p>Pixel-wise path correspondences between two input 1D arrays (sig_still, sig_mov).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -354,12 +333,9 @@ traces : 2D array | None
 <dt id="mpes.analysis.EnergyCalibrator.normalize">
 <code class="sig-name descname">normalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.EnergyCalibrator.normalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalize the spectra along an axis.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt><a href="#id13"><span class="problematic" id="id14">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>See the keywords for <code class="docutils literal notranslate"><span class="pre">mpes.utils.normspec()</span></code>.</p>
-</dd>
-</dl>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt><a href="#id13"><span class="problematic" id="id14">**</span></a>kwds: keyword arguments</dt><dd><p>See the keywords for <code class="docutils literal notranslate"><span class="pre">mpes.utils.normspec()</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -380,16 +356,13 @@ traces : 2D array | None
 <dt id="mpes.analysis.EnergyCalibrator.read">
 <code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">form</span><span class="o">=</span><span class="default_value">'h5'</span></em>, <em class="sig-param"><span class="n">tracename</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">tofname</span><span class="o">=</span><span class="default_value">'ToF'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.EnergyCalibrator.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read traces (e.g. energy dispersion curves) from files.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>form<span class="classifier">str | ‘h5’</span></dt><dd><p>Format of the files (‘h5’ or ‘mat’).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>form: str | ‘h5’</dt><dd><p>Format of the files (‘h5’ or ‘mat’).</p>
 </dd>
-<dt>tracename<span class="classifier">str | ‘’</span></dt><dd><p>Name of the group/attribute corresponding to the trace.</p>
+<dt>tracename: str | ‘’</dt><dd><p>Name of the group/attribute corresponding to the trace.</p>
 </dd>
-<dt>tofname<span class="classifier">str | ‘ToF’</span></dt><dd><p>Name of the group/attribute corresponding to the time-of-flight.</p>
-</dd>
-</dl>
+<dt>tofname: str | ‘ToF’</dt><dd><p>Name of the group/attribute corresponding to the time-of-flight.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -399,14 +372,11 @@ traces : 2D array | None
 <code class="sig-name descname">saveParameters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">form</span><span class="o">=</span><span class="default_value">'h5'</span></em>, <em class="sig-param"><span class="n">save_addr</span><span class="o">=</span><span class="default_value">'./energy'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.EnergyCalibrator.saveParameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save all the attributes of the workflow instance for later use
 (e.g. energy scale conversion).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>form<span class="classifier">str | ‘h5’</span></dt><dd><p>The file format to save the attributes in (‘h5’/’hdf5’ or ‘mat’).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>form: str | ‘h5’</dt><dd><p>The file format to save the attributes in (‘h5’/’hdf5’ or ‘mat’).</p>
 </dd>
-<dt>save_addr<span class="classifier">str | ‘./energy’</span></dt><dd><p>The filename to save the files with.</p>
-</dd>
-</dl>
+<dt>save_addr: str | ‘./energy’</dt><dd><p>The filename to save the files with.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -415,26 +385,25 @@ traces : 2D array | None
 <dt id="mpes.analysis.EnergyCalibrator.view">
 <code class="sig-name descname">view</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">traces</span></em>, <em class="sig-param"><span class="n">segs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">peaks</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">show_legend</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">backend</span><span class="o">=</span><span class="default_value">'matplotlib'</span></em>, <em class="sig-param"><span class="n">linekwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">linesegkwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">scatterkwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">legkwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.EnergyCalibrator.view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display a plot showing line traces with annotation.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt>traces<span class="classifier">2d array</span></dt><dd><p>Matrix of traces to visualize.</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>traces: 2d array</dt><dd><p>Matrix of traces to visualize.</p>
 </dd>
-<dt>segs<span class="classifier">list/tuple</span></dt><dd><p>Segments to be highlighted in the visualization.</p>
+<dt>segs: list/tuple</dt><dd><p>Segments to be highlighted in the visualization.</p>
 </dd>
-<dt>peaks<span class="classifier">2d array</span></dt><dd><p>Peak positions for labelling the traces.</p>
+<dt>peaks: 2d array</dt><dd><p>Peak positions for labelling the traces.</p>
 </dd>
-<dt>ret<span class="classifier">bool</span></dt><dd><p>Return specification.</p>
+<dt>ret: bool</dt><dd><p>Return specification.</p>
 </dd>
-<dt>backend<span class="classifier">str | ‘matplotlib’</span></dt><dd><p>Backend specification, choose between ‘matplotlib’ (static) or ‘bokeh’ (interactive).</p>
+<dt>backend: str | ‘matplotlib’</dt><dd><p>Backend specification, choose between ‘matplotlib’ (static) or ‘bokeh’ (interactive).</p>
 </dd>
-<dt>linekwds<span class="classifier">dict | {}</span></dt><dd><p>Keyword arguments for line plotting (see <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.plot()</span></code>).</p>
+<dt>linekwds: dict | {}</dt><dd><p>Keyword arguments for line plotting (see <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.plot()</span></code>).</p>
 </dd>
-<dt>scatterkwds<span class="classifier">dict | {}</span></dt><dd><p>Keyword arguments for scatter plot (see <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.scatter()</span></code>).</p>
+<dt>scatterkwds: dict | {}</dt><dd><p>Keyword arguments for scatter plot (see <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.scatter()</span></code>).</p>
 </dd>
-<dt>legkwds<span class="classifier">dict | {}</span></dt><dd><p>Keyword arguments for legend (see <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.legend()</span></code>).</p>
+<dt>legkwds: dict | {}</dt><dd><p>Keyword arguments for legend (see <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.legend()</span></code>).</p>
 </dd>
-<dt><a href="#id15"><span class="problematic" id="id16">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><table class="docutils align-default">
+<dt><a href="#id15"><span class="problematic" id="id16">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
 <col style="width: 26%" />
 <col style="width: 18%" />
@@ -471,8 +440,6 @@ traces : 2D array | None
 </table>
 </dd>
 </dl>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -480,35 +447,35 @@ traces : 2D array | None
 <dl class="py class">
 <dt id="mpes.analysis.Model">
 <em class="property">class </em><code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">Model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span></em>, <em class="sig-param"><span class="n">xvar</span></em>, <em class="sig-param"><span class="n">name</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.Model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Class of fitting curve models</p>
+<dd><p>Class of fitting curve models.</p>
 <dl class="py method">
 <dt id="mpes.analysis.Model._costfunc">
 <code class="sig-name descname">_costfunc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">inits</span></em>, <em class="sig-param"><span class="n">xv</span></em>, <em class="sig-param"><span class="n">form</span><span class="o">=</span><span class="default_value">'original'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.Model._costfunc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Define the cost function of the optimization process</p>
+<dd><p>Define the cost function of the optimization process.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mpes.analysis.Model.fit">
 <code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">inits</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'leastsq'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">fitkwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.Model.fit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Run the optimization</p>
+<dd><p>Run the optimization.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mpes.analysis.Model.model_eval">
 <code class="sig-name descname">model_eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.Model.model_eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate the fitting model with given parameters</p>
+<dd><p>Evaluate the fitting model with given parameters.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mpes.analysis.Model.normalize">
 <em class="property">static </em><code class="sig-name descname">normalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.Model.normalize" title="Permalink to this definition">¶</a></dt>
-<dd><p>Normalize n-dimensional data</p>
+<dd><p>Normalize n-dimensional data.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mpes.analysis.Model.partial_eval">
 <code class="sig-name descname">partial_eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">part</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.Model.partial_eval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate parts of a composite fitting model</p>
+<dd><p>Evaluate parts of a composite fitting model.</p>
 </dd></dl>
 
 </dd></dl>
@@ -533,14 +500,13 @@ traces : 2D array | None
 <dt id="mpes.analysis.MomentumCorrector.applyDeformation">
 <code class="sig-name descname">applyDeformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.applyDeformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply the deformation field to a specified image slice.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>image<span class="classifier">2D array</span></dt><dd><p>Image slice to apply the deformation.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>image: 2D array</dt><dd><p>Image slice to apply the deformation.</p>
 </dd>
-<dt>ret<span class="classifier">bool | True</span></dt><dd><p>Option to return the image after deformation.</p>
+<dt>ret: bool | True</dt><dd><p>Option to return the image after deformation.</p>
 </dd>
-<dt><a href="#id17"><span class="problematic" id="id18">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><dl class="field-list simple">
+<dt><a href="#id17"><span class="problematic" id="id18">**</span></a>kwds: keyword arguments</dt><dd><dl class="field-list simple">
 <dt class="field-odd">rdeform, cdeform</dt>
 <dd class="field-odd"><p>2D array, 2D array | self.rdeform_field, self.cdeform_field
 Row- and column-ordered deformation fields.</p>
@@ -551,8 +517,6 @@ Interpolation order.</p>
 </dd>
 <dt class="field-odd">others</dt>
 <dd class="field-odd"><p>See <code class="docutils literal notranslate"><span class="pre">scipy.ndimage.map_coordinates()</span></code>.</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd>
@@ -570,12 +534,9 @@ Distances calculated include center-vertex and nearest-neighbor vertex-vertex di
 <dt id="mpes.analysis.MomentumCorrector.calcSymmetryScores">
 <code class="sig-name descname">calcSymmetryScores</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">symtype</span><span class="o">=</span><span class="default_value">'rotation'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.calcSymmetryScores" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the symmetry scores from geometric quantities.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Paramters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>symtype<span class="classifier">str | ‘rotation’</span></dt><dd><p>Type of symmetry.</p>
-</dd>
-</dl>
+<p><strong>Paramters</strong></p>
+<dl class="simple">
+<dt>symtype: str | ‘rotation’</dt><dd><p>Type of symmetry.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -585,47 +546,42 @@ Distances calculated include center-vertex and nearest-neighbor vertex-vertex di
 <code class="sig-name descname">calibrate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">point_from</span></em>, <em class="sig-param"><span class="n">point_to</span></em>, <em class="sig-param"><span class="n">dist</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">'coeffs'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.calibrate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calibration of the momentum axes. Obtain all calibration-related values,
 return only the ones requested.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>image<span class="classifier">2d array</span></dt><dd><p>Image slice to construct the calibration function.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>image: 2d array</dt><dd><p>Image slice to construct the calibration function.</p>
 </dd>
-<dt>point_from, point_to<span class="classifier">list/tuple, list/tuple</span></dt><dd><p>Pixel coordinates of the two special points in (row, col) ordering.</p>
+<dt>point_from, point_to: list/tuple, list/tuple</dt><dd><p>Pixel coordinates of the two special points in (row, col) ordering.</p>
 </dd>
-<dt>dist<span class="classifier">float</span></dt><dd><p>Distance between the two selected points in inverse Angstrom.</p>
+<dt>dist: float</dt><dd><p>Distance between the two selected points in inverse Angstrom.</p>
 </dd>
-<dt>ret<span class="classifier">str | ‘coeffs’</span></dt><dd><p>Specification of return values (‘axes’, ‘extent’, ‘coeffs’, ‘grid’, ‘func’, ‘all’).</p>
+<dt>ret: str | ‘coeffs’</dt><dd><p>Specification of return values (‘axes’, ‘extent’, ‘coeffs’, ‘grid’, ‘func’, ‘all’).</p>
 </dd>
-<dt><a href="#id19"><span class="problematic" id="id20">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>See arguments in <code class="docutils literal notranslate"><span class="pre">mpes.analysis.calibrateE()</span></code>.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><p>Specified calibration parameters in a dictionary.</p>
+<dt><a href="#id19"><span class="problematic" id="id20">**</span></a>kwds: keyword arguments</dt><dd><p>See arguments in <code class="docutils literal notranslate"><span class="pre">mpes.analysis.calibrateE()</span></code>.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>Specified calibration parameters in a dictionary.</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mpes.analysis.MomentumCorrector.coordinateTransform">
 <code class="sig-name descname">coordinateTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">type</span></em>, <em class="sig-param"><span class="n">keep</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">interp_order</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">mapkwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.coordinateTransform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply a pixel-wise coordinate transform to an image.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>type<span class="classifier">str</span></dt><dd><p>Type of deformation to apply to image slice.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>type: str</dt><dd><p>Type of deformation to apply to image slice.</p>
 </dd>
-<dt>keep<span class="classifier">bool | False</span></dt><dd><p>Option to keep the specified coordinate transform.</p>
+<dt>keep: bool | False</dt><dd><p>Option to keep the specified coordinate transform.</p>
 </dd>
-<dt>ret<span class="classifier">bool | False</span></dt><dd><p>Option to return transformed image slice.</p>
+<dt>ret: bool | False</dt><dd><p>Option to return transformed image slice.</p>
 </dd>
-<dt>interp_order<span class="classifier">int | 1</span></dt><dd><p>Interpolation order for filling in missed pixels.</p>
+<dt>interp_order: int | 1</dt><dd><p>Interpolation order for filling in missed pixels.</p>
 </dd>
-<dt>mapkwds<span class="classifier">dict | {}</span></dt><dd><p>Additional arguments passed to <code class="docutils literal notranslate"><span class="pre">scipy.ndimage.map_coordinates()</span></code>.</p>
+<dt>mapkwds: dict | {}</dt><dd><p>Additional arguments passed to <code class="docutils literal notranslate"><span class="pre">scipy.ndimage.map_coordinates()</span></code>.</p>
 </dd>
-<dt><a href="#id21"><span class="problematic" id="id22">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>Additional arguments in specific deformation field. See <code class="docutils literal notranslate"><span class="pre">symmetrize.sym</span></code> module.</p>
-</dd>
-</dl>
+<dt><a href="#id21"><span class="problematic" id="id22">**</span></a>kwds: keyword arguments</dt><dd><p>Additional arguments in specific deformation field. See <code class="docutils literal notranslate"><span class="pre">symmetrize.sym</span></code> module.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -634,18 +590,17 @@ return only the ones requested.</p>
 <dt id="mpes.analysis.MomentumCorrector.correct">
 <code class="sig-name descname">correct</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">use_composite_transform</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">update</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">use_deform_field</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">updatekwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.correct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply a 2D transform to a stack of 2D images (3D) along a specific axis.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt>axis<span class="classifier">int</span></dt><dd><p>Axis for slice selection.</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>axis: int</dt><dd><p>Axis for slice selection.</p>
 </dd>
-<dt>use_composite_transform<span class="classifier">bool | False</span></dt><dd><p>Option to use the composite transform involving the rotation.</p>
+<dt>use_composite_transform: bool | False</dt><dd><p>Option to use the composite transform involving the rotation.</p>
 </dd>
-<dt>update<span class="classifier">bool | False</span></dt><dd><p>Option to update the existing figure attributes.</p>
+<dt>update: bool | False</dt><dd><p>Option to update the existing figure attributes.</p>
 </dd>
-<dt>use_deform_field<span class="classifier">bool | False</span></dt><dd><p>Option to use deformation field for distortion correction.</p>
+<dt>use_deform_field: bool | False</dt><dd><p>Option to use deformation field for distortion correction.</p>
 </dd>
-<dt><a href="#id23"><span class="problematic" id="id24">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><table class="docutils align-default">
+<dt><a href="#id23"><span class="problematic" id="id24">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 20%" />
@@ -674,8 +629,6 @@ return only the ones requested.</p>
 </table>
 </dd>
 </dl>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -685,20 +638,17 @@ return only the ones requested.</p>
 <dt>Extract features from the selected 2D slice.</dt><dd><p>Currently only point feature detection is implemented.</p>
 </dd>
 </dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>image<span class="classifier">2d array</span></dt><dd><p>The image slice to extract features from.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>image: 2d array</dt><dd><p>The image slice to extract features from.</p>
 </dd>
-<dt>direction<span class="classifier">str | ‘ccw’</span></dt><dd><p>The circular direction to reorder the features in (‘cw’ or ‘ccw’).</p>
+<dt>direction: str | ‘ccw’</dt><dd><p>The circular direction to reorder the features in (‘cw’ or ‘ccw’).</p>
 </dd>
-<dt>type<span class="classifier">str | ‘points’</span></dt><dd><p>The type of features to extract.</p>
+<dt>type: str | ‘points’</dt><dd><p>The type of features to extract.</p>
 </dd>
-<dt>center_det<span class="classifier">str | ‘centroidnn’</span></dt><dd><p>Specification of center detection method (‘centroidnn’, ‘centroid’, None).</p>
+<dt>center_det: str | ‘centroidnn’</dt><dd><p>Specification of center detection method (‘centroidnn’, ‘centroid’, None).</p>
 </dd>
-<dt><a href="#id25"><span class="problematic" id="id26">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>Extra keyword arguments for <code class="docutils literal notranslate"><span class="pre">symmetrize.pointops.peakdetect2d()</span></code>.</p>
-</dd>
-</dl>
+<dt><a href="#id25"><span class="problematic" id="id26">**</span></a>kwds: keyword arguments</dt><dd><p>Extra keyword arguments for <code class="docutils literal notranslate"><span class="pre">symmetrize.pointops.peakdetect2d()</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -721,9 +671,9 @@ return only the ones requested.</p>
 <dt id="mpes.analysis.MomentumCorrector.importBinningParameters">
 <code class="sig-name descname">importBinningParameters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parp</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.importBinningParameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Import parameters of binning used for correction image from parallelHDF5Processor Class instance</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p>parp: instance of the ParallelHDF5Processor class used for creation of the correction image</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>parp: instance of the <code class="docutils literal notranslate"><span class="pre">ParallelHDF5Processor</span></code> class</dt><dd><p>Import parameters used for creation of the distortion-corrected image.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -732,36 +682,32 @@ return only the ones requested.</p>
 <dt id="mpes.analysis.MomentumCorrector.intensityTransform">
 <code class="sig-name descname">intensityTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">type</span><span class="o">=</span><span class="default_value">'rot_sym'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.intensityTransform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply pixel-wise intensity transform.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>type<span class="classifier">str | ‘rot_sym’</span></dt><dd><p>Type of intensity transform.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>type: str | ‘rot_sym’</dt><dd><p>Type of intensity transform.</p>
 </dd>
 </dl>
-<p><a href="#id27"><span class="problematic" id="id28">**</span></a>kwds : keyword arguments</p>
-</dd>
-</dl>
+<p><a href="#id27"><span class="problematic" id="id28">**</span></a>kwds: keyword arguments</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mpes.analysis.MomentumCorrector.linWarpEstimate">
 <code class="sig-name descname">linWarpEstimate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">weights</span><span class="o">=</span><span class="default_value">1, 1, 1</span></em>, <em class="sig-param"><span class="n">optfunc</span><span class="o">=</span><span class="default_value">'minimize'</span></em>, <em class="sig-param"><span class="n">optmethod</span><span class="o">=</span><span class="default_value">'Nelder-Mead'</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">warpkwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.linWarpEstimate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Estimate the homography-based deformation field using landmark correspondences.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt>weights<span class="classifier">tuple/list/array | (1, 1, 1)</span></dt><dd><p>Weights added to the terms in the optimizer. The terms are assigned
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>weights: tuple/list/array | (1, 1, 1)</dt><dd><p>Weights added to the terms in the optimizer. The terms are assigned
 to the cost functions of (1) centeredness, (2) center-vertex symmetry,
 (3) vertex-vertex symmetry, respectively.</p>
 </dd>
-<dt>optfunc, optmethod<span class="classifier">str/func, str | ‘minimize’, ‘Nelder-Mead’</span></dt><dd><p>Name of the optimizer function and the optimization method.
+<dt>optfunc, optmethod: str/func, str | ‘minimize’, ‘Nelder-Mead’</dt><dd><p>Name of the optimizer function and the optimization method.
 See description in <code class="docutils literal notranslate"><span class="pre">mpes.analysis.sym.target_set_optimize()</span></code>.</p>
 </dd>
-<dt>ret<span class="classifier">bool | True</span></dt><dd><p>Specify if returning the corrected image slice.</p>
+<dt>ret: bool | True</dt><dd><p>Specify if returning the corrected image slice.</p>
 </dd>
-<dt>warpkwds<span class="classifier">dictionary | {}</span></dt><dd><p>Additional arguments passed to <code class="docutils literal notranslate"><span class="pre">symmetrize.sym.imgWarping()</span></code>.</p>
+<dt>warpkwds: dictionary | {}</dt><dd><p>Additional arguments passed to <code class="docutils literal notranslate"><span class="pre">symmetrize.sym.imgWarping()</span></code>.</p>
 </dd>
-<dt><a href="#id29"><span class="problematic" id="id30">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><table class="docutils align-default">
+<dt><a href="#id29"><span class="problematic" id="id30">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 16%" />
@@ -790,11 +736,10 @@ See description in <code class="docutils literal notranslate"><span class="pre">
 </table>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><p>Corrected 2D image slice (when <code class="docutils literal notranslate"><span class="pre">ret=True</span></code> is specified in the arguments).</p>
-</dd>
-</dl>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>Corrected 2D image slice (when <code class="docutils literal notranslate"><span class="pre">ret=True</span></code> is specified in the arguments).</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
@@ -807,14 +752,13 @@ See description in <code class="docutils literal notranslate"><span class="pre">
 <dt id="mpes.analysis.MomentumCorrector.rotate">
 <code class="sig-name descname">rotate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">angle</span><span class="o">=</span><span class="default_value">'auto'</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.rotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rotate 2D image in the homogeneous coordinate.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt>angle<span class="classifier">float/str</span></dt><dd><p>Angle of rotation (specify ‘auto’ to use automated estimation).</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>angle: float/str</dt><dd><p>Angle of rotation (specify ‘auto’ to use automated estimation).</p>
 </dd>
-<dt>ret<span class="classifier">bool | False</span></dt><dd><p>Return specification (True/False)</p>
+<dt>ret: bool | False</dt><dd><p>Return specification (True/False)</p>
 </dd>
-<dt><a href="#id31"><span class="problematic" id="id32">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><table class="docutils align-default">
+<dt><a href="#id31"><span class="problematic" id="id32">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
 <col style="width: 13%" />
 <col style="width: 18%" />
@@ -844,26 +788,21 @@ See description in <code class="docutils literal notranslate"><span class="pre">
 <p>See <code class="docutils literal notranslate"><span class="pre">symmetrize.sym.sym_pose_estimate()</span></code> for other keywords.</p>
 </dd>
 </dl>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mpes.analysis.MomentumCorrector.saveImage">
 <code class="sig-name descname">saveImage</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">form</span><span class="o">=</span><span class="default_value">'tiff'</span></em>, <em class="sig-param"><span class="n">save_addr</span><span class="o">=</span><span class="default_value">'./'</span></em>, <em class="sig-param"><span class="n">dtyp</span><span class="o">=</span><span class="default_value">'float32'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.saveImage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the distortion-corrected dataset (image only, without axes).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>form<span class="classifier">str | ‘tiff’</span></dt><dd><p>File format for saving the corrected image (‘tiff’ or ‘mat’).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>form: str | ‘tiff’</dt><dd><p>File format for saving the corrected image (‘tiff’ or ‘mat’).</p>
 </dd>
-<dt>save_addr<span class="classifier">str | ‘./’</span></dt><dd><p>The address to save the file at.</p>
+<dt>save_addr: str | ‘./’</dt><dd><p>The address to save the file at.</p>
 </dd>
-<dt>dtyp<span class="classifier">str | ‘float32’</span></dt><dd><p>Data type (in case conversion if needed).</p>
+<dt>dtyp: str | ‘float32’</dt><dd><p>Data type (in case conversion if needed).</p>
 </dd>
-<dt><a href="#id33"><span class="problematic" id="id34">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>See keywords from <code class="docutils literal notranslate"><span class="pre">tifffile.imsave()</span></code>.</p>
-</dd>
-</dl>
+<dt><a href="#id33"><span class="problematic" id="id34">**</span></a>kwds: keyword arguments</dt><dd><p>See keywords from <code class="docutils literal notranslate"><span class="pre">tifffile.imsave()</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -873,14 +812,11 @@ See description in <code class="docutils literal notranslate"><span class="pre">
 <code class="sig-name descname">saveParameters</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">form</span><span class="o">=</span><span class="default_value">'h5'</span></em>, <em class="sig-param"><span class="n">save_addr</span><span class="o">=</span><span class="default_value">'./momentum'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.saveParameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save all the attributes of the workflow instance for later use
 (e.g. momentum scale conversion, reconstructing the warping map function).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>form<span class="classifier">str | ‘h5’</span></dt><dd><p>File format to for saving the parameters (‘h5’/’hdf5’, ‘mat’)</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>form: str | ‘h5’</dt><dd><p>File format to for saving the parameters (‘h5’/’hdf5’, ‘mat’)</p>
 </dd>
-<dt>save_addr<span class="classifier">str | ‘./momentum’</span></dt><dd><p>The address for the to be saved file.</p>
-</dd>
-</dl>
+<dt>save_addr: str | ‘./momentum’</dt><dd><p>The address for the to be saved file.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -889,16 +825,13 @@ See description in <code class="docutils literal notranslate"><span class="pre">
 <dt id="mpes.analysis.MomentumCorrector.selectSlice2D">
 <code class="sig-name descname">selectSlice2D</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">selector</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.selectSlice2D" title="Permalink to this definition">¶</a></dt>
 <dd><p>Select (hyper)slice from a (hyper)volume.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>selector<span class="classifier">slice object/list/int</span></dt><dd><p>Selector along the specified axis to extract the slice (image).
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>selector: slice object/list/int</dt><dd><p>Selector along the specified axis to extract the slice (image).
 Use the construct slice(start, stop, step) to select a range of images and sum them.
 Use an integer to specify only a particular slice.</p>
 </dd>
-<dt>axis<span class="classifier">int | 2</span></dt><dd><p>Axis along which to select the image.</p>
-</dd>
-</dl>
+<dt>axis: int | 2</dt><dd><p>Axis along which to select the image.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -907,24 +840,23 @@ Use an integer to specify only a particular slice.</p>
 <dt id="mpes.analysis.MomentumCorrector.splineWarpEstimate">
 <code class="sig-name descname">splineWarpEstimate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">include_center</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">fixed_center</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">iterative</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">interp_order</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">update</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.splineWarpEstimate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Estimate the spline deformation field using thin plate spline registration.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>image<span class="classifier">2D array</span></dt><dd><p>Image slice to be corrected.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>image: 2D array</dt><dd><p>Image slice to be corrected.</p>
 </dd>
-<dt>include_center<span class="classifier">bool | True</span></dt><dd><p>Option to include the image center/centroid in the registration process.</p>
+<dt>include_center: bool | True</dt><dd><p>Option to include the image center/centroid in the registration process.</p>
 </dd>
-<dt>fixed_center<span class="classifier">bool | True</span></dt><dd><p>Option to have a fixed center during registration-based symmetrization.</p>
+<dt>fixed_center: bool | True</dt><dd><p>Option to have a fixed center during registration-based symmetrization.</p>
 </dd>
-<dt>iterative<span class="classifier">bool | False</span></dt><dd><p>Option to use the iterative approach (may not work in all cases).</p>
+<dt>iterative: bool | False</dt><dd><p>Option to use the iterative approach (may not work in all cases).</p>
 </dd>
-<dt>interp_order<span class="classifier">int | 1</span></dt><dd><p>Order of interpolation (see <code class="docutils literal notranslate"><span class="pre">scipy.ndimage.map_coordinates()</span></code>).</p>
+<dt>interp_order: int | 1</dt><dd><p>Order of interpolation (see <code class="docutils literal notranslate"><span class="pre">scipy.ndimage.map_coordinates()</span></code>).</p>
 </dd>
-<dt>update<span class="classifier">bool | False</span></dt><dd><p>Option to keep the spline-deformed image as corrected one.</p>
+<dt>update: bool | False</dt><dd><p>Option to keep the spline-deformed image as corrected one.</p>
 </dd>
-<dt>ret<span class="classifier">bool | False</span></dt><dd><p>Option to return corrected image slice.</p>
+<dt>ret: bool | False</dt><dd><p>Option to return corrected image slice.</p>
 </dd>
-<dt><a href="#id35"><span class="problematic" id="id36">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><dl class="field-list simple">
+<dt><a href="#id35"><span class="problematic" id="id36">**</span></a>kwds: keyword arguments</dt><dd><dl class="field-list simple">
 <dt class="field-odd">landmarks</dt>
 <dd class="field-odd"><p>list/array | self.pouter_ord
 Landmark positions (row, column) used for registration.</p>
@@ -933,8 +865,6 @@ Landmark positions (row, column) used for registration.</p>
 <dd class="field-even"><p>dict | {}
 User-specified center positions for the reference and target sets.
 {‘lmkcenter’: (row, col), ‘targcenter’: (row, col)}</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd>
@@ -951,35 +881,30 @@ User-specified center positions for the reference and target sets.
 <dt id="mpes.analysis.MomentumCorrector.transform">
 <em class="property">static </em><code class="sig-name descname">transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">points</span></em>, <em class="sig-param"><span class="n">transmat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Coordinate transform of a point set in the (row, column) formulation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>points<span class="classifier">list/array</span></dt><dd><p>Cartesian pixel coordinates of the points to be transformed.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>points: list/array</dt><dd><p>Cartesian pixel coordinates of the points to be transformed.</p>
 </dd>
-<dt>transmat<span class="classifier">2D array</span></dt><dd><p>The transform matrix.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><p>Transformed point coordinates.</p>
+<dt>transmat: 2D array</dt><dd><p>The transform matrix.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>Transformed point coordinates.</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py method">
 <dt id="mpes.analysis.MomentumCorrector.update">
 <code class="sig-name descname">update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">content</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update specific attributes of the class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>content<span class="classifier">str | ‘all’</span></dt><dd><p>‘feature’ = update only feature attributes
-‘image’ = update only image-related attributes
-‘all’ = update both feature and image-related attributes</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>content: str | ‘all’</dt><dd><p>‘feature’ = update only feature attributes</p>
+<p>‘image’ = update only image-related attributes</p>
+<p>‘all’ = update both feature and image-related attributes</p>
 </dd>
-<dt><a href="#id37"><span class="problematic" id="id38">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>Extra keyword arguments passed into <code class="docutils literal notranslate"><span class="pre">self._featureUpdate()</span></code>.</p>
-</dd>
-</dl>
+<dt><a href="#id37"><span class="problematic" id="id38">**</span></a>kwds: keyword arguments</dt><dd><p>Extra keyword arguments passed into <code class="docutils literal notranslate"><span class="pre">self._featureUpdate()</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -988,16 +913,13 @@ User-specified center positions for the reference and target sets.
 <dt id="mpes.analysis.MomentumCorrector.updateDeformation">
 <code class="sig-name descname">updateDeformation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rdeform</span></em>, <em class="sig-param"><span class="n">cdeform</span></em>, <em class="sig-param"><span class="n">reset</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.updateDeformation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the deformation field.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>rdeform, cdeform<span class="classifier">2D array, 2D array</span></dt><dd><p>Row- and column-ordered deformation fields.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>rdeform, cdeform: 2D array, 2D array</dt><dd><p>Row- and column-ordered deformation fields.</p>
 </dd>
-<dt>reset<span class="classifier">bool | False</span></dt><dd><p>Option to reset the deformation field.</p>
+<dt>reset: bool | False</dt><dd><p>Option to reset the deformation field.</p>
 </dd>
-<dt><a href="#id39"><span class="problematic" id="id40">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">mpes.analysis.MomentumCorrector.resetDeformation()</span></code>.</p>
-</dd>
-</dl>
+<dt><a href="#id39"><span class="problematic" id="id40">**</span></a>kwds: keyword arguments</dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">mpes.analysis.MomentumCorrector.resetDeformation()</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1006,38 +928,35 @@ User-specified center positions for the reference and target sets.
 <dt id="mpes.analysis.MomentumCorrector.view">
 <code class="sig-name descname">view</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">origin</span><span class="o">=</span><span class="default_value">'lower'</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'terrain_r'</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">4, 4</span></em>, <em class="sig-param"><span class="n">points</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">annotated</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">backend</span><span class="o">=</span><span class="default_value">'matplotlib'</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">imkwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">scatterkwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">crosshair</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">radii</span><span class="o">=</span><span class="default_value">[50, 100, 150]</span></em>, <em class="sig-param"><span class="n">crosshair_thickness</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.MomentumCorrector.view" title="Permalink to this definition">¶</a></dt>
 <dd><p>Display image slice with specified annotations.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>origin<span class="classifier">str | ‘lower’</span></dt><dd><p>Figure origin specification (‘lower’ or ‘upper’).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>origin: str | ‘lower’</dt><dd><p>Figure origin specification (‘lower’ or ‘upper’).</p>
 </dd>
-<dt>cmap<span class="classifier">str | ‘terrain_r’</span></dt><dd><p>Colormap specification.</p>
+<dt>cmap: str | ‘terrain_r’</dt><dd><p>Colormap specification.</p>
 </dd>
-<dt>figsize<span class="classifier">tuple/list | (4, 4)</span></dt><dd><p>Figure size.</p>
+<dt>figsize: tuple/list | (4, 4)</dt><dd><p>Figure size.</p>
 </dd>
-<dt>points<span class="classifier">dict | {}</span></dt><dd><p>Points for annotation.</p>
+<dt>points: dict | {}</dt><dd><p>Points for annotation.</p>
 </dd>
-<dt>annotated<span class="classifier">bool | False</span></dt><dd><p>Option for annotation.</p>
+<dt>annotated: bool | False</dt><dd><p>Option for annotation.</p>
 </dd>
-<dt>display<span class="classifier">bool | True</span></dt><dd><p>Display option when using <code class="docutils literal notranslate"><span class="pre">bokeh</span></code> to render interactively.</p>
+<dt>display: bool | True</dt><dd><p>Display option when using <code class="docutils literal notranslate"><span class="pre">bokeh</span></code> to render interactively.</p>
 </dd>
-<dt>backend<span class="classifier">str | ‘matplotlib’</span></dt><dd><p>Visualization backend specification.
+<dt>backend: str | ‘matplotlib’</dt><dd><p>Visualization backend specification.
 :’matplotlib’: use static display rendered by matplotlib.
 :’bokeh’: use interactive display rendered by bokeh.</p>
 </dd>
-<dt>ret<span class="classifier">bool | False</span></dt><dd><p>Option to return figure and axis objects.</p>
+<dt>ret: bool | False</dt><dd><p>Option to return figure and axis objects.</p>
 </dd>
-<dt>imkwd<span class="classifier">dict | {}</span></dt><dd><p>Keyword arguments for <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.imshow()</span></code>.</p>
+<dt>imkwd: dict | {}</dt><dd><p>Keyword arguments for <code class="docutils literal notranslate"><span class="pre">matplotlib.pyplot.imshow()</span></code>.</p>
 </dd>
-<dt>crosshair<span class="classifier">bool | False</span></dt><dd><p>Display option to plot circles around center self.pcent. Works only in bokeh backend.</p>
+<dt>crosshair: bool | False</dt><dd><p>Display option to plot circles around center self.pcent. Works only in bokeh backend.</p>
 </dd>
-<dt>radii<span class="classifier">list  |  [50,100,150]</span></dt><dd><p>Radii of circles to plot when crosshair optin is activated.</p>
+<dt>radii: list | [50,100,150]</dt><dd><p>Radii of circles to plot when crosshair optin is activated.</p>
 </dd>
-<dt>crosshair_thickness<span class="classifier">int  |  1</span></dt><dd><p>Thickness of crosshair circles.</p>
+<dt>crosshair_thickness: int | 1</dt><dd><p>Thickness of crosshair circles.</p>
 </dd>
-<dt><a href="#id41"><span class="problematic" id="id42">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>General extra arguments for the plotting procedure.</p>
-</dd>
-</dl>
+<dt><a href="#id41"><span class="problematic" id="id42">**</span></a>kwds: keyword arguments</dt><dd><p>General extra arguments for the plotting procedure.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1054,26 +973,22 @@ User-specified center positions for the reference and target sets.
 <dt id="mpes.analysis._rotate2d">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">_rotate2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">center</span></em>, <em class="sig-param"><span class="n">angle</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis._rotate2d" title="Permalink to this definition">¶</a></dt>
 <dd><p>2D matrix scaled rotation carried out in the homogenous coordinate.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>image<span class="classifier">2d array</span></dt><dd><p>Image matrix.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>image: 2d array</dt><dd><p>Image matrix.</p>
 </dd>
-<dt>center<span class="classifier">tuple/list</span></dt><dd><p>Center of the image (row pixel, column pixel).</p>
+<dt>center: tuple/list</dt><dd><p>Center of the image (row pixel, column pixel).</p>
 </dd>
-<dt>angle<span class="classifier">numeric</span></dt><dd><p>Angle of image rotation.</p>
+<dt>angle: numeric</dt><dd><p>Angle of image rotation.</p>
 </dd>
-<dt>scale<span class="classifier">numeric | 1</span></dt><dd><p>Scale of image rotation.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>image_rot<span class="classifier">2d array</span></dt><dd><p>Rotated image matrix.</p>
-</dd>
-<dt>rotmat<span class="classifier">2d array</span></dt><dd><p>Rotation matrix in the homogeneous coordinate system.</p>
+<dt>scale: numeric | 1</dt><dd><p>Scale of image rotation.</p>
 </dd>
 </dl>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>image_rot: 2d array</dt><dd><p>Rotated image matrix.</p>
+</dd>
+<dt>rotmat: 2d array</dt><dd><p>Rotation matrix in the homogeneous coordinate system.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1082,22 +997,18 @@ User-specified center positions for the reference and target sets.
 <dt id="mpes.analysis._signedmask">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">_signedmask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">imr</span></em>, <em class="sig-param"><span class="n">imc</span></em>, <em class="sig-param"><span class="n">maskr</span></em>, <em class="sig-param"><span class="n">maskc</span></em>, <em class="sig-param"><span class="n">sign</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis._signedmask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a binary mask using the masked coordinates.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>imr, imc<span class="classifier">int</span></dt><dd><p>Row and column size of the image.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>imr, imc: int</dt><dd><p>Row and column size of the image.</p>
 </dd>
-<dt>maskr, maskc<span class="classifier">1D array</span></dt><dd><p>Row and column coordinates of the masked pixels.</p>
+<dt>maskr, maskc: 1D array</dt><dd><p>Row and column coordinates of the masked pixels.</p>
 </dd>
-<dt>sign<span class="classifier">int/str</span></dt><dd><p>Value of the masked region, (0, 1, ‘nan’, or ‘xnan’).</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>mask<span class="classifier">2D array</span></dt><dd><p>Mask matrix.</p>
+<dt>sign: int/str</dt><dd><p>Value of the masked region, (0, 1, ‘nan’, or ‘xnan’).</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>mask: 2D array</dt><dd><p>Mask matrix.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1105,23 +1016,19 @@ User-specified center positions for the reference and target sets.
 <dl class="py function">
 <dt id="mpes.analysis.applyWarping">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">applyWarping</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">imgstack</span></em>, <em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">hgmat</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.applyWarping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Apply warping transform for a stack of images along an axis</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>imgstack<span class="classifier">3D array</span></dt><dd><p>Image stack before warping correction.</p>
+<dd><p>Apply warping transform for a stack of images along an axis.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>imgstack: 3D array</dt><dd><p>Image stack before warping correction.</p>
 </dd>
-<dt>axis<span class="classifier">int</span></dt><dd><p>Axis to iterate over to apply the transform.</p>
+<dt>axis: int</dt><dd><p>Axis to iterate over to apply the transform.</p>
 </dd>
-<dt>hgmat<span class="classifier">2D array</span></dt><dd><p>Homography matrix.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>imstack_transformed<span class="classifier">3D array</span></dt><dd><p>Stack of images after correction for warping.</p>
+<dt>hgmat: 2D array</dt><dd><p>Homography matrix.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>imstack_transformed: 3D array</dt><dd><p>Stack of images after correction for warping.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1130,52 +1037,44 @@ User-specified center positions for the reference and target sets.
 <dt id="mpes.analysis.apply_mask_along">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">apply_mask_along</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arr</span></em>, <em class="sig-param"><span class="n">mask</span></em>, <em class="sig-param"><span class="n">axes</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.apply_mask_along" title="Permalink to this definition">¶</a></dt>
 <dd><p>Apply a mask in a low dimensional slice throughout a high-dimensional array.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>arr<span class="classifier">nD array</span></dt><dd><p>Multidimensional array for masking.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>arr: nD array</dt><dd><p>Multidimensional array for masking.</p>
 </dd>
-<dt>mask<span class="classifier">nD array</span></dt><dd><p>Mask to apply.</p>
+<dt>mask: nD array</dt><dd><p>Mask to apply.</p>
 </dd>
-<dt>axes<span class="classifier">list/tuple of int | None</span></dt><dd><p>The axes to apply the mask to.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>maskedarr<span class="classifier">nD array</span></dt><dd><p>Masked multidimensional array.</p>
+<dt>axes: list/tuple of int | None</dt><dd><p>The axes to apply the mask to.</p>
 </dd>
 </dl>
-</dd>
-</dl>
+<p><strong>Return</strong>
+maskedarr: nD array</p>
+<blockquote>
+<div><p>Masked multidimensional array.</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="py function">
 <dt id="mpes.analysis.bandpath_map">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">bandpath_map</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">bsvol</span></em>, <em class="sig-param"><span class="n">pathr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pathc</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">path_coords</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">eaxis</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'analog'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.bandpath_map" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extract band diagram map from 2D/3D data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>bsvol<span class="classifier">2D/3D array</span></dt><dd><p>Volumetric band structure data.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>bsvol: 2D/3D array</dt><dd><p>Volumetric band structure data.</p>
 </dd>
-<dt>pathr, pathc<span class="classifier">1D array | None, None</span></dt><dd><p>Row and column pixel coordinates along the band path (ignored if path_coords is given).</p>
+<dt>pathr, pathc: 1D array | None, None</dt><dd><p>Row and column pixel coordinates along the band path (ignored if path_coords is given).</p>
 </dd>
-<dt>path_coords<span class="classifier">2D array | None</span></dt><dd><p>Combined row and column pixel coordinates of the band path.</p>
+<dt>path_coords: 2D array | None</dt><dd><p>Combined row and column pixel coordinates of the band path.</p>
 </dd>
-<dt>eaxis<span class="classifier">int | 2</span></dt><dd><p>Energy axis index.</p>
+<dt>eaxis: int | 2</dt><dd><p>Energy axis index.</p>
 </dd>
-<dt>method<span class="classifier">str | ‘analog’</span></dt><dd><p>Method for generating band path map (‘analog’ or ‘digital’).
+<dt>method: str | ‘analog’</dt><dd><p>Method for generating band path map (‘analog’ or ‘digital’).
 :’analog’: Using an interpolation scheme to calculate the exact pixel values.
 :’digital’: Using only the approximating pixel values (Bresenham’s algorithm).</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>bpm<span class="classifier">2D array</span></dt><dd><p>Band path map (BPM) sampled from the volumetric data.</p>
-</dd>
-</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>bpm: 2D array</dt><dd><p>Band path map (BPM) sampled from the volumetric data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1184,22 +1083,18 @@ User-specified center positions for the reference and target sets.
 <dt id="mpes.analysis.blocknorm">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">blocknorm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">mavg_axis</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">blockwidth</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.blocknorm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Block-thresholding 2D data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>data<span class="classifier">ndarray</span></dt><dd><p>Data to normalize.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>data: ndarray</dt><dd><p>Data to normalize.</p>
 </dd>
-<dt>mavg_axis<span class="classifier">int | 0</span></dt><dd><p>Axis to move the block along.</p>
+<dt>mavg_axis: int | 0</dt><dd><p>Axis to move the block along.</p>
 </dd>
-<dt>blockwidth<span class="classifier">int | 1</span></dt><dd><p>Width of the moving block.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>datanorm<span class="classifier">ndarray</span></dt><dd><p>Block-normalized data.</p>
+<dt>blockwidth: int | 1</dt><dd><p>Width of the moving block.</p>
 </dd>
 </dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>datanorm: ndarray</dt><dd><p>Block-normalized data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1208,27 +1103,26 @@ User-specified center positions for the reference and target sets.
 <dt id="mpes.analysis.bootstrapfit">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">bootstrapfit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">axval</span></em>, <em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">params</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">dfcontainer</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">pbar</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">pbenv</span><span class="o">=</span><span class="default_value">'classic'</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">'all'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.bootstrapfit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Line-by-line fitting via bootstrapping fitted parameters from one line to the next.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt>data<span class="classifier">ndarray</span></dt><dd><p>Data used in fitting.</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>data: ndarray</dt><dd><p>Data used in fitting.</p>
 </dd>
-<dt>axval<span class="classifier">list/numeric array</span></dt><dd><p>Value for the axis.</p>
+<dt>axval: list/numeric array</dt><dd><p>Value for the axis.</p>
 </dd>
-<dt>model<span class="classifier">lmfit Model object</span></dt><dd><p>The fitting model.</p>
+<dt>model: lmfit Model object</dt><dd><p>The fitting model.</p>
 </dd>
-<dt>params<span class="classifier">lmfit Parameters object</span></dt><dd><p>Initial guesses for fitting parameters.</p>
+<dt>params: lmfit Parameters object</dt><dd><p>Initial guesses for fitting parameters.</p>
 </dd>
-<dt>axis<span class="classifier">int | 0</span></dt><dd><p>The axis of the data to fit.</p>
+<dt>axis: int | 0</dt><dd><p>The axis of the data to fit.</p>
 </dd>
-<dt>dfcontainer<span class="classifier">pandas DataFrame | None</span></dt><dd><p>Dataframe container for the fitting parameters.</p>
+<dt>dfcontainer: pandas DataFrame | None</dt><dd><p>Dataframe container for the fitting parameters.</p>
 </dd>
-<dt>pbar<span class="classifier">bool | False</span></dt><dd><p>Progress bar condition.</p>
+<dt>pbar: bool | False</dt><dd><p>Progress bar condition.</p>
 </dd>
-<dt>pbenv<span class="classifier">str | ‘classic’</span></dt><dd><p>Progress bar environment (‘classic’ for generic version, ‘notebook’ for
+<dt>pbenv: str | ‘classic’</dt><dd><p>Progress bar environment (‘classic’ for generic version, ‘notebook’ for
 notebook compatible version).</p>
 </dd>
-<dt><a href="#id43"><span class="problematic" id="id44">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><table class="docutils align-default">
+<dt><a href="#id43"><span class="problematic" id="id44">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
 <col style="width: 14%" />
 <col style="width: 11%" />
@@ -1247,9 +1141,12 @@ notebook compatible version).</p>
 </tr>
 <tr class="row-odd"><td><p>concat</p></td>
 <td><p>bool</p></td>
-<td><p>concatenate the fit parameters to DataFrame input
-False (default) = no concatenation, use an empty DataFrame to start
-True = with concatenation to input DataFrame</p></td>
+<td><dl class="simple">
+<dt>concatenate the fit parameters to DataFrame input</dt><dd><p>False (default) = no concatenation, use an empty DataFrame to start
+True = with concatenation to input DataFrame</p>
+</dd>
+</dl>
+</td>
 </tr>
 <tr class="row-even"><td><p>bgremove</p></td>
 <td><p>bool</p></td>
@@ -1257,8 +1154,11 @@ True = with concatenation to input DataFrame</p></td>
 </tr>
 <tr class="row-odd"><td><p>flipped</p></td>
 <td><p>bool</p></td>
-<td><p>toggle for fitting start position
-(if flipped, fitting start from the last line)</p></td>
+<td><dl class="simple">
+<dt>toggle for fitting start position</dt><dd><p>(if flipped, fitting start from the last line)</p>
+</dd>
+</dl>
+</td>
 </tr>
 <tr class="row-even"><td><p>limpropagate</p></td>
 <td><p>bool</p></td>
@@ -1272,14 +1172,11 @@ True = with concatenation to input DataFrame</p></td>
 </table>
 </dd>
 </dl>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>df_fit: pandas DataFrame</dt><dd><p>Dataframe container populated with obtained fitting parameters.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>df_fit<span class="classifier">pandas DataFrame</span></dt><dd><p>Dataframe container populated with obtained fitting parameters.</p>
-</dd>
-<dt>data_nobg<span class="classifier">ndarray</span></dt><dd><p>Background-removed (Shirley-type) traces.</p>
-</dd>
-</dl>
+<dt>data_nobg: ndarray</dt><dd><p>Background-removed (Shirley-type) traces.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1299,7 +1196,7 @@ True = with concatenation to input DataFrame</p></td>
 </dl>
 <p><strong>Returns</strong></p>
 <dl class="simple">
-<dt>dyn_matrix<span class="classifier">4D ndarray</span></dt><dd><p>calculated dynamic matrix</p>
+<dt>dyn_matrix: 4D ndarray</dt><dd><p>calculated dynamic matrix</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1313,39 +1210,35 @@ coefficient vector, a, in the system of equations T.a = b. Here T is the
 differential drift time matrix and b the differential bias vector, and
 assuming that the energy-drift-time relationship can be written in the form,
 E = sum_n (a_n * t**n) + E0</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>pos<span class="classifier">list/array</span></dt><dd><p>Positions of the spectral landmarks (e.g. peaks) in the EDCs.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>pos: list/array</dt><dd><p>Positions of the spectral landmarks (e.g. peaks) in the EDCs.</p>
 </dd>
-<dt>vals<span class="classifier">list/array</span></dt><dd><p>Bias voltage value associated with each EDC.</p>
+<dt>vals: list/array</dt><dd><p>Bias voltage value associated with each EDC.</p>
 </dd>
-<dt>order<span class="classifier">int | 3</span></dt><dd><p>Polynomial order of the fitting function.</p>
+<dt>order: int | 3</dt><dd><p>Polynomial order of the fitting function.</p>
 </dd>
-<dt>refid<span class="classifier">int | 0</span></dt><dd><p>Reference dataset index, varies from 0 to vals.size - 1.</p>
+<dt>refid: int | 0</dt><dd><p>Reference dataset index, varies from 0 to vals.size - 1.</p>
 </dd>
-<dt>ret<span class="classifier">str | ‘func’</span></dt><dd><p>Return type, including ‘func’, ‘coeffs’, ‘full’, and ‘axis’ (see below).</p>
+<dt>ret: str | ‘func’</dt><dd><p>Return type, including ‘func’, ‘coeffs’, ‘full’, and ‘axis’ (see below).</p>
 </dd>
-<dt>E0<span class="classifier">float | None</span></dt><dd><p>Constant energy offset.</p>
+<dt>E0: float | None</dt><dd><p>Constant energy offset.</p>
 </dd>
-<dt>t<span class="classifier">numeric array | None</span></dt><dd><p>Drift time.</p>
+<dt>t: numeric array | None</dt><dd><p>Drift time.</p>
 </dd>
-<dt>aug<span class="classifier">int | 1</span></dt><dd><p>Fitting dimension augmentation (1=no change, 2=double, etc).</p>
+<dt>aug: int | 1</dt><dd><p>Fitting dimension augmentation (1=no change, 2=double, etc).</p>
 </dd>
 </dl>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>pfunc: partial function</dt><dd><p>Calibrating function with determined polynomial coefficients (except the constant offset).</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>pfunc<span class="classifier">partial function</span></dt><dd><p>Calibrating function with determined polynomial coefficients (except the constant offset).</p>
-</dd>
-<dt>ecalibdict<span class="classifier">dict</span></dt><dd><p>A dictionary of fitting parameters including the following,
+<dt>ecalibdict: dict</dt><dd><p>A dictionary of fitting parameters including the following,
 :coeffs: Fitted polynomial coefficients (the a’s).
 :offset: Minimum time-of-flight corresponding to a peak.
 :Tmat: the T matrix (differential time-of-flight) in the equation Ta=b.
 :bvec: the b vector (differential bias) in the fitting Ta=b.
 :axis: Fitted energy axis.</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -1357,21 +1250,20 @@ E = sum_n (a_n * t**n) + E0</p>
 and the absolute coordinate of a single point (b), defaulted to [0., 0.]. All coordinates
 should be specified in the (row_index, column_index) format. See the equiscale option for
 details on the specifications of point coordinates.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>img<span class="classifier">2D array</span></dt><dd><p>An energy cut of the band structure.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>img: 2D array</dt><dd><p>An energy cut of the band structure.</p>
 </dd>
-<dt>pxla, pxlb<span class="classifier">list/tuple/1D array</span></dt><dd><p>Pixel coordinates of the two symmetry points (a and b). Point b has the
+<dt>pxla, pxlb: list/tuple/1D array</dt><dd><p>Pixel coordinates of the two symmetry points (a and b). Point b has the
 default coordinates [0., 0.] (see below).</p>
 </dd>
-<dt>k_ab<span class="classifier">float | None</span></dt><dd><p>The known momentum space distance between the two symmetry points.</p>
+<dt>k_ab: float | None</dt><dd><p>The known momentum space distance between the two symmetry points.</p>
 </dd>
-<dt>kcoorda<span class="classifier">list/tuple/1D array | None</span></dt><dd><p>Momentum coordinates of the symmetry point a.</p>
+<dt>kcoorda: list/tuple/1D array | None</dt><dd><p>Momentum coordinates of the symmetry point a.</p>
 </dd>
-<dt>kcoordb<span class="classifier">list/tuple/1D array | [0., 0.]</span></dt><dd><p>Momentum coordinates of the symmetry point b (krow, kcol), default to k-space center.</p>
+<dt>kcoordb: list/tuple/1D array | [0., 0.]</dt><dd><p>Momentum coordinates of the symmetry point b (krow, kcol), default to k-space center.</p>
 </dd>
-<dt>equiscale<span class="classifier">bool | False</span></dt><dd><p>Option to adopt equal scale along both the row and column directions.
+<dt>equiscale: bool | False</dt><dd><p>Option to adopt equal scale along both the row and column directions.
 :True: Use a uniform scale for both x and y directions in the image coordinate system.
 This applies to the situation where the points a and b are (close to) parallel with one
 of the two image axes.
@@ -1379,20 +1271,17 @@ of the two image axes.
 to the situation where the points a and b are sufficiently different in both x and y directions
 in the image coordinate system.</p>
 </dd>
-<dt>ret<span class="classifier">list | [‘axes’]</span></dt><dd><p>Return type specification, options include ‘axes’, ‘extent’, ‘coeffs’, ‘grid’, ‘func’, ‘all’.</p>
+<dt>ret: list | [‘axes’]</dt><dd><p>Return type specification, options include ‘axes’, ‘extent’, ‘coeffs’, ‘grid’, ‘func’, ‘all’.</p>
 </dd>
 </dl>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>k_row, k_col: 1D array</dt><dd><p>Momentum coordinates of the row and column.</p>
 </dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>k_row, k_col<span class="classifier">1D array</span></dt><dd><p>Momentum coordinates of the row and column.</p>
+<dt>axis_extent: list</dt><dd><p>Extent of the two momentum axis (can be used directly in imshow).</p>
 </dd>
-<dt>axis_extent<span class="classifier">list</span></dt><dd><p>Extent of the two momentum axis (can be used directly in imshow).</p>
-</dd>
-<dt>k_rowgrid, k_colgrid<span class="classifier">2D array</span></dt><dd><p>Row and column mesh grid generated from the coordinates
+<dt>k_rowgrid, k_colgrid: 2D array</dt><dd><p>Row and column mesh grid generated from the coordinates
 (can be used directly in pcolormesh).</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -1401,62 +1290,26 @@ in the image coordinate system.</p>
 <dt id="mpes.analysis.circmask">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">circmask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">rcent</span></em>, <em class="sig-param"><span class="n">ccent</span></em>, <em class="sig-param"><span class="n">rad</span></em>, <em class="sig-param"><span class="n">sign</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">'mask'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.circmask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a circular binary mask to cover an image.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt>img<span class="classifier">2D array</span></dt><dd><p>Input image to be masked.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>img: 2D array</dt><dd><p>Input image to be masked.</p>
 </dd>
-<dt>rcent<span class="classifier">float</span></dt><dd><p>Row center position.</p>
+<dt>rcent: float</dt><dd><p>Row center position.</p>
 </dd>
-<dt>ccent<span class="classifier">float</span></dt><dd><p>Column center position.</p>
+<dt>ccent: float</dt><dd><p>Column center position.</p>
 </dd>
-<dt>rad<span class="classifier">float</span></dt><dd><p>Radius of circle.</p>
+<dt>rad: float</dt><dd><p>Radius of circle.</p>
 </dd>
-<dt>sign<span class="classifier">int/str | 1</span></dt><dd><p>Value of the masked region (0, 1, ‘nan’ or ‘xnan’).
+<dt>sign: int/str | 1</dt><dd><p>Value of the masked region (0, 1, ‘nan’ or ‘xnan’).
 ‘xnan’ means the masked region is 1 and the other region nan.</p>
 </dd>
-<dt>ret<span class="classifier">str | ‘mask’</span></dt><dd><p>Return type (‘mask’, ‘masked_image’)</p>
+<dt>ret: str | ‘mask’</dt><dd><p>Return type (‘mask’, ‘masked_image’)</p>
 </dd>
-<dt>kwds<span class="classifier">keyword arguments</span></dt><dd><table class="docutils align-default">
-<colgroup>
-<col style="width: 22%" />
-<col style="width: 17%" />
-<col style="width: 20%" />
-<col style="width: 42%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>keyword</p></th>
-<th class="head"><p>data type</p></th>
-<th class="head"><p>default</p></th>
-<th class="head"><p>meaning</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>shape</p></td>
-<td><p>tuple/list</p></td>
-<td><p>shape of img</p></td>
-<td><p>see skimage.draw.circle()</p></td>
-</tr>
-<tr class="row-odd"><td><p>method</p></td>
-<td><p>str</p></td>
-<td><p>‘graphic’</p></td>
-<td><p>‘graphic’ or ‘algebraic’</p></td>
-</tr>
-<tr class="row-even"><td><p>edgefactor</p></td>
-<td><p>float</p></td>
-<td><p>1.02</p></td>
-<td><p>prefactor to rad**2</p></td>
-</tr>
-</tbody>
-</table>
-</dd>
+<dt>kwds: keyword arguments</dt><dd></dd>
 </dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>cmask or cmask*img<span class="classifier">2D array</span></dt><dd><p>Mask only or masked image</p>
-</dd>
-</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>cmask or cmask*img: 2D array</dt><dd><p>Mask only or masked image</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1466,14 +1319,11 @@ in the image coordinate system.</p>
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">curvature2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">image</span></em>, <em class="sig-param"><span class="n">cx</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">cy</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.curvature2d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implementation of 2D curvature calculation.
 The formula follows Zhang et al. Rev. Sci. Instrum. 82, 043712 (2011).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>image<span class="classifier">2D array</span></dt><dd><p>2D image obtained from measurement.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>image: 2D array</dt><dd><p>2D image obtained from measurement.</p>
 </dd>
-<dt>cx, cy<span class="classifier">numeric, numeric | 1, 1</span></dt><dd><p>Scaling parameters in x and y directions.</p>
-</dd>
-</dl>
+<dt>cx, cy: numeric, numeric | 1, 1</dt><dd><p>Scaling parameters in x and y directions.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1482,12 +1332,12 @@ The formula follows Zhang et al. Rev. Sci. Instrum. 82, 043712 (2011).</p>
 <dt id="mpes.analysis.func_add">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">func_add</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">funcs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.func_add" title="Permalink to this definition">¶</a></dt>
 <dd><p>Addition of an arbitray number of functions</p>
-<p><strong>*Parameters*</strong></p>
+<p><strong>Parameters</strong></p>
 <dl class="simple">
 <dt><a href="#id45"><span class="problematic" id="id46">*</span></a>funcs: list/tuple</dt><dd><p>functions to combine</p>
 </dd>
 </dl>
-<p><strong>*Returns*</strong></p>
+<p><strong>Returns</strong></p>
 <dl class="simple">
 <dt>funcsum: function</dt><dd><p>functional sum</p>
 </dd>
@@ -1499,14 +1349,14 @@ The formula follows Zhang et al. Rev. Sci. Instrum. 82, 043712 (2011).</p>
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">func_update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span></em>, <em class="sig-param"><span class="n">suffix</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.func_update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Attach a suffix to parameter names and their instances
 in the expression of a function</p>
-<p><strong>*Parameters*</strong></p>
+<p><strong>Parameters</strong></p>
 <dl class="simple">
 <dt>func: function</dt><dd><p>input function</p>
 </dd>
 <dt>suffix: str | ‘’</dt><dd><p>suffix to attach to parameter names</p>
 </dd>
 </dl>
-<p><strong>*Returns*</strong></p>
+<p><strong>Returns</strong></p>
 <dl class="simple">
 <dt>params: list of str</dt><dd><p>updated function parameters</p>
 </dd>
@@ -1536,18 +1386,15 @@ in the expression of a function</p>
 <dt id="mpes.analysis.gradn">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">gradn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">array</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.gradn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate nth-order gradients of the array along different directions.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>array<span class="classifier">numpy array</span></dt><dd><p>N-dimensional matrix for calculating the gradient.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>array: numpy array</dt><dd><p>N-dimensional matrix for calculating the gradient.</p>
 </dd>
-<dt>axes<span class="classifier">int/list/tuple/1D array</span></dt><dd><p>A sequence of axes (from first to last) to calculate the gradient.
+<dt>axes: int/list/tuple/1D array</dt><dd><p>A sequence of axes (from first to last) to calculate the gradient.
 When input a single integer, the gradient is calculated along that particular axis.
 For example, the 4th-order mixed gradient d4f/(dxdydxdy) requires the sequence (1, 0, 1, 0).</p>
 </dd>
-<dt><a href="#id47"><span class="problematic" id="id48">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">numpy.gradient()</span></code>.</p>
-</dd>
-</dl>
+<dt><a href="#id47"><span class="problematic" id="id48">**</span></a>kwds: keyword arguments</dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">numpy.gradient()</span></code>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1591,18 +1438,15 @@ For example, the 4th-order mixed gradient d4f/(dxdydxdy) requires the sequence (
 <dt id="mpes.analysis.line_generator">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">line_generator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">B</span></em>, <em class="sig-param"><span class="n">npoints</span></em>, <em class="sig-param"><span class="n">endpoint</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">'separated'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.line_generator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate intermediate points in a line segment AB (A to B) given endpoints.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>A, B<span class="classifier">tuple/list, tuple/list</span></dt><dd><p>Pixel coordinates of the endpoints of the line segment.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>A, B: tuple/list, tuple/list</dt><dd><p>Pixel coordinates of the endpoints of the line segment.</p>
 </dd>
-<dt>npoints<span class="classifier">numeric</span></dt><dd><p>Number of points in the line segment.</p>
+<dt>npoints: numeric</dt><dd><p>Number of points in the line segment.</p>
 </dd>
-<dt>endpoint<span class="classifier">bool | True</span></dt><dd><p>Option to include the endpoint (B) in the line coordinates.</p>
+<dt>endpoint: bool | True</dt><dd><p>Option to include the endpoint (B) in the line coordinates.</p>
 </dd>
-<dt>ret<span class="classifier">str | ‘separated’</span></dt><dd><p>Option to return line coordinates (‘separated’ or ‘joined’).</p>
-</dd>
-</dl>
+<dt>ret: str | ‘separated’</dt><dd><p>Option to return line coordinates (‘separated’ or ‘joined’).</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1615,33 +1459,29 @@ Discovers peaks by searching for values which are surrounded by lower
 or larger values for maxima and minima respectively</p>
 <p>Converted from/based on a MATLAB script at:
 <a class="reference external" href="http://billauer.co.il/peakdet.html">http://billauer.co.il/peakdet.html</a></p>
-<p><strong>Parameters</strong>
-y_axis : list</p>
-<blockquote>
-<div><p>A list containing the signal over which to find peaks</p>
-</div></blockquote>
+<p><strong>Parameters</strong></p>
 <dl class="simple">
-<dt>x_axis<span class="classifier">list | None</span></dt><dd><p>A x-axis whose values correspond to the y_axis list and is used
+<dt>y_axis: list</dt><dd><p>A list containing the signal over which to find peaks</p>
+</dd>
+<dt>x_axis: list | None</dt><dd><p>A x-axis whose values correspond to the y_axis list and is used
 in the return to specify the position of the peaks. If omitted an
 index of the y_axis is used.</p>
 </dd>
-<dt>lookahead<span class="classifier">int | 200</span></dt><dd><p>distance to look ahead from a peak candidate to determine if
+<dt>lookahead: int | 200</dt><dd><p>distance to look ahead from a peak candidate to determine if
 it is the actual peak
 ‘(samples / period) / f’ where ‘4 &gt;= f &gt;= 1.25’ might be a good value</p>
 </dd>
-<dt>delta<span class="classifier">numeric | 0</span></dt><dd><p>this specifies a minimum difference between a peak and
+<dt>delta: numeric | 0</dt><dd><p>this specifies a minimum difference between a peak and
 the following points, before a peak may be considered a peak. Useful
 to hinder the function from picking up false peaks towards to end of
 the signal. To work well delta should be set to delta &gt;= RMSnoise * 5.</p>
 </dd>
 </dl>
-<p><strong>Returns</strong>
-max_peaks : list</p>
-<blockquote>
-<div><p>positions of the positive peaks</p>
-</div></blockquote>
+<p><strong>Returns</strong></p>
 <dl class="simple">
-<dt>min_peaks<span class="classifier">list</span></dt><dd><p>positions of the negative peaks</p>
+<dt>max_peaks: list</dt><dd><p>positions of the positive peaks</p>
+</dd>
+<dt>min_peaks: list</dt><dd><p>positions of the negative peaks</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1650,25 +1490,24 @@ max_peaks : list</p>
 <dt id="mpes.analysis.peakdetect2d">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">peakdetect2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'daofind'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.peakdetect2d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Peak-like feature detection in a 2D image.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl>
-<dt>img<span class="classifier">2D array</span></dt><dd><p>Image matrix.</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>img: 2D array</dt><dd><p>Image matrix.</p>
 </dd>
-<dt>method<span class="classifier">str | ‘daofind’</span></dt><dd><p>Detection method (‘daofind’ or ‘maxlist’).</p>
+<dt>method: str | ‘daofind’</dt><dd><p>Detection method (‘daofind’ or ‘maxlist’).</p>
 </dd>
-<dt><a href="#id49"><span class="problematic" id="id50">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><p>Arguments passed to the specific methods chosen.</p>
+<dt><a href="#id49"><span class="problematic" id="id50">**</span></a>kwds: keyword arguments</dt><dd><p>Arguments passed to the specific methods chosen.</p>
 <dl class="field-list simple">
 <dt class="field-odd">daofind</dt>
 <dd class="field-odd"><p>See <code class="docutils literal notranslate"><span class="pre">astropy.stats.sigma_clipped_stats()</span></code> and <code class="docutils literal notranslate"><span class="pre">photutils.detection.DAOStarFinder()</span></code>.</p>
 </dd>
 </dl>
 <dl class="simple">
-<dt>sigma<span class="classifier">float | 5.0</span></dt><dd><p>Standard deviation of the clipping Gaussian.</p>
+<dt>sigma: float | 5.0</dt><dd><p>Standard deviation of the clipping Gaussian.</p>
 </dd>
-<dt>fwhm<span class="classifier">float | 3.0</span></dt><dd><p>FWHM of the convoluting Gaussian kernel.</p>
+<dt>fwhm: float | 3.0</dt><dd><p>FWHM of the convoluting Gaussian kernel.</p>
 </dd>
-<dt>threshfactor<span class="classifier">float | 8</span></dt><dd><p>Intensity threshold for background-foreground separation (foreground is above threshold).</p>
+<dt>threshfactor: float | 8</dt><dd><p>Intensity threshold for background-foreground separation (foreground is above threshold).</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -1677,19 +1516,16 @@ max_peaks : list</p>
 </dd>
 </dl>
 <dl class="simple">
-<dt>mindist<span class="classifier">float | 10</span></dt><dd><p>Minimal distance between two local maxima.</p>
+<dt>mindist: float | 10</dt><dd><p>Minimal distance between two local maxima.</p>
 </dd>
-<dt>numpeaks<span class="classifier">int | 7</span></dt><dd><p>Maximum number of detected peaks.</p>
-</dd>
-</dl>
+<dt>numpeaks: int | 7</dt><dd><p>Maximum number of detected peaks.</p>
 </dd>
 </dl>
 </dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>pks<span class="classifier">2D array</span></dt><dd><p>Pixel coordinates of detected peaks, in (column, row) ordering.</p>
-</dd>
 </dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>pks: 2D array</dt><dd><p>Pixel coordinates of detected peaks, in (column, row) ordering.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1698,29 +1534,25 @@ max_peaks : list</p>
 <dt id="mpes.analysis.peaksearch">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">peaksearch</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">traces</span></em>, <em class="sig-param"><span class="n">tof</span></em>, <em class="sig-param"><span class="n">ranges</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'range-limited'</span></em>, <em class="sig-param"><span class="n">pkwindow</span><span class="o">=</span><span class="default_value">3</span></em>, <em class="sig-param"><span class="n">plot</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.peaksearch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Detect a list of peaks in the corresponding regions of multiple EDCs</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>traces<span class="classifier">2D array</span></dt><dd><p>Collection of EDCs.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>traces: 2D array</dt><dd><p>Collection of EDCs.</p>
 </dd>
-<dt>tof<span class="classifier">1D array</span></dt><dd><p>Time-of-flight values.</p>
+<dt>tof: 1D array</dt><dd><p>Time-of-flight values.</p>
 </dd>
-<dt>ranges<span class="classifier">list of tuples/lists | None</span></dt><dd><p>List of ranges for peak detection in the format
+<dt>ranges: list of tuples/lists | None</dt><dd><p>List of ranges for peak detection in the format
 [(LowerBound1, UpperBound1), (LowerBound2, UpperBound2), ….].</p>
 </dd>
-<dt>method<span class="classifier">str | ‘range-limited’</span></dt><dd><p>Method for peak-finding (‘range-limited’ and ‘alignment’).</p>
+<dt>method: str | ‘range-limited’</dt><dd><p>Method for peak-finding (‘range-limited’ and ‘alignment’).</p>
 </dd>
-<dt>pkwindow<span class="classifier">int | 3</span></dt><dd><p>Window width of a peak(amounts to lookahead in <code class="docutils literal notranslate"><span class="pre">mpes.analysis.peakdetect1d</span></code>).</p>
+<dt>pkwindow: int | 3</dt><dd><p>Window width of a peak(amounts to lookahead in <code class="docutils literal notranslate"><span class="pre">mpes.analysis.peakdetect1d</span></code>).</p>
 </dd>
-<dt>plot<span class="classifier">bool | False</span></dt><dd><p>Specify whether to display a custom plot of the peak search results.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>pkmaxs<span class="classifier">1D array</span></dt><dd><p>Collection of peak positions</p>
+<dt>plot: bool | False</dt><dd><p>Specify whether to display a custom plot of the peak search results.</p>
 </dd>
 </dl>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>pkmaxs: 1D array</dt><dd><p>Collection of peak positions.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1729,24 +1561,20 @@ max_peaks : list</p>
 <dt id="mpes.analysis.perspectiveWarping">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">perspectiveWarping</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">landmarks</span></em>, <em class="sig-param"><span class="n">targs</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">'image'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.perspectiveWarping" title="Permalink to this definition">¶</a></dt>
 <dd><p>Perform image warping based on a generic affine transform (homography).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>img<span class="classifier">2D array</span></dt><dd><p>Input image (distorted).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>img: 2D array</dt><dd><p>Input image (distorted).</p>
 </dd>
-<dt>landmarks<span class="classifier">list/array</span></dt><dd><p>List of pixel positions of the reference points.</p>
+<dt>landmarks: list/array</dt><dd><p>List of pixel positions of the reference points.</p>
 </dd>
-<dt>targs<span class="classifier">list/array</span></dt><dd><p>List of pixel positions of the target points.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>imgaw<span class="classifier">2D array</span></dt><dd><p>Image after affine warping.</p>
-</dd>
-<dt>maw<span class="classifier">2D array</span></dt><dd><p>Homography matrix for the tranform.</p>
+<dt>targs: list/array</dt><dd><p>List of pixel positions of the target points.</p>
 </dd>
 </dl>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>imgaw: 2D array</dt><dd><p>Image after affine warping.</p>
+</dd>
+<dt>maw: 2D array</dt><dd><p>Homography matrix for the tranform.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1757,26 +1585,22 @@ max_peaks : list</p>
 <dd><p>Calculate ordered pixel cooridnates along a path defined by specific intermediate points.
 The approach constructs the path using a set of line segments bridging the specified points,
 therefore it is also able to trace the sequence indices of these special points.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>pointsr, pointsc<span class="classifier">list/tuple/array</span></dt><dd><p>The row and column pixel coordinates of the special points along the sampling path.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>pointsr, pointsc: list/tuple/array</dt><dd><p>The row and column pixel coordinates of the special points along the sampling path.</p>
 </dd>
-<dt>method<span class="classifier">str | ‘analog’</span></dt><dd><p>Method of sampling.</p>
+<dt>method: str | ‘analog’</dt><dd><p>Method of sampling.</p>
 </dd>
-<dt>npoints<span class="classifier">list/tuple | None</span></dt><dd><p>Number of points along each segment.</p>
+<dt>npoints: list/tuple | None</dt><dd><p>Number of points along each segment.</p>
 </dd>
-<dt>ret<span class="classifier">str | ‘separated’</span></dt><dd><p>Specify if return combined (‘combined’) or separated (‘separated’) row and column coordinates.</p>
-</dd>
-</dl>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><dl class="simple">
-<dt>polyr, polyc<span class="classifier">1D array</span></dt><dd><p>Pixel coordinates along the path traced out sequentially.</p>
-</dd>
-<dt>pid<span class="classifier">1D array</span></dt><dd><p>Pointwise indices of the special lpoints.</p>
+<dt>ret: str | ‘separated’</dt><dd><p>Specify if return combined (‘combined’) or separated (‘separated’) row and column coordinates.</p>
 </dd>
 </dl>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>polyr, polyc: 1D array</dt><dd><p>Pixel coordinates along the path traced out sequentially.</p>
+</dd>
+<dt>pid: 1D array</dt><dd><p>Pointwise indices of the special lpoints.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1786,23 +1610,19 @@ therefore it is also able to trace the sequence indices of these special points.
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">rangeConvert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">xrng</span></em>, <em class="sig-param"><span class="n">pathcorr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.rangeConvert" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert value range using a pairwise path correspondence (e.g. obtained
 from time warping techniques).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>x<span class="classifier">1D array</span></dt><dd><p>Values of the x axis (e.g. time-of-flight values).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>x: 1D array</dt><dd><p>Values of the x axis (e.g. time-of-flight values).</p>
 </dd>
-<dt>xrng<span class="classifier">list/tuple</span></dt><dd><p>Boundary value range on the x axis.</p>
+<dt>xrng: list/tuple</dt><dd><p>Boundary value range on the x axis.</p>
 </dd>
-<dt>pathcorr<span class="classifier">list/tuple</span></dt><dd><p>Path correspondence between two 1D arrays in the following form,
+<dt>pathcorr: list/tuple</dt><dd><p>Path correspondence between two 1D arrays in the following form,
 [(id_1_trace_1, id_1_trace_2), (id_2_trace_1, id_2_trace_2), …]</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>xrange_trans<span class="classifier">tuple</span></dt><dd><p>Transformed range according to the path correspondence.</p>
-</dd>
-</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>xrange_trans: tuple</dt><dd><p>Transformed range according to the path correspondence.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1811,33 +1631,29 @@ from time warping techniques).</p>
 <dt id="mpes.analysis.rectmask">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">rectmask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">rcent</span></em>, <em class="sig-param"><span class="n">ccent</span></em>, <em class="sig-param"><span class="n">shift</span></em>, <em class="sig-param"><span class="n">direction</span><span class="o">=</span><span class="default_value">'row'</span></em>, <em class="sig-param"><span class="n">sign</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">'mask'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.rectmask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use a rectangular binary mask to cover an image.</p>
-<dl class="field-list">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>img<span class="classifier">2D array</span></dt><dd><p>Input image to be masked</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>img: 2D array</dt><dd><p>Input image to be masked</p>
 </dd>
-<dt>rcent<span class="classifier">float</span></dt><dd><p>Row center position</p>
+<dt>rcent: float</dt><dd><p>Row center position</p>
 </dd>
-<dt>ccent<span class="classifier">float</span></dt><dd><p>Column center position</p>
+<dt>ccent: float</dt><dd><p>Column center position</p>
 </dd>
-<dt>shift<span class="classifier">int/list of int</span></dt><dd><p>Pixel shifts</p>
+<dt>shift: int/list of int</dt><dd><p>Pixel shifts</p>
 </dd>
-<dt>direction<span class="classifier">str | ‘row’</span></dt><dd><p>Direction to apply the shift to, ‘row’ or ‘column’ indicates row-wise
+<dt>direction: str | ‘row’</dt><dd><p>Direction to apply the shift to, ‘row’ or ‘column’ indicates row-wise
 or column-wise shift for generating the rectangular mask</p>
 </dd>
-<dt>sign<span class="classifier">int/str | 1</span></dt><dd><p>Value of the masked region (0, 1, ‘nan’ or ‘xnan’).
+<dt>sign: int/str | 1</dt><dd><p>Value of the masked region (0, 1, ‘nan’ or ‘xnan’).
 ‘xnan’ means the masked region is 1 and the other region nan.</p>
 </dd>
-<dt>ret<span class="classifier">str | ‘mask’</span></dt><dd><p>Return type (‘mask’, ‘masked_image’)</p>
+<dt>ret: str | ‘mask’</dt><dd><p>Return type (‘mask’, ‘masked_image’)</p>
 </dd>
 </dl>
-<p><a href="#id51"><span class="problematic" id="id52">**</span></a>kwds : keyword arguments</p>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>cmask or cmask*img<span class="classifier">2D array</span></dt><dd><p>Mask only or masked image</p>
-</dd>
-</dl>
+<p><a href="#id51"><span class="problematic" id="id52">**</span></a>kwds: keyword arguments</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>cmask or cmask*img: 2D array</dt><dd><p>Mask only or masked image</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1846,13 +1662,11 @@ or column-wise shift for generating the rectangular mask</p>
 <dt id="mpes.analysis.regionExpand">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">regionExpand</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mask</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.regionExpand" title="Permalink to this definition">¶</a></dt>
 <dd><p>Expand the region of a binarized image around a line position</p>
-<p><strong>Parameters</strong>
-mask : numeric binarized 2D array</p>
-<blockquote>
-<div><p>the mask to be expanded</p>
-</div></blockquote>
+<p><strong>Parameters</strong></p>
 <dl>
-<dt><a href="#id53"><span class="problematic" id="id54">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><table class="docutils align-default">
+<dt>mask: numeric binarized 2D array</dt><dd><p>the mask to be expanded</p>
+</dd>
+<dt><a href="#id53"><span class="problematic" id="id54">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
 <col style="width: 21%" />
 <col style="width: 16%" />
@@ -1893,12 +1707,12 @@ mask : numeric binarized 2D array</p>
 </table>
 </dd>
 </dl>
-<p><strong>Return</strong>
-mask : numeric 2D array</p>
-<blockquote>
-<div><p>modified mask (returns the original mask if insufficient arguments
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>mask: numeric 2D array</dt><dd><p>modified mask (returns the original mask if insufficient arguments
 are provided for the chosen method for region expansion)</p>
-</div></blockquote>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -1907,13 +1721,13 @@ are provided for the chosen method for region expansion)</p>
 <dd><p>Detect the band ridges using selected methods.</p>
 <p><strong>Parameters</strong></p>
 <dl>
-<dt>mask<span class="classifier">numeric 2D array</span></dt><dd><p>the 2D integer-valued mask with labeled bands</p>
+<dt>mask: numeric 2D array</dt><dd><p>the 2D integer-valued mask with labeled bands</p>
 </dd>
-<dt>method<span class="classifier">str</span></dt><dd><p>the method used for ridge detection
-‘mask_mean_y’ : mean mask position along y direction (default)
-‘mask_mean_x’ : mean mask position along x direction</p>
+<dt>method: str</dt><dd><p>the method used for ridge detection
+‘mask_mean_y’: mean mask position along y direction (default)
+‘mask_mean_x’: mean mask position along x direction</p>
 </dd>
-<dt><a href="#id55"><span class="problematic" id="id56">**</span></a>kwds<span class="classifier">keyword arguments</span></dt><dd><table class="docutils align-default">
+<dt><a href="#id55"><span class="problematic" id="id56">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
 <col style="width: 20%" />
 <col style="width: 26%" />
@@ -1940,7 +1754,7 @@ are provided for the chosen method for region expansion)</p>
 </dl>
 <p><strong>Return</strong></p>
 <dl class="simple">
-<dt>ridges<span class="classifier">list of dataframes</span></dt><dd><p>the ridge coordinates</p>
+<dt>ridges: list of dataframes</dt><dd><p>the ridge coordinates</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1952,15 +1766,15 @@ are provided for the chosen method for region expansion)</p>
 and connected component labeling</p>
 <p><strong>Parameters</strong></p>
 <dl class="simple">
-<dt>img<span class="classifier">2D numeric array</span></dt><dd><p>the 2D matrix to segment</p>
+<dt>img: 2D numeric array</dt><dd><p>the 2D matrix to segment</p>
 </dd>
-<dt>nbands<span class="classifier">int</span></dt><dd><p>number of electronic bands</p>
+<dt>nbands: int</dt><dd><p>number of electronic bands</p>
 </dd>
 </dl>
-<p><a href="#id57"><span class="problematic" id="id58">**</span></a>kwds : keyword arguments</p>
+<p><a href="#id57"><span class="problematic" id="id58">**</span></a>kwds: keyword arguments</p>
 <p><strong>Return</strong></p>
 <dl class="simple">
-<dt>imglabeled<span class="classifier">2D numeric array</span></dt><dd><p>labeled mask</p>
+<dt>imglabeled: 2D numeric array</dt><dd><p>labeled mask</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2023,35 +1837,31 @@ reach the tolerance level (tol).</p>
 <dt id="mpes.analysis.vertexGenerator">
 <code class="sig-prename descclassname">mpes.analysis.</code><code class="sig-name descname">vertexGenerator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">center</span></em>, <em class="sig-param"><span class="n">fixedvertex</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">cvd</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">arot</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nside</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">direction</span><span class="o">=</span><span class="default_value">- 1</span></em>, <em class="sig-param"><span class="n">scale</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">diagdir</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">'all'</span></em>, <em class="sig-param"><span class="n">rettype</span><span class="o">=</span><span class="default_value">'float32'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.analysis.vertexGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generation of the vertices of symmetric polygons.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><dl class="simple">
-<dt>center<span class="classifier">(int, int)</span></dt><dd><p>Pixel positions of the symmetry center (row pixel, column pixel).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>center: (int, int)</dt><dd><p>Pixel positions of the symmetry center (row pixel, column pixel).</p>
 </dd>
-<dt>fixedvertex<span class="classifier">(int, int) | None</span></dt><dd><p>Pixel position of the fixed vertex (row pixel, column pixel).</p>
+<dt>fixedvertex: (int, int) | None</dt><dd><p>Pixel position of the fixed vertex (row pixel, column pixel).</p>
 </dd>
-<dt>cvd<span class="classifier">numeric | None</span></dt><dd><p>Center-vertex distance.</p>
+<dt>cvd: numeric | None</dt><dd><p>Center-vertex distance.</p>
 </dd>
-<dt>arot<span class="classifier">float | None</span></dt><dd><p>Spacing in angle of rotation.</p>
+<dt>arot: float | None</dt><dd><p>Spacing in angle of rotation.</p>
 </dd>
-<dt>nside<span class="classifier">int | None</span></dt><dd><p>The total number of sides for the polygon.</p>
+<dt>nside: int | None</dt><dd><p>The total number of sides for the polygon.</p>
 </dd>
-<dt>direction<span class="classifier">int | -1</span></dt><dd><p>Direction of angular rotation (1 = counterclockwise, -1 = clockwise)</p>
+<dt>direction: int | -1</dt><dd><p>Direction of angular rotation (1 = counterclockwise, -1 = clockwise)</p>
 </dd>
-<dt>scale<span class="classifier">float | 1</span></dt><dd><p>Radial scaling factor.</p>
+<dt>scale: float | 1</dt><dd><p>Radial scaling factor.</p>
 </dd>
-<dt>diagdir<span class="classifier">str | None</span></dt><dd><p>Diagonal direction of the polygon (‘x’ or ‘y’).</p>
+<dt>diagdir: str | None</dt><dd><p>Diagonal direction of the polygon (‘x’ or ‘y’).</p>
 </dd>
-<dt>ret<span class="classifier">str | ‘all’</span></dt><dd><p>Return type. Specify ‘all’ returns all vertices, specify ‘generated’
+<dt>ret: str | ‘all’</dt><dd><p>Return type. Specify ‘all’ returns all vertices, specify ‘generated’
 returns only the generated ones (without the fixedvertex in the argument).</p>
 </dd>
 </dl>
-</dd>
-<dt class="field-even">Return</dt>
-<dd class="field-even"><dl class="simple">
-<dt>vertices<span class="classifier">2D array</span></dt><dd><p>Collection of generated vertices.</p>
-</dd>
-</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>vertices: 2D array</dt><dd><p>Collection of generated vertices.</p>
 </dd>
 </dl>
 </dd></dl>
