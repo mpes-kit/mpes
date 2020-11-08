@@ -21,7 +21,7 @@ import numpy as np
 from numpy.linalg import norm, lstsq
 from scipy.sparse.linalg import lsqr
 import scipy.optimize as opt
-from scipy.special import wofz
+from scipy.special import wofz, erf
 import scipy.interpolate as scip
 import scipy.io as sio
 from scipy.spatial import distance
@@ -2762,7 +2762,7 @@ SQ2PI = np.sqrt(2*np.pi)
 
 
 def gaussian(feval=False, vardict=None):
-    """1D Gaussian lineshape model. Returns numerical values if ``feval=True``.
+    """1D/2D Gaussian lineshape model. Returns numerical values if ``feval=True``.
 
     **Parameters**
 
@@ -2786,7 +2786,7 @@ def gaussian(feval=False, vardict=None):
 
 
 def voigt(feval=False, vardict=None):
-    """1D Voigt lineshape model. Returns numerical values if ``feval=True``.
+    """1D/2D Voigt lineshape model. Returns numerical values if ``feval=True``.
 
     **Parameters**
 
@@ -2803,6 +2803,31 @@ def voigt(feval=False, vardict=None):
 
     asvars = ['amp', 'xvar', 'ctr', 'sig', 'gam']
     expr = 'amp*wofz((xvar-ctr+1j*gam) / (sig*SQ2)).real / (sig*SQ2PI)'
+
+    if feval == False:
+        return asvars, expr
+    else:
+        return eval(expr, vardict, globals())
+
+
+def skewed_gaussian(feval=False, vardict=None):
+    """ 1D/2D Skewed Gaussian model. The model is introduced by O'Hagan and Leonard in Biometrika 63, 201 (1976). DOI: 10.1093/biomet/63.1.201
+
+    **Parameters**
+
+    feval: bool | False
+        Option to evaluate function.
+    vardict: dict | None
+        Dictionary containing values for the variables named as follows (as dictionary keys).\n
+        ``amp`` function amplitude or scaling factor.\n
+        ``xvar`` x values (energy values in a lineshape).\n        
+        ``ctr`` center position.\n        
+        ``sig`` standard deviation of the Gaussian component.\n
+        ``alph`` skew parameter of the model.
+    """
+
+    asvars = ['amp', 'xvar', 'ctr', 'sig', 'alph']
+    expr = '(amp/2)*np.exp(-((xvar-ctr)**2) / (2*sig**2)) * (1+erf(alph*(xvar-ctr)))'
 
     if feval == False:
         return asvars, expr
