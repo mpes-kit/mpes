@@ -22,6 +22,7 @@ from numpy.linalg import norm, lstsq
 from scipy.sparse.linalg import lsqr
 import scipy.optimize as opt
 from scipy.special import wofz, erf
+from scipy.signal import savgol_filter
 import scipy.interpolate as scip
 import scipy.io as sio
 from scipy.spatial import distance
@@ -150,6 +151,41 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
         return (yr + B)[::-1]
     else:
         return yr + B
+
+
+def shirley_piecewise(x, y, seg_ranges, tol=1e-5, maxiter=20, explicit=False, **kwds):
+    """ Calculate piecewise Shirley-Proctor-Sherwood background from spectral data.
+    
+    **Parameters**
+
+    x, y: 1D array, 1D array
+        X and Y values of the data.
+    seg_ranges: list/tuple
+        Index ranges of the indices.
+    tol: numeric | 1e-5
+        Tolerance of the background estimation.
+    """
+    
+    xlen = len(x)
+    bgs = [np.empty(0)]
+    warn = kwds.pop('warning', False)
+    
+    for sr in seg_ranges:
+        sind = slice(*sr)
+        bgtmp = shirley(x[sind], y[sind], tol=tol, maxiter=maxiter, explicit=explicit, warning=warn)
+        bgs.append(bgtmp)
+       
+    bgall = np.concatenate(bgs)
+    blen = len(bgall)
+    
+    if blen == xlen:
+        return bgall
+    else:
+        wl = kwds.pop('window_length', 5)
+        poly = kwds.pop('polyorder', 1)
+        bgs.append(savgol_filter(y[blen:], wl, poly, **kwds))
+        bgall = np.concatenate(bgs)
+        return bgall
 
 
 def shirley2d(x, y, tol=1e-5, maxiter=20, explicit=False,
