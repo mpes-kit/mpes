@@ -41,6 +41,8 @@ The MPES instrument enables sampling of the multidimensional parameter space ass
 
 Documentation on the usage is posted [here](https://mpes-kit.github.io/mpes/) and examples are provided in [Jupyter notebooks](https://github.com/mpes-kit/mpes/tree/master/examples).
 
-If you use it in your work, please cite the latest version of the paper [arXiv:1909.07714](https://arxiv.org/abs/1909.07714).
+If you want to refer the software in your work, please cite the following paper.
+
+R. P. Xian, Y. Acremann, S. Y. Agustsson, M. Dendzik, K. Bühlmann, D. Curcio, D. Kutnyakhov, F. Pressacco, M. Heber, S. Dong, T. Pincelli, J. Demsar, W. Wurth, P. Hofmann, M.Wolf, M. Scheidgen, L. Rettig, R. Ernstorfer, An open-source, end-to-end workflow for multidimensional photoemission spectroscopy, [Sci. Data 7, 442 (2020)](https://www.nature.com/articles/s41597-020-00769-8).
 
 The size of the single-event data is in the GB to TB range, some datasets used for the example [notebooks](https://github.com/mpes-kit/mpes/tree/master/examples) are made available on a [Zenodo repository](https://doi.org/10.5281/zenodo.3987303). Please always use the latest version of the datasets.
