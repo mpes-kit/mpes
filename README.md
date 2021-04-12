@@ -37,12 +37,23 @@ The MPES instrument enables sampling of the multidimensional parameter space ass
     pip install --upgrade git+https://github.com/mpes-kit/mpes.git@0.9.8
     </code></pre>
 
-### Documentation & citation
+### Documentation and tutorials
 
 Documentation on the usage is posted [here](https://mpes-kit.github.io/mpes/) and examples are provided in [Jupyter notebooks](https://github.com/mpes-kit/mpes/tree/master/examples).
+
+List of current tutorials are viewable using [nbviewer](https://nbviewer.jupyter.org) via the links
+
+- [**Tutorial_01_HDF5 File Management**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_01_HDF5%20File%20Management.ipynb)
+- [**Tutorial_02_Data Binning**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_02_Data%20Binning.ipynb)
+- [**Tutorial_03_Rebinning Artefacts**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_03_Rebinning%20Artefacts.ipynb)
+- [**Tutorial_04_Distortion Correction**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_04_Distortion%20Correction.ipynb)
+- [**Tutorial_05_Axes Calibration**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_05_Axes%20Calibration.ipynb)
+- [**Tutorial_06_MPES_Workflow**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_06_MPES_Workflow.ipynb)
+
+The size of the single-event datasets used in the tutorial [notebooks](https://github.com/mpes-kit/mpes/tree/master/examples) are in the GB to TB range each, which reflect the actual examperimental setting and the light source configuration (see [here](https://doi.org/10.1063/5.0024493) for technical details). Example datasets are made available publicly in a [Zenodo repository](https://doi.org/10.5281/zenodo.3987303). Please always use the latest version of the datasets.
+
+### Reference
 
 If you want to refer the software in your work, please cite the following paper.
 
 R. P. Xian, Y. Acremann, S. Y. Agustsson, M. Dendzik, K. Bühlmann, D. Curcio, D. Kutnyakhov, F. Pressacco, M. Heber, S. Dong, T. Pincelli, J. Demsar, W. Wurth, P. Hofmann, M.Wolf, M. Scheidgen, L. Rettig, R. Ernstorfer, An open-source, end-to-end workflow for multidimensional photoemission spectroscopy, [Sci. Data 7, 442 (2020)](https://www.nature.com/articles/s41597-020-00769-8).
-
-The size of the single-event data is in the GB to TB range, some datasets used for the example [notebooks](https://github.com/mpes-kit/mpes/tree/master/examples) are made available on a [Zenodo repository](https://doi.org/10.5281/zenodo.3987303). Please always use the latest version of the datasets.
