@@ -41,17 +41,19 @@ class CopyTool(object):
 
             for path, dirs, filenames in os.walk(sdir):
                 # Check space left
-                size = 0
+                size_src = 0
+                size_dst = 0
                 for sfile in filenames:
-                    if (not os.path.exists(os.path.join(path.replace(sdir, ddir), sfile))):
-                        size += os.path.getsize(os.path.join(sdir,sfile))
-                if (size == 0 and not forceCopy):
+                    size_src += os.path.getsize(os.path.join(sdir,sfile))
+                    if (os.path.exists(os.path.join(path.replace(sdir, ddir), sfile))):
+                        size_dst += os.path.getsize(os.path.join(path.replace(sdir, ddir), sfile))
+                if (size_src == 0 and not forceCopy):
                     # nothing to copy, just return directory
                     return ddir
                 else:
                     total, used, free = shutil.disk_usage(ddir)
-                    if (size > free - self.safetyMargin):
-                        print("Target disk full, only " + str(free/2**30) + " GB free, but " + str(size/2**30) + " GB needed!")
+                    if (size_src - size_dst > free - self.safetyMargin):
+                        print("Target disk full, only " + str(free/2**30) + " GB free, but " + str((size_src - size_dst)/2**30) + " GB needed!")
                         return
                     for directory in dirs:
                         destDir = path.replace(sdir,ddir)
@@ -61,17 +63,19 @@ class CopyTool(object):
                     for sfile in filenames:
                             srcFile = os.path.join(path, sfile)
                             destFile = os.path.join(path.replace(sdir, ddir), sfile)
-                            if (not os.path.exists(destFile) or forceCopy):
-                                copyTasks.append(d.delayed(shutil.copy2)(srcFile, destFile))
+                            size_src = os.path.getsize(srcFile)
+                            size_dst = os.path.getsize(srcFile)
+                            if (not os.path.exists(destFile) or size_dst != size_src or forceCopy):
+                                if (os.path.exists(destFile)):
+                                    # delete existing file, to fix permission issue
+                                    copyTasks.append(d.delayed(mycopy)(srcFile, destFile, gid=self.gid, mode=0o664, replace=True))
+                                else:
+                                    copyTasks.append(d.delayed(mycopy)(srcFile, destFile, gid=self.gid, mode=0o664))
                         
                     print("Copy Files...")
                     with ProgressBar():
                         d.compute(*copyTasks, scheduler=scheduler, num_workers=self.ntasks, **compute_kwds)
                     print("Copy finished!")
-                    # fix permissions and group ownership:
-                    for sfile in filenames:
-                        os.chown(os.path.join(path.replace(sdir, ddir), sfile), -1, self.gid)
-                        os.chmod(os.path.join(path.replace(sdir, ddir), sfile), 0o664)
 
                 return ddir
 
@@ -162,3 +166,12 @@ def mymakedirs(path, mode, gid):
     os.chown(path, -1, gid)
     res += [path]
     return res
+    
+def mycopy(source, dest, gid, mode, replace=False):
+    if replace:
+        if (os.path.exists(dest)):
+            os.remove(dest)
+    shutil.copy2(source, dest)
+    # fix permissions and group ownership:
+    os.chown(dest, -1, gid)
+    os.chmod(dest, mode)
