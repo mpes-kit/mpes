@@ -73,13 +73,13 @@ class FileCollection(object):
         """
         Sort terms according to parameter value.
 
-        :Parameters:
-            terms : list
-                List of terms (e.g. strings).
-            parameter : bool
-                Decision parameter for sorting.
+        **Parameters**\n
+        terms: list
+            List of terms (e.g. strings).
+        parameter: bool
+            Decision parameter for sorting.
 
-        :Return:
+        **Return**\n
             Sorted or unsorted terms.
         """
 
@@ -92,13 +92,13 @@ class FileCollection(object):
         """
         Gather files from a folder (specified at instantiation).
 
-        :Parameters:
-            identifier : str | r'/*.h5'
-                File identifier used for glob.glob().
-            f_start, f_end, f_step : int, int, int | None, None, 1
-                Starting, ending file id and the step. Used to construct a file selector.
-            file_sorting : bool | True
-                Option to sort the files by their names.
+        **Parameters**\n
+        identifier: str | r'/*.h5'
+            File identifier used for glob.glob().
+        f_start, f_end, f_step: int, int, int | None, None, 1
+            Starting, ending file id and the step. Used to construct a file selector.
+        file_sorting: bool | True
+            Option to sort the files by their names.
         """
 
         f_start, f_end, f_step = u.intify(f_start, f_end, f_step)
@@ -121,17 +121,17 @@ class FileCollection(object):
     def filter(self, wexpr=None, woexpr=None, str_start=None, str_end=None):
         """ Filter filenames by keywords.
 
-        :Parameters:
-            wexpr : str | None
-                Expression in a name to leave in the filename list (w = with).
-            woexpr : str | None
-                Expression in a name to leave out of the filename list (wo = without).
-            str_start, str_end : int, int | None, None
-                Starting and ending indices of the filename string.
+        **Parameters**\n
+        wexpr: str | None
+            Expression in a name to leave in the filename list (w = with).
+        woexpr: str | None
+            Expression in a name to leave out of the filename list (wo = without).
+        str_start, str_end: int, int | None, None
+            Starting and ending indices of the filename string.
 
-        :Return:
-            filteredFiles : list
-                List of filtered filenames.
+        **Return**\n
+        filteredFiles: list
+            List of filtered filenames.
         """
 
         if (wexpr is None) and (woexpr is None):
@@ -146,21 +146,21 @@ class FileCollection(object):
     def select(self, ids=[], update='', ret=False):
         """ Select gathered files by the filename ids.
 
-        :Parameters:
-            ids : list/1D array | []
-                File IDs for selection.
-            update : str | ''
-                File address list update condition,
-                'remove' = remove the selected files.
-                'keep' = keep the selected files and remove the rest.
-                others strings or no action = do nothing.
-                '' = nothing happens (can be used in combination with `ret=True`
-                to retrieve filtered file names).
-            ret : str | 'selected'
-                Return option,
-                :'selected': Return of the selected files.
-                :'rest': Return the rest of the files (not selected).
-                :False: No action (return).
+        **Parameters**\n
+        ids: list/1D array | []
+            File IDs for selection.
+        update: str | ''
+            File address list update condition,
+            'remove' = remove the selected files.
+            'keep' = keep the selected files and remove the rest.
+            others strings or no action = do nothing.
+            '' = nothing happens (can be used in combination with `ret=True`
+            to retrieve filtered file names).
+        ret: str | 'selected'
+            Return option,
+            :'selected': Return of the selected files.
+            :'rest': Return the rest of the files (not selected).
+            :False: No action (return).
         """
 
         if self.files:
@@ -262,13 +262,13 @@ class MapParser(FileCollection):
     def parse(parse_map, **mapkeys):
         """ Parse map parameters stored in files.
 
-        :Parameter:
-            parse_map : function
-                Run parse_map function to populate the class namespace.
+        **Parameter**\n
+        parse_map: function
+            Run parse_map function to populate the class namespace.
 
-        :Return:
-            flag : int (0 or 1)
-                Returns 1 if successful, 0 if not.
+        **Return**\n
+        flag: int (0 or 1)
+            Returns 1 if successful, 0 if not.
         """
 
         try:
@@ -308,9 +308,9 @@ class MapParser(FileCollection):
     def EMap(self, parse_key='coeffs', **kwds):
         """ The ToF to energy coordinate transform function.
 
-        :Parameter:
-            parse_key : str | 'coeffs'
-                Parsing key for extracting parameters.
+        **Parameter**\n
+        parse_key: str | 'coeffs'
+            Parsing key for extracting parameters.
         """
 
         # Load the parameters to construct the energy conversion function
@@ -348,13 +348,13 @@ class MapParser(FileCollection):
 def saveClassAttributes(clss, form, save_addr):
     """ Save class attributes.
 
-    :Parameters:
-        clss : instance
-            Handle of the instance to be saved.
-        form : str
-            Format to save in ('h5'/'hdf5', 'mat', or 'dmp'/'dump').
-        save_addr : str
-            The address to save the attributes in.
+    **Parameters**\n
+    clss: instance
+        Handle of the instance to be saved.
+    form: str
+        Format to save in ('h5'/'hdf5', 'mat', or 'dmp'/'dump').
+    save_addr: str
+        The address to save the attributes in.
     """
 
     save_addr = u.appendformat(save_addr, form)
@@ -380,13 +380,14 @@ def saveClassAttributes(clss, form, save_addr):
 def loadClassAttributes(form, load_addr):
     """ Load class from saved attributes.
 
-    :Parameters:
-        form : dump
-            Format to load from (only works for 'dump' right now).
-        load_addr : str
-            The address to load the attributes from.
-            
-        returns the loaded class
+    **Parameters**\n
+    form: dump
+        Format to load from (only works for 'dump' right now).
+    load_addr: str
+        The address to load the attributes from.
+    
+    **Return**\n
+        Returns the loaded class
     """
 
     load_addr = u.appendformat(load_addr, form)
@@ -407,17 +408,17 @@ def tof2evpoly(a, E0, t):
     Polynomial approximation of the time-of-flight to electron volt
     conversion formula.
 
-    :Parameters:
-        a : 1D array
-            Polynomial coefficients.
-        E0 : float
-            Energy offset.
-        t : numeric array
-            Drift time of electron.
+    **Parameters**\n
+    a: 1D array
+        Polynomial coefficients.
+    E0: float
+        Energy offset.
+    t: numeric array
+        Drift time of electron.
 
-    :Return:
-        E : numeric array
-            Converted energy
+    **Return**\n
+    E: numeric array
+        Converted energy
     """
 
     odr = len(a) # Polynomial order
@@ -434,6 +435,14 @@ def tof2evpoly(a, E0, t):
 def imxy2kxy(x, y, x0, y0, fx, fy):
     """
     Conversion from Cartesian coordinate in binned image (x, y) to momentum coordinates (kx, ky).
+
+    **Parameters**\n
+    x, y: numeric, numeric
+        Components of the Cartesian coordinates.
+    x0, y0: numeric, numeric
+        Origins of the Cartesian coordinates.
+    fx, fy: numeric numeric
+        Numerical scaling in the conversion.
     """
 
     kx = fx * (x - x0)
@@ -446,18 +455,18 @@ def detxy2kxy(xdet, ydet, xstart, ystart, x0, y0, fx, fy, xstep, ystep):
     """
     Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).
 
-    :Parameters:
-        xdet, ydet : numeric, numeric
-            Pixel coordinates in the detector coordinate system.
-        xstart, ystart : numeric, numeric
-            The starting pixel number in the detector coordinate system
-            along the x and y axes used in the binning.
-        x0, y0 : numeric, numeric
-            The center pixel position in binned image used in calibration.
-        fx, fy : numeric, numeric
-            Scaling factor along the x and y axes (in binned image).
-        xstep, ystep : numeric, numeric
-            Binning step size along x and y directions.
+    **Parameters**\n
+    xdet, ydet: numeric, numeric
+        Pixel coordinates in the detector coordinate system.
+    xstart, ystart: numeric, numeric
+        The starting pixel number in the detector coordinate system
+        along the x and y axes used in the binning.
+    x0, y0: numeric, numeric
+        The center pixel position in binned image used in calibration.
+    fx, fy: numeric, numeric
+        Scaling factor along the x and y axes (in binned image).
+    xstep, ystep: numeric, numeric
+        Binning step size along x and y directions.
     """
 
     xdet0 = xstart + xstep * x0
@@ -505,8 +514,12 @@ def dfieldapply(edf, dfield, X='X', Y='Y', newX='Xm', newY='Ym'):
 
 def generateDfield(rdeform_field, cdeform_field):
     """
-    Generate inverse deformation field using inperpolation with griddata
-    Assuming the binning range of the input rdeform_field and cdeform_field covers the whole detector
+    Generate inverse deformation field using inperpolation with griddata.
+    Assuming the binning range of the input ``rdeform_field`` and ``cdeform_field`` covers the whole detector.
+
+    **Parameters**\n
+    rdeform_field, cdeform_field: 2d array, 2d array
+        Row-wise and column-wise deformation fields.
     """
     # Interpolate to 2048x2048 grid of the detector coordinates
     grid_x, grid_y = np.mgrid[0:cdeform_field.shape[0]:(cdeform_field.shape[0]/2048), 0:cdeform_field.shape[1]:(cdeform_field.shape[1]/2048)]
@@ -541,15 +554,15 @@ def reshape2d(data, apply_axis):
     """
     Reshape matrix to apply 2D function to.
 
-    :Parameters:
-        data : numpy.ndarray
-            N-dimensional numerical array.
-        apply_axis : tuple/list of int
-            The index of the axes to apply the transform to.
+    **Parameters**\n
+    data: numpy.ndarray
+        N-dimensional numerical array.
+    apply_axis: tuple/list of int
+        The index of the axes to apply the transform to.
 
-    :Return:
-        data : numpy.ndarray
-            Reshaped n-dimensional array.
+    **Return**\n
+    data: numpy.ndarray
+        Reshaped n-dimensional array.
     """
 
     nax = len(apply_axis)
@@ -577,13 +590,13 @@ def mapping(data, f, **kwds):
     """ Mapping a generic function to multidimensional data with
     the possibility to supply keyword arguments.
 
-    :Parameter:
-        data : numpy.ndarray
-            Data to map the function to.
-        f : function
-            Function to map to data.
-        **kwds : keyword arguments
-            Keyword arguments of the function map.
+    **Parameter**\n
+    data: numpy.ndarray
+        Data to map the function to.
+    f: function
+        Function to map to data.
+    **kwds: keyword arguments
+        Keyword arguments of the function map.
     """
 
     result = np.asarray(list(map(lambda x:f(x, **kwds), data)))
@@ -611,15 +624,15 @@ def correctnd(data, warping, func=cv2.warpPerspective, **kwds):
 def perspectiveTransform(x, y, M):
     """ Implementation of the perspective transform (homography) in 2D.
 
-    :Parameters:
-        x, y : numeric, numeric
-            Pixel coordinates of the original point.
-        M : 2d array
-            Perspective transform matrix.
+    **Parameters**\n
+    x, y: numeric, numeric
+        Pixel coordinates of the original point.
+    M: 2d array
+        Perspective transform matrix.
 
-    :Return:
-        xtrans, ytrans : numeric, numeric
-            Pixel coordinates after projective/perspective transform.
+    **Return**\n
+    xtrans, ytrans: numeric, numeric
+        Pixel coordinates after projective/perspective transform.
     """
 
     denom = M[2, 0]*x + M[2, 1]*y + M[2, 2]

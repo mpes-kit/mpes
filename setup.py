@@ -2,12 +2,12 @@ from setuptools import setup, find_packages
 from codecs import open
 from os import path
 
-__version__ = '0.8.5'
+__version__ = '1.1.2'
 
 here = path.abspath(path.dirname(__file__))
 
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(path.join(here, 'README.md')) as f:
     long_description = f.read()
 
 # get the dependencies and installs
@@ -20,11 +20,12 @@ dependency_links = [x.strip().replace('git+', '') for x in all_reqs if x.startsw
 setup(
     name='mpes',
     version=__version__,
-    description='Python-based data processing routines for static and time- and angle-resolved photoemission spectroscopy (ARPES & trARPES)',
+    description='Distributed data processing routines for multidimensional photoemission spectroscopy (MPES)',
     long_description=long_description,
-    url='https://github.com/RealPolitiX/mpes',
-    download_url='https://github.com/RealPolitiX/mpes/tarball/' + __version__,
-    license='BSD',
+    long_description_content_type='text/markdown',
+    url='https://github.com/mpes-kit/mpes',
+    download_url='https://github.com/mpes-kit/mpes/tarball/' + __version__,
+    license='MIT',
     classifiers=[
       'Development Status :: 3 - Alpha',
       'Intended Audience :: Developers',
@@ -33,8 +34,8 @@ setup(
     keywords='',
     packages=find_packages(exclude=['docs', 'tests*']),
     include_package_data=True,
-    author='R. Patrick Xian',
+    author='R. Patrick Xian, Laurenz Rettig',
     install_requires=install_requires,
     dependency_links=dependency_links,
-    author_email='xrpatrick@gmail.com'
+    author_email='xrpatrick@gmail.com, rettig@fhi-berlin.mpg.de'
 )

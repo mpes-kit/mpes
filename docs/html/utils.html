@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Utility functions &mdash; mpes 0.1 documentation</title>
+  <title>Utility functions (mpes.utils) &mdash; mpes 1.1.2 documentation</title>
   
 
   
@@ -35,8 +35,8 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="mpes 0.1 documentation" href="index.html"/>
-        <link rel="prev" title="Visualization" href="visualization.html"/> 
+    <link rel="top" title="mpes 1.1.2 documentation" href="index.html"/>
+        <link rel="prev" title="Local file copying (mpes.mirrorutil)" href="mirrorutil.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                0.1
+                1.1.2
               </div>
             
           
@@ -89,12 +89,21 @@
               
             
             
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis</a></li>
-<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Utility functions</a></li>
+              <p class="caption"><span class="caption-text">Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="I01_start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="I02_overview.html">Overview of modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="I03_usenotes.html">Usage notes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis  <code class="docutils literal notranslate"><span class="pre">(mpes.analysis)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandstructure.html">Band-mapping data classes  <code class="docutils literal notranslate"><span class="pre">(mpes.bandstructure)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization  <code class="docutils literal notranslate"><span class="pre">(mpes.visualization)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirrorutil.html">Local file copying  <code class="docutils literal notranslate"><span class="pre">(mpes.mirrorutil)</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Utility functions  <code class="docutils literal notranslate"><span class="pre">(mpes.utils)</span></code></a></li>
 </ul>
 
             
@@ -139,7 +148,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Utility functions</li>
+      <li>Utility functions  <code class="docutils literal notranslate"><span class="pre">(mpes.utils)</span></code></li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -158,430 +167,287 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="utility-functions">
-<h1>Utility functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="utility-functions-mpes-utils">
+<h1>Utility functions  <code class="docutils literal notranslate"><span class="pre">(mpes.utils)</span></code><a class="headerlink" href="#utility-functions-mpes-utils" title="Permalink to this headline">¶</a></h1>
 <p>Utility functions for the mpes package</p>
 <span class="target" id="module-mpes.utils"></span><p>&#64;author: R. Patrick Xian</p>
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.appendformat">
-<code class="descclassname">mpes.utils.</code><code class="descname">appendformat</code><span class="sig-paren">(</span><em>filepath</em>, <em>form</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.appendformat" title="Permalink to this definition">¶</a></dt>
-<dd><p>Append a format string to the end of a file path</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>filepath <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">File path of interest</p>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">appendformat</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filepath</span></em>, <em class="sig-param"><span class="n">form</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.appendformat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a format string to the end of a file path.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>filepath: str</dt><dd><p>File path of interest.</p>
 </dd>
-<dt>form <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">File format of interest</p>
+<dt>form: str</dt><dd><p>File format of interest.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.arraybin">
-<code class="descclassname">mpes.utils.</code><code class="descname">arraybin</code><span class="sig-paren">(</span><em>arr</em>, <em>bins</em>, <em>method='mean'</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.arraybin" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">arraybin</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arr</span></em>, <em class="sig-param"><span class="n">bins</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'mean'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.arraybin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Resize an nD array by binning.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>arr <span class="classifier-delimiter">:</span> <span class="classifier">nD array</span></dt>
-<dd><p class="first last">N-dimensional array for binning.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>arr: nD array</dt><dd><p>N-dimensional array for binning.</p>
 </dd>
-<dt>bins <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple of int</span></dt>
-<dd><p class="first last">Bins/Size shrinkage along every axis.</p>
+<dt>bins: list/tuple of int</dt><dd><p>Bins/Size shrinkage along every axis.</p>
 </dd>
-<dt>method <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Method for binning, ‘mean’ or ‘sum’.</p>
+<dt>method: str</dt><dd><p>Method for binning, ‘mean’ or ‘sum’.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first last">arrbinned : nD array</p>
-</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>arrbinned: numpy array</dt><dd><p>Array after resizing.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.bnorm">
-<code class="descclassname">mpes.utils.</code><code class="descname">bnorm</code><span class="sig-paren">(</span><em>pval</em>, <em>pmax</em>, <em>pmin</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.bnorm" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">bnorm</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pval</span></em>, <em class="sig-param"><span class="n">pmax</span></em>, <em class="sig-param"><span class="n">pmin</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.bnorm" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalize parameters by the bounds of the given values.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>pval <span class="classifier-delimiter">:</span> <span class="classifier">array/numeric</span></dt>
-<dd><p class="first last">A single value/collection of values to normalize.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>pval: array/numeric</dt><dd><p>A single value/collection of values to normalize.</p>
 </dd>
-<dt>pmax, pmin <span class="classifier-delimiter">:</span> <span class="classifier">numeric, numeric</span></dt>
-<dd><p class="first last">The maximum and the minimum of the values.</p>
+<dt>pmax, pmin: numeric, numeric</dt><dd><p>The maximum and the minimum of the values.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first last">Normalized values (with the same dimensions as pval).</p>
-</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>Normalized values (with the same dimensions as pval).</p>
+</div></blockquote>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.calcax">
-<code class="descclassname">mpes.utils.</code><code class="descname">calcax</code><span class="sig-paren">(</span><em>start</em>, <em>end</em>, <em>steps</em>, <em>ret='midpoint'</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.calcax" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">calcax</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start</span></em>, <em class="sig-param"><span class="n">end</span></em>, <em class="sig-param"><span class="n">steps</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">'midpoint'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.calcax" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the positions of the axes values.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>start, end, steps: numeric, numeric, numeric</dt><dd><p>Start, end positions and the steps.</p>
+</dd>
+<dt>ret: str | ‘midpoints’</dt><dd><p>Specification of positions.</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.concat">
-<code class="descclassname">mpes.utils.</code><code class="descname">concat</code><span class="sig-paren">(</span><em>*arrays</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.concat" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">concat</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">arrays</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.concat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenate a sequence of (up to 2D) array-like objects along a given axis.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.dictmerge">
-<code class="descclassname">mpes.utils.</code><code class="descname">dictmerge</code><span class="sig-paren">(</span><em>D</em>, <em>others</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.dictmerge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Merge a dictionary with other dictionaries</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>D <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
-<dd><p class="first last">Main dictionary.</p>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">dictmerge</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">D</span></em>, <em class="sig-param"><span class="n">others</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.dictmerge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merge a dictionary with other dictionaries.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>D: dict</dt><dd><p>Main dictionary.</p>
 </dd>
-<dt>others <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple/dict</span></dt>
-<dd><p class="first last">Other dictionary or composite dictionarized elements.</p>
+<dt>others: list/tuple/dict</dt><dd><p>Other dictionary or composite dictionarized elements.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>D <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
-<dd><p class="first last">Merged dictionary.</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>D: dict</dt><dd><p>Merged dictionary.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.find_nearest">
-<code class="descclassname">mpes.utils.</code><code class="descname">find_nearest</code><span class="sig-paren">(</span><em>val</em>, <em>narray</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.find_nearest" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">find_nearest</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">val</span></em>, <em class="sig-param"><span class="n">narray</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.find_nearest" title="Permalink to this definition">¶</a></dt>
 <dd><p>Find the value closest to a given one in a 1D array.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>val <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd><p class="first last">Value of interest.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>val: float</dt><dd><p>Value of interest.</p>
 </dd>
-<dt>narray <span class="classifier-delimiter">:</span> <span class="classifier">1D numeric array</span></dt>
-<dd><p class="first last">The array to look for the nearest value.</p>
+<dt>narray: 1D numeric array</dt><dd><p>The array to look for the nearest value.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>ind <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">Array index of the value nearest to the given one.</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>ind: int</dt><dd><p>Array index of the value nearest to the given one.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.intify">
-<code class="descclassname">mpes.utils.</code><code class="descname">intify</code><span class="sig-paren">(</span><em>*nums</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.intify" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">intify</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">nums</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.intify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Safely convert to integer (avoiding None).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first docutils">
-<dt>nums <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple/1D array</span></dt>
-<dd><p class="first last">Numeric array to convert to integer.</p>
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>nums: list/tuple/1D array</dt><dd><p>Numeric array to convert to integer.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>intnums <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd><p class="first last">Converted list of numerics.</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>intnums<span class="classifier">list</span></dt><dd><p>Converted list of numerics.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.multithresh">
-<code class="descclassname">mpes.utils.</code><code class="descname">multithresh</code><span class="sig-paren">(</span><em>arr</em>, <em>lbs</em>, <em>ubs</em>, <em>ths</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.multithresh" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">multithresh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arr</span></em>, <em class="sig-param"><span class="n">lbs</span></em>, <em class="sig-param"><span class="n">ubs</span></em>, <em class="sig-param"><span class="n">ths</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.multithresh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multilevel thresholding of a 1D array. Somewhat similar to bit depth reduction.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first last docutils">
-<dt>arr <span class="classifier-delimiter">:</span> <span class="classifier">1D array</span></dt>
-<dd><p class="first last">Array for thresholding.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>arr: 1D array</dt><dd><p>Array for thresholding.</p>
 </dd>
-<dt>lbs, ubs <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple/array, list/tuple/array</span></dt>
-<dd><p class="first last">Paired lower and upper bounds for each thresholding level.</p>
+<dt>lbs, ubs: list/tuple/array, list/tuple/array</dt><dd><p>Paired lower and upper bounds for each thresholding level.</p>
 </dd>
-<dt>ths <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple/array</span></dt>
-<dd><p class="first last">Thresholds for the values within the paired lower and upper bounds.</p>
+<dt>ths: list/tuple/array</dt><dd><p>Thresholds for the values within the paired lower and upper bounds.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.normspec">
-<code class="descclassname">mpes.utils.</code><code class="descname">normspec</code><span class="sig-paren">(</span><em>*specs</em>, <em>smooth=False</em>, <em>span=13</em>, <em>order=1</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.normspec" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">normspec</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">specs</span></em>, <em class="sig-param"><span class="n">smooth</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">span</span><span class="o">=</span><span class="default_value">13</span></em>, <em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.normspec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Normalize a series of 1D signals.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt><a href="#id1"><span class="problematic" id="id2">*</span></a>specs <span class="classifier-delimiter">:</span> <span class="classifier">list/2D array</span></dt>
-<dd><p class="first last">Collection of 1D signals.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt><a href="#id1"><span class="problematic" id="id2">*</span></a>specs: list/2D array</dt><dd><p>Collection of 1D signals.</p>
 </dd>
-<dt>smooth <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
-<dd><p class="first last">Option to smooth the signals before normalization.</p>
+<dt>smooth: bool | False</dt><dd><p>Option to smooth the signals before normalization.</p>
 </dd>
-<dt>span, order <span class="classifier-delimiter">:</span> <span class="classifier">int, int | 13, 1</span></dt>
-<dd><p class="first last">Smoothing parameters of the LOESS method (see <code class="docutils literal"><span class="pre">scipy.signal.savgol_filter()</span></code>).</p>
+<dt>span, order: int, int | 13, 1</dt><dd><p>Smoothing parameters of the LOESS method (see <code class="docutils literal notranslate"><span class="pre">scipy.signal.savgol_filter()</span></code>).</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>normalized_specs <span class="classifier-delimiter">:</span> <span class="classifier">2D array</span></dt>
-<dd><p class="first last">The matrix assembled from a list of maximum-normalized signals.</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>normalized_specs: 2D array</dt><dd><p>The matrix assembled from a list of maximum-normalized signals.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.numFormatConversion">
-<code class="descclassname">mpes.utils.</code><code class="descname">numFormatConversion</code><span class="sig-paren">(</span><em>seq</em>, <em>form='int'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.numFormatConversion" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">numFormatConversion</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">seq</span></em>, <em class="sig-param"><span class="n">form</span><span class="o">=</span><span class="default_value">'int'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.numFormatConversion" title="Permalink to this definition">¶</a></dt>
 <dd><p>When length keyword is not specified as an argument, the function
 returns a format-converted sequence of numbers. The function returns
 nothing when the conversion fails due to errors.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>seq <span class="classifier-delimiter">:</span> <span class="classifier">1D numeric array</span></dt>
-<dd><p class="first last">The numeric array to be converted.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>seq: 1D numeric array</dt><dd><p>The numeric array to be converted.</p>
 </dd>
-<dt>form <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘int’</span></dt>
-<dd><p class="first last">The format to convert into.</p>
+<dt>form: str | ‘int’</dt><dd><p>The format to convert into.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>numseq <span class="classifier-delimiter">:</span> <span class="classifier">converted numeric type</span></dt>
-<dd><p class="first last">The format-converted array.</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>numseq: converted numeric type</dt><dd><p>The format-converted array.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.replist">
-<code class="descclassname">mpes.utils.</code><code class="descname">replist</code><span class="sig-paren">(</span><em>entry</em>, <em>row</em>, <em>column</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.replist" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">replist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">entry</span></em>, <em class="sig-param"><span class="n">row</span></em>, <em class="sig-param"><span class="n">column</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.replist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generator of nested lists with identical entries.
 Generated values are independent of one another.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>entry <span class="classifier-delimiter">:</span> <span class="classifier">numeric/str</span></dt>
-<dd><p class="first last">repeated item in nested list</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>entry: numeric/str</dt><dd><p>Repeated item in nested list.</p>
 </dd>
-<dt>row <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">number of rows in nested list</p>
+<dt>row: int</dt><dd><p>Number of rows in nested list.</p>
 </dd>
-<dt>column <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">number of columns in nested list</p>
+<dt>column: int</dt><dd><p>Number of columns in nested list.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><p class="first last">Nested list</p>
-</td>
-</tr>
-</tbody>
-</table>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>Nested list.</p>
+</div></blockquote>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.revaxis">
-<code class="descclassname">mpes.utils.</code><code class="descname">revaxis</code><span class="sig-paren">(</span><em>arr</em>, <em>axis=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.revaxis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">revaxis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arr</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.revaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reverse an ndarray along certain axis.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>arr <span class="classifier-delimiter">:</span> <span class="classifier">nD numeric array</span></dt>
-<dd><p class="first last">array to invert</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>arr: nD numeric array</dt><dd><p>array to invert</p>
 </dd>
-<dt>axis <span class="classifier-delimiter">:</span> <span class="classifier">int | -1</span></dt>
-<dd><p class="first last">the axis along which to invert</p>
+<dt>axis: int | -1</dt><dd><p>the axis along which to invert</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>revarr <span class="classifier-delimiter">:</span> <span class="classifier">nD numeric array</span></dt>
-<dd><p class="first last">axis-inverted nD array</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>revarr: nD numeric array</dt><dd><p>axis-inverted nD array</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.riffle">
-<code class="descclassname">mpes.utils.</code><code class="descname">riffle</code><span class="sig-paren">(</span><em>*arr</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.riffle" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">riffle</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">arr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.riffle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Interleave multiple arrays of the same number of elements.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first docutils">
-<dt><a href="#id3"><span class="problematic" id="id4">*</span></a>arr <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
-<dd><p class="first last">A number of arrays</p>
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt><a href="#id3"><span class="problematic" id="id4">*</span></a>arr: array</dt><dd><p>A number of arrays.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>riffarr <span class="classifier-delimiter">:</span> <span class="classifier">1D array</span></dt>
-<dd><p class="first last">An array with interleaving elements from each input array.</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>riffarr: 1D array</dt><dd><p>An array with interleaving elements from each input array.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.shuffleaxis">
-<code class="descclassname">mpes.utils.</code><code class="descname">shuffleaxis</code><span class="sig-paren">(</span><em>arr</em>, <em>axes</em>, <em>direction='front'</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.shuffleaxis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">shuffleaxis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">arr</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">direction</span><span class="o">=</span><span class="default_value">'front'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.shuffleaxis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move multiple axes of a multidimensional array simultaneously
-to the front or end of its axis order</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>arr <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
-<dd><p class="first last">array to be shuffled</p>
+to the front or end of its axis order.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>arr: ndarray</dt><dd><p>Array to be shuffled.</p>
 </dd>
-<dt>axes <span class="classifier-delimiter">:</span> <span class="classifier">tuple of int</span></dt>
-<dd><p class="first last">dimensions to be shuffled</p>
+<dt>axes: tuple of int</dt><dd><p>Dimensions to be shuffled.</p>
 </dd>
-<dt>direction <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘front’</span></dt>
-<dd><p class="first last">direction of shuffling (‘front’ or ‘end’)</p>
+<dt>direction: str | ‘front’</dt><dd><p>Direction of shuffling (‘front’ or ‘end’).</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>sharr <span class="classifier-delimiter">:</span> <span class="classifier">ndarray</span></dt>
-<dd><p class="first last">dimension-shuffled array</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>sharr: ndarray</dt><dd><p>Dimension-shuffled array.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.to_odd">
-<code class="descclassname">mpes.utils.</code><code class="descname">to_odd</code><span class="sig-paren">(</span><em>num</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.to_odd" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">to_odd</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">num</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.to_odd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a single number to its nearest odd number.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>num <span class="classifier-delimiter">:</span> <span class="classifier">float/int</span></dt>
-<dd><p class="first last">Number to convert.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>num: float/int</dt><dd><p>Number to convert.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>oddnum <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">The nearest odd number.</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>oddnum: int</dt><dd><p>The nearest odd number.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.utils.tqdmenv">
-<code class="descclassname">mpes.utils.</code><code class="descname">tqdmenv</code><span class="sig-paren">(</span><em>env</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.tqdmenv" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.utils.</code><code class="sig-name descname">tqdmenv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.utils.tqdmenv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Choose tqdm progress bar executing environment.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first last docutils">
-<dt>env <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Name of the environment, ‘classic’ for ordinary environment,
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>env: str</dt><dd><p>Name of the environment, ‘classic’ for ordinary environment,
 ‘notebook’ for Jupyter notebook.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 </div>
@@ -597,7 +463,7 @@ to the front or end of its axis order</p>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="visualization.html" class="btn btn-neutral" title="Visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="mirrorutil.html" class="btn btn-neutral" title="Local file copying (mpes.mirrorutil)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -606,7 +472,7 @@ to the front or end of its axis order</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, R. Patrick Xian.
+        &copy; Copyright 2017-2020, R. Patrick Xian, Laurenz Rettig.
 
     </p>
   </div>
@@ -628,7 +494,7 @@ to the front or end of its axis order</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1',
+            VERSION:'1.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -638,7 +504,7 @@ to the front or end of its axis order</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
 
   
 

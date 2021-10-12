@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Visualization &mdash; mpes 0.1 documentation</title>
+  <title>Visualization (mpes.visualization) &mdash; mpes 1.1.2 documentation</title>
   
 
   
@@ -35,9 +35,9 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="mpes 0.1 documentation" href="index.html"/>
-        <link rel="next" title="Utility functions" href="utils.html"/>
-        <link rel="prev" title="Analysis" href="analysis.html"/> 
+    <link rel="top" title="mpes 1.1.2 documentation" href="index.html"/>
+        <link rel="next" title="Local file copying (mpes.mirrorutil)" href="mirrorutil.html"/>
+        <link rel="prev" title="Band-mapping data classes (mpes.bandstructure)" href="bandstructure.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                0.1
+                1.1.2
               </div>
             
           
@@ -90,12 +90,21 @@
               
             
             
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Visualization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="utils.html">Utility functions</a></li>
+              <p class="caption"><span class="caption-text">Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="I01_start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="I02_overview.html">Overview of modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="I03_usenotes.html">Usage notes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis  <code class="docutils literal notranslate"><span class="pre">(mpes.analysis)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandstructure.html">Band-mapping data classes  <code class="docutils literal notranslate"><span class="pre">(mpes.bandstructure)</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Visualization  <code class="docutils literal notranslate"><span class="pre">(mpes.visualization)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirrorutil.html">Local file copying  <code class="docutils literal notranslate"><span class="pre">(mpes.mirrorutil)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utility functions  <code class="docutils literal notranslate"><span class="pre">(mpes.utils)</span></code></a></li>
 </ul>
 
             
@@ -140,7 +149,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Visualization</li>
+      <li>Visualization  <code class="docutils literal notranslate"><span class="pre">(mpes.visualization)</span></code></li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -159,722 +168,635 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="visualization">
-<h1>Visualization<a class="headerlink" href="#visualization" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="visualization-mpes-visualization">
+<h1>Visualization  <code class="docutils literal notranslate"><span class="pre">(mpes.visualization)</span></code><a class="headerlink" href="#visualization-mpes-visualization" title="Permalink to this headline">¶</a></h1>
 <p>Custom methods for visualizing 2D-4D datasets for ARPES and beyond</p>
 <span class="target" id="module-mpes.visualization"></span><p>&#64;author: R. Patrick Xian</p>
-<dl class="function">
+<dl class="py class">
+<dt id="mpes.visualization.MidpointNormalize">
+<em class="property">class </em><code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">MidpointNormalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vmin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vmax</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">midpoint</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">clip</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.MidpointNormalize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
 <dt id="mpes.visualization.bandpathplot">
-<code class="descclassname">mpes.visualization.</code><code class="descname">bandpathplot</code><span class="sig-paren">(</span><em>pathmap</em>, <em>symlabel</em>, <em>symid</em>, <em>energytk=None</em>, <em>energylabel=None</em>, <em>vline=True</em>, <em>noends=True</em>, <em>vlinekwds={}</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.bandpathplot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">bandpathplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pathmap</span></em>, <em class="sig-param"><span class="n">symlabel</span></em>, <em class="sig-param"><span class="n">symid</span></em>, <em class="sig-param"><span class="n">energytk</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">energylabel</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vline</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">noends</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">vlinekwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.bandpathplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Band path map (band dispersion in sampled k path within Brillouin zone).</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>pathmap <span class="classifier-delimiter">:</span> <span class="classifier">2D array</span></dt>
-<dd><p class="first last">Band path map.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>pathmap: 2D array</dt><dd><p>Band path map.</p>
 </dd>
-<dt>symlabel <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
-<dd><p class="first last">Labels of the symmetry points.</p>
+<dt>symlabel: list/tuple</dt><dd><p>Labels of the symmetry points.</p>
 </dd>
-<dt>symid <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple/array</span></dt>
-<dd><p class="first last">Pixel indices of the symmetry points.</p>
+<dt>symid: list/tuple/array</dt><dd><p>Pixel indices of the symmetry points.</p>
 </dd>
-<dt>energytk <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple/array | None</span></dt>
-<dd><p class="first last">Energy axis ticks.</p>
+<dt>energytk: list/tuple/array | None</dt><dd><p>Energy axis ticks.</p>
 </dd>
-<dt>energylabel <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple | None</span></dt>
-<dd><p class="first last">Energy axis label.</p>
+<dt>energylabel: list/tuple | None</dt><dd><p>Energy axis label.</p>
 </dd>
-<dt>vline: bool | True</dt>
-<dd><p class="first last">Vertical annotation lines.</p>
+<dt>vline: bool | True</dt><dd><p>Vertical annotation lines.</p>
 </dd>
-<dt>noends <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
-<dd><p class="first last">No vertical lines at the ends</p>
+<dt>noends: bool | True</dt><dd><p>No vertical lines at the ends</p>
 </dd>
-<dt>vlinekwds <span class="classifier-delimiter">:</span> <span class="classifier">dict | {}</span></dt>
-<dd><p class="first last">Style directives of the vertical annotation lines.</p>
+<dt>vlinekwds: dict | {}</dt><dd><p>Style directives of the vertical annotation lines.</p>
 </dd>
-<dt><a href="#id1"><span class="problematic" id="id2">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
-<dd><p class="first last">See mpes.visualization._imshow()</p>
+<dt><a href="#id1"><span class="problematic" id="id2">**</span></a>kwds: keyword arguments</dt><dd><p>See <code class="docutils literal notranslate"><span class="pre">mpes.visualization._imshow()</span></code>.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">AxesObject</span></dt>
-<dd><p class="first last">Axes of the generated plot.</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>ax: AxesObject</dt><dd><p>Axes of the generated plot.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.cm2palette">
-<code class="descclassname">mpes.visualization.</code><code class="descname">cm2palette</code><span class="sig-paren">(</span><em>cmapName</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.cm2palette" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">cm2palette</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cmapName</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.cm2palette" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert certain matplotlib colormap (cm) to bokeh palette.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameter:</th><td class="field-body"><dl class="first docutils">
-<dt>cmapName <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Name of the colormap/palette.</p>
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>cmapName: str</dt><dd><p>Name of the colormap/palette.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>palette <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd><p class="first last">List of colors in hex representation (a bokoeh palette).</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>palette: list</dt><dd><p>List of colors in hex representation (a bokoeh palette).</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.colormesh2d">
-<code class="descclassname">mpes.visualization.</code><code class="descname">colormesh2d</code><span class="sig-paren">(</span><em>data</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.colormesh2d" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">colormesh2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.colormesh2d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Efficient one-line color mesh plot of a 2D data matrix</p>
 <p><strong>Parameters</strong></p>
-<dl class="docutils">
-<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">numeric 2D array</span></dt>
-<dd>the 2D data to plot</dd>
-<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
-<dd><table border="1" class="first last docutils">
+<dl>
+<dt>data: numeric 2D array</dt><dd><p>The 2D data to plot.</p>
+</dd>
+<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
-<col width="13%" />
-<col width="10%" />
-<col width="77%" />
+<col style="width: 13%" />
+<col style="width: 10%" />
+<col style="width: 77%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">keyword</th>
-<th class="head">data type</th>
-<th class="head">meaning</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>keyword</p></th>
+<th class="head"><p>data type</p></th>
+<th class="head"><p>meaning</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>figsize</td>
-<td>tuple/list</td>
-<td>(horizontal_size, vertical_size)</td>
+<tbody>
+<tr class="row-even"><td><p>figsize</p></td>
+<td><p>tuple/list</p></td>
+<td><p>(horizontal_size, vertical_size)</p></td>
 </tr>
-<tr class="row-odd"><td>x</td>
-<td>1D array</td>
-<td>x axis coordinates</td>
+<tr class="row-odd"><td><p>x</p></td>
+<td><p>1D array</p></td>
+<td><p>x axis coordinates</p></td>
 </tr>
-<tr class="row-even"><td>y</td>
-<td>1D array</td>
-<td>y axis coordinates</td>
+<tr class="row-even"><td><p>y</p></td>
+<td><p>1D array</p></td>
+<td><p>y axis coordinates</p></td>
 </tr>
-<tr class="row-odd"><td>xlabel</td>
-<td>str</td>
-<td>x axis label</td>
+<tr class="row-odd"><td><p>xlabel</p></td>
+<td><p>str</p></td>
+<td><p>x axis label</p></td>
 </tr>
-<tr class="row-even"><td>ylabel</td>
-<td>str</td>
-<td>y axis label</td>
+<tr class="row-even"><td><p>ylabel</p></td>
+<td><p>str</p></td>
+<td><p>y axis label</p></td>
 </tr>
-<tr class="row-odd"><td>colormap</td>
-<td>str</td>
-<td><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></td>
+<tr class="row-odd"><td><p>colormap</p></td>
+<td><p>str</p></td>
+<td><p><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></p></td>
 </tr>
-<tr class="row-even"><td>cscale</td>
-<td>str/dict</td>
-<td>‘linear’ (default), ‘log’, ‘gammaA-b’, dictionary with keys
-[‘midpoint’, ‘vmin’, ‘vmax’] for bilinear normalization</td>
+<tr class="row-even"><td><p>cscale</p></td>
+<td><p>str/dict</p></td>
+<td><p>‘’ (default), ‘linear’, ‘log’, ‘gammaA-b’, dictionary with keys
+[‘midpoint’, ‘vmin’, ‘vmax’] for bilinear normalization</p></td>
 </tr>
-<tr class="row-odd"><td>levels</td>
-<td>1D array</td>
-<td>explicit contour levels (ignores ncontour if not None)</td>
+<tr class="row-odd"><td><p>levels</p></td>
+<td><p>1D array</p></td>
+<td><p>explicit contour levels (ignores ncontour if not None)</p></td>
 </tr>
-<tr class="row-even"><td>ncontour</td>
-<td>int</td>
-<td>number of contours (ignores levels if not None)</td>
+<tr class="row-even"><td><p>ncontour</p></td>
+<td><p>int</p></td>
+<td><p>number of contours (ignores levels if not None)</p></td>
 </tr>
-<tr class="row-odd"><td>plottype</td>
-<td>str</td>
-<td>‘pcolormesh’ or ‘contourf’</td>
+<tr class="row-odd"><td><p>plottype</p></td>
+<td><p>str</p></td>
+<td><p>‘pcolormesh’ or ‘contourf’</p></td>
 </tr>
-<tr class="row-even"><td>plotaxes</td>
-<td>AxesObject</td>
-<td>supply an existing AxesObject to plot on</td>
+<tr class="row-even"><td><p>plotaxes</p></td>
+<td><p>AxesObject</p></td>
+<td><p>supply an existing AxesObject to plot on</p></td>
 </tr>
-<tr class="row-odd"><td>vmin</td>
-<td>float</td>
-<td>minimum value of colormap</td>
+<tr class="row-odd"><td><p>vmin</p></td>
+<td><p>float</p></td>
+<td><p>minimum value of colormap</p></td>
 </tr>
-<tr class="row-even"><td>vmax</td>
-<td>float</td>
-<td>maximum value of colormap</td>
+<tr class="row-even"><td><p>vmax</p></td>
+<td><p>float</p></td>
+<td><p>maximum value of colormap</p></td>
 </tr>
-<tr class="row-odd"><td>ax_labelsize</td>
-<td>int</td>
-<td>font size of axis text labels</td>
+<tr class="row-odd"><td><p>ax_labelsize</p></td>
+<td><p>int</p></td>
+<td><p>font size of axis text labels</p></td>
 </tr>
-<tr class="row-even"><td>tk_labelsize</td>
-<td>int</td>
-<td>font size of axis tick labels</td>
+<tr class="row-even"><td><p>tk_labelsize</p></td>
+<td><p>int</p></td>
+<td><p>font size of axis tick labels</p></td>
 </tr>
 </tbody>
 </table>
 </dd>
 </dl>
 <p><strong>Return</strong></p>
-<dl class="docutils">
-<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">axes object</span></dt>
-<dd>handle for the plot axes</dd>
+<dl class="simple">
+<dt>ax: axes object</dt><dd><p>Handle for the plot axes.</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.fit_parameter_plot">
-<code class="descclassname">mpes.visualization.</code><code class="descname">fit_parameter_plot</code><span class="sig-paren">(</span><em>data</em>, <em>ncol</em>, <em>axis=(0</em>, <em>1)</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.fit_parameter_plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Plot of actual value, absolute and relative changes of the fitting parameters</p>
-<p><strong>*Parameters*</strong></p>
-<dl class="docutils">
-<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">2D numeric array</span></dt>
-<dd>data for plotting</dd>
-<dt>ncol <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>number of columns</dd>
-<dt>axis <span class="classifier-delimiter">:</span> <span class="classifier">tuple | (0, 1)</span></dt>
-<dd>axes for positioning the subplot grid</dd>
-<dt><a href="#id5"><span class="problematic" id="id6">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
-<dd><table border="1" class="first last docutils">
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">fit_parameter_plot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">ncol</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0, 1</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.fit_parameter_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot of actual value, absolute and relative changes of the fitting parameters.</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>data: 2D numeric array</dt><dd><p>data for plotting</p>
+</dd>
+<dt>ncol: int</dt><dd><p>number of columns</p>
+</dd>
+<dt>axis: tuple | (0, 1)</dt><dd><p>axes for positioning the subplot grid</p>
+</dd>
+<dt><a href="#id5"><span class="problematic" id="id6">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
-<col width="13%" />
-<col width="12%" />
-<col width="75%" />
+<col style="width: 13%" />
+<col style="width: 12%" />
+<col style="width: 75%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">keyword</th>
-<th class="head">data type</th>
-<th class="head">meaning</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>keyword</p></th>
+<th class="head"><p>data type</p></th>
+<th class="head"><p>meaning</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>mainfigsize</td>
-<td>tuple/list</td>
-<td>(horizontal_size, vertical_size)</td>
+<tbody>
+<tr class="row-even"><td><p>mainfigsize</p></td>
+<td><p>tuple/list</p></td>
+<td><p>(horizontal_size, vertical_size)</p></td>
 </tr>
-<tr class="row-odd"><td>cmaps</td>
-<td>list of str</td>
-<td><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></td>
+<tr class="row-odd"><td><p>cmaps</p></td>
+<td><p>list of str</p></td>
+<td><p><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></p></td>
 </tr>
-<tr class="row-even"><td>cscales</td>
-<td>mixed list</td>
-<td>specification of color scaling for each plot</td>
+<tr class="row-even"><td><p>cscales</p></td>
+<td><p>mixed list</p></td>
+<td><p>specification of color scaling for each plot</p></td>
 </tr>
-<tr class="row-odd"><td>cbars</td>
-<td>list of bool</td>
-<td>specification of colorbars</td>
+<tr class="row-odd"><td><p>cbars</p></td>
+<td><p>list of bool</p></td>
+<td><p>specification of colorbars</p></td>
 </tr>
-<tr class="row-even"><td>ncontours</td>
-<td>list of int</td>
-<td>number of contours for each subplot</td>
+<tr class="row-even"><td><p>ncontours</p></td>
+<td><p>list of int</p></td>
+<td><p>number of contours for each subplot</p></td>
 </tr>
-<tr class="row-odd"><td>plottypes</td>
-<td>list of str</td>
-<td>plottype for each subplot</td>
+<tr class="row-odd"><td><p>plottypes</p></td>
+<td><p>list of str</p></td>
+<td><p>plottype for each subplot</p></td>
 </tr>
 </tbody>
 </table>
 </dd>
 </dl>
-<p><strong>*Returns*</strong></p>
-<dl class="docutils">
-<dt>f <span class="classifier-delimiter">:</span> <span class="classifier">figure object</span></dt>
-<dd>figure handle</dd>
-<dt>ims <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd>list of plot objects</dd>
-<dt>axs <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd>list of axes objects</dd>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>f: figure object</dt><dd><p>figure handle</p>
+</dd>
+<dt>ims: list</dt><dd><p>list of plot objects</p>
+</dd>
+<dt>axs: list</dt><dd><p>list of axes objects</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.grid_histogram">
-<code class="descclassname">mpes.visualization.</code><code class="descname">grid_histogram</code><span class="sig-paren">(</span><em>dct, ncol, rvs=['X', 'Y', 't', 'ADC'], rvbins=[80, 80, 80, 80], rvranges=[(0, 1800), (0, 1800), (68000, 74000), (0, 500)], backend='matplotlib', legend=True, histkwds={}, legkwds={}, **kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.grid_histogram" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">grid_histogram</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dct</span></em>, <em class="sig-param"><span class="n">ncol</span></em>, <em class="sig-param"><span class="n">rvs</span><span class="o">=</span><span class="default_value">['X', 'Y', 't', 'ADC']</span></em>, <em class="sig-param"><span class="n">rvbins</span><span class="o">=</span><span class="default_value">[80, 80, 80, 80]</span></em>, <em class="sig-param"><span class="n">rvranges</span><span class="o">=</span><span class="default_value">[0, 1800, 0, 1800, 68000, 74000, 0, 500]</span></em>, <em class="sig-param"><span class="n">backend</span><span class="o">=</span><span class="default_value">'matplotlib'</span></em>, <em class="sig-param"><span class="n">legend</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">histkwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">legkwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.grid_histogram" title="Permalink to this definition">¶</a></dt>
 <dd><p>Grid plot of multiple 1D histograms.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>dct <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
-<dd><p class="first last">Dictionary containing the name and values of the random variables.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>dct: dict</dt><dd><p>Dictionary containing the name and values of the random variables.</p>
 </dd>
-<dt>ncol <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd><p class="first last">Number of columns in the plot grid.</p>
+<dt>ncol: int</dt><dd><p>Number of columns in the plot grid.</p>
 </dd>
-<dt>rvs <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
-<dd><p class="first last">List of names for the random variables (rvs).</p>
+<dt>rvs: list/tuple</dt><dd><p>List of names for the random variables (rvs).</p>
 </dd>
-<dt>rvbins <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
-<dd><p class="first last">Bin values for all random variables.</p>
+<dt>rvbins: list/tuple</dt><dd><p>Bin values for all random variables.</p>
 </dd>
-<dt>rvranges <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
-<dd><p class="first last">Value ranges of all random variables.</p>
+<dt>rvranges: list/tuple</dt><dd><p>Value ranges of all random variables.</p>
 </dd>
-<dt>backend <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘matplotlib’</span></dt>
-<dd><p class="first last">Backend for making the plot (‘matplotlib’ or ‘bokeh’).</p>
+<dt>backend: str | ‘matplotlib’</dt><dd><p>Backend for making the plot (‘matplotlib’ or ‘bokeh’).</p>
 </dd>
-<dt>legend <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
-<dd><p class="first last">Option to include a legend in each histogram plot.</p>
+<dt>legend: bool | True</dt><dd><p>Option to include a legend in each histogram plot.</p>
 </dd>
-<dt>histkwds <span class="classifier-delimiter">:</span> <span class="classifier">dict | {}</span></dt>
-<dd><p class="first last">Keyword arguments for histogram plots.</p>
+<dt>histkwds: dict | {}</dt><dd><p>Keyword arguments for histogram plots.</p>
 </dd>
-<dt>legkwds: dict | {}</dt>
-<dd><p class="first last">Keyword arguments for legends.</p>
+<dt>legkwds: dict | {}</dt><dd><p>Keyword arguments for legends.</p>
 </dd>
 </dl>
-<p class="last"><a href="#id8"><span class="problematic" id="id9">**</span></a>kwds : keyword arguments</p>
-</td>
-</tr>
-</tbody>
-</table>
+<p><a href="#id8"><span class="problematic" id="id9">**</span></a>kwds: keyword arguments</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.initmpl">
-<code class="descclassname">mpes.visualization.</code><code class="descname">initmpl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.initmpl" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">initmpl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.initmpl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize mpes plot style</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.moviemaker">
-<code class="descclassname">mpes.visualization.</code><code class="descname">moviemaker</code><span class="sig-paren">(</span><em>folder</em>, <em>files=None</em>, <em>imform='png'</em>, <em>movform='avi'</em>, <em>namestr='movie'</em>, <em>file_sorting='forward'</em>, <em>recursive=False</em>, <em>ret=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.moviemaker" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">moviemaker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">folder</span></em>, <em class="sig-param"><span class="n">files</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">imform</span><span class="o">=</span><span class="default_value">'png'</span></em>, <em class="sig-param"><span class="n">movform</span><span class="o">=</span><span class="default_value">'avi'</span></em>, <em class="sig-param"><span class="n">namestr</span><span class="o">=</span><span class="default_value">'movie'</span></em>, <em class="sig-param"><span class="n">file_sorting</span><span class="o">=</span><span class="default_value">'forward'</span></em>, <em class="sig-param"><span class="n">recursive</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.moviemaker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a movie file from a stack of images</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>folder <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Directory of the file folder.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>folder: str</dt><dd><p>Directory of the file folder.</p>
 </dd>
-<dt>files <span class="classifier-delimiter">:</span> <span class="classifier">list/tuple</span></dt>
-<dd><p class="first last">Directory of the files to be used for generating a movie.</p>
+<dt>files: list/tuple</dt><dd><p>Directory of the files to be used for generating a movie.</p>
 </dd>
-<dt>imform <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘png’</span></dt>
-<dd><p class="first last">Format of the images.</p>
+<dt>imform: str | ‘png’</dt><dd><p>Format of the images.</p>
 </dd>
-<dt>movform <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘avi’</span></dt>
-<dd><p class="first last">Format of the generated movie.</p>
+<dt>movform: str | ‘avi’</dt><dd><p>Format of the generated movie.</p>
 </dd>
-<dt>namestr <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘movie’</span></dt>
-<dd><p class="first last">Namestring (including folder path) used to save the generated movie.</p>
+<dt>namestr: str | ‘movie’</dt><dd><p>Namestring (including folder path) used to save the generated movie.</p>
 </dd>
-<dt>file_sorting <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘forward’</span></dt>
-<dd><p class="first last">File-sorting direction.</p>
+<dt>file_sorting: str | ‘forward’</dt><dd><p>File-sorting direction.</p>
 </dd>
-<dt>recursive <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
-<dd><p class="first last">Option to generate a recursive movie.</p>
+<dt>recursive: bool | False</dt><dd><p>Option to generate a recursive movie.</p>
 </dd>
-<dt>ret <span class="classifier-delimiter">:</span> <span class="classifier">bool | False</span></dt>
-<dd><p class="first last">Specify return.</p>
+<dt>ret: bool | False</dt><dd><p>Specify return.</p>
 </dd>
-<dt><a href="#id10"><span class="problematic" id="id11">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
-<dd><p class="first last">Specific parameter settings for the vocoder.</p>
+<dt><a href="#id10"><span class="problematic" id="id11">**</span></a>kwds: keyword arguments</dt><dd><p>Specific parameter settings for the vocoder.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>fnames <span class="classifier-delimiter">:</span> <span class="classifier">list of str</span></dt>
-<dd><p class="first last">List of (un)sorted filenames.</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>fnames: list of str</dt><dd><p>List of (un)sorted filenames.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.plot_overlay">
-<code class="descclassname">mpes.visualization.</code><code class="descname">plot_overlay</code><span class="sig-paren">(</span><em>imbot</em>, <em>imtop</em>, <em>origin='lower'</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.plot_overlay" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">plot_overlay</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">imbot</span></em>, <em class="sig-param"><span class="n">imtop</span></em>, <em class="sig-param"><span class="n">origin</span><span class="o">=</span><span class="default_value">'lower'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.plot_overlay" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make an overlay plot of two images</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>imbot <span class="classifier-delimiter">:</span> <span class="classifier">2D array</span></dt>
-<dd><p class="first last">Image at the lower layer.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>imbot: 2D array</dt><dd><p>Image at the lower layer.</p>
 </dd>
-<dt>imtop <span class="classifier-delimiter">:</span> <span class="classifier">2D array</span></dt>
-<dd><p class="first last">Image at the top layer.</p>
+<dt>imtop: 2D array</dt><dd><p>Image at the top layer.</p>
 </dd>
-<dt>origin <span class="classifier-delimiter">:</span> <span class="classifier">str | ‘lower’</span></dt>
-<dd><p class="first last">Origin of the image (‘lower’ or ‘upper’), following imshow convention</p>
+<dt>origin: str | ‘lower’</dt><dd><p>Origin of the image (‘lower’ or ‘upper’), following imshow convention.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="first last docutils">
-<dt>f <span class="classifier-delimiter">:</span> <span class="classifier">fig</span></dt>
-<dd><p class="first last">Figure handle</p>
+<p><strong>Returns</strong></p>
+<dl class="simple">
+<dt>f: fig</dt><dd><p>Figure handle.</p>
 </dd>
-<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">axes</span></dt>
-<dd><p class="first last">Figure axes object</p>
+<dt>ax: axes</dt><dd><p>Figure axes object.</p>
 </dd>
-<dt>ims <span class="classifier-delimiter">:</span> <span class="classifier">list</span></dt>
-<dd><p class="first last">List of image objects</p>
+<dt>ims: list</dt><dd><p>List of image objects.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.plot_single_hist">
-<code class="descclassname">mpes.visualization.</code><code class="descname">plot_single_hist</code><span class="sig-paren">(</span><em>histvals</em>, <em>edges</em>, <em>legend=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.plot_single_hist" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">plot_single_hist</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">histvals</span></em>, <em class="sig-param"><span class="n">edges</span></em>, <em class="sig-param"><span class="n">legend</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.plot_single_hist" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bokeh-based plotting of a single histogram with legend and tooltips.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
-<dt>histvals <span class="classifier-delimiter">:</span> <span class="classifier">1D array</span></dt>
-<dd><p class="first last">Histogram counts (e.g. vertical axis).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>histvals: 1D array</dt><dd><p>Histogram counts (e.g. vertical axis).</p>
 </dd>
-<dt>edges <span class="classifier-delimiter">:</span> <span class="classifier">1D array</span></dt>
-<dd><p class="first last">Histogram edge values (e.g. horizontal axis).</p>
+<dt>edges: 1D array</dt><dd><p>Histogram edge values (e.g. horizontal axis).</p>
 </dd>
-<dt>legend <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><p class="first last">Text for the plot legend.</p>
+<dt>legend: str</dt><dd><p>Text for the plot legend.</p>
 </dd>
-<dt><a href="#id12"><span class="problematic" id="id13">**</span></a>kwds :</dt>
-<dd><p class="first last">Keyword arguments for ‘bokeh.plotting.figure().quad()’.</p>
+<dt><a href="#id12"><span class="problematic" id="id13">**</span></a>kwds:</dt><dd><p>Keyword arguments for ‘bokeh.plotting.figure().quad()’.</p>
 </dd>
 </dl>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return:</th><td class="field-body"><dl class="first last docutils">
-<dt>p <span class="classifier-delimiter">:</span> <span class="classifier">object</span></dt>
-<dd><p class="first last">An instance of ‘bokeh.plotting.figure()’ as a plot handle.</p>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>p: object</dt><dd><p>An instance of ‘bokeh.plotting.figure()’ as a plot handle.</p>
 </dd>
 </dl>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.sliceview3d">
-<code class="descclassname">mpes.visualization.</code><code class="descname">sliceview3d</code><span class="sig-paren">(</span><em>datamat</em>, <em>axis=0</em>, <em>numbered=True</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.sliceview3d" title="Permalink to this definition">¶</a></dt>
-<dd><p>3D matrix slices displayed in a grid of subplots
-<strong>Parameters</strong></p>
-<dl class="docutils">
-<dt>datamat <span class="classifier-delimiter">:</span> <span class="classifier">numeric 3D array</span></dt>
-<dd>the 3D data to plot</dd>
-<dt>axis <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>the axis to slice through</dd>
-<dt>numbered <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>condition for numbering the subplots</dd>
-<dt><a href="#id14"><span class="problematic" id="id15">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
-<dd><table border="1" class="first last docutils">
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">sliceview3d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datamat</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">numbered</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">imkwds</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.sliceview3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>3D matrix slices displayed in a grid of subplots.</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>datamat: numeric 3D array</dt><dd><p>The 3D data to plot.</p>
+</dd>
+<dt>axis: int</dt><dd><p>The axis to slice through.</p>
+</dd>
+<dt>numbered: bool</dt><dd><p>Option to print numbering onto the subplots.</p>
+</dd>
+<dt>imkwds: dict</dt><dd><p>Additional arguments for the image plotting functions (<cite>imshow</cite> and <cite>contourf</cite>).</p>
+</dd>
+<dt><a href="#id14"><span class="problematic" id="id15">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
-<col width="10%" />
-<col width="11%" />
-<col width="79%" />
+<col style="width: 9%" />
+<col style="width: 10%" />
+<col style="width: 80%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">keyword</th>
-<th class="head">data type</th>
-<th class="head">meaning</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>keyword</p></th>
+<th class="head"><p>data type</p></th>
+<th class="head"><p>meaning</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>aspect</td>
-<td>str/numeric</td>
-<td>aspect ratio of each subplot, from [‘auto’, ‘equal’ or scalar]</td>
+<tbody>
+<tr class="row-even"><td><p>aspect</p></td>
+<td><p>str/numeric</p></td>
+<td><p>aspect ratio of each subplot, from [‘auto’, ‘equal’ or scalar]</p></td>
 </tr>
-<tr class="row-odd"><td>ncol</td>
-<td>int</td>
-<td>number of columns in subplot grid</td>
+<tr class="row-odd"><td><p>ncol</p></td>
+<td><p>int</p></td>
+<td><p>number of columns in subplot grid</p></td>
 </tr>
-<tr class="row-even"><td>nrow</td>
-<td>int</td>
-<td>number of rows in subplot grid</td>
+<tr class="row-even"><td><p>nrow</p></td>
+<td><p>int</p></td>
+<td><p>number of rows in subplot grid</p></td>
 </tr>
-<tr class="row-odd"><td>figsize</td>
-<td>tuple/list</td>
-<td>figure size, (vertical_size, horizontal_size)</td>
+<tr class="row-odd"><td><p>figsize</p></td>
+<td><p>tuple/list</p></td>
+<td><p>figure size, (vertical_size, horizontal_size)</p></td>
 </tr>
-<tr class="row-even"><td>flipdir</td>
-<td>str</td>
-<td>flip up-down or left-right of the matrix (‘ud’, ‘lr’)</td>
+<tr class="row-even"><td><p>flipdir</p></td>
+<td><p>str</p></td>
+<td><p>flip up-down or left-right of the matrix (‘ud’, ‘lr’)</p></td>
 </tr>
-<tr class="row-odd"><td>colormap</td>
-<td>str</td>
-<td><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></td>
+<tr class="row-odd"><td><p>colormap</p></td>
+<td><p>str</p></td>
+<td><p><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></p></td>
 </tr>
-<tr class="row-even"><td>cscale</td>
-<td>str</td>
-<td>colormap scaling (‘log’, ‘linear’, ‘midpointx’, or ‘gammaA-b’, see below)</td>
+<tr class="row-even"><td><p>cscale</p></td>
+<td><p>str</p></td>
+<td><p>colormap scaling (‘’(default), ‘log’, ‘linear’, ‘midpointx’, or ‘gammaA-b’, see below)</p></td>
 </tr>
-<tr class="row-odd"><td>vmin</td>
-<td>numeric</td>
-<td>minimum of the color scale</td>
+<tr class="row-odd"><td><p>vmin</p></td>
+<td><p>numeric</p></td>
+<td><p>minimum of the color scale</p></td>
 </tr>
-<tr class="row-even"><td>vmax</td>
-<td>numeric</td>
-<td>maximum of the color scale</td>
+<tr class="row-even"><td><p>vmax</p></td>
+<td><p>numeric</p></td>
+<td><p>maximum of the color scale</p></td>
 </tr>
-<tr class="row-odd"><td>numcolor</td>
-<td>str</td>
-<td>color code for subplot number</td>
+<tr class="row-odd"><td><p>numcolor</p></td>
+<td><p>str</p></td>
+<td><p>color code for subplot number</p></td>
 </tr>
-<tr class="row-even"><td>numpos</td>
-<td>tuple</td>
-<td>(Y, X) position of the text on the subplots</td>
+<tr class="row-even"><td><p>numpos</p></td>
+<td><p>tuple</p></td>
+<td><p>(Y, X) position of the text on the subplots</p></td>
 </tr>
-<tr class="row-odd"><td>numsize</td>
-<td>int</td>
-<td>fontsize of the subtitle within a subplot</td>
+<tr class="row-odd"><td><p>numsize</p></td>
+<td><p>int</p></td>
+<td><p>fontsize of the subtitle within a subplot</p></td>
 </tr>
-<tr class="row-even"><td>numtext</td>
-<td>str</td>
-<td>subtitle text within a subplot</td>
+<tr class="row-even"><td><p>numtext</p></td>
+<td><p>str</p></td>
+<td><p>subtitle text within a subplot</p></td>
 </tr>
-<tr class="row-odd"><td>wspace</td>
-<td>float</td>
-<td>width spacing between subplots</td>
+<tr class="row-odd"><td><p>wspace</p></td>
+<td><p>float</p></td>
+<td><p>width spacing between subplots</p></td>
 </tr>
-<tr class="row-even"><td>hspace</td>
-<td>float</td>
-<td>height spacing betweens subplots</td>
+<tr class="row-even"><td><p>hspace</p></td>
+<td><p>float</p></td>
+<td><p>height spacing betweens subplots</p></td>
 </tr>
-<tr class="row-odd"><td>plottype</td>
-<td>str</td>
-<td>‘imshow’ (default) or ‘contourf’</td>
+<tr class="row-odd"><td><p>plottype</p></td>
+<td><p>str</p></td>
+<td><p>‘imshow’ (default) or ‘contourf’</p></td>
 </tr>
-<tr class="row-even"><td>maintitle</td>
-<td>str</td>
-<td>main title of the plot</td>
+<tr class="row-even"><td><p>maintitle</p></td>
+<td><p>str</p></td>
+<td><p>main title of the plot</p></td>
 </tr>
-<tr class="row-odd"><td>axisreturn</td>
-<td>str</td>
-<td>‘flattened’ or ‘nested’, return format of axis object</td>
+<tr class="row-odd"><td><p>axisreturn</p></td>
+<td><p>str</p></td>
+<td><p>‘flattened’ or ‘nested’, return format of axis object</p></td>
 </tr>
 </tbody>
 </table>
 </dd>
 </dl>
 <p><strong>Returns</strong></p>
-<dl class="docutils">
-<dt>ims <span class="classifier-delimiter">:</span> <span class="classifier">AxesImage object</span></dt>
-<dd>handle for the images in each subplot</dd>
-<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">AxesSubplot object</span></dt>
-<dd>handle for the subplot axes</dd>
+<dl class="simple">
+<dt>ims: AxesImage object</dt><dd><p>Handle for the images in each subplot.</p>
+</dd>
+<dt>ax: AxesSubplot object</dt><dd><p>Handle for the subplot axes.</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.stackedlineplot">
-<code class="descclassname">mpes.visualization.</code><code class="descname">stackedlineplot</code><span class="sig-paren">(</span><em>datamat</em>, <em>axis=0</em>, <em>interval=0</em>, <em>binning=1</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.stackedlineplot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">stackedlineplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datamat</span></em>, <em class="sig-param"><span class="n">axis</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">interval</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">binning</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.stackedlineplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stacked line plots (used for visualizing energy or momentum dispersion curves)</p>
 <p><strong>Parameters</strong></p>
-<dl class="docutils">
-<dt>data <span class="classifier-delimiter">:</span> <span class="classifier">numeric 2D array</span></dt>
-<dd>the 2D data to plot</dd>
-<dt>axis <span class="classifier-delimiter">:</span> <span class="classifier">int | 0</span></dt>
-<dd>the axis to cut along</dd>
-<dt>interval <span class="classifier-delimiter">:</span> <span class="classifier">float | 0</span></dt>
-<dd>the interval between plots</dd>
-<dt>binning <span class="classifier-delimiter">:</span> <span class="classifier">int | 1 (no binning)</span></dt>
-<dd>number of binned rows/columns</dd>
-<dt><a href="#id17"><span class="problematic" id="id18">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
-<dd><table border="1" class="first last docutils">
+<dl>
+<dt>data: numeric 2D array</dt><dd><p>the 2D data to plot</p>
+</dd>
+<dt>axis: int | 0</dt><dd><p>the axis to cut along</p>
+</dd>
+<dt>interval: float | 0</dt><dd><p>the interval between plots</p>
+</dd>
+<dt>binning: int | 1 (no binning)</dt><dd><p>number of binned rows/columns</p>
+</dd>
+<dt><a href="#id17"><span class="problematic" id="id18">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
-<col width="13%" />
-<col width="10%" />
-<col width="77%" />
+<col style="width: 13%" />
+<col style="width: 10%" />
+<col style="width: 77%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">keyword</th>
-<th class="head">data type</th>
-<th class="head">meaning</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>keyword</p></th>
+<th class="head"><p>data type</p></th>
+<th class="head"><p>meaning</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>figsize</td>
-<td>tuple/list</td>
-<td>(horizontal_size, vertical_size)</td>
+<tbody>
+<tr class="row-even"><td><p>figsize</p></td>
+<td><p>tuple/list</p></td>
+<td><p>(horizontal_size, vertical_size)</p></td>
 </tr>
-<tr class="row-odd"><td>x</td>
-<td>1D array</td>
-<td>x axis values</td>
+<tr class="row-odd"><td><p>x</p></td>
+<td><p>1D array</p></td>
+<td><p>x axis values</p></td>
 </tr>
-<tr class="row-even"><td>xlabel</td>
-<td>str</td>
-<td>x axis label</td>
+<tr class="row-even"><td><p>xlabel</p></td>
+<td><p>str</p></td>
+<td><p>x axis label</p></td>
 </tr>
-<tr class="row-odd"><td>ylabel</td>
-<td>str</td>
-<td>y axis label</td>
+<tr class="row-odd"><td><p>ylabel</p></td>
+<td><p>str</p></td>
+<td><p>y axis label</p></td>
 </tr>
-<tr class="row-even"><td>cmap</td>
-<td>str</td>
-<td><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></td>
+<tr class="row-even"><td><p>cmap</p></td>
+<td><p>str</p></td>
+<td><p><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></p></td>
 </tr>
-<tr class="row-odd"><td>axislabelsize</td>
-<td>int</td>
-<td>font size of axis text labels</td>
+<tr class="row-odd"><td><p>axislabelsize</p></td>
+<td><p>int</p></td>
+<td><p>font size of axis text labels</p></td>
 </tr>
-<tr class="row-even"><td>ticklabelsize</td>
-<td>int</td>
-<td>font size of axis tick labels</td>
+<tr class="row-even"><td><p>ticklabelsize</p></td>
+<td><p>int</p></td>
+<td><p>font size of axis tick labels</p></td>
 </tr>
-<tr class="row-odd"><td>margins</td>
-<td>tuple/list</td>
-<td>(xmargin, ymargin), values between 0 and 1</td>
+<tr class="row-odd"><td><p>margins</p></td>
+<td><p>tuple/list</p></td>
+<td><p>(xmargin, ymargin), values between 0 and 1</p></td>
 </tr>
 </tbody>
 </table>
 </dd>
 </dl>
 <p><strong>Return</strong></p>
-<dl class="docutils">
-<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">axes object</span></dt>
-<dd>handle for the plot axes</dd>
+<dl class="simple">
+<dt>ax: axes object</dt><dd><p>handle for the plot axes</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.surf2d">
-<code class="descclassname">mpes.visualization.</code><code class="descname">surf2d</code><span class="sig-paren">(</span><em>datamat</em>, <em>frame=True</em>, <em>miniaxes=False</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.surf2d" title="Permalink to this definition">¶</a></dt>
-<dd><p>2D surface plot
-<strong>Parameters</strong></p>
-<dl class="docutils">
-<dt>datamat <span class="classifier-delimiter">:</span> <span class="classifier">numeric 2D array</span></dt>
-<dd>the 2D data to plot</dd>
-<dt>frame <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
-<dd>controls whether the frame is shown</dd>
-<dt><a href="#id20"><span class="problematic" id="id21">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
-<dd><table border="1" class="first last docutils">
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">surf2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datamat</span></em>, <em class="sig-param"><span class="n">frame</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">miniaxes</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.surf2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make 2D surface plot.</p>
+<p><strong>Parameters</strong></p>
+<dl>
+<dt>datamat: numeric 2D array</dt><dd><p>The 2D data to plot.</p>
+</dd>
+<dt>frame: bool | True</dt><dd><p>Option to control whether the frame is shown.</p>
+</dd>
+<dt><a href="#id20"><span class="problematic" id="id21">**</span></a>kwds: keyword arguments</dt><dd><table class="docutils align-default">
 <colgroup>
-<col width="11%" />
-<col width="11%" />
-<col width="79%" />
+<col style="width: 11%" />
+<col style="width: 11%" />
+<col style="width: 79%" />
 </colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">keyword</th>
-<th class="head">data type</th>
-<th class="head">meaning</th>
+<thead>
+<tr class="row-odd"><th class="head"><p>keyword</p></th>
+<th class="head"><p>data type</p></th>
+<th class="head"><p>meaning</p></th>
 </tr>
 </thead>
-<tbody valign="top">
-<tr class="row-even"><td>alpha</td>
-<td>float</td>
-<td>opacity value from 0 to 1</td>
+<tbody>
+<tr class="row-even"><td><p>alpha</p></td>
+<td><p>float</p></td>
+<td><p>opacity value from 0 to 1</p></td>
 </tr>
-<tr class="row-odd"><td>azimuth</td>
-<td>float</td>
-<td>azimuthal viewing angle (default = 0)</td>
+<tr class="row-odd"><td><p>azimuth</p></td>
+<td><p>float</p></td>
+<td><p>azimuthal viewing angle (default = 0)</p></td>
 </tr>
-<tr class="row-even"><td>cmap</td>
-<td>str</td>
-<td><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></td>
+<tr class="row-even"><td><p>cmap</p></td>
+<td><p>str</p></td>
+<td><p><a class="reference external" href="https://matplotlib.org/users/colormaps.html">matplotlib colormap string</a></p></td>
 </tr>
-<tr class="row-odd"><td>elevation</td>
-<td>float</td>
-<td>zenith viewing angle (default = 0)</td>
+<tr class="row-odd"><td><p>elevation</p></td>
+<td><p>float</p></td>
+<td><p>zenith viewing angle (default = 0)</p></td>
 </tr>
-<tr class="row-even"><td>bgc</td>
-<td>tuple/list</td>
-<td>background color in RGB values</td>
+<tr class="row-even"><td><p>bgc</p></td>
+<td><p>tuple/list</p></td>
+<td><p>background color in RGB values</p></td>
 </tr>
-<tr class="row-odd"><td>kind</td>
-<td>str</td>
-<td>kind of surface plot, {‘points’, ‘wireframe’, ‘surface’}</td>
+<tr class="row-odd"><td><p>kind</p></td>
+<td><p>str</p></td>
+<td><p>kind of surface plot, {‘points’, ‘wireframe’, ‘surface’}</p></td>
 </tr>
-<tr class="row-even"><td>framecolor</td>
-<td>tuple/list</td>
-<td>color of the frame</td>
+<tr class="row-even"><td><p>framecolor</p></td>
+<td><p>tuple/list</p></td>
+<td><p>color of the frame</p></td>
 </tr>
-<tr class="row-odd"><td>warp_scale</td>
-<td>float</td>
-<td>warp scale value from 0 to 1</td>
+<tr class="row-odd"><td><p>warp_scale</p></td>
+<td><p>float</p></td>
+<td><p>warp scale value from 0 to 1</p></td>
 </tr>
 </tbody>
 </table>
 </dd>
 </dl>
 <p><strong>Return</strong></p>
-<dl class="docutils">
-<dt>f <span class="classifier-delimiter">:</span> <span class="classifier">figure object</span></dt>
-<dd>handle for the figure</dd>
+<dl class="simple">
+<dt>f: figure object</dt><dd><p>Handle for the figure.</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.toggle3d">
-<code class="descclassname">mpes.visualization.</code><code class="descname">toggle3d</code><span class="sig-paren">(</span><em>state=True</em>, <em>nb_backend=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.toggle3d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Switch on/off the mayavi backend
-<strong>Parameters</strong></p>
-<dl class="docutils">
-<dt>state <span class="classifier-delimiter">:</span> <span class="classifier">bool | True</span></dt>
-<dd>on/off state of the mayavi backend</dd>
-<dt>nb_backend <span class="classifier-delimiter">:</span> <span class="classifier">| None</span></dt>
-<dd>type of rendering engine choose from ‘x3d’ (interactive) and ‘png’ (static)</dd>
-<dt><a href="#id23"><span class="problematic" id="id24">**</span></a>kwds <span class="classifier-delimiter">:</span> <span class="classifier">keyword arguments</span></dt>
-<dd>additional arguments to be passed into mayavi.mlab.init_notebook()</dd>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">toggle3d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">state</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">nb_backend</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.toggle3d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Switch on/off the mayavi backend.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>state: bool | True</dt><dd><p>on/off state of the mayavi backend</p>
+</dd>
+<dt>nb_backend: | None</dt><dd><p>type of rendering engine choose from ‘x3d’ (interactive) and ‘png’ (static).</p>
+</dd>
+<dt><a href="#id23"><span class="problematic" id="id24">**</span></a>kwds: keyword arguments</dt><dd><p>additional arguments to be passed into <code class="docutils literal notranslate"><span class="pre">mayavi.mlab.init_notebook()</span></code>.</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.trisurf2d">
-<code class="descclassname">mpes.visualization.</code><code class="descname">trisurf2d</code><span class="sig-paren">(</span><em>datamat</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.trisurf2d" title="Permalink to this definition">¶</a></dt>
-<dd><p>2D triangulated surface plot rendered using mplot3d</p>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">trisurf2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datamat</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.trisurf2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D triangulated surface plot rendered using <code class="docutils literal notranslate"><span class="pre">mplot3d</span></code>.</p>
 <p><strong>Parameters</strong></p>
-<dl class="docutils">
-<dt>datamat <span class="classifier-delimiter">:</span> <span class="classifier">numeric 2d array</span></dt>
-<dd>2D data for plotting</dd>
+<dl class="simple">
+<dt>datamat: numeric 2d array</dt><dd><p>2D data for plotting.</p>
+</dd>
 </dl>
 <p><strong>Returns</strong></p>
-<dl class="docutils">
-<dt>sf <span class="classifier-delimiter">:</span> <span class="classifier">Poly3DCollection object</span></dt>
-<dd>handle for objects in the plot</dd>
-<dt>ax <span class="classifier-delimiter">:</span> <span class="classifier">Axes object</span></dt>
-<dd>handle for the axes of the plot</dd>
+<dl class="simple">
+<dt>sf: Poly3DCollection object</dt><dd><p>Handle for objects in the plot.</p>
+</dd>
+<dt>ax: Axes object</dt><dd><p>Handle for the axes of the plot.</p>
+</dd>
 </dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="mpes.visualization.ysplitplot">
-<code class="descclassname">mpes.visualization.</code><code class="descname">ysplitplot</code><span class="sig-paren">(</span><em>datamat</em>, <em>xaxis</em>, <em>yaxis</em>, <em>ysplit=160</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.ysplitplot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">mpes.visualization.</code><code class="sig-name descname">ysplitplot</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">datamat</span></em>, <em class="sig-param"><span class="n">xaxis</span></em>, <em class="sig-param"><span class="n">yaxis</span></em>, <em class="sig-param"><span class="n">ysplit</span><span class="o">=</span><span class="default_value">160</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.visualization.ysplitplot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Split-screen plot of an ARPES spectrum
-(intensity scaled differently for valence and conduction bands)</p>
+(intensity scaled differently for valence and conduction bands).</p>
 <p><strong>Parameters</strong></p>
-<dl class="docutils">
-<dt>datamat <span class="classifier-delimiter">:</span> <span class="classifier">numeric 2D array</span></dt>
-<dd>the 2D data matrix to plot</dd>
-<dt>xaxis <span class="classifier-delimiter">:</span> <span class="classifier">numeric 1D array</span></dt>
-<dd>the x axis coordinates</dd>
-<dt>yaxis <span class="classifier-delimiter">:</span> <span class="classifier">numeric 1D array</span></dt>
-<dd>the y axis coordinates</dd>
-<dt>ysplit <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>the index of the split y position</dd>
+<dl class="simple">
+<dt>datamat: numeric 2D array</dt><dd><p>the 2D data matrix to plot</p>
+</dd>
+<dt>xaxis: numeric 1D array</dt><dd><p>the x axis coordinates</p>
+</dd>
+<dt>yaxis: numeric 1D array</dt><dd><p>the y axis coordinates</p>
+</dd>
+<dt>ysplit: int</dt><dd><p>the index of the split y position</p>
+</dd>
 </dl>
 <p><strong>Returns</strong></p>
-<dl class="docutils">
-<dt>axu <span class="classifier-delimiter">:</span> <span class="classifier">axes object</span></dt>
-<dd>handle for the upper subplot axes</dd>
-<dt>axl <span class="classifier-delimiter">:</span> <span class="classifier">axes object</span></dt>
-<dd>handle for the lower subplot axes</dd>
+<dl class="simple">
+<dt>axu: axes object</dt><dd><p>handle for the upper subplot axes</p>
+</dd>
+<dt>axl: axes object</dt><dd><p>handle for the lower subplot axes</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -890,10 +812,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="utils.html" class="btn btn-neutral float-right" title="Utility functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="mirrorutil.html" class="btn btn-neutral float-right" title="Local file copying (mpes.mirrorutil)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="analysis.html" class="btn btn-neutral" title="Analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="bandstructure.html" class="btn btn-neutral" title="Band-mapping data classes (mpes.bandstructure)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -902,7 +824,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, R. Patrick Xian.
+        &copy; Copyright 2017-2020, R. Patrick Xian, Laurenz Rettig.
 
     </p>
   </div>
@@ -924,7 +846,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.1',
+            VERSION:'1.1.2',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true,
@@ -934,7 +856,7 @@
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
 
   
 

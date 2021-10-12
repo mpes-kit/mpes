@@ -30,6 +30,8 @@ class CopyTool(object):
         
 
     def copy(self, sdir, forceCopy=False, scheduler='threads', **compute_kwds):
+        """ Local file copying method.
+        """
 
         numFiles = countFiles(sdir)
 
@@ -80,6 +82,9 @@ class CopyTool(object):
                 return ddir
 
     def size(self, sdir):
+        """ Calculate file size.
+        """
+        
         for path, dirs, filenames in os.walk(sdir):
             # Check space left
             size = 0
@@ -88,6 +93,8 @@ class CopyTool(object):
             return size
                 
     def cleanUpOldestScan(self, remove = None, force = False):
+        """ Remove scans in old directories.
+        """        
         
         # get list of all Scan directories (leaf directories)
         scan_dirs = list()
@@ -123,6 +130,9 @@ class CopyTool(object):
 
 # private Functions
 def getTargetDir(sdir, source, dest, gid, mode, create=False):
+    """ Retrieve target directories.
+    """
+    
     if (not os.path.isdir(sdir)):
         print ("Only works for Directories!")
         return
@@ -147,6 +157,9 @@ def getTargetDir(sdir, source, dest, gid, mode, create=False):
     return ddir
 
 def countFiles(directory):
+    """ Count the number of files in a directory.
+    """
+
     files = []
  
     if os.path.isdir(directory):
@@ -157,6 +170,9 @@ def countFiles(directory):
     
 # replacement for os.makedirs, which is independent of umask
 def mymakedirs(path, mode, gid):
+    """ Create directories.
+    """
+
     if not path or os.path.exists(path):
         return []
     (head, tail) = os.path.split(path)

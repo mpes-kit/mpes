@@ -31,9 +31,9 @@ def _U_dask(col):
     """
     Compute the U function as part of the thin-plate function.
 
-    **Parameter**
-        col : dask.Series or numpy.ndarray
-            A column vector of ``dask`` (or ``pandas``) ``Series``.
+    **Parameter**\n
+    col: dask.Series or numpy.ndarray
+        A column vector of ``dask`` (or ``pandas``) ``Series``.
     """
 
     return col**2 * da.log(col.abs())

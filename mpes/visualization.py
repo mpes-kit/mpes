@@ -84,13 +84,13 @@ class MidpointNormalize(colors.Normalize):
 def cm2palette(cmapName):
     """ Convert certain matplotlib colormap (cm) to bokeh palette.
 
-    :Parameter:
-        cmapName : str
-            Name of the colormap/palette.
+    **Parameter**\n
+    cmapName: str
+        Name of the colormap/palette.
 
-    :Return:
-        palette : list
-            List of colors in hex representation (a bokoeh palette).
+    **Return**\n
+    palette: list
+        List of colors in hex representation (a bokoeh palette).
     """
 
     if cmapName in bp.all_palettes.keys():
@@ -113,15 +113,15 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
 
     **Parameters**
 
-    data : numeric 2D array
+    data: numeric 2D array
         the 2D data to plot
-    axis : int | 0
+    axis: int | 0
         the axis to cut along
-    interval : float | 0
+    interval: float | 0
         the interval between plots
-    binning : int | 1 (no binning)
+    binning: int | 1 (no binning)
         number of binned rows/columns
-    **kwds : keyword arguments
+    **kwds: keyword arguments
         =============  ==========  ===================================
         keyword        data type   meaning
         =============  ==========  ===================================
@@ -134,9 +134,10 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
         ticklabelsize  int         font size of axis tick labels
         margins        tuple/list  (xmargin, ymargin), values between 0 and 1
         =============  ==========  ===================================
+    
     **Return**
 
-    ax : axes object
+    ax: axes object
         handle for the plot axes
     """
 
@@ -188,19 +189,19 @@ def stackedlineplot(datamat, axis=0, interval=0, binning=1, **kwds):
 def plot_single_hist(histvals, edges, legend=None, **kwds):
     """ Bokeh-based plotting of a single histogram with legend and tooltips.
 
-    :Parameters:
-        histvals : 1D array
-            Histogram counts (e.g. vertical axis).
-        edges : 1D array
-            Histogram edge values (e.g. horizontal axis).
-        legend : str
-            Text for the plot legend.
-        **kwds :
-            Keyword arguments for 'bokeh.plotting.figure().quad()'.
+    **Parameters**\n
+    histvals: 1D array
+        Histogram counts (e.g. vertical axis).
+    edges: 1D array
+        Histogram edge values (e.g. horizontal axis).
+    legend: str
+        Text for the plot legend.
+    **kwds:
+        Keyword arguments for 'bokeh.plotting.figure().quad()'.
 
-    :Return:
-        p : object
-            An instance of 'bokeh.plotting.figure()' as a plot handle.
+    **Return**\n
+    p: object
+        An instance of 'bokeh.plotting.figure()' as a plot handle.
     """
 
     ttp = kwds.pop('tooltip', [('(x, y)', '($x, $y)')])
@@ -222,26 +223,26 @@ def grid_histogram(dct, ncol, rvs=['X', 'Y', 't', 'ADC'], rvbins=[80, 80, 80, 80
     """
     Grid plot of multiple 1D histograms.
 
-    :Parameters:
-        dct : dict
-            Dictionary containing the name and values of the random variables.
-        ncol : int
-            Number of columns in the plot grid.
-        rvs : list/tuple
-            List of names for the random variables (rvs).
-        rvbins : list/tuple
-            Bin values for all random variables.
-        rvranges : list/tuple
-            Value ranges of all random variables.
-        backend : str | 'matplotlib'
-            Backend for making the plot ('matplotlib' or 'bokeh').
-        legend : bool | True
-            Option to include a legend in each histogram plot.
-        histkwds : dict | {}
-            Keyword arguments for histogram plots.
-        legkwds: dict | {}
-            Keyword arguments for legends.
-        **kwds : keyword arguments
+    **Parameters**\n
+    dct: dict
+        Dictionary containing the name and values of the random variables.
+    ncol: int
+        Number of columns in the plot grid.
+    rvs: list/tuple
+        List of names for the random variables (rvs).
+    rvbins: list/tuple
+        Bin values for all random variables.
+    rvranges: list/tuple
+        Value ranges of all random variables.
+    backend: str | 'matplotlib'
+        Backend for making the plot ('matplotlib' or 'bokeh').
+    legend: bool | True
+        Option to include a legend in each histogram plot.
+    histkwds: dict | {}
+        Keyword arguments for histogram plots.
+    legkwds: dict | {}
+        Keyword arguments for legends.
+    **kwds: keyword arguments
     """
 
     figsz = kwds.pop('figsize', (14, 8))
@@ -333,9 +334,9 @@ def colormesh2d(data, **kwds):
 
     **Parameters**
 
-    data : numeric 2D array
-        the 2D data to plot
-    **kwds : keyword arguments
+    data: numeric 2D array
+        The 2D data to plot.
+    **kwds: keyword arguments
         =============  ==========  ===================================
         keyword        data type   meaning
         =============  ==========  ===================================
@@ -359,8 +360,8 @@ def colormesh2d(data, **kwds):
 
     **Return**
 
-    ax : axes object
-        handle for the plot axes
+    ax: axes object
+        Handle for the plot axes.
     """
 
     # Remove singleton dimension and mask pixels with NaN values
@@ -456,15 +457,15 @@ def fit_parameter_plot(data, ncol, axis=(0, 1), **kwds):
     """
     Plot of actual value, absolute and relative changes of the fitting parameters.
 
-    ***Parameters***
+    **Parameters**
 
-    data : 2D numeric array
+    data: 2D numeric array
         data for plotting
-    ncol : int
+    ncol: int
         number of columns
-    axis : tuple | (0, 1)
+    axis: tuple | (0, 1)
         axes for positioning the subplot grid
-    **kwds : keyword arguments
+    **kwds: keyword arguments
         =============  ============  ===================================
         keyword        data type     meaning
         =============  ============  ===================================
@@ -476,13 +477,13 @@ def fit_parameter_plot(data, ncol, axis=(0, 1), **kwds):
         plottypes      list of str   plottype for each subplot
         =============  ============  ===================================
 
-    ***Returns***
+    **Returns**
 
-    f : figure object
+    f: figure object
         figure handle
-    ims : list
+    ims: list
         list of plot objects
-    axs : list
+    axs: list
         list of axes objects
     """
 
@@ -519,20 +520,20 @@ def ysplitplot(datamat, xaxis, yaxis, ysplit=160):
 
     **Parameters**
 
-    datamat : numeric 2D array
+    datamat: numeric 2D array
             the 2D data matrix to plot
-    xaxis : numeric 1D array
+    xaxis: numeric 1D array
             the x axis coordinates
-    yaxis : numeric 1D array
+    yaxis: numeric 1D array
             the y axis coordinates
-    ysplit : int
+    ysplit: int
             the index of the split y position
 
     **Returns**
 
-    axu : axes object
+    axu: axes object
         handle for the upper subplot axes
-    axl : axes object
+    axl: axes object
         handle for the lower subplot axes
     """
 
@@ -626,21 +627,21 @@ def plot_overlay(imbot, imtop, origin='lower', **kwds):
     """
     Make an overlay plot of two images
 
-    :Parameters:
-        imbot : 2D array
-            Image at the lower layer.
-        imtop : 2D array
-            Image at the top layer.
-        origin : str | 'lower'
-            Origin of the image ('lower' or 'upper'), following imshow convention
+    **Parameters**\n
+    imbot: 2D array
+        Image at the lower layer.
+    imtop: 2D array
+        Image at the top layer.
+    origin: str | 'lower'
+        Origin of the image ('lower' or 'upper'), following imshow convention.
 
-    :Returns:
-        f : fig
-            Figure handle
-        ax : axes
-            Figure axes object
-        ims : list
-            List of image objects
+    **Returns**\n
+    f: fig
+        Figure handle.
+    ax: axes
+        Figure axes object.
+    ims: list
+        List of image objects.
     """
 
     fsize = kwds.pop('figsize', (6, 6))
@@ -664,29 +665,29 @@ def bandpathplot(pathmap, symlabel, symid, energytk=None, energylabel=None, \
     """
     Band path map (band dispersion in sampled k path within Brillouin zone).
 
-    :Parameters:
-        pathmap : 2D array
-            Band path map.
-        symlabel : list/tuple
-            Labels of the symmetry points.
-        symid : list/tuple/array
-            Pixel indices of the symmetry points.
-        energytk : list/tuple/array | None
-            Energy axis ticks.
-        energylabel : list/tuple | None
-            Energy axis label.
-        vline: bool | True
-            Vertical annotation lines.
-        noends : bool | True
-            No vertical lines at the ends
-        vlinekwds : dict | {}
-            Style directives of the vertical annotation lines.
-        **kwds : keyword arguments
-            See mpes.visualization._imshow()
+    **Parameters**\n
+    pathmap: 2D array
+        Band path map.
+    symlabel: list/tuple
+        Labels of the symmetry points.
+    symid: list/tuple/array
+        Pixel indices of the symmetry points.
+    energytk: list/tuple/array | None
+        Energy axis ticks.
+    energylabel: list/tuple | None
+        Energy axis label.
+    vline: bool | True
+        Vertical annotation lines.
+    noends: bool | True
+        No vertical lines at the ends
+    vlinekwds: dict | {}
+        Style directives of the vertical annotation lines.
+    **kwds: keyword arguments
+        See ``mpes.visualization._imshow()``.
 
-    :Return:
-        ax : AxesObject
-            Axes of the generated plot.
+    **Return**\n
+    ax: AxesObject
+        Axes of the generated plot.
     """
 
     # fs = kwds.pop('fontsize', 15)
@@ -713,17 +714,18 @@ def bandpathplot(pathmap, symlabel, symid, energytk=None, energylabel=None, \
 def sliceview3d(datamat, axis=0, numbered=True, imkwds={}, **kwds):
     """
     3D matrix slices displayed in a grid of subplots.
+    
     **Parameters**
 
-    datamat : numeric 3D array
+    datamat: numeric 3D array
         The 3D data to plot.
-    axis : int
+    axis: int
         The axis to slice through.
-    numbered : bool
+    numbered: bool
         Option to print numbering onto the subplots.
-    imkwds : dict
+    imkwds: dict
         Additional arguments for the image plotting functions (`imshow` and `contourf`).
-    **kwds : keyword arguments
+    **kwds: keyword arguments
         ==========  ===========  ======================================================================================
         keyword     data type    meaning
         ==========  ===========  ======================================================================================
@@ -733,7 +735,7 @@ def sliceview3d(datamat, axis=0, numbered=True, imkwds={}, **kwds):
         figsize     tuple/list   figure size, (vertical_size, horizontal_size)
         flipdir     str          flip up-down or left-right of the matrix ('ud', 'lr')
         colormap    str          `matplotlib colormap string <https://matplotlib.org/users/colormaps.html>`_
-        cscale      str          colormap scaling (''(default), log', 'linear', 'midpointx', or 'gammaA-b', see below)
+        cscale      str          colormap scaling (''(default), 'log', 'linear', 'midpointx', or 'gammaA-b', see below)
         vmin        numeric      minimum of the color scale
         vmax        numeric      maximum of the color scale
         numcolor    str          color code for subplot number
@@ -749,10 +751,10 @@ def sliceview3d(datamat, axis=0, numbered=True, imkwds={}, **kwds):
 
     **Returns**
 
-    ims : AxesImage object
-        handle for the images in each subplot
-    ax : AxesSubplot object
-        handle for the subplot axes
+    ims: AxesImage object
+        Handle for the images in each subplot.
+    ax: AxesSubplot object
+        Handle for the subplot axes.
     """
 
     # Mask pixels with NaN values
@@ -906,15 +908,16 @@ def sliceview3d(datamat, axis=0, numbered=True, imkwds={}, **kwds):
 
 def toggle3d(state=True, nb_backend=None, **kwds):
     """
-    Switch on/off the mayavi backend
+    Switch on/off the mayavi backend.
+    
     **Parameters**
 
-    state : bool | True
+    state: bool | True
         on/off state of the mayavi backend
-    nb_backend : | None
-        type of rendering engine choose from 'x3d' (interactive) and 'png' (static)
-    **kwds : keyword arguments
-        additional arguments to be passed into mayavi.mlab.init_notebook()
+    nb_backend: | None
+        type of rendering engine choose from 'x3d' (interactive) and 'png' (static).
+    **kwds: keyword arguments
+        additional arguments to be passed into ``mayavi.mlab.init_notebook()``.
     """
 
     global PLOT3D
@@ -934,13 +937,14 @@ def toggle3d(state=True, nb_backend=None, **kwds):
 def surf2d(datamat, frame=True, miniaxes=False, **kwds):
     """
     Make 2D surface plot.
+
     **Parameters**
 
-    datamat : numeric 2D array
-            the 2D data to plot
-    frame : bool | True
-            controls whether the frame is shown
-    **kwds : keyword arguments
+    datamat: numeric 2D array
+        The 2D data to plot.
+    frame: bool | True
+        Option to control whether the frame is shown.
+    **kwds: keyword arguments
         ==========  ==========  =====================================
         keyword     data type   meaning
         ==========  ==========  =====================================
@@ -953,10 +957,11 @@ def surf2d(datamat, frame=True, miniaxes=False, **kwds):
         framecolor  tuple/list  color of the frame
         warp_scale  float       warp scale value from 0 to 1
         ==========  ==========  =====================================
+    
     **Return**
 
-    f : figure object
-        handle for the figure
+    f: figure object
+        Handle for the figure.
     """
 
     colormap = kwds.pop('cmap', 'rainbow')
@@ -994,19 +999,19 @@ def surf2d(datamat, frame=True, miniaxes=False, **kwds):
 
 def trisurf2d(datamat, **kwds):
     """
-    2D triangulated surface plot rendered using mplot3d
+    2D triangulated surface plot rendered using ``mplot3d``.
 
     **Parameters**
 
-    datamat : numeric 2d array
-        2D data for plotting
+    datamat: numeric 2d array
+        2D data for plotting.
 
     **Returns**
 
-    sf : Poly3DCollection object
-        handle for objects in the plot
-    ax : Axes object
-        handle for the axes of the plot
+    sf: Poly3DCollection object
+        Handle for objects in the plot.
+    ax: Axes object
+        Handle for the axes of the plot.
     """
 
     data = np.ma.array(datamat.squeeze(), mask=np.isnan(datamat))
@@ -1042,29 +1047,29 @@ def moviemaker(folder, files=None, imform='png', movform='avi', namestr='movie',
                 file_sorting='forward', recursive=False, ret=False, **kwds):
     """ Generate a movie file from a stack of images
 
-    :Parameters:
-        folder : str
-            Directory of the file folder.
-        files : list/tuple
-            Directory of the files to be used for generating a movie.
-        imform : str | 'png'
-            Format of the images.
-        movform : str | 'avi'
-            Format of the generated movie.
-        namestr : str | 'movie'
-            Namestring (including folder path) used to save the generated movie.
-        file_sorting : str | 'forward'
-            File-sorting direction.
-        recursive : bool | False
-            Option to generate a recursive movie.
-        ret : bool | False
-            Specify return.
-        **kwds : keyword arguments
-            Specific parameter settings for the vocoder.
+    **Parameters**\n
+    folder: str
+        Directory of the file folder.
+    files: list/tuple
+        Directory of the files to be used for generating a movie.
+    imform: str | 'png'
+        Format of the images.
+    movform: str | 'avi'
+        Format of the generated movie.
+    namestr: str | 'movie'
+        Namestring (including folder path) used to save the generated movie.
+    file_sorting: str | 'forward'
+        File-sorting direction.
+    recursive: bool | False
+        Option to generate a recursive movie.
+    ret: bool | False
+        Specify return.
+    **kwds: keyword arguments
+        Specific parameter settings for the vocoder.
 
-    :Return:
-        fnames : list of str
-            List of (un)sorted filenames.
+    **Return**\n
+    fnames: list of str
+        List of (un)sorted filenames.
     """
 
     fps = kwds.pop('fps', 4)

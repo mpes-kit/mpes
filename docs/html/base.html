@@ -1,0 +1,626 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Base classes (mpes.base) &mdash; mpes 1.1.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="mpes 1.1.2 documentation" href="index.html"/>
+        <link rel="next" title="File I/O &amp; Processing (mpes.fprocessing)" href="file_io.html"/>
+        <link rel="prev" title="Usage notes" href="I03_usenotes.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> mpes
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="I01_start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="I02_overview.html">Overview of modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="I03_usenotes.html">Usage notes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis  <code class="docutils literal notranslate"><span class="pre">(mpes.analysis)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandstructure.html">Band-mapping data classes  <code class="docutils literal notranslate"><span class="pre">(mpes.bandstructure)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization  <code class="docutils literal notranslate"><span class="pre">(mpes.visualization)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirrorutil.html">Local file copying  <code class="docutils literal notranslate"><span class="pre">(mpes.mirrorutil)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utility functions  <code class="docutils literal notranslate"><span class="pre">(mpes.utils)</span></code></a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mpes</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/base.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="base-classes-mpes-base">
+<h1>Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code><a class="headerlink" href="#base-classes-mpes-base" title="Permalink to this headline">¶</a></h1>
+<p>Information about the base classes, the building blocks of data processing classes.</p>
+<span class="target" id="module-mpes.base"></span><p>&#64;author: R. Patrick Xian</p>
+<dl class="py class">
+<dt id="mpes.base.FileCollection">
+<em class="property">class </em><code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">FileCollection</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">file_sorting</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">folder</span><span class="o">=</span><span class="default_value">''</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection" title="Permalink to this definition">¶</a></dt>
+<dd><p>File collecting and sorting class.</p>
+<dl class="py method">
+<dt id="mpes.base.FileCollection._sort_terms">
+<em class="property">static </em><code class="sig-name descname">_sort_terms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">terms</span></em>, <em class="sig-param"><span class="n">parameter</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection._sort_terms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort terms according to parameter value.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>terms: list</dt><dd><p>List of terms (e.g. strings).</p>
+</dd>
+<dt>parameter: bool</dt><dd><p>Decision parameter for sorting.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>Sorted or unsorted terms.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.FileCollection.fileID">
+<em class="property">property </em><code class="sig-name descname">fileID</code><a class="headerlink" href="#mpes.base.FileCollection.fileID" title="Permalink to this definition">¶</a></dt>
+<dd><p>The sequence IDs of the files.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.FileCollection.filter">
+<code class="sig-name descname">filter</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">wexpr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">woexpr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">str_start</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">str_end</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection.filter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter filenames by keywords.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>wexpr: str | None</dt><dd><p>Expression in a name to leave in the filename list (w = with).</p>
+</dd>
+<dt>woexpr: str | None</dt><dd><p>Expression in a name to leave out of the filename list (wo = without).</p>
+</dd>
+<dt>str_start, str_end: int, int | None, None</dt><dd><p>Starting and ending indices of the filename string.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>filteredFiles: list</dt><dd><p>List of filtered filenames.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.FileCollection.gather">
+<code class="sig-name descname">gather</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">folder</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">identifier</span><span class="o">=</span><span class="default_value">'/*.h5'</span></em>, <em class="sig-param"><span class="n">f_start</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">f_end</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">f_step</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">file_sorting</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection.gather" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gather files from a folder (specified at instantiation).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>identifier: str | r’/<a href="#id1"><span class="problematic" id="id2">*</span></a>.h5’</dt><dd><p>File identifier used for glob.glob().</p>
+</dd>
+<dt>f_start, f_end, f_step: int, int, int | None, None, 1</dt><dd><p>Starting, ending file id and the step. Used to construct a file selector.</p>
+</dd>
+<dt>file_sorting: bool | True</dt><dd><p>Option to sort the files by their names.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.FileCollection.nallfiles">
+<em class="property">property </em><code class="sig-name descname">nallfiles</code><a class="headerlink" href="#mpes.base.FileCollection.nallfiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of files with the same attributes.
+# of allfiles &gt;= # of files (equal when no selection criterion is applied).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.FileCollection.nfiles">
+<em class="property">property </em><code class="sig-name descname">nfiles</code><a class="headerlink" href="#mpes.base.FileCollection.nfiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total number of files for a specific workflow.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.FileCollection.select">
+<code class="sig-name descname">select</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">ids</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">update</span><span class="o">=</span><span class="default_value">''</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.FileCollection.select" title="Permalink to this definition">¶</a></dt>
+<dd><p>Select gathered files by the filename ids.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>ids: list/1D array | []</dt><dd><p>File IDs for selection.</p>
+</dd>
+<dt>update: str | ‘’</dt><dd><p>File address list update condition,
+‘remove’ = remove the selected files.
+‘keep’ = keep the selected files and remove the rest.
+others strings or no action = do nothing.
+‘’ = nothing happens (can be used in combination with <cite>ret=True</cite>
+to retrieve filtered file names).</p>
+</dd>
+<dt>ret: str | ‘selected’</dt><dd><p>Return option,
+:’selected’: Return of the selected files.
+:’rest’: Return the rest of the files (not selected).
+:False: No action (return).</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mpes.base.MapParser">
+<em class="property">class </em><code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">MapParser</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">files</span><span class="o">=</span><span class="default_value">[]</span></em>, <em class="sig-param"><span class="n">file_sorting</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">folder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.MapParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parser of recorded parameters and turn into functional maps.</p>
+<dl class="py method">
+<dt id="mpes.base.MapParser.EMap">
+<em class="property">property </em><code class="sig-name descname">EMap</code><a class="headerlink" href="#mpes.base.MapParser.EMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ToF to energy coordinate transform function.</p>
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>parse_key: str | ‘coeffs’</dt><dd><p>Parsing key for extracting parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.Efile">
+<em class="property">property </em><code class="sig-name descname">Efile</code><a class="headerlink" href="#mpes.base.MapParser.Efile" title="Permalink to this definition">¶</a></dt>
+<dd><p>File containing the energy calibration information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.bfile">
+<em class="property">property </em><code class="sig-name descname">bfile</code><a class="headerlink" href="#mpes.base.MapParser.bfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>File containing the binning parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.kMap">
+<em class="property">property </em><code class="sig-name descname">kMap</code><a class="headerlink" href="#mpes.base.MapParser.kMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>The (row, column) to momentum coordinate transform function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.kfile">
+<em class="property">property </em><code class="sig-name descname">kfile</code><a class="headerlink" href="#mpes.base.MapParser.kfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>File containing the momentum correction and calibration information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.listfind">
+<em class="property">static </em><code class="sig-name descname">listfind</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">namelist</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">itemlist</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.MapParser.listfind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find item in the itemlist according to the name index in the namelist.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.mapConstruct">
+<em class="property">static </em><code class="sig-name descname">mapConstruct</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mapfunc</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.MapParser.mapConstruct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct mapping function (partial function) by filling in certain
+known parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.parse">
+<em class="property">static </em><code class="sig-name descname">parse</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parse_map</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">mapkeys</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.MapParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse map parameters stored in files.</p>
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>parse_map: function</dt><dd><p>Run parse_map function to populate the class namespace.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>flag: int (0 or 1)</dt><dd><p>Returns 1 if successful, 0 if not.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.parse_Emap">
+<code class="sig-name descname">parse_Emap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span><span class="o">=</span><span class="default_value">'coeffs'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.MapParser.parse_Emap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the parameters to construct the energy conversion function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.parse_bfile">
+<code class="sig-name descname">parse_bfile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.MapParser.parse_bfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the binning parameters.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.parse_kmap">
+<code class="sig-name descname">parse_kmap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span><span class="o">=</span><span class="default_value">'coeffs'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.MapParser.parse_kmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the parameters to construct the momentum conversion function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.parse_wmap">
+<code class="sig-name descname">parse_wmap</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span><span class="o">=</span><span class="default_value">'warping'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.MapParser.parse_wmap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the parameters to construct the distortion correction function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.base.MapParser.wMap">
+<em class="property">property </em><code class="sig-name descname">wMap</code><a class="headerlink" href="#mpes.base.MapParser.wMap" title="Permalink to this definition">¶</a></dt>
+<dd><p>The distortion correction transform function.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.correctnd">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">correctnd</code><span class="sig-paren">(</span><em class="sig-param">data</em>, <em class="sig-param">warping</em>, <em class="sig-param">func=&lt;built-in function warpPerspective&gt;</em>, <em class="sig-param">**kwds</em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.correctnd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a 2D transform to 2D in n-dimensional data.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.detrc2krc">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">detrc2krc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rdet</span></em>, <em class="sig-param"><span class="n">cdet</span></em>, <em class="sig-param"><span class="n">rstart</span></em>, <em class="sig-param"><span class="n">cstart</span></em>, <em class="sig-param"><span class="n">r0</span></em>, <em class="sig-param"><span class="n">c0</span></em>, <em class="sig-param"><span class="n">fr</span></em>, <em class="sig-param"><span class="n">fc</span></em>, <em class="sig-param"><span class="n">rstep</span></em>, <em class="sig-param"><span class="n">cstep</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.detrc2krc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conversion from detector coordinates (rdet, cdet) to momentum coordinates (kr, kc).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.detxy2kxy">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">detxy2kxy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">xdet</span></em>, <em class="sig-param"><span class="n">ydet</span></em>, <em class="sig-param"><span class="n">xstart</span></em>, <em class="sig-param"><span class="n">ystart</span></em>, <em class="sig-param"><span class="n">x0</span></em>, <em class="sig-param"><span class="n">y0</span></em>, <em class="sig-param"><span class="n">fx</span></em>, <em class="sig-param"><span class="n">fy</span></em>, <em class="sig-param"><span class="n">xstep</span></em>, <em class="sig-param"><span class="n">ystep</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.detxy2kxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conversion from detector coordinates (xd, yd) to momentum coordinates (kx, ky).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>xdet, ydet: numeric, numeric</dt><dd><p>Pixel coordinates in the detector coordinate system.</p>
+</dd>
+<dt>xstart, ystart: numeric, numeric</dt><dd><p>The starting pixel number in the detector coordinate system
+along the x and y axes used in the binning.</p>
+</dd>
+<dt>x0, y0: numeric, numeric</dt><dd><p>The center pixel position in binned image used in calibration.</p>
+</dd>
+<dt>fx, fy: numeric, numeric</dt><dd><p>Scaling factor along the x and y axes (in binned image).</p>
+</dd>
+<dt>xstep, ystep: numeric, numeric</dt><dd><p>Binning step size along x and y directions.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.dfieldapply">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">dfieldapply</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">edf</span></em>, <em class="sig-param"><span class="n">dfield</span></em>, <em class="sig-param"><span class="n">X</span><span class="o">=</span><span class="default_value">'X'</span></em>, <em class="sig-param"><span class="n">Y</span><span class="o">=</span><span class="default_value">'Y'</span></em>, <em class="sig-param"><span class="n">newX</span><span class="o">=</span><span class="default_value">'Xm'</span></em>, <em class="sig-param"><span class="n">newY</span><span class="o">=</span><span class="default_value">'Ym'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.dfieldapply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Application of the inverse displacement-field to the dataframe coordinates</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.generateDfield">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">generateDfield</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">rdeform_field</span></em>, <em class="sig-param"><span class="n">cdeform_field</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.generateDfield" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate inverse deformation field using inperpolation with griddata.
+Assuming the binning range of the input <code class="docutils literal notranslate"><span class="pre">rdeform_field</span></code> and <code class="docutils literal notranslate"><span class="pre">cdeform_field</span></code> covers the whole detector.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>rdeform_field, cdeform_field: 2d array, 2d array</dt><dd><p>Row-wise and column-wise deformation fields.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.imrc2krc">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">imrc2krc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">r</span></em>, <em class="sig-param"><span class="n">c</span></em>, <em class="sig-param"><span class="n">r0</span></em>, <em class="sig-param"><span class="n">c0</span></em>, <em class="sig-param"><span class="n">fr</span></em>, <em class="sig-param"><span class="n">fc</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.imrc2krc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conversion from image coordinate (row, column) to momentum coordinates (kr, kc).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.imxy2kxy">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">imxy2kxy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">x0</span></em>, <em class="sig-param"><span class="n">y0</span></em>, <em class="sig-param"><span class="n">fx</span></em>, <em class="sig-param"><span class="n">fy</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.imxy2kxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Conversion from Cartesian coordinate in binned image (x, y) to momentum coordinates (kx, ky).</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>x, y: numeric, numeric</dt><dd><p>Components of the Cartesian coordinates.</p>
+</dd>
+<dt>x0, y0: numeric, numeric</dt><dd><p>Origins of the Cartesian coordinates.</p>
+</dd>
+<dt>fx, fy: numeric numeric</dt><dd><p>Numerical scaling in the conversion.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.loadClassAttributes">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">loadClassAttributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">form</span></em>, <em class="sig-param"><span class="n">load_addr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.loadClassAttributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load class from saved attributes.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>form: dump</dt><dd><p>Format to load from (only works for ‘dump’ right now).</p>
+</dd>
+<dt>load_addr: str</dt><dd><p>The address to load the attributes from.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>Returns the loaded class</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.mapping">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">mapping</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">f</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mapping a generic function to multidimensional data with
+the possibility to supply keyword arguments.</p>
+<p><strong>Parameter</strong></p>
+<dl class="simple">
+<dt>data: numpy.ndarray</dt><dd><p>Data to map the function to.</p>
+</dd>
+<dt>f: function</dt><dd><p>Function to map to data.</p>
+</dd>
+<dt><a href="#id3"><span class="problematic" id="id4">**</span></a>kwds: keyword arguments</dt><dd><p>Keyword arguments of the function map.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.perspectiveTransform">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">perspectiveTransform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">x</span></em>, <em class="sig-param"><span class="n">y</span></em>, <em class="sig-param"><span class="n">M</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.perspectiveTransform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Implementation of the perspective transform (homography) in 2D.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>x, y: numeric, numeric</dt><dd><p>Pixel coordinates of the original point.</p>
+</dd>
+<dt>M: 2d array</dt><dd><p>Perspective transform matrix.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>xtrans, ytrans: numeric, numeric</dt><dd><p>Pixel coordinates after projective/perspective transform.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.reshape2d">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">reshape2d</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">apply_axis</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.reshape2d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reshape matrix to apply 2D function to.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>data: numpy.ndarray</dt><dd><p>N-dimensional numerical array.</p>
+</dd>
+<dt>apply_axis: tuple/list of int</dt><dd><p>The index of the axes to apply the transform to.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>data: numpy.ndarray</dt><dd><p>Reshaped n-dimensional array.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.saveClassAttributes">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">saveClassAttributes</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">clss</span></em>, <em class="sig-param"><span class="n">form</span></em>, <em class="sig-param"><span class="n">save_addr</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.saveClassAttributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save class attributes.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>clss: instance</dt><dd><p>Handle of the instance to be saved.</p>
+</dd>
+<dt>form: str</dt><dd><p>Format to save in (‘h5’/’hdf5’, ‘mat’, or ‘dmp’/’dump’).</p>
+</dd>
+<dt>save_addr: str</dt><dd><p>The address to save the attributes in.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="mpes.base.tof2evpoly">
+<code class="sig-prename descclassname">mpes.base.</code><code class="sig-name descname">tof2evpoly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">a</span></em>, <em class="sig-param"><span class="n">E0</span></em>, <em class="sig-param"><span class="n">t</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.base.tof2evpoly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Polynomial approximation of the time-of-flight to electron volt
+conversion formula.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>a: 1D array</dt><dd><p>Polynomial coefficients.</p>
+</dd>
+<dt>E0: float</dt><dd><p>Energy offset.</p>
+</dd>
+<dt>t: numeric array</dt><dd><p>Drift time of electron.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>E: numeric array</dt><dd><p>Converted energy</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="file_io.html" class="btn btn-neutral float-right" title="File I/O &amp; Processing (mpes.fprocessing)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="I03_usenotes.html" class="btn btn-neutral" title="Usage notes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017-2020, R. Patrick Xian, Laurenz Rettig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

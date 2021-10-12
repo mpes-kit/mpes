@@ -1,83 +1,59 @@
 # mpes
 
-![Build Status](https://www.travis-ci.org/RealPolitiX/mpes.svg?branch=master)
+![Build Status](https://www.travis-ci.org/RealPolitiX/mpes.svg?branch=master) ![License](https://img.shields.io/github/license/mpes-kit/mpes?color=lightgrey) [![Downloads](https://pepy.tech/badge/mpes)](https://pepy.tech/project/mpes)
 
-Python-based data processing routines for multidimensional photoemission spectroscopy (MPES). An upgrade of the time- and angle-resolved photoemission spectroscopy (trARPES).
+Distributed data processing routines for multidimensional photoemission spectroscopy (MPES), an upgrade of the angle-resolved photoemission spectroscopy (ARPES) to achieve parallel data acquisition on multiple parameters by the use of a time-of-flight tube and a multichannel delay-line detector.
 
+![Banner](https://github.com/mpes-kit/mpes/blob/master/resources/figures/Schematic.png)
 
 In a photoemission process, an extreme UV or X-ray photon liberates an electron from the confines of the electronic potential within the material. [ARPES](https://en.wikipedia.org/wiki/Angle-resolved_photoemission_spectroscopy) directly measures the electronic energy and momentum parallel to the surface of the sample under study to infer the electronic states of the material. For a tutorial review on ARPES and its applications in physics and material science, see [here](http://www.phas.ubc.ca/~damascel/ARPES_Intro.pdf). The data structure of ARPES is a stack of 2D images measured at different sample geometries, which are used to reconstruct the full static 3D band structure of the material.
 
 
-[TrARPES](http://ac.els-cdn.com/S036820481400108X/1-s2.0-S036820481400108X-main.pdf?_tid=00fe4a76-705f-11e7-aa2e-00000aacb35f&acdnat=1500894080_b61b6aadc82bb357e2797ddac6419991) is an emerging technique that combines state-of-the-art ultrafast laser systems (~ fs resolution) with an existing ARPES experimental setup. TrARPES studies light-induced electronic dynamics such as phase transition, exciton dynamics, reaction kinetics, etc. It adds a time dimension, usually on the order of femtoseconds to nanoseconds, to the scope of ARPES measurements. Due to complex electronic dynamics, various coupling effects between the energy and momentum dimensions come into play in time. A complete understanding of the multidimensional time series from trARPES measurements can reveal dynamic constants crucial to the understanding of material properties and aid in simulation, design and further device applications.
-
-
-The package supports file I/O of standard file formats (.pxp and .ibw) from [Igor Pro](https://www.wavemetrics.com/products/igorpro/igorpro.htm), the "native language" of photoemission data analysis. Recently, the support for hdf5 files is added.
+The MPES instrument enables sampling of the multidimensional parameter space associated with the electronic band structure at an elevated speed. At the minimum, it measures the two parallel momenta and the energy of photoelectrons simultaneously. The measurement procedure can be extended with recording of varying external parameters such as the temperature, photon polarization, dynamical time delay as in a time-resolved ARPES ([trARPES](http://ac.els-cdn.com/S036820481400108X/1-s2.0-S036820481400108X-main.pdf?_tid=00fe4a76-705f-11e7-aa2e-00000aacb35f&acdnat=1500894080_b61b6aadc82bb357e2797ddac6419991)) experiments using a ultrafast laser system (~ fs resolution), etc. These different flavors of momentum-resolved photoemission experiment together yield a complete understanding of the electronic properties of materials under equilibrium and nonequilibrium conditions for realistic design and simulation of electronic devices.
 
 ### Installation
 
 1. Install from scratch
 
-```
-pip install git+https://github.com/mpes-kit/mpes.git
-```
-2. Upgrade existing installation
+    <pre><code class="console"> pip install git+https://github.com/mpes-kit/mpes.git
+    </code></pre>
 
-```
-pip install --upgrade git+https://github.com/mpes-kit/mpes.git
-```
+2. Upgrade or overwrite an existing installation
 
-PyPI installation coming soon...
+    <pre><code class="console"> pip install --upgrade git+https://github.com/mpes-kit/mpes.git
+    </code></pre>
 
-### Documentation
+3. [PyPI](https://pypi.org/project/mpes/) installation
 
-Documentation and examples are posted [here](https://mpes-kit.github.io/mpes/).
+    <pre><code class="console"> pip install mpes
+    </code></pre>
 
-### Dependencies
+4. Install a specific version
 
-```
-numpy = 0.13.0 +
-scipy = 0.19.0 +
-scikit-image = 0.13.0 +
-pandas = 0.19.2 +
-mayavi = 4.5.0 +
-dask >= 0.18.0
-xarray
-opencv
-```
+    <pre><code class="console"> # version 1.0.9 from PyPI
+    pip install mpes==1.0.9
 
-### Overview of submodules  
-The mpes package contains the following major submodules. They are listed here along with suggested import conventions
-```
-import mpes.fprocessing as fp  
-import mpes.analysis as aly
-import mpes.visualization as vis
-```
+    # version 0.9.8 from GitHub
+    pip install --upgrade git+https://github.com/mpes-kit/mpes.git@0.9.8
+    </code></pre>
 
-### Using mayavi in Jupyter notebook
-For 3D rendering of multidimensional dataset, the mpes package takes advantage of the recent version of mayavi (4.5.0 and above) with jupyter notebook support through [x3dom](https://www.x3dom.org/). Follow the steps below on the command line to allow mayavi output to be displayed on jupyter/ipython notebook
+### Documentation and tutorials
 
-1. Install mayavi using the whl distribution [here](http://www.lfd.uci.edu/~gohlke/pythonlibs/#mayavi)
-2. Install mayavi extension for Jupyter notebook
-```
-jupyter nbextension install --py mayavi --user
-```
-3. Enable the mayavi extension (this may give an error, but proceed nevertheless)
-```
-jupyter nbextension enable mayavi --user --py
-```
-4. When starting Jupyter notebook, set the backend to qt and increase the data I/O rate
-```
-jupyter notebook --NotebookApp.iopub_data_rate_limit=1e10 --gui=qt
-```
-5. Enable immediate display of mayavi figures explicitly in Jupyter notebook
-```
-from mayavi import mlab
-mlab.init_notebook('x3d')  # Interactive rendering
-or mlab.init_notebook('png')  # Static rendering
-```
-To reduce the installation requirements, mayavi is not loaded at start. Use mpes built-in functions to switch on/off mayavi display
-```
-import mpes.visualization as vis
-vis.toggle3d(state=True, nb_backend)  # Switch on, nb_backend can be 'x3d', 'png', or blank
-vis.toggle3d(state=False)  # Switch off
-```
+Documentation on the usage is posted [here](https://mpes-kit.github.io/mpes/) and examples are provided in [Jupyter notebooks](https://github.com/mpes-kit/mpes/tree/master/examples).
+
+List of current tutorials are viewable using [nbviewer](https://nbviewer.jupyter.org) via the links
+
+- [**Tutorial_01_HDF5 File Management**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_01_HDF5%20File%20Management.ipynb)
+- [**Tutorial_02_Data Binning**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_02_Data%20Binning.ipynb)
+- [**Tutorial_03_Rebinning Artefacts**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_03_Rebinning%20Artefacts.ipynb)
+- [**Tutorial_04_Distortion Correction**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_04_Distortion%20Correction.ipynb)
+- [**Tutorial_05_Axes Calibration**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_05_Axes%20Calibration.ipynb)
+- [**Tutorial_06_MPES_Workflow**](https://nbviewer.jupyter.org/github/mpes-kit/mpes/blob/master/examples/Tutorial_06_MPES_Workflow.ipynb)
+
+The size of the single-event datasets used in the tutorial [notebooks](https://github.com/mpes-kit/mpes/tree/master/examples) are in the GB to TB range each, which reflect the actual examperimental setting and the light source configuration (see [here](https://doi.org/10.1063/5.0024493) for technical details). Example datasets are made available publicly in a [Zenodo repository](https://doi.org/10.5281/zenodo.3987303). Please always use the latest version of the datasets.
+
+### Reference
+
+If you want to refer the software in your work, please cite the following paper.
+
+R. P. Xian, Y. Acremann, S. Y. Agustsson, M. Dendzik, K. Bühlmann, D. Curcio, D. Kutnyakhov, F. Pressacco, M. Heber, S. Dong, T. Pincelli, J. Demsar, W. Wurth, P. Hofmann, M.Wolf, M. Scheidgen, L. Rettig, R. Ernstorfer, An open-source, end-to-end workflow for multidimensional photoemission spectroscopy, [Sci. Data 7, 442 (2020)](https://www.nature.com/articles/s41597-020-00769-8).

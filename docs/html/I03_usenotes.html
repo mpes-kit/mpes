@@ -1,0 +1,295 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Usage notes &mdash; mpes 1.1.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="mpes 1.1.2 documentation" href="index.html"/>
+        <link rel="next" title="Base classes (mpes.base)" href="base.html"/>
+        <link rel="prev" title="Overview of modules" href="I02_overview.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> mpes
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Instructions</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="I01_start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="I02_overview.html">Overview of modules</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-mayavi-in-jupyter-notebook">Using mayavi in Jupyter notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#documentation">Documentation</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis  <code class="docutils literal notranslate"><span class="pre">(mpes.analysis)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="bandstructure.html">Band-mapping data classes  <code class="docutils literal notranslate"><span class="pre">(mpes.bandstructure)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization  <code class="docutils literal notranslate"><span class="pre">(mpes.visualization)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirrorutil.html">Local file copying  <code class="docutils literal notranslate"><span class="pre">(mpes.mirrorutil)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utility functions  <code class="docutils literal notranslate"><span class="pre">(mpes.utils)</span></code></a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mpes</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Usage notes</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/I03_usenotes.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="usage-notes">
+<h1>Usage notes<a class="headerlink" href="#usage-notes" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="using-mayavi-in-jupyter-notebook">
+<h2>Using mayavi in Jupyter notebook<a class="headerlink" href="#using-mayavi-in-jupyter-notebook" title="Permalink to this headline">¶</a></h2>
+<p>For 3D rendering of multidimensional dataset, the mpes package takes advantage of the recent version of mayavi (4.5.0 and above) with jupyter notebook support through <a class="reference external" href="https://www.x3dom.org/">x3dom</a>. Follow the steps below on the command line to allow mayavi output to be displayed on jupyter/ipython notebook</p>
+<ol class="arabic">
+<li><p>Install mayavi using the whl distribution <a class="reference external" href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#mayavi">here</a></p></li>
+<li><p>Install mayavi extension for Jupyter notebook:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">jupyter</span> <span class="n">nbextension</span> <span class="n">install</span> <span class="o">--</span><span class="n">py</span> <span class="n">mayavi</span> <span class="o">--</span><span class="n">user</span>
+</pre></div>
+</div>
+</li>
+<li><p>Enable the mayavi extension (this may give an error, but proceed nevertheless):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">jupyter</span> <span class="n">nbextension</span> <span class="n">enable</span> <span class="n">mayavi</span> <span class="o">--</span><span class="n">user</span> <span class="o">--</span><span class="n">py</span>
+</pre></div>
+</div>
+</li>
+<li><p>When starting Jupyter notebook, set the backend to qt and increase the data I/O rate:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">jupyter</span> <span class="n">notebook</span> <span class="o">--</span><span class="n">NotebookApp</span><span class="o">.</span><span class="n">iopub_data_rate_limit</span><span class="o">=</span><span class="mf">1e10</span> <span class="o">--</span><span class="n">gui</span><span class="o">=</span><span class="n">qt</span>
+</pre></div>
+</div>
+</li>
+<li><p>Enable immediate display of mayavi figures explicitly in Jupyter notebook:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">mayavi</span> <span class="kn">import</span> <span class="n">mlab</span>
+<span class="n">mlab</span><span class="o">.</span><span class="n">init_notebook</span><span class="p">(</span><span class="s1">&#39;x3d&#39;</span><span class="p">)</span>  <span class="c1"># Interactive rendering</span>
+<span class="ow">or</span> <span class="n">mlab</span><span class="o">.</span><span class="n">init_notebook</span><span class="p">(</span><span class="s1">&#39;png&#39;</span><span class="p">)</span>  <span class="c1"># Static rendering</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>To reduce the installation requirements, mayavi is not loaded at start. Use mpes built-in functions to switch on/off mayavi display:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">mpes.visualization</span> <span class="k">as</span> <span class="nn">vis</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">toggle3d</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">nb_backend</span><span class="p">)</span>  <span class="c1"># Switch on, nb_backend can be &#39;x3d&#39;, &#39;png&#39;, or blank</span>
+<span class="n">vis</span><span class="o">.</span><span class="n">toggle3d</span><span class="p">(</span><span class="n">state</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Switch off</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>The documentation is currently built using the <code class="docutils literal notranslate"><span class="pre">sphinx</span></code> package and rendered online as GitHub pages. To update the documentation, first, apply changes to existing (or create new) reStructuredText (rst) files in the <code class="docutils literal notranslate"><span class="pre">/docs</span></code> folder. Next, go to the <code class="docutils literal notranslate"><span class="pre">/docs</span></code> folder at the command line and type the following,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>make html
+</pre></div>
+</div>
+<p>to execute the documentation building process. Most of the warnings related to line breaks may be ignored, except the fatal ones that terminates the building process. Then, check the <code class="docutils literal notranslate"><span class="pre">/docs/index.html</span></code> file using any standard web browser. If the changes are correctly rendered locally, update the changes to the online repository and check the outcome at the <a class="reference external" href="https://mpes-kit.github.io/mpes/">documentation site</a>. Some tens of seconds of latency is expected for the changes to be included on the associated GitHub pages.</p>
+</div>
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="base.html" class="btn btn-neutral float-right" title="Base classes (mpes.base)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="I02_overview.html" class="btn btn-neutral" title="Overview of modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017-2020, R. Patrick Xian, Laurenz Rettig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

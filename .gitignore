@@ -10,6 +10,8 @@
 # Packages
 *.egg
 *.egg-info
+.pypirc
+dist
 build
 eggs
 parts
@@ -38,3 +40,6 @@ docs/_build
 
 # Cookiecutter
 output/
+
+# Notebooks
+examples/.ipynb_checkpoints

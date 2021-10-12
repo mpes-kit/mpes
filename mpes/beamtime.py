@@ -18,19 +18,19 @@ from skimage.draw import circle, polygon
 @nb.njit(parallel=False)
 def _gridopt_landscape(u, v, shift_range, scale_range):
     """
-    Calculate the optimization landscape
+    Calculate the optimization landscape.
 
-    :Parameters:
-        u, v : numpy.ndarray
-            Vectors to compare in the grid search
-        shift_range : numpy.ndarray (Lshift x 1)
-            Array containing the shift values to evaluate
-        scale_range : numpy.ndarray (Lscale x 1)
-            Array containing the scale values to evaluate
+    **Parameters**\n
+    u, v: numpy.ndarray
+        Vectors to compare in the grid search.
+    shift_range: numpy.ndarray (Lshift x 1)
+        Array containing the shift values to evaluate.
+    scale_range: numpy.ndarray (Lscale x 1)
+        Array containing the scale values to evaluate.
 
-    :Return:
-        vopt : numpy.ndarray (Lshift x Lscale)
-            Numerical optimization landscape obtained from grid search
+    **Return**\n
+    vopt: numpy.ndarray (Lshift x Lscale)
+        Numerical optimization landscape obtained from grid search.
     """
 
     lshift = shift_range.size
@@ -49,24 +49,24 @@ def _gridopt_landscape(u, v, shift_range, scale_range):
 
 def planarfilter(U, axis, leftshift=0, rightshift=1, upshift=0, downshift=1, shifts=None):
     """
-    An nearest neighbor filter on 3D data
+    An nearest neighbor filter on 3D data.
 
-    :Parameters:
-        U : numpy.ndarray
-            3D matrix for spatial filtering.
-        axis : int
-            Axis perpendicular to the spatial domain.
-        leftshift, rightshift, upshift, downshift : int | 0, 1, 0, 1
-            Shift parameters along the four principal directions.
-            left-right range : pixel - leftshift -- pixel + rightshift
-            top-down range : pixel - upshift -- pixel + downshift
-        shifts : list of numerics
-            Collection of shift parameters along the four directions
-            (overwrites the separate assignment).
+    **Parameters**\n
+    U: numpy.ndarray
+        3D matrix for spatial filtering.
+    axis: int
+        Axis perpendicular to the spatial domain.
+    leftshift, rightshift, upshift, downshift: int | 0, 1, 0, 1
+        Shift parameters along the four principal directions.
+        left-right range : pixel - leftshift -- pixel + rightshift
+        top-down range : pixel - upshift -- pixel + downshift
+    shifts: list of numerics
+        Collection of shift parameters along the four directions
+        (overwrites the separate assignment).
 
-    :Return:
-        V : numpy.ndarray
-            Matrix output after nearest-neighbor spatial averaging
+    **Return**\n
+    V: numpy.ndarray
+        Matrix output after nearest-neighbor spatial averaging.
     """
 
     # Gather shift parameters
@@ -86,15 +86,15 @@ def nnmean(U, V, lsh, rsh, ush, dsh):
     """
     Nearest-neighbor mean averaging
 
-    :Parameters:
-        U, V : numpy.ndarray (float32)
-            3D matrices, U is the original, V is the modified version of U.
-        lsh, rsh, ush, dsh : int
-            Pixel shifts along the four primary directions (left, right, up, down).
+    **Parameters**\n
+    U, V: numpy.ndarray (float32)
+        3D matrices, U is the original, V is the modified version of U.
+    lsh, rsh, ush, dsh: int
+        Pixel shifts along the four primary directions (left, right, up, down).
 
-    :Return:
-        V : numpy.ndarray (float32)
-            Modified 3D matrix after averaging.
+    **Return**\n
+    V: numpy.ndarray (float32)
+        Modified 3D matrix after averaging.
     """
 
     a, x, y = V.shape
@@ -111,23 +111,23 @@ def nnmean(U, V, lsh, rsh, ush, dsh):
 
 def calcShiftScale(U, V, axis, **kwds):
     """
-    Calculate the shift and scale matrices that aligns the matrix V to U by grid search
+    Calculate the shift and scale matrices that aligns the matrix V to U by grid search.
 
-    :Parameters:
-        U, V : numpy.ndarray
-            3D matrices for alignment (from V to U)
-        axis : int
-            The axis along which to align V to U matrices
-        rgshift : numpy.ndarray
-            The range of shifts to iterate over
-        rgscale : numpy.ndarray
-            The range of scales to iterate over
+    **Parameters**\n
+    U, V: numpy.ndarray
+        3D matrices for alignment (from V to U).
+    axis: int
+        The axis along which to align V to U matrices.
+    rgshift: numpy.ndarray
+        The range of shifts to iterate over.
+    rgscale: numpy.ndarray
+        The range of scales to iterate over.
 
-    :Returns:
-        shift : numpy.ndarray
-            The matrix of optimal shifts to align V to U
-        scale : numpy.ndarray
-            The matrix of optimal scales to align V to U
+    **Returns**\n
+    shift: numpy.ndarray
+        The matrix of optimal shifts to align V to U.
+    scale: numpy.ndarray
+        The matrix of optimal scales to align V to U.
     """
 
     rgshift = kwds.pop('shifts', np.linspace(1, 10, 10, dtype='int32'))
@@ -174,20 +174,21 @@ def applyAlignment(V, shift, scale, axis=2, filterkwd=None, ret='mat'):
     Apply the calculated shift and scale matrices to the volume using the
     formula, W = scale * shift * V
 
-    :Parameters:
-        V : numpy.ndarray
-            The 3D matrix to adjust
-        shift : numpy.ndarray
-            The shift matrix
-        scale : numpy.ndarray
-            The scale matrix
-        axis : int
-            The axis to apply the shift matrix to.
-        filterkwd : dict
+    **Parameters**\n
+    V: numpy.ndarray
+        The 3D matrix to adjust.
+    shift: numpy.ndarray
+        The shift matrix.
+    scale: numpy.ndarray
+        The scale matrix.
+    axis: int
+        The axis to apply the shift matrix to.
+    filterkwd: dict
+        Keyword arguments to supply to ``mpes.beamtime.planarfilter()``.
 
-    :Return:
-        trimmed W matrix : numpy.ndarray
-            3D matrix after application of alignment (different size from V)
+    **Return**\n
+    trimmed W matrix: numpy.ndarray
+        3D matrix after application of alignment (different size from V)
     """
 
     shift = shift.astype('int')

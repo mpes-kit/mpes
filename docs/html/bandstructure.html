@@ -1,0 +1,404 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Band-mapping data classes (mpes.bandstructure) &mdash; mpes 1.1.2 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="mpes 1.1.2 documentation" href="index.html"/>
+        <link rel="next" title="Visualization (mpes.visualization)" href="visualization.html"/>
+        <link rel="prev" title="Analysis (mpes.analysis)" href="analysis.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> mpes
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.1.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Instructions</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="I01_start.html">How to start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="I02_overview.html">Overview of modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="I03_usenotes.html">Usage notes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">API documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="base.html">Base classes  <code class="docutils literal notranslate"><span class="pre">(mpes.base)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="file_io.html">File I/O &amp; Processing  <code class="docutils literal notranslate"><span class="pre">(mpes.fprocessing)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analysis  <code class="docutils literal notranslate"><span class="pre">(mpes.analysis)</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Band-mapping data classes  <code class="docutils literal notranslate"><span class="pre">(mpes.bandstructure)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="visualization.html">Visualization  <code class="docutils literal notranslate"><span class="pre">(mpes.visualization)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirrorutil.html">Local file copying  <code class="docutils literal notranslate"><span class="pre">(mpes.mirrorutil)</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">Utility functions  <code class="docutils literal notranslate"><span class="pre">(mpes.utils)</span></code></a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">mpes</a>
+        
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Band-mapping data classes  <code class="docutils literal notranslate"><span class="pre">(mpes.bandstructure)</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/bandstructure.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="band-mapping-data-classes-mpes-bandstructure">
+<h1>Band-mapping data classes  <code class="docutils literal notranslate"><span class="pre">(mpes.bandstructure)</span></code><a class="headerlink" href="#band-mapping-data-classes-mpes-bandstructure" title="Permalink to this headline">¶</a></h1>
+<p>Axis-linked data structure for multidimensional data based on <code class="docutils literal notranslate"><span class="pre">xarray.DataArray</span></code>.</p>
+<span class="target" id="module-mpes.bandstructure"></span><p>&#64;author: R. Patrick Xian</p>
+<dl class="py class">
+<dt id="mpes.bandstructure.BandStructure">
+<em class="property">class </em><code class="sig-prename descclassname">mpes.bandstructure.</code><code class="sig-name descname">BandStructure</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">coords</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dims</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">datakey</span><span class="o">=</span><span class="default_value">'V'</span></em>, <em class="sig-param"><span class="n">faddr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">typ</span><span class="o">=</span><span class="default_value">'float32'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data structure for storage and manipulation of a single band structure (1-3D) dataset.
+Instantiation of the BandStructure class can be done by specifying a (HDF5 or mat) file path
+or by separately specify the data, the axes values and their names.</p>
+<dl class="py method">
+<dt id="mpes.bandstructure.BandStructure._view_result">
+<code class="sig-name descname">_view_result</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">figsize</span><span class="o">=</span><span class="default_value">5, 5</span></em>, <em class="sig-param"><span class="n">cmap</span><span class="o">=</span><span class="default_value">'terrain_r'</span></em>, <em class="sig-param"><span class="n">origin</span><span class="o">=</span><span class="default_value">'lower'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure._view_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D visualization of intermediate result.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.bandstructure.BandStructure.keypoint_estimate">
+<code class="sig-name descname">keypoint_estimate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">img</span></em>, <em class="sig-param"><span class="n">dimname</span><span class="o">=</span><span class="default_value">'E'</span></em>, <em class="sig-param"><span class="n">pdmethod</span><span class="o">=</span><span class="default_value">'daofind'</span></em>, <em class="sig-param"><span class="n">display</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">update</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure.keypoint_estimate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the positions of momentum local maxima (high symmetry points) in the isoenergetic plane.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.bandstructure.BandStructure.orthogonalize">
+<code class="sig-name descname">orthogonalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">center</span></em>, <em class="sig-param"><span class="n">update</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure.orthogonalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Align the high symmetry axes in the isoenergetic plane to the row and
+column directions of the image coordinate system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.bandstructure.BandStructure.resize">
+<em class="property">classmethod </em><code class="sig-name descname">resize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">axes</span></em>, <em class="sig-param"><span class="n">factor</span></em>, <em class="sig-param"><span class="n">method</span><span class="o">=</span><span class="default_value">'mean'</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure.resize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reduce the size (shape-changing operation) of the axis through rebinning.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>data: nD array</dt><dd><p>Data to resize (e.g. self.data).</p>
+</dd>
+<dt>axes: dict</dt><dd><p>Axis values of the original data structure (e.g. self.coords).</p>
+</dd>
+<dt>factor: list/tuple of int</dt><dd><p>Resizing factor for each dimension (e.g. 2 means reduce by a factor of 2).</p>
+</dd>
+<dt>method: str | ‘mean’</dt><dd><p>Numerical operation used for resizing (‘mean’ or ‘sum’).</p>
+</dd>
+<dt>ret: bool | False</dt><dd><p>Option to return the resized data array.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>Instance of resized n-dimensional array along with downsampled axis coordinates.</p>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.bandstructure.BandStructure.rotate">
+<code class="sig-name descname">rotate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">angle</span></em>, <em class="sig-param"><span class="n">angle_unit</span><span class="o">=</span><span class="default_value">'deg'</span></em>, <em class="sig-param"><span class="n">update</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure.rotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Primary axis rotation that preserves the data size.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.bandstructure.BandStructure.scale">
+<code class="sig-name descname">scale</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">scale_array</span></em>, <em class="sig-param"><span class="n">update</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure.scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scaling and masking of band structure data.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>axis: str/tuple</dt><dd><p>Axes along which to apply the intensity transform.</p>
+</dd>
+<dt>scale_array: nD array</dt><dd><p>Scale array to be applied to data.</p>
+</dd>
+<dt>update: bool | True</dt><dd><p>Options to update the existing array with the intensity-transformed version.</p>
+</dd>
+<dt>ret: bool | False</dt><dd><p>Options to return the intensity-transformed data.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>scdata: nD array</dt><dd><p>Data after intensity scaling.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.bandstructure.BandStructure.symmetrize">
+<code class="sig-name descname">symmetrize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">center</span></em>, <em class="sig-param"><span class="n">symtype</span></em>, <em class="sig-param"><span class="n">update</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure.symmetrize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Symmetrize data within isoenergetic planes. Supports rotational and
+mirror symmetries. The operation preserves the data size.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.bandstructure.BandStructure.update_axis">
+<code class="sig-name descname">update_axis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axes</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">vals</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">axesdict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.BandStructure.update_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the values of multiple axes.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>axes: list/tuple | None</dt><dd><p>Collection of axis names.</p>
+</dd>
+<dt>vals: list/tuple | None</dt><dd><p>Collection of axis values.</p>
+</dd>
+<dt>axesdict: dict | None</dt><dd><p>Axis-value pair for update.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="mpes.bandstructure.MPESDataset">
+<em class="property">class </em><code class="sig-prename descclassname">mpes.bandstructure.</code><code class="sig-name descname">MPESDataset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">coords</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dims</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">datakey</span><span class="o">=</span><span class="default_value">'V'</span></em>, <em class="sig-param"><span class="n">faddr</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">typ</span><span class="o">=</span><span class="default_value">'float32'</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.MPESDataset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data structure for storage and manipulation of a multidimensional photoemission
+spectroscopy (MPES) dataset (4D and above).</p>
+<dl class="py method">
+<dt id="mpes.bandstructure.MPESDataset.maxdiff">
+<code class="sig-name descname">maxdiff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vslice</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.MPESDataset.maxdiff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the hyperslice with maximum difference from the specified one.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.bandstructure.MPESDataset.slicediff">
+<code class="sig-name descname">slicediff</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">slicea</span></em>, <em class="sig-param"><span class="n">sliceb</span></em>, <em class="sig-param"><span class="n">slicetype</span><span class="o">=</span><span class="default_value">'index'</span></em>, <em class="sig-param"><span class="n">axreduce</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">ret</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwds</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.MPESDataset.slicediff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the difference of two hyperslices (hs), hsa - hsb.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>slicea, sliceb: dict</dt><dd><p>Dictionaries for slicing.</p>
+</dd>
+<dt>slicetype: str | ‘index’</dt><dd><p>Type of slicing, ‘index’ (DataArray.isel) or ‘value’ (DataArray.sel).</p>
+</dd>
+<dt>axreduce: tuple of int | None</dt><dd><p>Axes to sum over.</p>
+</dd>
+<dt>ret: bool | False</dt><dd><p>Options for return.</p>
+</dd>
+<dt><a href="#id1"><span class="problematic" id="id2">**</span></a>kwds: keyword arguments</dt><dd><p>Those passed into DataArray.isel() and DataArray.sel().</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<dl class="simple">
+<dt>sldiff: class</dt><dd><p>Sliced class instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="mpes.bandstructure.MPESDataset.subset">
+<code class="sig-name descname">subset</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">axis</span></em>, <em class="sig-param"><span class="n">axisrange</span></em><span class="sig-paren">)</span><a class="headerlink" href="#mpes.bandstructure.MPESDataset.subset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawn an instance of the BandStructure class from axis slicing.</p>
+<p><strong>Parameters</strong></p>
+<dl class="simple">
+<dt>axis: str/list</dt><dd><p>Axes to subset from.</p>
+</dd>
+<dt>axisrange: slice object/list</dt><dd><p>The value range of axes to be sliced out.</p>
+</dd>
+</dl>
+<p><strong>Return</strong></p>
+<blockquote>
+<div><p>An instances of <code class="docutils literal notranslate"><span class="pre">BandStructure</span></code>, <code class="docutils literal notranslate"><span class="pre">MPESDataset</span></code> or <code class="docutils literal notranslate"><span class="pre">DataArray</span></code> class.</p>
+</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           <div class="articleComments">
+            
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="visualization.html" class="btn btn-neutral float-right" title="Visualization (mpes.visualization)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="analysis.html" class="btn btn-neutral" title="Analysis (mpes.analysis)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2017-2020, R. Patrick Xian, Laurenz Rettig.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.1.2',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="_static/language_data.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

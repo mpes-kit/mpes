@@ -21,7 +21,8 @@ import numpy as np
 from numpy.linalg import norm, lstsq
 from scipy.sparse.linalg import lsqr
 import scipy.optimize as opt
-from scipy.special import wofz
+from scipy.special import wofz, erf
+from scipy.signal import savgol_filter
 import scipy.interpolate as scip
 import scipy.io as sio
 from scipy.spatial import distance
@@ -65,23 +66,23 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
 
     **Parameters**
 
-    x : 1D numeric array
-        the photoelectron energy axis
-    y : 1D numeric array
-        the photoemission intensity axis
-    tol : float | 1e-5
-        fitting tolerance
-    maxiter : int | 20
-        maximal iteration
-    explicit : bool | False
-        explicit display of iteration number
-    warning : bool | False
-        display of warnings during calculation
+    x: 1D numeric array
+        The photoelectron energy axis.
+    y: 1D numeric array
+        The photoemission intensity axis.
+    tol: float | 1e-5
+        The fitting tolerance.
+    maxiter: int | 20
+        The maximal iteration.
+    explicit: bool | False
+        Option for explicit display of iteration number.
+    warning: bool | False
+        Option to display of warnings during calculation.
 
     **Return**
 
-    sbg : 1D numeric array
-        Calculated Shirley background
+    sbg: 1D numeric array
+        Calculated Shirley background.
     """
 
     # Set the energy values in decreasing order
@@ -152,10 +153,60 @@ def shirley(x, y, tol=1e-5, maxiter=20, explicit=False, warning=False):
         return yr + B
 
 
+def shirley_piecewise(x, y, seg_ranges, tol=1e-5, maxiter=20, explicit=False, **kwds):
+    """ Calculate piecewise Shirley-Proctor-Sherwood background from spectral data.
+    
+    **Parameters**
+
+    x, y: 1D array, 1D array
+        X and Y values of the data.
+    seg_ranges: list/tuple
+        Index ranges of the indices.
+    tol: numeric | 1e-5
+        Tolerance of the background estimation.
+    """
+    
+    xlen = len(x)
+    bgs = [np.empty(0)]
+    warn = kwds.pop('warning', False)
+    
+    for sr in seg_ranges:
+        sind = slice(*sr)
+        bgtmp = shirley(x[sind], y[sind], tol=tol, maxiter=maxiter, explicit=explicit, warning=warn)
+        bgs.append(bgtmp)
+       
+    bgall = np.concatenate(bgs)
+    blen = len(bgall)
+    
+    if blen == xlen:
+        return bgall
+    else:
+        wl = kwds.pop('window_length', 5)
+        poly = kwds.pop('polyorder', 1)
+        bgs.append(savgol_filter(y[blen:], wl, poly, **kwds))
+        bgall = np.concatenate(bgs)
+        return bgall
+
+
 def shirley2d(x, y, tol=1e-5, maxiter=20, explicit=False,
             warning=False):
     """
     2D Shirley background removal
+
+    **Parameters**
+
+    x: 1D numeric array
+        Photoemission energy axis.
+    y: 2D numeric array
+        Photoemission intensity matrix.
+    tol: float | 1e-5
+        The fitting tolerance.
+    maxiter: int | 20
+        The maximal iteration.
+    explicit: bool | False
+        Option for explicit display of iteration number.
+    warning: bool | False
+        Option to display of warnings during calculation.
     """
 
     nx = y.shape[0]
@@ -261,27 +312,27 @@ def peakdetect1d(y_axis, x_axis = None, lookahead = 200, delta=0):
     Converted from/based on a MATLAB script at:
     http://billauer.co.il/peakdet.html
 
-    **Parameters**
-    y_axis : list
+    **Parameters**\n
+    y_axis: list
         A list containing the signal over which to find peaks
-    x_axis : list | None
+    x_axis: list | None
         A x-axis whose values correspond to the y_axis list and is used
         in the return to specify the position of the peaks. If omitted an
         index of the y_axis is used.
-    lookahead : int | 200
+    lookahead: int | 200
         distance to look ahead from a peak candidate to determine if
         it is the actual peak
         '(samples / period) / f' where '4 >= f >= 1.25' might be a good value
-    delta : numeric | 0
+    delta: numeric | 0
         this specifies a minimum difference between a peak and
         the following points, before a peak may be considered a peak. Useful
         to hinder the function from picking up false peaks towards to end of
         the signal. To work well delta should be set to delta >= RMSnoise * 5.
 
-    **Returns**
-    max_peaks : list
+    **Returns**\n
+    max_peaks: list
         positions of the positive peaks
-    min_peaks : list
+    min_peaks: list
         positions of the negative peaks
     """
 
@@ -378,31 +429,31 @@ def peakdetect2d(img, method='daofind', **kwds):
     """
     Peak-like feature detection in a 2D image.
 
-    :Parameters:
-        img : 2D array
-            Image matrix.
-        method : str | 'daofind'
-            Detection method ('daofind' or 'maxlist').
-        **kwds : keyword arguments
-            Arguments passed to the specific methods chosen.
+    **Parameters**\n
+    img: 2D array
+        Image matrix.
+    method: str | 'daofind'
+        Detection method ('daofind' or 'maxlist').
+    **kwds: keyword arguments
+        Arguments passed to the specific methods chosen.
 
-            :daofind: See ``astropy.stats.sigma_clipped_stats()`` and ``photutils.detection.DAOStarFinder()``.
-            sigma : float | 5.0
-                Standard deviation of the clipping Gaussian.
-            fwhm : float | 3.0
-                FWHM of the convoluting Gaussian kernel.
-            threshfactor : float | 8
-                Intensity threshold for background-foreground separation (foreground is above threshold).
+        :daofind: See ``astropy.stats.sigma_clipped_stats()`` and ``photutils.detection.DAOStarFinder()``.
+        sigma: float | 5.0
+            Standard deviation of the clipping Gaussian.
+        fwhm: float | 3.0
+            FWHM of the convoluting Gaussian kernel.
+        threshfactor: float | 8
+            Intensity threshold for background-foreground separation (foreground is above threshold).
 
-            :maxlist: See ``skimage.feature.peak_local_max()``.
-            mindist : float | 10
-                Minimal distance between two local maxima.
-            numpeaks : int | 7
-                Maximum number of detected peaks.
+        :maxlist: See ``skimage.feature.peak_local_max()``.
+        mindist: float | 10
+            Minimal distance between two local maxima.
+        numpeaks: int | 7
+            Maximum number of detected peaks.
 
-    :Return:
-        pks : 2D array
-            Pixel coordinates of detected peaks, in (column, row) ordering.
+    **Return**\n
+    pks: 2D array
+        Pixel coordinates of detected peaks, in (column, row) ordering.
     """
 
     if method == 'daofind':
@@ -437,37 +488,37 @@ def calibrateK(img, pxla, pxlb, k_ab=None, kcoorda=None, kcoordb=[0., 0.], equis
     should be specified in the (row_index, column_index) format. See the equiscale option for
     details on the specifications of point coordinates.
 
-    :Parameters:
-        img : 2D array
-            An energy cut of the band structure.
-        pxla, pxlb : list/tuple/1D array
-            Pixel coordinates of the two symmetry points (a and b). Point b has the
-            default coordinates [0., 0.] (see below).
-        k_ab : float | None
-            The known momentum space distance between the two symmetry points.
-        kcoorda : list/tuple/1D array | None
-            Momentum coordinates of the symmetry point a.
-        kcoordb : list/tuple/1D array | [0., 0.]
-            Momentum coordinates of the symmetry point b (krow, kcol), default to k-space center.
-        equiscale : bool | False
-            Option to adopt equal scale along both the row and column directions.
-            :True: Use a uniform scale for both x and y directions in the image coordinate system.
-            This applies to the situation where the points a and b are (close to) parallel with one
-            of the two image axes.
-            :False: Calculate the momentum scale for both x and y directions separately. This applies
-            to the situation where the points a and b are sufficiently different in both x and y directions
-            in the image coordinate system.
-        ret : list | ['axes']
-            Return type specification, options include 'axes', 'extent', 'coeffs', 'grid', 'func', 'all'.
+    **Parameters**\n
+    img: 2D array
+        An energy cut of the band structure.
+    pxla, pxlb: list/tuple/1D array
+        Pixel coordinates of the two symmetry points (a and b). Point b has the
+        default coordinates [0., 0.] (see below).
+    k_ab: float | None
+        The known momentum space distance between the two symmetry points.
+    kcoorda: list/tuple/1D array | None
+        Momentum coordinates of the symmetry point a.
+    kcoordb: list/tuple/1D array | [0., 0.]
+        Momentum coordinates of the symmetry point b (krow, kcol), default to k-space center.
+    equiscale: bool | False
+        Option to adopt equal scale along both the row and column directions.
+        :True: Use a uniform scale for both x and y directions in the image coordinate system.
+        This applies to the situation where the points a and b are (close to) parallel with one
+        of the two image axes.
+        :False: Calculate the momentum scale for both x and y directions separately. This applies
+        to the situation where the points a and b are sufficiently different in both x and y directions
+        in the image coordinate system.
+    ret: list | ['axes']
+        Return type specification, options include 'axes', 'extent', 'coeffs', 'grid', 'func', 'all'.
 
-    :Returns:
-        k_row, k_col : 1D array
-            Momentum coordinates of the row and column.
-        axis_extent : list
-            Extent of the two momentum axis (can be used directly in imshow).
-        k_rowgrid, k_colgrid : 2D array
-            Row and column mesh grid generated from the coordinates
-            (can be used directly in pcolormesh).
+    **Returns**\n
+    k_row, k_col: 1D array
+        Momentum coordinates of the row and column.
+    axis_extent: list
+        Extent of the two momentum axis (can be used directly in imshow).
+    k_rowgrid, k_colgrid: 2D array
+        Row and column mesh grid generated from the coordinates
+        (can be used directly in pcolormesh).
     """
 
     nr, nc = img.shape
@@ -517,24 +568,24 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
     """
     Detect a list of peaks in the corresponding regions of multiple EDCs
 
-    :Parameters:
-        traces : 2D array
-            Collection of EDCs.
-        tof : 1D array
-            Time-of-flight values.
-        ranges : list of tuples/lists | None
-            List of ranges for peak detection in the format
-            [(LowerBound1, UpperBound1), (LowerBound2, UpperBound2), ....].
-        method : str | 'range-limited'
-            Method for peak-finding ('range-limited' and 'alignment').
-        pkwindow : int | 3
-            Window width of a peak(amounts to lookahead in ``mpes.analysis.peakdetect1d``).
-        plot : bool | False
-            Specify whether to display a custom plot of the peak search results.
+    **Parameters**\n
+    traces: 2D array
+        Collection of EDCs.
+    tof: 1D array
+        Time-of-flight values.
+    ranges: list of tuples/lists | None
+        List of ranges for peak detection in the format
+        [(LowerBound1, UpperBound1), (LowerBound2, UpperBound2), ....].
+    method: str | 'range-limited'
+        Method for peak-finding ('range-limited' and 'alignment').
+    pkwindow: int | 3
+        Window width of a peak(amounts to lookahead in ``mpes.analysis.peakdetect1d``).
+    plot: bool | False
+        Specify whether to display a custom plot of the peak search results.
 
-    :Returns:
-        pkmaxs : 1D array
-            Collection of peak positions
+    **Returns**\n
+    pkmaxs: 1D array
+        Collection of peak positions.
     """
 
     pkmaxs = []
@@ -571,34 +622,34 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, Eref=None, t=No
     assuming that the energy-drift-time relationship can be written in the form,
     E = sum_n (a_n * t**n) + E0
 
-    :Parameters:
-        pos : list/array
-            Positions of the spectral landmarks (e.g. peaks) in the EDCs.
-        vals : list/array
-            Bias voltage value associated with each EDC.
-        order : int | 3
-            Polynomial order of the fitting function.
-        refid : int | 0
-            Reference dataset index, varies from 0 to vals.size - 1.
-        ret : str | 'func'
-            Return type, including 'func', 'coeffs', 'full', and 'axis' (see below).
-        E0 : float | None
-            Constant energy offset.
-        t : numeric array | None
-            Drift time.
-        aug : int | 1
-            Fitting dimension augmentation (1=no change, 2=double, etc).
+    **Parameters**\n
+    pos: list/array
+        Positions of the spectral landmarks (e.g. peaks) in the EDCs.
+    vals: list/array
+        Bias voltage value associated with each EDC.
+    order: int | 3
+        Polynomial order of the fitting function.
+    refid: int | 0
+        Reference dataset index, varies from 0 to vals.size - 1.
+    ret: str | 'func'
+        Return type, including 'func', 'coeffs', 'full', and 'axis' (see below).
+    E0: float | None
+        Constant energy offset.
+    t: numeric array | None
+        Drift time.
+    aug: int | 1
+        Fitting dimension augmentation (1=no change, 2=double, etc).
 
-    :Returns:
-        pfunc : partial function
-            Calibrating function with determined polynomial coefficients (except the constant offset).
-        ecalibdict : dict
-            A dictionary of fitting parameters including the following,
-            :coeffs: Fitted polynomial coefficients (the a's).
-            :offset: Minimum time-of-flight corresponding to a peak.
-            :Tmat: the T matrix (differential time-of-flight) in the equation Ta=b.
-            :bvec: the b vector (differential bias) in the fitting Ta=b.
-            :axis: Fitted energy axis.
+    **Returns**\n
+    pfunc: partial function
+        Calibrating function with determined polynomial coefficients (except the constant offset).
+    ecalibdict: dict
+        A dictionary of fitting parameters including the following,
+        :coeffs: Fitted polynomial coefficients (the a's).
+        :offset: Minimum time-of-flight corresponding to a peak.
+        :Tmat: the T matrix (differential time-of-flight) in the equation Ta=b.
+        :bvec: the b vector (differential bias) in the fitting Ta=b.
+        :axis: Fitted energy axis.
     """
 
     vals = np.array(vals)
@@ -725,13 +776,13 @@ class EnergyCalibrator(base.FileCollection):
     def read(self, form='h5', tracename='', tofname='ToF'):
         """ Read traces (e.g. energy dispersion curves) from files.
 
-        :Parameters:
-            form : str | 'h5'
-                Format of the files ('h5' or 'mat').
-            tracename : str | ''
-                Name of the group/attribute corresponding to the trace.
-            tofname : str | 'ToF'
-                Name of the group/attribute corresponding to the time-of-flight.
+        **Parameters**\n
+        form: str | 'h5'
+            Format of the files ('h5' or 'mat').
+        tracename: str | ''
+            Name of the group/attribute corresponding to the trace.
+        tofname: str | 'ToF'
+            Name of the group/attribute corresponding to the time-of-flight.
         """
 
         if form == 'h5':
@@ -753,9 +804,9 @@ class EnergyCalibrator(base.FileCollection):
     def normalize(self, **kwds):
         """ Normalize the spectra along an axis.
 
-        :Parameters:
-            **kwds : keyword arguments
-                See the keywords for ``mpes.utils.normspec()``.
+        **Parameters**\n
+        **kwds: keyword arguments
+            See the keywords for ``mpes.utils.normspec()``.
         """
 
         self.traces_normed = u.normspec(*self.traces, **kwds)
@@ -764,19 +815,19 @@ class EnergyCalibrator(base.FileCollection):
     def findCorrespondence(sig_still, sig_mov, method='dtw', **kwds):
         """ Determine the correspondence between two 1D traces by alignment.
 
-        :Parameters:
-            sig_still, sig_mov : 1D array, 1D array
-                Input 1D signals.
-            method : str | 'dtw'
-                Method for 1D signal correspondence detection ('dtw' or 'ptw').
-            **kwds : keyword arguments
-                See available keywords for the following functions,
-                (1) ``fastdtw.fastdtw()`` (when ``method=='dtw'``)
-                (2) ``ptw.ptw.timeWarp()`` (when ``method=='ptw'``)
+        **Parameters**\n
+        sig_still, sig_mov: 1D array, 1D array
+            Input 1D signals.
+        method: str | 'dtw'
+            Method for 1D signal correspondence detection ('dtw' or 'ptw').
+        **kwds: keyword arguments
+            See available keywords for the following functions,
+            (1) ``fastdtw.fastdtw()`` (when ``method=='dtw'``)
+            (2) ``ptw.ptw.timeWarp()`` (when ``method=='ptw'``)
 
-        :Return:
-            pathcorr : list
-                Pixel-wise path correspondences between two input 1D arrays (sig_still, sig_mov).
+        **Return**\n
+        pathcorr: list
+            Pixel-wise path correspondences between two input 1D arrays (sig_still, sig_mov).
         """
 
         if method == 'dtw':
@@ -795,20 +846,20 @@ class EnergyCalibrator(base.FileCollection):
     def addFeatures(self, ranges, refid=0, traces=None, infer_others=False, mode='append', **kwds):
         """ Select or extract the equivalent landmarks (e.g. peaks) among all traces.
 
-        :Parameters:
-            ranges : list/tuple
-                Collection of feature detection ranges, within which an algorithm
-                (i.e. 1D peak detector) with look for the feature.
-            refid : int | 0
-                Index of the reference trace (EDC).
-            traces : 2D array | None
-                Collection of energy dispersion curves (EDCs).
-            infer_others : bool | True
-                Option to infer the feature detection range in other traces (EDCs) from a given one.
-            mode : str | 'append'
-                Specification on how to change the feature ranges ('append' or 'replace').
-            **kwds : keyword arguments
-                Dictionarized keyword arguments for trace alignment (See ``self.findCorrespondence()``)
+        **Parameters**\n
+        ranges: list/tuple
+            Collection of feature detection ranges, within which an algorithm
+            (i.e. 1D peak detector) with look for the feature.
+        refid: int | 0
+            Index of the reference trace (EDC).
+        traces: 2D array | None
+            Collection of energy dispersion curves (EDCs).
+        infer_others: bool | True
+            Option to infer the feature detection range in other traces (EDCs) from a given one.
+        mode: str | 'append'
+            Specification on how to change the feature ranges ('append' or 'replace').
+        **kwds: keyword arguments
+            Dictionarized keyword arguments for trace alignment (See ``self.findCorrespondence()``)
         """
 
         if traces is None:
@@ -840,11 +891,13 @@ class EnergyCalibrator(base.FileCollection):
     def featureExtract(self, ranges=None, traces=None, **kwds):
         """ Select or extract the equivalent landmarks (e.g. peaks) among all traces.
 
-        :Parameters:
-            ranges : list | None
-            traces : 2D array | None
-            **kwds : keyword arguments
-                See available keywords in ``mpes.analysis.peaksearch()``.
+        **Parameters**\n
+        ranges: list/tuple | None
+            Range in each trace to look for the peak feature, [start, end].
+        traces: 2D array | None
+            Collection of 1D spectra to use for calibration.
+        **kwds: keyword arguments
+            See available keywords in ``mpes.analysis.peaksearch()``.
         """
 
         if ranges is None:
@@ -862,13 +915,13 @@ class EnergyCalibrator(base.FileCollection):
         """ Calculate the functional mapping between time-of-flight and the energy
         scale using optimization methods.
 
-        :Parameters:
-            refid : int | 0
-                The reference trace index (an integer).
-            ret : list | ['coeffs']
-                Options for return values (see ``mpes.analysis.calibrateE()``).
-            **kwds : keyword arguments
-                See available keywords for ``mpes.analysis.calibrateE()``.
+        **Parameters**\n
+        refid: int | 0
+            The reference trace index (an integer).
+        ret: list | ['coeffs']
+            Options for return values (see ``mpes.analysis.calibrateE()``).
+        **kwds: keyword arguments
+            See available keywords for ``mpes.analysis.calibrateE()``.
         """
 
         landmarks = kwds.pop('landmarks', self.peaks[:, 0])
@@ -883,33 +936,33 @@ class EnergyCalibrator(base.FileCollection):
             backend='matplotlib', linekwds={}, linesegkwds={}, scatterkwds={}, legkwds={}, **kwds):
         """ Display a plot showing line traces with annotation.
 
-        :Parameters:
-            traces : 2d array
-                Matrix of traces to visualize.
-            segs : list/tuple
-                Segments to be highlighted in the visualization.
-            peaks : 2d array
-                Peak positions for labelling the traces.
-            ret : bool
-                Return specification.
-            backend : str | 'matplotlib'
-                Backend specification, choose between 'matplotlib' (static) or 'bokeh' (interactive).
-            linekwds : dict | {}
-                Keyword arguments for line plotting (see ``matplotlib.pyplot.plot()``).
-            scatterkwds : dict | {}
-                Keyword arguments for scatter plot (see ``matplotlib.pyplot.scatter()``).
-            legkwds : dict | {}
-                Keyword arguments for legend (see ``matplotlib.pyplot.legend()``).
-            **kwds : keyword arguments
-                ===============  ==========  ================================
-                keyword          data type   meaning
-                ===============  ==========  ================================
-                maincolor        str
-                labels           list        Labels for each curve
-                xaxis            1d array    x (horizontal) axis values
-                title            str         Title of the plot
-                legend_location  str         Location of the plot legend
-                ===============  ==========  ================================
+        **Parameters**\n
+        traces: 2d array
+            Matrix of traces to visualize.
+        segs: list/tuple
+            Segments to be highlighted in the visualization.
+        peaks: 2d array
+            Peak positions for labelling the traces.
+        ret: bool
+            Return specification.
+        backend: str | 'matplotlib'
+            Backend specification, choose between 'matplotlib' (static) or 'bokeh' (interactive).
+        linekwds: dict | {}
+            Keyword arguments for line plotting (see ``matplotlib.pyplot.plot()``).
+        scatterkwds: dict | {}
+            Keyword arguments for scatter plot (see ``matplotlib.pyplot.scatter()``).
+        legkwds: dict | {}
+            Keyword arguments for legend (see ``matplotlib.pyplot.legend()``).
+        **kwds: keyword arguments
+            ===============  ==========  ================================
+            keyword          data type   meaning
+            ===============  ==========  ================================
+            maincolor        str
+            labels           list        Labels for each curve
+            xaxis            1d array    x (horizontal) axis values
+            title            str         Title of the plot
+            legend_location  str         Location of the plot legend
+            ===============  ==========  ================================
         """
 
         maincolor = kwds.pop('maincolor', 'None')
@@ -989,11 +1042,11 @@ class EnergyCalibrator(base.FileCollection):
         Save all the attributes of the workflow instance for later use
         (e.g. energy scale conversion).
 
-        :Parameters:
-            form : str | 'h5'
-                The file format to save the attributes in ('h5'/'hdf5' or 'mat').
-            save_addr : str | './energy'
-                The filename to save the files with.
+        **Parameters**\n
+        form: str | 'h5'
+            The file format to save the attributes in ('h5'/'hdf5' or 'mat').
+        save_addr: str | './energy'
+            The filename to save the files with.
         """
 
         # Modify the data type for HDF5-convertibility (temporary fix)
@@ -1005,18 +1058,18 @@ def rangeConvert(x, xrng, pathcorr):
     """ Convert value range using a pairwise path correspondence (e.g. obtained
     from time warping techniques).
 
-    :Parameters:
-        x : 1D array
-            Values of the x axis (e.g. time-of-flight values).
-        xrng : list/tuple
-            Boundary value range on the x axis.
-        pathcorr : list/tuple
-            Path correspondence between two 1D arrays in the following form,
-            [(id_1_trace_1, id_1_trace_2), (id_2_trace_1, id_2_trace_2), ...]
+    **Parameters**\n
+    x: 1D array
+        Values of the x axis (e.g. time-of-flight values).
+    xrng: list/tuple
+        Boundary value range on the x axis.
+    pathcorr: list/tuple
+        Path correspondence between two 1D arrays in the following form,
+        [(id_1_trace_1, id_1_trace_2), (id_2_trace_1, id_2_trace_2), ...]
 
-    :Return:
-        xrange_trans : tuple
-            Transformed range according to the path correspondence.
+    **Return**\n
+    xrange_trans: tuple
+        Transformed range according to the path correspondence.
     """
 
     pathcorr = np.asarray(pathcorr)
@@ -1039,17 +1092,17 @@ def blocknorm(data, mavg_axis=0, blockwidth=1):
     """
     Block-thresholding 2D data.
 
-    :Parameters:
-        data : ndarray
-            Data to normalize.
-        mavg_axis : int | 0
-            Axis to move the block along.
-        blockwidth : int | 1
-            Width of the moving block.
+    **Parameters**\n
+    data: ndarray
+        Data to normalize.
+    mavg_axis: int | 0
+        Axis to move the block along.
+    blockwidth: int | 1
+        Width of the moving block.
 
-    :Return:
-        datanorm : ndarray
-            Block-normalized data.
+    **Return**\n
+    datanorm: ndarray
+        Block-normalized data.
     """
 
     datar = np.rollaxis(data, mavg_axis)
@@ -1065,15 +1118,15 @@ def blocknorm(data, mavg_axis=0, blockwidth=1):
 def gradn(array, axes, **kwds):
     """ Calculate nth-order gradients of the array along different directions.
 
-    :Parameters:
-        array : numpy array
-            N-dimensional matrix for calculating the gradient.
-        axes : int/list/tuple/1D array
-            A sequence of axes (from first to last) to calculate the gradient.
-            When input a single integer, the gradient is calculated along that particular axis.
-            For example, the 4th-order mixed gradient d4f/(dxdydxdy) requires the sequence (1, 0, 1, 0).
-        **kwds : keyword arguments
-            See ``numpy.gradient()``.
+    **Parameters**\n
+    array: numpy array
+        N-dimensional matrix for calculating the gradient.
+    axes: int/list/tuple/1D array
+        A sequence of axes (from first to last) to calculate the gradient.
+        When input a single integer, the gradient is calculated along that particular axis.
+        For example, the 4th-order mixed gradient d4f/(dxdydxdy) requires the sequence (1, 0, 1, 0).
+    **kwds: keyword arguments
+        See ``numpy.gradient()``.
     """
 
     grad = np.gradient
@@ -1096,11 +1149,11 @@ def curvature2d(image, cx=1, cy=1):
     """ Implementation of 2D curvature calculation.
     The formula follows Zhang et al. Rev. Sci. Instrum. 82, 043712 (2011).
 
-    :Parameters:
-        image : 2D array
-            2D image obtained from measurement.
-        cx, cy : numeric, numeric | 1, 1
-            Scaling parameters in x and y directions.
+    **Parameters**\n
+    image: 2D array
+        2D image obtained from measurement.
+    cx, cy: numeric, numeric | 1, 1
+        Scaling parameters in x and y directions.
     """
 
     fx = np.gradient(image, axis=1)
@@ -1121,17 +1174,15 @@ def segment2d(img, nbands=1, **kwds):
     Electronic band segmentation using local thresholding
     and connected component labeling
 
-    **Parameters**
-
-    img : 2D numeric array
+    **Parameters**\n
+    img: 2D numeric array
         the 2D matrix to segment
-    nbands : int
+    nbands: int
         number of electronic bands
-    **kwds : keyword arguments
+    **kwds: keyword arguments
 
-    **Return**
-
-    imglabeled : 2D numeric array
+    **Return**\n
+    imglabeled: 2D numeric array
         labeled mask
     """
 
@@ -1159,13 +1210,13 @@ def ridgeDetect(mask, method='mask_mean_y', **kwds):
 
     **Parameters**
 
-    mask : numeric 2D array
+    mask: numeric 2D array
         the 2D integer-valued mask with labeled bands
-    method : str
+    method: str
         the method used for ridge detection
-        'mask_mean_y' : mean mask position along y direction (default)
-        'mask_mean_x' : mean mask position along x direction
-    **kwds : keyword arguments
+        'mask_mean_y': mean mask position along y direction (default)
+        'mask_mean_x': mean mask position along x direction
+    **kwds: keyword arguments
         ======= ========= ===================
         keyword data type meaning
         ======= ========= ===================
@@ -1175,7 +1226,7 @@ def ridgeDetect(mask, method='mask_mean_y', **kwds):
 
     **Return**
 
-    ridges : list of dataframes
+    ridges: list of dataframes
         the ridge coordinates
     """
 
@@ -1216,10 +1267,10 @@ def regionExpand(mask, **kwds):
     """
     Expand the region of a binarized image around a line position
 
-    **Parameters**
-    mask : numeric binarized 2D array
+    **Parameters**\n
+    mask: numeric binarized 2D array
         the mask to be expanded
-    **kwds : keyword arguments
+    **kwds: keyword arguments
         =============  ==========  ===================================
         keyword        data type   meaning
         =============  ==========  ===================================
@@ -1231,8 +1282,8 @@ def regionExpand(mask, **kwds):
         selem          ndarray     structuring element
         =============  ==========  ===================================
 
-    **Return**
-    mask : numeric 2D array
+    **Return**\n
+    mask: numeric 2D array
         modified mask (returns the original mask if insufficient arguments
         are provided for the chosen method for region expansion)
     """
@@ -1267,17 +1318,17 @@ def regionExpand(mask, **kwds):
 def _signedmask(imr, imc, maskr, maskc, sign):
     """ Generate a binary mask using the masked coordinates.
 
-    :Parameters:
-        imr, imc : int
-            Row and column size of the image.
-        maskr, maskc : 1D array
-            Row and column coordinates of the masked pixels.
-        sign : int/str
-            Value of the masked region, (0, 1, 'nan', or 'xnan').
+    **Parameters**\n
+    imr, imc: int
+        Row and column size of the image.
+    maskr, maskc: 1D array
+        Row and column coordinates of the masked pixels.
+    sign: int/str
+        Value of the masked region, (0, 1, 'nan', or 'xnan').
 
-    :Return:
-        mask : 2D array
-            Mask matrix.
+    **Return**\n
+    mask: 2D array
+        Mask matrix.
     """
 
     if sign == 1:
@@ -1314,32 +1365,32 @@ def _signedmask(imr, imc, maskr, maskc, sign):
 def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
     """ Use a circular binary mask to cover an image.
 
-    :Parameters:
-        img : 2D array
-            Input image to be masked.
-        rcent : float
-            Row center position.
-        ccent : float
-            Column center position.
-        rad : float
-            Radius of circle.
-        sign : int/str | 1
-            Value of the masked region (0, 1, 'nan' or 'xnan').
-            'xnan' means the masked region is 1 and the other region nan.
-        ret : str | 'mask'
-            Return type ('mask', 'masked_image')
-        kwds : keyword arguments
-            =============  ==========  ============ =========================
-               keyword     data type   default      meaning
-            =============  ==========  ============ =========================
-                shape      tuple/list  shape of img see skimage.draw.circle()
-               method         str       'graphic'   'graphic' or 'algebraic'
-              edgefactor     float        1.02       prefactor to rad**2
-            =============  ==========  ============ =========================
+    **Parameters**\n
+    img: 2D array
+        Input image to be masked.
+    rcent: float
+        Row center position.
+    ccent: float
+        Column center position.
+    rad: float
+        Radius of circle.
+    sign: int/str | 1
+        Value of the masked region (0, 1, 'nan' or 'xnan').
+        'xnan' means the masked region is 1 and the other region nan.
+    ret: str | 'mask'
+        Return type ('mask', 'masked_image')
+    kwds: keyword arguments
+        =============  ==========  ============ =========================
+            keyword     data type   default      meaning
+        =============  ==========  ============ =========================
+            shape      tuple/list  shape of img see skimage.draw.circle()
+            method         str       'graphic'   'graphic' or 'algebraic'
+            edgefactor     float        1.02       prefactor to rad**2
+        =============  ==========  ============ =========================
 
-    :Return:
-        cmask or cmask*img : 2D array
-            Mask only or masked image
+    **Return**\n
+    cmask or cmask*img: 2D array
+        Mask only or masked image
     """
 
     rim, cim = img.shape
@@ -1367,28 +1418,28 @@ def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
 def rectmask(img, rcent, ccent, shift, direction='row', sign=1, ret='mask', **kwds):
     """ Use a rectangular binary mask to cover an image.
 
-    :Parameters:
-        img : 2D array
-            Input image to be masked
-        rcent : float
-            Row center position
-        ccent : float
-            Column center position
-        shift : int/list of int
-            Pixel shifts
-        direction : str | 'row'
-            Direction to apply the shift to, 'row' or 'column' indicates row-wise
-            or column-wise shift for generating the rectangular mask
-        sign : int/str | 1
-            Value of the masked region (0, 1, 'nan' or 'xnan').
-            'xnan' means the masked region is 1 and the other region nan.
-        ret : str | 'mask'
-            Return type ('mask', 'masked_image')
-        **kwds : keyword arguments
+    **Parameters**\n
+    img: 2D array
+        Input image to be masked
+    rcent: float
+        Row center position
+    ccent: float
+        Column center position
+    shift: int/list of int
+        Pixel shifts
+    direction: str | 'row'
+        Direction to apply the shift to, 'row' or 'column' indicates row-wise
+        or column-wise shift for generating the rectangular mask
+    sign: int/str | 1
+        Value of the masked region (0, 1, 'nan' or 'xnan').
+        'xnan' means the masked region is 1 and the other region nan.
+    ret: str | 'mask'
+        Return type ('mask', 'masked_image')
+    **kwds: keyword arguments
 
-    :Return:
-        cmask or cmask*img : 2D array
-            Mask only or masked image
+    **Return**\n
+    cmask or cmask*img: 2D array
+        Mask only or masked image
     """
 
     rim, cim = img.shape
@@ -1428,17 +1479,17 @@ def apply_mask_along(arr, mask, axes=None):
     """
     Apply a mask in a low dimensional slice throughout a high-dimensional array.
 
-    :Parameters:
-        arr : nD array
-            Multidimensional array for masking.
-        mask : nD array
-            Mask to apply.
-        axes : list/tuple of int | None
-            The axes to apply the mask to.
+    **Parameters**\n
+    arr: nD array
+        Multidimensional array for masking.
+    mask: nD array
+        Mask to apply.
+    axes: list/tuple of int | None
+        The axes to apply the mask to.
 
-    :Return:
-        maskedarr : nD array
-            Masked multidimensional array.
+    **Return**
+    maskedarr: nD array
+        Masked multidimensional array.
     """
 
     ndimmask = mask.ndim
@@ -1465,15 +1516,15 @@ def apply_mask_along(arr, mask, axes=None):
 def line_generator(A, B, npoints, endpoint=True, ret='separated'):
     """ Generate intermediate points in a line segment AB (A to B) given endpoints.
 
-    :Parameters:
-        A, B : tuple/list, tuple/list
-            Pixel coordinates of the endpoints of the line segment.
-        npoints : numeric
-            Number of points in the line segment.
-        endpoint : bool | True
-            Option to include the endpoint (B) in the line coordinates.
-        ret : str | 'separated'
-            Option to return line coordinates ('separated' or 'joined').
+    **Parameters**\n
+    A, B: tuple/list, tuple/list
+        Pixel coordinates of the endpoints of the line segment.
+    npoints: numeric
+        Number of points in the line segment.
+    endpoint: bool | True
+        Option to include the endpoint (B) in the line coordinates.
+    ret: str | 'separated'
+        Option to return line coordinates ('separated' or 'joined').
     """
 
     ndim = len(A)
@@ -1494,15 +1545,17 @@ def line_generator(A, B, npoints, endpoint=True, ret='separated'):
 def image_interpolator(image, iptype='RGI'):
     """ Construction of an image interpolator.
 
-    :Parameters:
-        image : 2D array
-            2D image for interpolation.
-        iptype : str | 'RGI'
-            Type of the interpolator.
+    **Parameters**
 
-    :Return:
-        interp : interpolator instance
-            Instance of an interpolator.
+    image: 2D array
+        2D image for interpolation.
+    iptype: str | 'RGI'
+        Type of the interpolator.
+
+    **Return**
+
+    interp: interpolator instance
+        Instance of an interpolator.
     """
 
     dims = image.shape
@@ -1520,15 +1573,16 @@ def image_interpolator(image, iptype='RGI'):
 def interp_slice(data, pathr=None, pathc=None, path_coords=None, iptype='RGI'):
     """ Slicing 2D/3D data through interpolation.
 
-    :Parameters:
-        data : 2D/3D array
-            Data array for slicing.
-        pathr, pathc : list/tuple/array, list/tuple/array
-            Row and column coordinates of the interpolated path.
-        path_coords : array
-            Cartesian coordinates of the interpolated path.
-        iptype : str | 'RGI'
-            Type of interpolator.
+    **Parameters**
+
+    data: 2D/3D array
+        Data array for slicing.
+    pathr, pathc: list/tuple/array, list/tuple/array
+        Row and column coordinates of the interpolated path.
+    path_coords: array
+        Cartesian coordinates of the interpolated path.
+    iptype: str | 'RGI'
+        Type of interpolator.
     """
 
     ndim = data.ndim
@@ -1561,21 +1615,21 @@ def points2path(pointsr, pointsc, method='analog', npoints=None, ret='separated'
     The approach constructs the path using a set of line segments bridging the specified points,
     therefore it is also able to trace the sequence indices of these special points.
 
-    :Parameters:
-        pointsr, pointsc : list/tuple/array
-            The row and column pixel coordinates of the special points along the sampling path.
-        method : str | 'analog'
-            Method of sampling.
-        npoints : list/tuple | None
-            Number of points along each segment.
-        ret : str | 'separated'
-            Specify if return combined ('combined') or separated ('separated') row and column coordinates.
+    **Parameters**\n
+    pointsr, pointsc: list/tuple/array
+        The row and column pixel coordinates of the special points along the sampling path.
+    method: str | 'analog'
+        Method of sampling.
+    npoints: list/tuple | None
+        Number of points along each segment.
+    ret: str | 'separated'
+        Specify if return combined ('combined') or separated ('separated') row and column coordinates.
 
-    :Returns:
-        polyr, polyc : 1D array
-            Pixel coordinates along the path traced out sequentially.
-        pid : 1D array
-            Pointwise indices of the special lpoints.
+    **Returns**\n
+    polyr, polyc: 1D array
+        Pixel coordinates along the path traced out sequentially.
+    pid: 1D array
+        Pointwise indices of the special lpoints.
     """
 
     pointsr = np.round(pointsr).astype('int')
@@ -1613,23 +1667,23 @@ def bandpath_map(bsvol, pathr=None, pathc=None, path_coords=None, eaxis=2, metho
     """
     Extract band diagram map from 2D/3D data.
 
-    :Parameters:
-        bsvol : 2D/3D array
-            Volumetric band structure data.
-        pathr, pathc : 1D array | None, None
-            Row and column pixel coordinates along the band path (ignored if path_coords is given).
-        path_coords : 2D array | None
-            Combined row and column pixel coordinates of the band path.
-        eaxis : int | 2
-            Energy axis index.
-        method : str | 'analog'
-            Method for generating band path map ('analog' or 'digital').
-            :'analog': Using an interpolation scheme to calculate the exact pixel values.
-            :'digital': Using only the approximating pixel values (Bresenham's algorithm).
+    **Parameters**\n
+    bsvol: 2D/3D array
+        Volumetric band structure data.
+    pathr, pathc: 1D array | None, None
+        Row and column pixel coordinates along the band path (ignored if path_coords is given).
+    path_coords: 2D array | None
+        Combined row and column pixel coordinates of the band path.
+    eaxis: int | 2
+        Energy axis index.
+    method: str | 'analog'
+        Method for generating band path map ('analog' or 'digital').
+        :'analog': Using an interpolation scheme to calculate the exact pixel values.
+        :'digital': Using only the approximating pixel values (Bresenham's algorithm).
 
-    :Return:
-        bpm : 2D array
-            Band path map (BPM) sampled from the volumetric data.
+    **Return**\n
+    bpm: 2D array
+        Band path map (BPM) sampled from the volumetric data.
     """
 
     try: # Shift axis for 3D data
@@ -1661,13 +1715,13 @@ class BoundedArea(object):
     def __init__(self, image=None, shape=None, subimage=None):
         """ Initialization of the BoundedArea class.
 
-        :Parameters:
-            image : 2d array
-                Image to generate mask.
-            shape : tuple/list
-                Shape of the image matrix.
-            subimage : 2d bool array
-                Image generated.
+        **Parameters**\n
+        image: 2d array
+            Image to generate mask.
+        shape: tuple/list
+            Shape of the image matrix.
+        subimage: 2d bool array
+            Image generated.
         """
 
         self.image = image
@@ -1726,12 +1780,12 @@ class BoundedArea(object):
     def setBoundary(self, pmz='linear', boundtype='>', **kwds):
         """ Add bound to grid to redefine subgrid.
 
-        :Parameters:
-            pmz : str | 'linear'
-                Parametrization (pmz) of the decision boundary ('linear' or 'circular').
-            boundtype : str | '>'
-                Bound region specification ('>' or '<').
-            **kwds : keyword arguments
+        **Parameters**\n
+        pmz: str | 'linear'
+            Parametrization (pmz) of the decision boundary ('linear' or 'circular').
+        boundtype: str | '>'
+            Bound region specification ('>' or '<').
+        **kwds: keyword arguments
         """
 
         if pmz == 'linear':
@@ -1772,15 +1826,15 @@ class BoundedArea(object):
     def view(self, origin='lower', cmap='terrain_r', axes=True, **kwds):
         """ Display the current mask.
 
-        :Parameters:
-            origin : str | 'lower'
-                Location of the image origin.
-            cmap : str | 'terrain_r'
-                Color map
-            axes : bool | True
-                Axes visibility option in plot.
-            **kwds : keyword arguments
-                Additional arguments for ``matplotlib.pyplot.imshow()``.
+        **Parameters**\n
+        origin: str | 'lower'
+            Location of the image origin.
+        cmap: str | 'terrain_r'
+            Color map
+        axes: bool | True
+            Axes visibility option in plot.
+        **kwds: keyword arguments
+            Additional arguments for ``matplotlib.pyplot.imshow()``.
         """
 
         f, ax = plt.subplots(figsize=(4, 4))
@@ -1793,15 +1847,15 @@ class BoundedArea(object):
     def toMask(self, inbound=1, exbound=0):
         """ Generate a scaled mask from existing shape.
 
-        :Parameters:
-            inbound : float | 1
-                Value for the pixels within the boundary.
-            exbound : float | 0
-                Value for the pixels outside the boundary.
+        **Parameters**\n
+        inbound: float | 1
+            Value for the pixels within the boundary.
+        exbound: float | 0
+            Value for the pixels outside the boundary.
 
-        :Return:
-            modmask : 2d array
-                Modified mask as a 2d array.
+        **Return**\n
+        modmask: 2d array
+            Modified mask as a 2d array.
         """
 
         modmask = self.subimage.copy()
@@ -1820,30 +1874,30 @@ def vertexGenerator(center, fixedvertex=None, cvd=None, arot=None, nside=None, d
     """
     Generation of the vertices of symmetric polygons.
 
-    :Parameters:
-        center : (int, int)
-            Pixel positions of the symmetry center (row pixel, column pixel).
-        fixedvertex : (int, int) | None
-            Pixel position of the fixed vertex (row pixel, column pixel).
-        cvd : numeric | None
-            Center-vertex distance.
-        arot : float | None
-            Spacing in angle of rotation.
-        nside : int | None
-            The total number of sides for the polygon.
-        direction : int | -1
-            Direction of angular rotation (1 = counterclockwise, -1 = clockwise)
-        scale : float | 1
-            Radial scaling factor.
-        diagdir : str | None
-            Diagonal direction of the polygon ('x' or 'y').
-        ret : str | 'all'
-            Return type. Specify 'all' returns all vertices, specify 'generated'
-            returns only the generated ones (without the fixedvertex in the argument).
+    **Parameters**\n
+    center: (int, int)
+        Pixel positions of the symmetry center (row pixel, column pixel).
+    fixedvertex: (int, int) | None
+        Pixel position of the fixed vertex (row pixel, column pixel).
+    cvd: numeric | None
+        Center-vertex distance.
+    arot: float | None
+        Spacing in angle of rotation.
+    nside: int | None
+        The total number of sides for the polygon.
+    direction: int | -1
+        Direction of angular rotation (1 = counterclockwise, -1 = clockwise)
+    scale: float | 1
+        Radial scaling factor.
+    diagdir: str | None
+        Diagonal direction of the polygon ('x' or 'y').
+    ret: str | 'all'
+        Return type. Specify 'all' returns all vertices, specify 'generated'
+        returns only the generated ones (without the fixedvertex in the argument).
 
-    :Return:
-        vertices : 2D array
-            Collection of generated vertices.
+    **Return**\n
+    vertices: 2D array
+        Collection of generated vertices.
     """
 
     try:
@@ -1895,19 +1949,19 @@ def perspectiveWarping(img, landmarks, targs, ret='image'):
     """
     Perform image warping based on a generic affine transform (homography).
 
-    :Parameters:
-        img : 2D array
-            Input image (distorted).
-        landmarks : list/array
-            List of pixel positions of the reference points.
-        targs : list/array
-            List of pixel positions of the target points.
+    **Parameters**\n
+    img: 2D array
+        Input image (distorted).
+    landmarks: list/array
+        List of pixel positions of the reference points.
+    targs: list/array
+        List of pixel positions of the target points.
 
-    :Returns:
-        imgaw : 2D array
-            Image after affine warping.
-        maw : 2D array
-            Homography matrix for the tranform.
+    **Returns**\n
+    imgaw: 2D array
+        Image after affine warping.
+    maw: 2D array
+        Homography matrix for the tranform.
     """
 
     landmarks = np.asarray(landmarks, dtype='float32')
@@ -1924,19 +1978,19 @@ def perspectiveWarping(img, landmarks, targs, ret='image'):
 
 def applyWarping(imgstack, axis, hgmat):
     """
-    Apply warping transform for a stack of images along an axis
+    Apply warping transform for a stack of images along an axis.
 
-    :Parameters:
-        imgstack : 3D array
-            Image stack before warping correction.
-        axis : int
-            Axis to iterate over to apply the transform.
-        hgmat : 2D array
-            Homography matrix.
+    **Parameters**\n
+    imgstack: 3D array
+        Image stack before warping correction.
+    axis: int
+        Axis to iterate over to apply the transform.
+    hgmat: 2D array
+        Homography matrix.
 
-    :Return:
-        imstack_transformed : 3D array
-            Stack of images after correction for warping.
+    **Return**\n
+    imstack_transformed: 3D array
+        Stack of images after correction for warping.
     """
 
     imgstack = np.moveaxis(imgstack, axis, 0)
@@ -1959,11 +2013,11 @@ class MomentumCorrector(object):
 
     def __init__(self, image, rotsym=6):
         """
-        :Parameters:
-            image : 3d array
-                Volumetric band structure data.
-            rotsym : int | 6
-                Order of rotational symmetry.
+        **Parameters**\n
+        image: 3d array
+            Volumetric band structure data.
+        rotsym: int | 6
+            Order of rotational symmetry.
         """
 
         self.image = np.squeeze(image)
@@ -2005,13 +2059,13 @@ class MomentumCorrector(object):
     def selectSlice2D(self, selector, axis=2):
         """ Select (hyper)slice from a (hyper)volume.
 
-        :Parameters:
-            selector : slice object/list/int
-                Selector along the specified axis to extract the slice (image).
-                Use the construct slice(start, stop, step) to select a range of images and sum them.
-                Use an integer to specify only a particular slice.
-            axis : int | 2
-                Axis along which to select the image.
+        **Parameters**\n
+        selector: slice object/list/int
+            Selector along the specified axis to extract the slice (image).
+            Use the construct slice(start, stop, step) to select a range of images and sum them.
+            Use an integer to specify only a particular slice.
+        axis: int | 2
+            Axis along which to select the image.
         """
 
         if self.imgndim > 2:
@@ -2028,9 +2082,9 @@ class MomentumCorrector(object):
     def importBinningParameters(self, parp):
         """ Import parameters of binning used for correction image from parallelHDF5Processor Class instance
         
-        :Parameters:
-            parp: instance of the ParallelHDF5Processor class used for creation of the correction image
-            
+        **Parameters**\n
+        parp: instance of the ``ParallelHDF5Processor`` class
+            Import parameters used for creation of the distortion-corrected image.            
         """
         
         if hasattr(parp, '__class__'):
@@ -2045,17 +2099,17 @@ class MomentumCorrector(object):
         """ Extract features from the selected 2D slice.
             Currently only point feature detection is implemented.
 
-        :Parameters:
-            image : 2d array
-                The image slice to extract features from.
-            direction : str | 'ccw'
-                The circular direction to reorder the features in ('cw' or 'ccw').
-            type : str | 'points'
-                The type of features to extract.
-            center_det : str | 'centroidnn'
-                Specification of center detection method ('centroidnn', 'centroid', None).
-            **kwds : keyword arguments
-                Extra keyword arguments for ``symmetrize.pointops.peakdetect2d()``.
+        **Parameters**\n
+        image: 2d array
+            The image slice to extract features from.
+        direction: str | 'ccw'
+            The circular direction to reorder the features in ('cw' or 'ccw').
+        type: str | 'points'
+            The type of features to extract.
+        center_det: str | 'centroidnn'
+            Specification of center detection method ('centroidnn', 'centroid', None).
+        **kwds: keyword arguments
+            Extra keyword arguments for ``symmetrize.pointops.peakdetect2d()``.
         """
 
         self.resetDeformation(image=image, coordtype='cartesian')
@@ -2130,13 +2184,13 @@ class MomentumCorrector(object):
     def update(self, content, **kwds):
         """ Update specific attributes of the class.
 
-        :Parameters:
-            content : str | 'all'
-                'feature' = update only feature attributes
-                'image' = update only image-related attributes
-                'all' = update both feature and image-related attributes
-            **kwds : keyword arguments
-                Extra keyword arguments passed into ``self._featureUpdate()``.
+        **Parameters**\n
+        content: str | 'all'
+            'feature' = update only feature attributes\n
+            'image' = update only image-related attributes\n
+            'all' = update both feature and image-related attributes
+        **kwds: keyword arguments
+            Extra keyword arguments passed into ``self._featureUpdate()``.
         """
 
         if content == 'feature':
@@ -2151,28 +2205,28 @@ class MomentumCorrector(object):
                         ret=True, warpkwds={}, **kwds):
         """ Estimate the homography-based deformation field using landmark correspondences.
 
-        :Parameters:
-            weights : tuple/list/array | (1, 1, 1)
-                Weights added to the terms in the optimizer. The terms are assigned
-                to the cost functions of (1) centeredness, (2) center-vertex symmetry,
-                (3) vertex-vertex symmetry, respectively.
-            optfunc, optmethod : str/func, str | 'minimize', 'Nelder-Mead'
-                Name of the optimizer function and the optimization method.
-                See description in ``mpes.analysis.sym.target_set_optimize()``.
-            ret : bool | True
-                Specify if returning the corrected image slice.
-            warpkwds : dictionary | {}
-                Additional arguments passed to ``symmetrize.sym.imgWarping()``.
-            **kwds : keyword arguments
-                ========= ========== =============================================
-                keyword   data type  meaning
-                ========= ========== =============================================
-                niter     int        Maximum number of iterations
-                landmarks list/array Symmetry landmarks selected for registration
-                fitinit   tuple/list Initial conditions for fitting
-                ========= ========== =============================================
+        **Parameters**\n
+        weights: tuple/list/array | (1, 1, 1)
+            Weights added to the terms in the optimizer. The terms are assigned
+            to the cost functions of (1) centeredness, (2) center-vertex symmetry,
+            (3) vertex-vertex symmetry, respectively.
+        optfunc, optmethod: str/func, str | 'minimize', 'Nelder-Mead'
+            Name of the optimizer function and the optimization method.
+            See description in ``mpes.analysis.sym.target_set_optimize()``.
+        ret: bool | True
+            Specify if returning the corrected image slice.
+        warpkwds: dictionary | {}
+            Additional arguments passed to ``symmetrize.sym.imgWarping()``.
+        **kwds: keyword arguments
+            ========= ========== =============================================
+            keyword   data type  meaning
+            ========= ========== =============================================
+            niter     int        Maximum number of iterations
+            landmarks list/array Symmetry landmarks selected for registration
+            fitinit   tuple/list Initial conditions for fitting
+            ========= ========== =============================================
 
-        :Return:
+        **Return**\n
             Corrected 2D image slice (when ``ret=True`` is specified in the arguments).
         """
 
@@ -2205,9 +2259,9 @@ class MomentumCorrector(object):
     def calcSymmetryScores(self, symtype='rotation'):
         """ Calculate the symmetry scores from geometric quantities.
 
-        :Paramters:
-            symtype : str | 'rotation'
-                Type of symmetry.
+        **Paramters**\n
+        symtype: str | 'rotation'
+            Type of symmetry.
         """
 
         csm = po.csm(self.pcent, self.pouter_ord, rotsym=self.rotsym, type=symtype)
@@ -2218,13 +2272,13 @@ class MomentumCorrector(object):
     def transform(points, transmat):
         """ Coordinate transform of a point set in the (row, column) formulation.
 
-        :Parameters:
-            points : list/array
-                Cartesian pixel coordinates of the points to be transformed.
-            transmat : 2D array
-                The transform matrix.
+        **Parameters**\n
+        points: list/array
+            Cartesian pixel coordinates of the points to be transformed.
+        transmat: 2D array
+            The transform matrix.
 
-        :Return:
+        **Return**\n
             Transformed point coordinates.
         """
 
@@ -2236,27 +2290,27 @@ class MomentumCorrector(object):
                             interp_order=1, update=False, ret=False, **kwds):
         """ Estimate the spline deformation field using thin plate spline registration.
 
-        :Parameters:
-            image : 2D array
-                Image slice to be corrected.
-            include_center : bool | True
-                Option to include the image center/centroid in the registration process.
-            fixed_center : bool | True
-                Option to have a fixed center during registration-based symmetrization.
-            iterative : bool | False
-                Option to use the iterative approach (may not work in all cases).
-            interp_order : int | 1
-                Order of interpolation (see ``scipy.ndimage.map_coordinates()``).
-            update : bool | False
-                Option to keep the spline-deformed image as corrected one.
-            ret : bool | False
-                Option to return corrected image slice.
-            **kwds : keyword arguments
-                :landmarks: list/array | self.pouter_ord
-                    Landmark positions (row, column) used for registration.
-                :new_centers: dict | {}
-                    User-specified center positions for the reference and target sets.
-                    {'lmkcenter': (row, col), 'targcenter': (row, col)}
+        **Parameters**\n
+        image: 2D array
+            Image slice to be corrected.
+        include_center: bool | True
+            Option to include the image center/centroid in the registration process.
+        fixed_center: bool | True
+            Option to have a fixed center during registration-based symmetrization.
+        iterative: bool | False
+            Option to use the iterative approach (may not work in all cases).
+        interp_order: int | 1
+            Order of interpolation (see ``scipy.ndimage.map_coordinates()``).
+        update: bool | False
+            Option to keep the spline-deformed image as corrected one.
+        ret: bool | False
+            Option to return corrected image slice.
+        **kwds: keyword arguments
+            :landmarks: list/array | self.pouter_ord
+                Landmark positions (row, column) used for registration.
+            :new_centers: dict | {}
+                User-specified center positions for the reference and target sets.
+                {'lmkcenter': (row, col), 'targcenter': (row, col)}
         """
 
         self.prefs = kwds.pop('landmarks', self.pouter_ord)
@@ -2301,20 +2355,20 @@ class MomentumCorrector(object):
     def rotate(self, angle='auto', ret=False, **kwds):
         """ Rotate 2D image in the homogeneous coordinate.
 
-        :Parameters:
-            angle : float/str
-                Angle of rotation (specify 'auto' to use automated estimation).
-            ret : bool | False
-                Return specification (True/False)
-            **kwds : keyword arguments
-                ======= ========== =======================================
-                keyword data type  meaning
-                ======= ========== =======================================
-                image   2d array   2D image for correction
-                center  tuple/list pixel coordinates of the image center
-                scale   float      scaling factor in rotation
-                ======= ========== =======================================
-                See ``symmetrize.sym.sym_pose_estimate()`` for other keywords.
+        **Parameters**\n
+        angle: float/str
+            Angle of rotation (specify 'auto' to use automated estimation).
+        ret: bool | False
+            Return specification (True/False)
+        **kwds: keyword arguments
+            ======= ========== =======================================
+            keyword data type  meaning
+            ======= ========== =======================================
+            image   2d array   2D image for correction
+            center  tuple/list pixel coordinates of the image center
+            scale   float      scaling factor in rotation
+            ======= ========== =======================================
+            See ``symmetrize.sym.sym_pose_estimate()`` for other keywords.
         """
 
         image = kwds.pop('image', self.slice)
@@ -2340,23 +2394,23 @@ class MomentumCorrector(object):
                 updatekwds={}, **kwds):
         """ Apply a 2D transform to a stack of 2D images (3D) along a specific axis.
 
-        :Parameters:
-            axis : int
-                Axis for slice selection.
-            use_composite_transform : bool | False
-                Option to use the composite transform involving the rotation.
-            update : bool | False
-                Option to update the existing figure attributes.
-            use_deform_field : bool | False
-                Option to use deformation field for distortion correction.
-            **kwds : keyword arguments
-                ======= ========== =================================
-                keyword data type  meaning
-                ======= ========== =================================
-                image   2d array   3D image for correction
-                dfield  list/tuple row and column deformation field
-                warping 2d array   2D transform correction matrix
-                ======= ========== =================================
+        **Parameters**\n
+        axis: int
+            Axis for slice selection.
+        use_composite_transform: bool | False
+            Option to use the composite transform involving the rotation.
+        update: bool | False
+            Option to update the existing figure attributes.
+        use_deform_field: bool | False
+            Option to use deformation field for distortion correction.
+        **kwds: keyword arguments
+            ======= ========== =================================
+            keyword data type  meaning
+            ======= ========== =================================
+            image   2d array   3D image for correction
+            dfield  list/tuple row and column deformation field
+            warping 2d array   2D transform correction matrix
+            ======= ========== =================================
         """
 
         image = kwds.pop('image', self.image)
@@ -2393,18 +2447,18 @@ class MomentumCorrector(object):
     def applyDeformation(self, image, ret=True, **kwds):
         """ Apply the deformation field to a specified image slice.
 
-        :Parameters:
-            image : 2D array
-                Image slice to apply the deformation.
-            ret : bool | True
-                Option to return the image after deformation.
-            **kwds : keyword arguments
-                :rdeform, cdeform: 2D array, 2D array | self.rdeform_field, self.cdeform_field
-                    Row- and column-ordered deformation fields.
-                :interp_order: int | 1
-                    Interpolation order.
-                :others:
-                    See ``scipy.ndimage.map_coordinates()``.
+        **Parameters**\n
+        image: 2D array
+            Image slice to apply the deformation.
+        ret: bool | True
+            Option to return the image after deformation.
+        **kwds: keyword arguments
+            :rdeform, cdeform: 2D array, 2D array | self.rdeform_field, self.cdeform_field
+                Row- and column-ordered deformation fields.
+            :interp_order: int | 1
+                Interpolation order.
+            :others:
+                See ``scipy.ndimage.map_coordinates()``.
         """
 
         rdeform = kwds.pop('rdeform', self.rdeform_field)
@@ -2429,13 +2483,13 @@ class MomentumCorrector(object):
     def updateDeformation(self, rdeform, cdeform, reset=False, **kwds):
         """ Update the deformation field.
 
-        :Parameters:
-            rdeform, cdeform : 2D array, 2D array
-                Row- and column-ordered deformation fields.
-            reset : bool | False
-                Option to reset the deformation field.
-            **kwds : keyword arguments
-                See ``mpes.analysis.MomentumCorrector.resetDeformation()``.
+        **Parameters**\n
+        rdeform, cdeform: 2D array, 2D array
+            Row- and column-ordered deformation fields.
+        reset: bool | False
+            Option to reset the deformation field.
+        **kwds: keyword arguments
+            See ``mpes.analysis.MomentumCorrector.resetDeformation()``.
         """
 
         if reset == True:
@@ -2448,19 +2502,19 @@ class MomentumCorrector(object):
                             mapkwds={}, **kwds):
         """ Apply a pixel-wise coordinate transform to an image.
 
-        :Parameters:
-            type : str
-                Type of deformation to apply to image slice.
-            keep : bool | False
-                Option to keep the specified coordinate transform.
-            ret : bool | False
-                Option to return transformed image slice.
-            interp_order : int | 1
-                Interpolation order for filling in missed pixels.
-            mapkwds : dict | {}
-                Additional arguments passed to ``scipy.ndimage.map_coordinates()``.
-            **kwds : keyword arguments
-                Additional arguments in specific deformation field. See ``symmetrize.sym`` module.
+        **Parameters**\n
+        type: str
+            Type of deformation to apply to image slice.
+        keep: bool | False
+            Option to keep the specified coordinate transform.
+        ret: bool | False
+            Option to return transformed image slice.
+        interp_order: int | 1
+            Interpolation order for filling in missed pixels.
+        mapkwds: dict | {}
+            Additional arguments passed to ``scipy.ndimage.map_coordinates()``.
+        **kwds: keyword arguments
+            Additional arguments in specific deformation field. See ``symmetrize.sym`` module.
         """
 
         image = kwds.pop('image', self.slice)
@@ -2514,10 +2568,10 @@ class MomentumCorrector(object):
     def intensityTransform(self, type='rot_sym', **kwds):
         """ Apply pixel-wise intensity transform.
 
-        :Parameters:
-            type : str | 'rot_sym'
-                Type of intensity transform.
-            **kwds : keyword arguments
+        **Parameters**\n
+        type: str | 'rot_sym'
+            Type of intensity transform.
+        **kwds: keyword arguments
         """
         import fuller
         image = kwds.pop('image', self.slice)
@@ -2538,35 +2592,35 @@ class MomentumCorrector(object):
             display=True, backend='matplotlib', ret=False, imkwds={}, scatterkwds={}, crosshair=False, radii=[50,100,150], crosshair_thickness=1, **kwds):
         """ Display image slice with specified annotations.
 
-        :Parameters:
-            origin : str | 'lower'
-                Figure origin specification ('lower' or 'upper').
-            cmap : str | 'terrain_r'
-                Colormap specification.
-            figsize : tuple/list | (4, 4)
-                Figure size.
-            points : dict | {}
-                Points for annotation.
-            annotated : bool | False
-                Option for annotation.
-            display : bool | True
-                Display option when using ``bokeh`` to render interactively.
-            backend : str | 'matplotlib'
-                Visualization backend specification.
-                :'matplotlib': use static display rendered by matplotlib.
-                :'bokeh': use interactive display rendered by bokeh.
-            ret : bool | False
-                Option to return figure and axis objects.
-            imkwd : dict | {}
-                Keyword arguments for ``matplotlib.pyplot.imshow()``.
-            crosshair : bool | False
-                Display option to plot circles around center self.pcent. Works only in bokeh backend.
-            radii  : list  |  [50,100,150]
-                Radii of circles to plot when crosshair optin is activated.
-            crosshair_thickness  :  int  |  1
-                Thickness of crosshair circles.
-            **kwds : keyword arguments
-                General extra arguments for the plotting procedure.
+        **Parameters**\n
+        origin: str | 'lower'
+            Figure origin specification ('lower' or 'upper').
+        cmap: str | 'terrain_r'
+            Colormap specification.
+        figsize: tuple/list | (4, 4)
+            Figure size.
+        points: dict | {}
+            Points for annotation.
+        annotated: bool | False
+            Option for annotation.
+        display: bool | True
+            Display option when using ``bokeh`` to render interactively.
+        backend: str | 'matplotlib'
+            Visualization backend specification.
+            :'matplotlib': use static display rendered by matplotlib.
+            :'bokeh': use interactive display rendered by bokeh.
+        ret: bool | False
+            Option to return figure and axis objects.
+        imkwd: dict | {}
+            Keyword arguments for ``matplotlib.pyplot.imshow()``.
+        crosshair: bool | False
+            Display option to plot circles around center self.pcent. Works only in bokeh backend.
+        radii: list | [50,100,150]
+            Radii of circles to plot when crosshair optin is activated.
+        crosshair_thickness: int | 1
+            Thickness of crosshair circles.
+        **kwds: keyword arguments
+            General extra arguments for the plotting procedure.
         """
 
         image = kwds.pop('image', self.slice)
@@ -2633,19 +2687,19 @@ class MomentumCorrector(object):
         """ Calibration of the momentum axes. Obtain all calibration-related values,
         return only the ones requested.
 
-        :Parameters:
-            image : 2d array
-                Image slice to construct the calibration function.
-            point_from, point_to : list/tuple, list/tuple
-                Pixel coordinates of the two special points in (row, col) ordering.
-            dist : float
-                Distance between the two selected points in inverse Angstrom.
-            ret : str | 'coeffs'
-                Specification of return values ('axes', 'extent', 'coeffs', 'grid', 'func', 'all').
-            **kwds : keyword arguments
-                See arguments in ``mpes.analysis.calibrateE()``.
+        **Parameters**\n
+        image: 2d array
+            Image slice to construct the calibration function.
+        point_from, point_to: list/tuple, list/tuple
+            Pixel coordinates of the two special points in (row, col) ordering.
+        dist: float
+            Distance between the two selected points in inverse Angstrom.
+        ret: str | 'coeffs'
+            Specification of return values ('axes', 'extent', 'coeffs', 'grid', 'func', 'all').
+        **kwds: keyword arguments
+            See arguments in ``mpes.analysis.calibrateE()``.
 
-        :Return:
+        **Return**\n
             Specified calibration parameters in a dictionary.
         """
 
@@ -2663,15 +2717,15 @@ class MomentumCorrector(object):
     def saveImage(self, form='tiff', save_addr='./', dtyp='float32', **kwds):
         """ Save the distortion-corrected dataset (image only, without axes).
 
-        :Parameters:
-            form : str | 'tiff'
-                File format for saving the corrected image ('tiff' or 'mat').
-            save_addr : str | './'
-                The address to save the file at.
-            dtyp : str | 'float32'
-                Data type (in case conversion if needed).
-            **kwds : keyword arguments
-                See keywords from ``tifffile.imsave()``.
+        **Parameters**\n
+        form: str | 'tiff'
+            File format for saving the corrected image ('tiff' or 'mat').
+        save_addr: str | './'
+            The address to save the file at.
+        dtyp: str | 'float32'
+            Data type (in case conversion if needed).
+        **kwds: keyword arguments
+            See keywords from ``tifffile.imsave()``.
         """
 
         data = kwds.pop('data', self.image).astype(dtyp)
@@ -2695,11 +2749,11 @@ class MomentumCorrector(object):
         Save all the attributes of the workflow instance for later use
         (e.g. momentum scale conversion, reconstructing the warping map function).
 
-        :Parameters:
-            form : str | 'h5'
-                File format to for saving the parameters ('h5'/'hdf5', 'mat')
-            save_addr : str | './momentum'
-                The address for the to be saved file.
+        **Parameters**\n
+        form: str | 'h5'
+            File format to for saving the parameters ('h5'/'hdf5', 'mat')
+        save_addr: str | './momentum'
+            The address for the to be saved file.
         """
 
         base.saveClassAttributes(self, form, save_addr)
@@ -2709,21 +2763,21 @@ def _rotate2d(image, center, angle, scale=1):
     """
     2D matrix scaled rotation carried out in the homogenous coordinate.
 
-    :Parameters:
-        image : 2d array
-            Image matrix.
-        center : tuple/list
-            Center of the image (row pixel, column pixel).
-        angle : numeric
-            Angle of image rotation.
-        scale : numeric | 1
-            Scale of image rotation.
+    **Parameters**\n
+    image: 2d array
+        Image matrix.
+    center: tuple/list
+        Center of the image (row pixel, column pixel).
+    angle: numeric
+        Angle of image rotation.
+    scale: numeric | 1
+        Scale of image rotation.
 
-    :Returns:
-        image_rot : 2d array
-            Rotated image matrix.
-        rotmat : 2d array
-            Rotation matrix in the homogeneous coordinate system.
+    **Returns**\n
+    image_rot: 2d array
+        Rotated image matrix.
+    rotmat: 2d array
+        Rotation matrix in the homogeneous coordinate system.
     """
 
     rotmat = cv2.getRotationMatrix2D(center, angle=angle, scale=scale)
@@ -2744,7 +2798,18 @@ SQ2PI = np.sqrt(2*np.pi)
 
 
 def gaussian(feval=False, vardict=None):
-    """ Gaussian model
+    """1D/2D Gaussian lineshape model. Returns numerical values if ``feval=True``.
+
+    **Parameters**
+
+    feval: bool | False
+        Option to evaluate function.
+    vardict: dict | None
+        Dictionary containing values for the variables named as follows (as dictionary keys).\n
+        ``amp`` function amplitude or scaling factor.\n
+        ``xvar`` x values (energy values in a lineshape).\n
+        ``ctr`` center position.\n
+        ``sig`` standard deviation.\n
     """
 
     asvars = ['amp', 'xvar', 'ctr', 'sig']
@@ -2757,11 +2822,48 @@ def gaussian(feval=False, vardict=None):
 
 
 def voigt(feval=False, vardict=None):
-    """ Voigt model
+    """1D/2D Voigt lineshape model. Returns numerical values if ``feval=True``.
+
+    **Parameters**
+
+    feval: bool | False
+        Option to evaluate function.
+    vardict: dict | None
+        Dictionary containing values for the variables named as follows (as dictionary keys).\n
+        ``amp`` function amplitude or scaling factor.\n
+        ``xvar`` x values (energy values in a lineshape).\n        
+        ``ctr`` center position.\n        
+        ``sig`` standard deviation of the Gaussian component.\n
+        ``gam`` linewidth of the Lorentzian component.
     """
 
     asvars = ['amp', 'xvar', 'ctr', 'sig', 'gam']
     expr = 'amp*wofz((xvar-ctr+1j*gam) / (sig*SQ2)).real / (sig*SQ2PI)'
+
+    if feval == False:
+        return asvars, expr
+    else:
+        return eval(expr, vardict, globals())
+
+
+def skewed_gaussian(feval=False, vardict=None):
+    """ 1D/2D Skewed Gaussian model. The model is introduced by O'Hagan and Leonard in Biometrika 63, 201 (1976). DOI: 10.1093/biomet/63.1.201
+
+    **Parameters**
+
+    feval: bool | False
+        Option to evaluate function.
+    vardict: dict | None
+        Dictionary containing values for the variables named as follows (as dictionary keys).\n
+        ``amp`` function amplitude or scaling factor.\n
+        ``xvar`` x values (energy values in a lineshape).\n        
+        ``ctr`` center position.\n        
+        ``sig`` standard deviation of the Gaussian component.\n
+        ``alph`` skew parameter of the model.
+    """
+
+    asvars = ['amp', 'xvar', 'ctr', 'sig', 'alph']
+    expr = '(amp/2)*np.exp(-((xvar-ctr)**2) / (2*sig**2)) * (1+erf(alph*(xvar-ctr)))'
 
     if feval == False:
         return asvars, expr
@@ -2774,18 +2876,18 @@ def func_update(func, suffix=''):
     Attach a suffix to parameter names and their instances
     in the expression of a function
 
-    ***Parameters***
+    **Parameters**
 
-    func : function
+    func: function
         input function
-    suffix : str | ''
+    suffix: str | ''
         suffix to attach to parameter names
 
-    ***Returns***
+    **Returns**
 
-    params : list of str
+    params: list of str
         updated function parameters
-    expr : str
+    expr: str
         updated function expression
     """
 
@@ -2805,14 +2907,14 @@ def func_add(*funcs):
     """
     Addition of an arbitray number of functions
 
-    ***Parameters***
+    **Parameters**
 
-    *funcs : list/tuple
+    *funcs: list/tuple
         functions to combine
 
-    ***Returns***
+    **Returns**
 
-    funcsum : function
+    funcsum: function
         functional sum
     """
 
@@ -2841,44 +2943,44 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
     """
     Line-by-line fitting via bootstrapping fitted parameters from one line to the next.
 
-    :Parameters:
-        data : ndarray
-            Data used in fitting.
-        axval : list/numeric array
-            Value for the axis.
-        model : lmfit Model object
-            The fitting model.
-        params : lmfit Parameters object
-            Initial guesses for fitting parameters.
-        axis : int | 0
-            The axis of the data to fit.
-        dfcontainer : pandas DataFrame | None
-            Dataframe container for the fitting parameters.
-        pbar : bool | False
-            Progress bar condition.
-        pbenv : str | 'classic'
-            Progress bar environment ('classic' for generic version, 'notebook' for
-            notebook compatible version).
-        **kwds : keyword arguments
-            =============  ==========  ====================================================================
-            keyword        data type   meaning
-            =============  ==========  ====================================================================
-            maxiter        int         maximum iteration per fit (default = 20)
-            concat         bool        concatenate the fit parameters to DataFrame input
-                                       False (default) = no concatenation, use an empty DataFrame to start
-                                       True = with concatenation to input DataFrame
-            bgremove       bool        toggle for background removal (default = True)
-            flipped        bool        toggle for fitting start position
-                                       (if flipped, fitting start from the last line)
-            limpropagate   bool
-            verbose        bool        toggle for output message (default = False)
-            =============  ==========  ====================================================================
+    **Parameters**\n
+    data: ndarray
+        Data used in fitting.
+    axval: list/numeric array
+        Value for the axis.
+    model: lmfit Model object
+        The fitting model.
+    params: lmfit Parameters object
+        Initial guesses for fitting parameters.
+    axis: int | 0
+        The axis of the data to fit.
+    dfcontainer: pandas DataFrame | None
+        Dataframe container for the fitting parameters.
+    pbar: bool | False
+        Progress bar condition.
+    pbenv: str | 'classic'
+        Progress bar environment ('classic' for generic version, 'notebook' for
+        notebook compatible version).
+    **kwds: keyword arguments
+        =============  ==========  ====================================================================
+        keyword        data type   meaning
+        =============  ==========  ====================================================================
+        maxiter        int         maximum iteration per fit (default = 20)
+        concat         bool        concatenate the fit parameters to DataFrame input
+                                    False (default) = no concatenation, use an empty DataFrame to start
+                                    True = with concatenation to input DataFrame
+        bgremove       bool        toggle for background removal (default = True)
+        flipped        bool        toggle for fitting start position
+                                    (if flipped, fitting start from the last line)
+        limpropagate   bool
+        verbose        bool        toggle for output message (default = False)
+        =============  ==========  ====================================================================
 
-    :Returns:
-        df_fit : pandas DataFrame
-            Dataframe container populated with obtained fitting parameters.
-        data_nobg : ndarray
-            Background-removed (Shirley-type) traces.
+    **Returns**\n
+    df_fit: pandas DataFrame
+        Dataframe container populated with obtained fitting parameters.
+    data_nobg: ndarray
+        Background-removed (Shirley-type) traces.
     """
 
     # Retrieve values from input arguments
@@ -2970,7 +3072,7 @@ def bootstrapfit(data, axval, model, params, axis=0, dfcontainer=None, pbar=Fals
 
 class Model(object):
     """
-    Class of fitting curve models
+    Class of fitting curve models.
     """
 
     def __init__(self, func, xvar, name=None):
@@ -2990,28 +3092,28 @@ class Model(object):
     @staticmethod
     def normalize(data):
         """
-        Normalize n-dimensional data
+        Normalize n-dimensional data.
         """
         return data/np.max(np.abs(data))
 
 
     def model_eval(self, params):
         """
-        Evaluate the fitting model with given parameters
+        Evaluate the fitting model with given parameters.
         """
         return self.func(feval=True, vals=params, xvar=self.xvar)
 
 
     def partial_eval(self, params, part=0):
         """
-        Evaluate parts of a composite fitting model
+        Evaluate parts of a composite fitting model.
         """
         pass
 
 
     def _costfunc(self, inits, xv, form='original'):
         """
-        Define the cost function of the optimization process
+        Define the cost function of the optimization process.
         """
         self.model = self.func(feval=True, vals=inits, xvar=xv)
         if form == 'original':
@@ -3024,7 +3126,7 @@ class Model(object):
 
     def fit(self, data, inits, method='leastsq', **fitkwds):
         """
-        Run the optimization
+        Run the optimization.
         """
         self.data = data
         self.norm_data = self.normalize(data)
@@ -3047,21 +3149,21 @@ class Model(object):
 
 def build_dynamic_matrix(fitparams, display_range=slice(None, None, None), pre_t0_range=slice(None, 1, None)):
     """
-    Construct the dynamic matrix from the fitting results:
-    for each fitting parameter, construct time-dependent value,
-    time-dependent absolute and relative changes
+    Construct the dynamic matrix from the fitting results. For each fitting parameter, construct time-dependent value, time-dependent absolute and relative changes.
 
-    :Parameters:
-        fitparams : 3D ndarray
-            fitting output
-        display_range : slice object | slice(None, None, None)
-            display time range of the fitting parameters (default = full range)
-        pre_t0_range : slice object | slice(None, 1, None)
-            time range regarded as before time-zero
+    **Parameters**
 
-    :Returns:
-        dyn_matrix : 4D ndarray
-            calculated dynamic matrix
+    fitparams: 3D ndarray
+        fitting output
+    display_range: slice object | slice(None, None, None)
+        display time range of the fitting parameters (default = full range)
+    pre_t0_range: slice object | slice(None, 1, None)
+        time range regarded as before time-zero
+
+    **Returns**
+
+    dyn_matrix: 4D ndarray
+        calculated dynamic matrix
     """
 
     if np.ndim(fitparams) != 3:
