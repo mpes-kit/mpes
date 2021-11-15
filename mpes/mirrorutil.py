@@ -29,57 +29,80 @@ class CopyTool(object):
             self.ntasks = int(ntasks)
         
 
-    def copy(self, sdir, forceCopy=False, scheduler='threads', **compute_kwds):
+    def copy(self, source, forceCopy=False, scheduler='threads', **compute_kwds):
         """ Local file copying method.
         """
-
-        numFiles = countFiles(sdir)
-
-        if numFiles > 0:
-
-            ddir = getTargetDir(sdir, self.source, self.dest, gid=self.gid, mode=0o775, create=True, )
-
-            numCopied = 0
-
-            for path, dirs, filenames in os.walk(sdir):
-                # Check space left
-                size_src = 0
-                size_dst = 0
-                for sfile in filenames:
-                    size_src += os.path.getsize(os.path.join(sdir,sfile))
-                    if (os.path.exists(os.path.join(path.replace(sdir, ddir), sfile))):
-                        size_dst += os.path.getsize(os.path.join(path.replace(sdir, ddir), sfile))
-                if (size_src == 0 and not forceCopy):
-                    # nothing to copy, just return directory
-                    return ddir
-                else:
-                    total, used, free = shutil.disk_usage(ddir)
-                    if (size_src - size_dst > free - self.safetyMargin):
-                        print("Target disk full, only " + str(free/2**30) + " GB free, but " + str((size_src - size_dst)/2**30) + " GB needed!")
-                        return
-                    for directory in dirs:
-                        destDir = path.replace(sdir,ddir)
-                        mymakedirs(os.path.join(destDir, directory), gid=self.gid, mode=0o775)
-
-                    copyTasks = [] # Core-level jobs
-                    for sfile in filenames:
-                            srcFile = os.path.join(path, sfile)
-                            destFile = os.path.join(path.replace(sdir, ddir), sfile)
-                            size_src = os.path.getsize(srcFile)
-                            size_dst = os.path.getsize(srcFile)
-                            if (not os.path.exists(destFile) or size_dst != size_src or forceCopy):
-                                if (os.path.exists(destFile)):
-                                    # delete existing file, to fix permission issue
-                                    copyTasks.append(d.delayed(mycopy)(srcFile, destFile, gid=self.gid, mode=0o664, replace=True))
-                                else:
-                                    copyTasks.append(d.delayed(mycopy)(srcFile, destFile, gid=self.gid, mode=0o664))
-                        
-                    print("Copy Files...")
-                    with ProgressBar():
-                        d.compute(*copyTasks, scheduler=scheduler, num_workers=self.ntasks, **compute_kwds)
-                    print("Copy finished!")
-
+        
+        if not os.path.exists(source):
+            print("Source not found!")
+            return
+        
+        filenames = []
+        dirnames = []
+        
+        if os.path.isfile(source):
+            # Single file
+            sdir = os.path.dirname(os.path.realpath(source))
+            ddir = getTargetDir(sdir, self.source, self.dest, gid=self.gid, mode=0o775, create=True)
+            filenames.append(source)
+            
+        elif os.path.isdir(source):
+            sdir = source
+            ddir = getTargetDir(sdir, self.source, self.dest, gid=self.gid, mode=0o775, create=True)
+            #dirs.append(sdir)
+            for path, dirs, files in os.walk(sdir):
+                for file in files:
+                    filenames.append(os.path.join(path, file))
+                for dir in dirs:
+                    dirnames.append(os.path.join(path, dir))      
+                            
+        #actual copy loop
+        if filenames:
+            # Check space left
+            size_src = 0
+            size_dst = 0
+            for sfile in filenames:
+                size_src += os.path.getsize(sfile)
+                if (os.path.exists(sfile.replace(sdir, ddir))):
+                    size_dst += os.path.getsize(sfile.replace(sdir, ddir))
+            if (size_src == 0 and not forceCopy):
+                # nothing to copy, just return directory
                 return ddir
+            else:
+                total, used, free = shutil.disk_usage(ddir)
+                if (size_src - size_dst > free - self.safetyMargin):
+                    print("Target disk full, only " + str(free/2**30) + " GB free, but " + str((size_src - size_dst)/2**30) + " GB needed!")
+                    return
+        
+            # make directories
+            for directory in dirnames:
+                destDir = directory.replace(sdir,ddir)
+                mymakedirs(destDir, gid=self.gid, mode=0o775)
+
+            copyTasks = [] # Core-level jobs
+            for srcFile in filenames:
+                destFile = srcFile.replace(sdir, ddir)
+                size_src = os.path.getsize(srcFile)
+                size_dst = os.path.getsize(srcFile)
+                if (not os.path.exists(destFile) or size_dst != size_src or forceCopy):
+                    if (os.path.exists(destFile)):
+                        # delete existing file, to fix permission issue
+                        copyTasks.append(d.delayed(mycopy)(srcFile, destFile, gid=self.gid, mode=0o664, replace=True))
+                    else:
+                        copyTasks.append(d.delayed(mycopy)(srcFile, destFile, gid=self.gid, mode=0o664))
+            
+            # run the copy tasks
+            if len(copyTasks)>0:
+                print("Copy Files...")
+                with ProgressBar():
+                    d.compute(*copyTasks, scheduler=scheduler, num_workers=self.ntasks, **compute_kwds)
+                print("Copy finished!")
+
+            if os.path.isfile(source):
+                return destFile
+            elif os.path.isdir(source):
+                return ddir
+
 
     def size(self, sdir):
         """ Calculate file size.
@@ -156,17 +179,6 @@ def getTargetDir(sdir, source, dest, gid, mode, create=False):
             mymakedirs(ddir, mode, gid)
     return ddir
 
-def countFiles(directory):
-    """ Count the number of files in a directory.
-    """
-
-    files = []
- 
-    if os.path.isdir(directory):
-        for path, dirs, filenames in os.walk(directory):
-            files.extend(filenames)
- 
-    return len(files)
     
 # replacement for os.makedirs, which is independent of umask
 def mymakedirs(path, mode, gid):
@@ -184,6 +196,9 @@ def mymakedirs(path, mode, gid):
     return res
     
 def mycopy(source, dest, gid, mode, replace=False):
+    """ Copy function with option to delete the target file firs (to take ownership).
+    """
+
     if replace:
         if (os.path.exists(dest)):
             os.remove(dest)
