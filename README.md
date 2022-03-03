@@ -57,3 +57,7 @@ The size of the single-event datasets used in the tutorial [notebooks](https://g
 If you want to refer the software in your work, please cite the following paper.
 
 R. P. Xian, Y. Acremann, S. Y. Agustsson, M. Dendzik, K. Bühlmann, D. Curcio, D. Kutnyakhov, F. Pressacco, M. Heber, S. Dong, T. Pincelli, J. Demsar, W. Wurth, P. Hofmann, M.Wolf, M. Scheidgen, L. Rettig, R. Ernstorfer, An open-source, end-to-end workflow for multidimensional photoemission spectroscopy, [Sci. Data 7, 442 (2020)](https://www.nature.com/articles/s41597-020-00769-8).
+
+Specifically, for the symmetry distortion correction, please cite
+
+R. P. Xian, L. Rettig, R. Ernstorfer, Symmetry-guided nonrigid registration: The case for distortion correction in multidimensional photoemission spectroscopy, [Ultramicroscopy 202, 133 (2019)](https://doi.org/10.1016/j.ultramic.2019.04.004).
