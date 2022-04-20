@@ -29,7 +29,7 @@ from scipy.spatial import distance
 import scipy.ndimage as ndi
 import pandas as pd
 from skimage import measure, filters, morphology
-from skimage.draw import line, circle, polygon
+from skimage.draw import line, disk, polygon
 from skimage.feature import peak_local_max
 import cv2
 import astropy.stats as astat
@@ -1383,7 +1383,7 @@ def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
         =============  ==========  ============ =========================
             keyword     data type   default      meaning
         =============  ==========  ============ =========================
-            shape      tuple/list  shape of img see skimage.draw.circle()
+            shape      tuple/list  shape of img see skimage.draw.disk()
             method         str       'graphic'   'graphic' or 'algebraic'
             edgefactor     float        1.02       prefactor to rad**2
         =============  ==========  ============ =========================
@@ -1400,7 +1400,7 @@ def circmask(img, rcent, ccent, rad, sign=1, ret='mask', **kwds):
 
     # Generate circular mask of the chosen sign
     if method == 'graphic':
-        rr, cc = circle(rcent, ccent, rad, shape=shape)
+        rr, cc = disk(rcent, ccent, rad, shape=shape)
     elif method == 'algebraic':
         cmesh, rmesh = np.meshgrid(range(cim), range(rim))
         rr, cc = np.where((cmesh - ccent)**2 + (rmesh - rcent)**2 <= edgefac*rad**2)
