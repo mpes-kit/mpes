@@ -615,6 +615,70 @@ def peaksearch(traces, tof, ranges=None, method='range-limited', pkwindow=3, plo
     return pkmaxs
 
 
+def fit_energyCalibation(pos, vals, refid=0, Eref=None, t=None, **kwds):
+    """
+    Energy calibration by nonlinear least squares fitting of spectral landmarks on
+    a set of (energy dispersion curves (EDCs). This is done here by fitting to the
+    function d/(t-t0)**2.
+
+    **Parameters**\n
+    pos: list/array
+        Positions of the spectral landmarks (e.g. peaks) in the EDCs.
+    vals: list/array
+        Bias voltage value associated with each EDC.
+    refid: int | 0
+        Reference dataset index, varies from 0 to vals.size - 1.
+    Eref: float | None
+        Energy of the reference value.
+    t: numeric array | None
+        Drift time.
+
+    **Returns**\n
+    ecalibdict: dict
+        A dictionary of fitting parameters including the following,
+        :coeffs: Fitted function coefficents.
+        :axis: Fitted energy axis.
+    """
+
+    vals = np.array(vals)
+    nvals = vals.size
+
+    if refid >= nvals:
+        wn.warn('Reference index (refid) cannot be larger than the number of traces!\
+                Reset to the largest allowed number.')
+        refid = nvals - 1
+
+    def residual(pars, time, data):
+        model =  base.tof2ev(pars['d'], pars['t0'], pars['E0'], time)
+        if data is None:
+            return model
+        return model-data
+
+    pars = Parameters()
+    pars.add(name="d", value=1)
+    pars.add(name="t0", value=1E5, max=min(pos)-1)
+    pars.add(name="E0", value=min(vals))
+    fit = Minimizer(residual, pars, fcn_args=(pos, vals))
+    result = fit.leastsq()
+    report_fit(result)  
+
+    # Construct the calibrating function
+    pfunc = partial(base.tof2ev, result.params['d'].value, result.params['t0'].value)
+
+    # Return results according to specification
+    ecalibdict = {}
+    ecalibdict['d'] = result.params['d'].value
+    ecalibdict['t0'] = result.params['t0'].value
+    ecalibdict['E0'] = result.params['E0'].value
+        
+    if (Eref is not None) and (t is not None):
+        E0 = -pfunc(-Eref, pos[refid])
+        ecalibdict['axis'] = pfunc(E0, t)
+        ecalibdict['E0'] = E0
+
+    return ecalibdict  
+
+
 def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, Eref=None, t=None, aug=1, method='lstsq', **kwds):
     """
     Energy calibration by nonlinear least squares fitting of spectral landmarks on
@@ -687,39 +751,9 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, Eref=None, t=No
     # Solve for the a vector (polynomial coefficients) using least squares
     if method == 'lstsq':
         sol = lstsq(Tmat, bvec, rcond=None)
-        a = sol[0]
     elif method == 'lsqr':
         sol = lsqr(Tmat, bvec, **kwds)
-        a = sol[0]
-    elif method == 'lmfit':
-        def residual(pars, time, data):
-            model = 0*time
-            #for p in polyorder:
-            #    model += pars["par"+str(p)]*time**p
-            model += pars['par1']*(time-pars['par2'])**3-pars['par3']*time+pars['par1']*pars['par2']**3
-            return model - data
-        pars = Parameters()
-        #for p in polyorder:
-            #pars.add(name="par"+str(p), value=0.001**p)
-        pars.add(name="par1", value=-1e-10)
-        pars.add(name="par2", value=1e-9)
-        pars.add(name="par3", value=1e-3, min=0, max=np.inf)
-        #pars.add(name="par3", min=0, max=np.inf)
-        fit = Minimizer(residual, pars,  fcn_args=(pos, vals))
-        #if order == 3: # contrains only for 3rd oder polynom for now...
-            #pars.add(name='delta', value=-1e-14, min=-np.inf, max=0, vary=True)
-            #pars.add(name='par2', expr='sqrt(delta+3*par1*par3)')
-            #pars.add(name='par1', expr='(par2**2-delta)/(3*par3)')
-        result = fit.leastsq()
-        report_fit(result)
-        a = list()
-        #for p in polyorder:
-        #    a.append(result.params["par"+str(p)])
-        a.append(result.params['par1'])
-        a.append(-3*result.params['par1']*result.params['par2'])
-        a.append(3*result.params['par1']*result.params['par2']**2-result.params['par3'])
-
-    
+    a = sol[0]
 
     # Construct the calibrating function
     pfunc = partial(base.tof2evpoly, a)
@@ -959,7 +993,10 @@ class EnergyCalibrator(base.FileCollection):
         landmarks = kwds.pop('landmarks', self.peaks[:, 0])
         biases = kwds.pop('biases', self.biases)
         calibret = kwds.pop('calib_ret', False)
-        self.calibration = calibrateE(landmarks, biases, refid=refid, ret=ret, aug=self.dup, **kwds)
+        if ('method' in kwds) and (kwds['method'] == "lmfit"):
+            self.calibration = fit_energyCalibation(landmarks, biases, refid=refid, **kwds)
+        else:
+            self.calibration = calibrateE(landmarks, biases, refid=refid, ret=ret, aug=self.dup, **kwds)
 
         if calibret == True:
             return self.calibration

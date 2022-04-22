@@ -432,6 +432,31 @@ def tof2evpoly(a, E0, t):
     return E
 
 
+def tof2ev(d, t0, E0, t):
+    """
+    d/(t-t0) expression of the time-of-flight to electron volt
+    conversion formula.
+
+    **Parameters**\n
+    d: float
+        Drift distance
+    t0: float
+        time offset
+    E0: float
+        Energy offset.
+    t: numeric array
+        Drift time of electron.
+
+    **Return**\n
+    E: numeric array
+        Converted energy
+    """
+
+    E = 2.84281e-12*(d/((t-t0)*0.00823e-9))**2 + E0
+
+    return E
+
+
 def imxy2kxy(x, y, x0, y0, fx, fy):
     """
     Conversion from Cartesian coordinate in binned image (x, y) to momentum coordinates (kx, ky).
