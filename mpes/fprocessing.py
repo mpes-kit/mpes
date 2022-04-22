@@ -2211,7 +2211,11 @@ class dataframeProcessor(MapParser):
         
         t = kwds.pop('t', self.edf['t'].astype('float64'))
 
-        if ('a' in kwds):
+        if ('t0' in kwds) and ('d' in kwds):
+            self.ecalib_t0 = kwds.pop('t0')
+            self.ecalib_d = kwds.pop('d')
+            self.columnApply(mapping=b.tof2ev, rescolname='E', E0=E0, d=self.ecalib_d, t0=self.ecalib_t0, t=t, **kwds)
+        elif ('a' in kwds):
             self.poly_a = kwds.pop('a')
             self.columnApply(mapping=b.tof2evpoly, rescolname='E', E0=E0, a=self.poly_a, t=t, **kwds)
         else:        
