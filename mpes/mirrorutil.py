@@ -83,7 +83,10 @@ class CopyTool(object):
             for srcFile in filenames:
                 destFile = srcFile.replace(sdir, ddir)
                 size_src = os.path.getsize(srcFile)
-                size_dst = os.path.getsize(srcFile)
+                if os.path.exists(destFile):
+                    size_dst = os.path.getsize(destFile)
+                else:
+                    size_dst = 0
                 if (not os.path.exists(destFile) or size_dst != size_src or forceCopy):
                     if (os.path.exists(destFile)):
                         # delete existing file, to fix permission issue
