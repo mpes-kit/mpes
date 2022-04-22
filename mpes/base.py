@@ -452,6 +452,7 @@ def tof2ev(d, t0, E0, t):
         Converted energy
     """
 
+    #    m_e/2 [eV]            bin width [s]
     E = 2.84281e-12*(d/((t-t0)*0.00823e-9))**2 + E0
 
     return E
