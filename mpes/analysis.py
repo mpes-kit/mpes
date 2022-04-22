@@ -21,6 +21,8 @@ import numpy as np
 from numpy.linalg import norm, lstsq
 from scipy.sparse.linalg import lsqr
 import scipy.optimize as opt
+from lmfit import Minimizer, Parameters
+from lmfit.printfuncs import report_fit
 from scipy.special import wofz, erf
 from scipy.signal import savgol_filter
 import scipy.interpolate as scip
@@ -685,9 +687,39 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, Eref=None, t=No
     # Solve for the a vector (polynomial coefficients) using least squares
     if method == 'lstsq':
         sol = lstsq(Tmat, bvec, rcond=None)
+        a = sol[0]
     elif method == 'lsqr':
         sol = lsqr(Tmat, bvec, **kwds)
-    a = sol[0]
+        a = sol[0]
+    elif method == 'lmfit':
+        def residual(pars, time, data):
+            model = 0*time
+            #for p in polyorder:
+            #    model += pars["par"+str(p)]*time**p
+            model += pars['par1']*(time-pars['par2'])**3-pars['par3']*time+pars['par1']*pars['par2']**3
+            return model - data
+        pars = Parameters()
+        #for p in polyorder:
+            #pars.add(name="par"+str(p), value=0.001**p)
+        pars.add(name="par1", value=-1e-10)
+        pars.add(name="par2", value=1e-9)
+        pars.add(name="par3", value=1e-3, min=0, max=np.inf)
+        #pars.add(name="par3", min=0, max=np.inf)
+        fit = Minimizer(residual, pars,  fcn_args=(pos, vals))
+        #if order == 3: # contrains only for 3rd oder polynom for now...
+            #pars.add(name='delta', value=-1e-14, min=-np.inf, max=0, vary=True)
+            #pars.add(name='par2', expr='sqrt(delta+3*par1*par3)')
+            #pars.add(name='par1', expr='(par2**2-delta)/(3*par3)')
+        result = fit.leastsq()
+        report_fit(result)
+        a = list()
+        #for p in polyorder:
+        #    a.append(result.params["par"+str(p)])
+        a.append(result.params['par1'])
+        a.append(-3*result.params['par1']*result.params['par2'])
+        a.append(3*result.params['par1']*result.params['par2']**2-result.params['par3'])
+
+    
 
     # Construct the calibrating function
     pfunc = partial(base.tof2evpoly, a)
