@@ -119,7 +119,7 @@ class CopyTool(object):
                 size += os.path.getsize(os.path.join(sdir,sfile))
             return size
                 
-    def cleanUpOldestScan(self, remove = None, force = False, report = False):
+    def cleanUpOldestScan(self, force = False, report = False):
         """ Remove scans in old directories.
         """        
         
