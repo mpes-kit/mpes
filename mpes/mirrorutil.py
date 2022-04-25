@@ -9,6 +9,7 @@ import os
 import shutil
 import dask as d
 from dask.diagnostics import ProgressBar
+from datetime import datetime
 
 class CopyTool(object):
     """ File collecting and sorting class.
@@ -118,7 +119,7 @@ class CopyTool(object):
                 size += os.path.getsize(os.path.join(sdir,sfile))
             return size
                 
-    def cleanUpOldestScan(self, remove = None, force = False):
+    def cleanUpOldestScan(self, remove = None, force = False, report = False):
         """ Remove scans in old directories.
         """        
         
@@ -128,9 +129,19 @@ class CopyTool(object):
             if not dirs:
                 scan_dirs.append(root)
                 
-        #print(scan_dirs)
         scan_dirs = sorted(scan_dirs, key=os.path.getctime)
-        #print(scan_dirs)
+        if report:
+            print("Last accessed                                Size          Path")
+            total_size = 0
+            for scan in scan_dirs:
+                size = 0
+                for path, dirs, filenames in os.walk(scan):
+                    for sfile in filenames:
+                        size += os.path.getsize(os.path.join(scan,sfile))
+                total_size += size
+                if size > 0:
+                    print(f"{datetime.fromtimestamp(os.path.getctime(scan))},        {(size/2**30):.2f} GB,     {scan}")
+            print(f"Total size: {(total_size/2**30):.2f} GB.")
         oldestScan = None
         for scan in scan_dirs:
             size = 0
@@ -144,14 +155,17 @@ class CopyTool(object):
             print("No scan with data found to remove!")
             return
         
-        print("I would delete the scan, freeing " + str(size/2**30) + " GB space:")
-        print(oldestScan)    
-        if (remove == oldestScan or force):
+        print(f"Oldest scan is \"{oldestScan}\", removing it will free {(size/2**30):.2f} GB space.")
+        if force:
+            proceed = "y"
+        else:
+            print("Proceed (y/n)?")
+            proceed = input()              
+        if (proceed == "y"):
             shutil.rmtree(oldestScan)
             print ("Removed sucessfully!")
         else:
-            print("To proceed, please call:")
-            print("cleanUpOldestScan(remove=\'" + oldestScan + "')")
+            print("Aborted.")
                 
 
 # private Functions
