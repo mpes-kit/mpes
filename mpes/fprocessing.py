@@ -38,6 +38,12 @@ import natsort as nts
 from functools import reduce
 from funcy import project
 from threadpoolctl import threadpool_limits
+from dask import compute
+import datetime as dt
+from urllib.request import urlopen
+import json
+import xarray as xr
+import h5py
 
 N_CPU = ps.cpu_count()
 
@@ -2296,6 +2302,220 @@ class dataframeProcessor(MapParser):
 
         if ret:
             return self.histdict
+
+    def gather_metadata(self, metadata_dict=None, mc=None, ec=None):
+        """ Gathers additional metadata from the source file and updates 
+        the existing metadata if provided.
+        Parameters:
+            dfp:
+            metadata:
+            ec:
+            mc:
+        Returns:
+            
+        """
+        if metadata_dict is None:
+            metadata_dict = {}
+            
+        # Read events in with ms time stamps
+        dfpart = self.edf.get_partition(0)
+        all_data = np.array(compute(dfpart.values))[0,:,:]
+        timeStamps = all_data[:,6]
+        tsFrom = timeStamps[0]
+        dfpart = self.edf.get_partition(len(self.datafiles)-1)
+        all_data = np.array(compute(dfpart.values))[0,:,:]
+        timeStamps = all_data[:,6]
+        tsTo = timeStamps[len(timeStamps)-1]
+        metadata_dict['timing'] = {'acquisition_start': dt.datetime.utcfromtimestamp(tsFrom/1000).replace(tzinfo=dt.timezone.utc).isoformat(),
+                            'acquisition_start_ts': tsFrom/1000,
+                            'acquisition_stop': dt.datetime.utcfromtimestamp(tsTo/1000).replace(tzinfo=dt.timezone.utc).isoformat(),
+                            'acquisition_stop_ts': tsTo/1000,
+                            'acquisition_duration': int((tsTo - tsFrom)/1000),
+                            'collection_time': float((tsTo - tsFrom)/1000),
+                            'bin_array_creation': dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc).isoformat(),
+                            'bin_array_creation_ts': dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc).timestamp()
+                            }
+        #import meta data from data file
+        file0 = self.datafiles[0]
+        if 'file' not in metadata_dict.keys(): #If already present, the value is assumed to be a dictionary
+            metadata_dict['file'] = {}
+        
+        with h5py.File(file0, 'r') as f:
+            for k,v in f.attrs.items():
+                metadata_dict['file'][k] = v      
+
+        metadata_dict['entry_identifier'] = self.datafolder[13:-2]
+            
+        #Get metadata from Epics archive if not present already
+        filestart = dt.datetime.utcfromtimestamp(tsFrom/1000).isoformat()
+        fileend = dt.datetime.utcfromtimestamp(tsTo/1000).isoformat()
+        Epics_channels = ["KTOF:Lens:Extr:I", "trARPES:Carving:TEMP_RBV",
+                        "trARPES:XGS600:PressureAC:P_RD", "KTOF:Lens:UDLD:V", "KTOF:Lens:Sample:V"]
+        for channel in Epics_channels:
+            if channel not in metadata_dict['file'].keys():
+                req_str = "http://aa0.fhi-berlin.mpg.de:17668/retrieval/data/getData.json?pv=" + channel + "&from=" + filestart + "Z&to=" + fileend + "Z"
+                req = urlopen(req_str)
+                data = json.load(req)
+                vals = [x['val'] for x in data[0]['data']]
+                metadata_dict['file'][f'{channel}'] = np.average(np.array(vals)) #Change temp and pressurue config translation paths  
+
+        #Meta data of the binning
+        if mc is not None:
+            momentum_dict = mc.__dict__.copy()
+            momentum_dict['calibration']['coeffs'] = np.array(momentum_dict['calibration']['coeffs'])
+            momentum_dict['adjust_params']['center'] = np.array(momentum_dict['adjust_params']['center'])
+            momentum_dict['pcent'] = np.array(momentum_dict['pcent'])
+            # to reduce the size of h5 file
+            momentum_dict.pop('image')
+            metadata_dict['momentum_correction'] = momentum_dict
+        if ec is not None:
+            energy_dict = ec.__dict__
+            metadata_dict['energy_correction'] = energy_dict
+            
+        binning_dict = self.__dict__.copy()
+        binning_dict.pop('histdict')
+        binning_dict.pop('dfield')
+        metadata_dict['binning'] = binning_dict
+        
+        #get fa size and ca size
+    #     fa = metadata_dict['file']['KTOF:Lens:UFA:VSet']
+    #     ca = metadata_dict['file']['KTOF:Lens:UCA:VSet']
+    #     if <fa< and <ca< :
+    #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
+    #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
+    #     elif <fa< and <ca< :
+    #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
+    #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
+    #     elif <fa< and <ca< :
+    #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
+    #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
+    #     elif <fa< and <ca< :
+    #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
+    #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
+    #     elif <fa< and <ca< :
+    #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
+    #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
+
+        default_units = {
+        'X': 'step', 
+        'Y': 'step', 
+        't': 'step', 
+        'tofVoltage':'V',
+        'extractorVoltage':'V',
+        'extractorCurrent':'A',
+        'cryoTemperature':'K',
+        'sampleTemperature':'K',
+        'dldTimeBinSize':'ns',
+        'delay':'ps',
+        'timeStamp':'s',
+        'E':'eV',
+        'kx':'1/A',
+        'ky':'1/A'}
+
+        def res_to_xarray(res, binNames, binAxes, metadata=None):
+            """ creates a BinnedArray (xarray subclass) out of the given np.array
+            Parameters:
+                res: np.array
+                    nd array of binned data
+                binNames (list): list of names of the binned axes
+                binAxes (list): list of np.arrays with the values of the axes
+            Returns:
+                ba: BinnedArray (xarray)
+                    an xarray-like container with binned data, axis, and all available metadata
+            """
+            dims = binNames
+            coords = {}
+            for name, vals in zip(binNames, binAxes):
+                coords[name] = vals
+
+            xres = xr.DataArray(res, dims=dims, coords=coords)
+
+            for name in binNames:
+                try:
+                    xres[name].attrs['unit'] = default_units[name]
+                except KeyError:
+                    pass
+
+            xres.attrs['units'] = 'counts'
+            xres.attrs['long_name'] = 'photoelectron counts'
+
+            if metadata is not None:
+                xres.attrs['metadata'] = metadata
+
+            return xres
+        
+        axnames = self.binaxes.copy()
+        axnames[2] = "energy"
+        axes = [self.histdict[ax] for ax in self.binaxes]
+        res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata_dict)
+        
+        return metadata_dict, res_xarray
+
+    def xarray_to_h5(self, data, faddr, mode='w'):
+        """ Save xarray formatted data to hdf5
+        Args:
+            data (xarray.DataArray): input data
+            faddr (str): complete file name (including path)
+            mode (str): hdf5 read/write mode
+        Returns:
+        """
+        with h5py.File(faddr, mode) as h5File:
+
+            print(f'saving data to {faddr}')
+
+            # Saving data
+
+            ff = h5File.create_group('binned')
+
+            # make a single dataset
+            ff.create_dataset('BinnedData', data=data.data)
+
+            # Saving axes
+            aa = h5File.create_group("axes")
+            # aa.create_dataset('axis_order', data=data.dims)
+            ax_n = 0
+            for binName in data.dims:
+                ds = aa.create_dataset(f'ax{ax_n}', data=data.coords[binName])
+                ds.attrs['name'] = binName
+                ax_n += 1
+            # Saving delay histograms
+            #                hh = h5File.create_group("histograms")
+            #                if hasattr(data, 'delaystageHistogram'):
+            #                    hh.create_dataset(
+            #                        'delaystageHistogram',
+            #                        data=data.delaystageHistogram)
+            #                if hasattr(data, 'pumpProbeHistogram'):
+            #                    hh.create_dataset(
+            #                        'pumpProbeHistogram',
+            #                        data=data.pumpProbeHistogram)\
+
+            if ('metadata' in data.attrs and isinstance(data.attrs['metadata'], dict)):
+                meta_group = h5File.create_group('metadata')
+                
+                def recursive_write_metadata(h5group, node):
+                    for key, item in node.items():
+                        if isinstance(item, (np.ndarray, np.int64, np.float64, str, bytes, int, float, list)):
+                            try:
+                                h5group.create_dataset(key, data=item)
+                            except TypeError:
+                                h5group.create_dataset(key, data=str(item))
+                                print("saved " + key + " as string")
+                        elif isinstance(item, dict):
+                            print(key)
+                            group = h5group.create_group(key)
+                            recursive_write_metadata(group, item)
+                        else:
+                            try:
+                                h5group.create_dataset(key, data=str(item))
+                                print("saved " + key + " as string")
+                            except:
+                                raise ValueError('Cannot save %s type'%type(item))
+                
+                
+        
+                recursive_write_metadata(meta_group, data.attrs['metadata'])
+                
+        print('Saving complete!')
 
     def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
         """ Update or convert to other file formats.
