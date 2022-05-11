@@ -2303,21 +2303,21 @@ class dataframeProcessor(MapParser):
         if ret:
             return self.histdict
 
-    def gather_metadata(self, metadata_dict=None, mc=None, ec=None):
+    def gather_metadata(self, metadata_dict=None, mc_dict=None, ec_dict=None):
         """ Gathers additional metadata from the source file and updates 
         the existing metadata if provided.
         Parameters:
-            dfp:
-            metadata:
-            ec:
-            mc:
-        Returns:
+            metadata: Initial manual metadata (optional)
+            ec_dict: Energy calibration dictionary from the pre-processing
+            mc_dict: Momentum calibration dictionary from the pre-processing
+        Returns: xarray object containing the updated metadata 
             
         """
         if metadata_dict is None:
             metadata_dict = {}
-            
+        print("Gathering metadata from different locations...")
         # Read events in with ms time stamps
+        print("Collection time stamps...")
         dfpart = self.edf.get_partition(0)
         all_data = np.array(compute(dfpart.values))[0,:,:]
         timeStamps = all_data[:,6]
@@ -2340,17 +2340,21 @@ class dataframeProcessor(MapParser):
         if 'file' not in metadata_dict.keys(): #If already present, the value is assumed to be a dictionary
             metadata_dict['file'] = {}
         
+        print("Collecting lens voltages...")
         with h5py.File(file0, 'r') as f:
             for k,v in f.attrs.items():
                 metadata_dict['file'][k] = v      
+        #Add a segment to change VSet to V in lens voltages.
 
         metadata_dict['entry_identifier'] = self.datafolder[13:-2]
-            
+
+        print("Collecting data from the EPICS archive...")
         #Get metadata from Epics archive if not present already
         filestart = dt.datetime.utcfromtimestamp(tsFrom/1000).isoformat()
         fileend = dt.datetime.utcfromtimestamp(tsTo/1000).isoformat()
         Epics_channels = ["KTOF:Lens:Extr:I", "trARPES:Carving:TEMP_RBV",
                         "trARPES:XGS600:PressureAC:P_RD", "KTOF:Lens:UDLD:V", "KTOF:Lens:Sample:V"]
+        #Add a try except block to handle url access outside FHI network
         for channel in Epics_channels:
             if channel not in metadata_dict['file'].keys():
                 req_str = "http://aa0.fhi-berlin.mpg.de:17668/retrieval/data/getData.json?pv=" + channel + "&from=" + filestart + "Z&to=" + fileend + "Z"
@@ -2360,16 +2364,17 @@ class dataframeProcessor(MapParser):
                 metadata_dict['file'][f'{channel}'] = np.average(np.array(vals)) #Change temp and pressurue config translation paths  
 
         #Meta data of the binning
-        if mc is not None:
-            momentum_dict = mc.__dict__.copy()
+        print("Collecting metadata from the binning...")
+        if mc_dict is not None:
+            momentum_dict = mc_dict.__dict__.copy()
             momentum_dict['calibration']['coeffs'] = np.array(momentum_dict['calibration']['coeffs'])
             momentum_dict['adjust_params']['center'] = np.array(momentum_dict['adjust_params']['center'])
             momentum_dict['pcent'] = np.array(momentum_dict['pcent'])
             # to reduce the size of h5 file
             momentum_dict.pop('image')
             metadata_dict['momentum_correction'] = momentum_dict
-        if ec is not None:
-            energy_dict = ec.__dict__
+        if ec_dict is not None:
+            energy_dict = ec_dict.__dict__
             metadata_dict['energy_correction'] = energy_dict
             
         binning_dict = self.__dict__.copy()
@@ -2378,8 +2383,10 @@ class dataframeProcessor(MapParser):
         metadata_dict['binning'] = binning_dict
         
         #get fa size and ca size
-    #     fa = metadata_dict['file']['KTOF:Lens:UFA:VSet']
-    #     ca = metadata_dict['file']['KTOF:Lens:UCA:VSet']
+    #     fa_in = metadata_dict['file']['KTOF:Apertures:m1:RBV']
+    #     fa_hor = metadata_dict['file']['KTOF:Apertures:m2:RBV']
+    #     ca = metadata_dict['file']['KTOF:Apertures:m3:RBV']
+
     #     if <fa< and <ca< :
     #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
     #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
@@ -2443,13 +2450,14 @@ class dataframeProcessor(MapParser):
                 xres.attrs['metadata'] = metadata
 
             return xres
-        
+
+        print("Building the xarray data object...")
         axnames = self.binaxes.copy()
         axnames[2] = "energy"
         axes = [self.histdict[ax] for ax in self.binaxes]
         res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata_dict)
         
-        return metadata_dict, res_xarray
+        return res_xarray
 
     def xarray_to_h5(self, data, faddr, mode='w'):
         """ Save xarray formatted data to hdf5
