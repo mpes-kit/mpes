@@ -41,6 +41,7 @@ from threadpoolctl import threadpool_limits
 from dask import compute
 import datetime as dt
 from urllib.request import urlopen
+import urllib
 import json
 import xarray as xr
 import h5py
@@ -2315,9 +2316,9 @@ class dataframeProcessor(MapParser):
         """
         if metadata_dict is None:
             metadata_dict = {}
-        print("Gathering metadata from different locations...")
+        print("Gathering metadata from different locations")
         # Read events in with ms time stamps
-        print("Collection time stamps...")
+        print("Collecting time stamps...")
         dfpart = self.edf.get_partition(0)
         all_data = np.array(compute(dfpart.values))[0,:,:]
         timeStamps = all_data[:,6]
@@ -2340,11 +2341,12 @@ class dataframeProcessor(MapParser):
         if 'file' not in metadata_dict.keys(): #If already present, the value is assumed to be a dictionary
             metadata_dict['file'] = {}
         
-        print("Collecting lens voltages...")
+        print("Collecting lens voltages etc...")
         with h5py.File(file0, 'r') as f:
             for k,v in f.attrs.items():
-                metadata_dict['file'][k] = v      
-        #Add a segment to change VSet to V in lens voltages.
+                if "VSet" in k: #Changing VSet to V in dict keys
+                    k = k[:-3]
+                metadata_dict['file'][k] = v
 
         metadata_dict['entry_identifier'] = self.datafolder[13:-2]
 
@@ -2354,15 +2356,27 @@ class dataframeProcessor(MapParser):
         fileend = dt.datetime.utcfromtimestamp(tsTo/1000).isoformat()
         Epics_channels = ["KTOF:Lens:Extr:I", "trARPES:Carving:TEMP_RBV",
                         "trARPES:XGS600:PressureAC:P_RD", "KTOF:Lens:UDLD:V", "KTOF:Lens:Sample:V"]
-        #Add a try except block to handle url access outside FHI network
-        for channel in Epics_channels:
-            if channel not in metadata_dict['file'].keys():
-                req_str = "http://aa0.fhi-berlin.mpg.de:17668/retrieval/data/getData.json?pv=" + channel + "&from=" + filestart + "Z&to=" + fileend + "Z"
+        
+        channels_missing = set(Epics_channels)-set(metadata_dict['file'].keys())
+        for channel in channels_missing:
+            try:
+                req_str = "http://aa0.fhi-berlin.mpg.de:17668/retrieval/data/getData.json?pv=" + \
+                           channel + "&from=" + filestart + "Z&to=" + fileend + "Z"
                 req = urlopen(req_str)
                 data = json.load(req)
                 vals = [x['val'] for x in data[0]['data']]
                 metadata_dict['file'][f'{channel}'] = np.average(np.array(vals)) #Change temp and pressurue config translation paths  
-
+            except urllib.error.HTTPError as e:
+                print(f"Incorrect URL for the archive channel {channel}. "
+                     "Make sure that the channel name and file start and end times are correct.")
+                print("Error code: ", e)
+            except urllib.error.URLError as e:
+                print(f"Cannot access the archive URL for channel {channel}. "
+                      f"Make sure that you are within the FHI network."
+                      f"Skipping over channels {channels_missing}.")
+                print("Error code: ", e)
+                break
+                
         #Meta data of the binning
         print("Collecting metadata from the binning...")
         if mc_dict is not None:
@@ -2456,7 +2470,7 @@ class dataframeProcessor(MapParser):
         axnames[2] = "energy"
         axes = [self.histdict[ax] for ax in self.binaxes]
         res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata_dict)
-        
+        print("Done!")
         return res_xarray
 
     def xarray_to_h5(self, data, faddr, mode='w'):
