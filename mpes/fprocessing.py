@@ -2396,26 +2396,50 @@ class dataframeProcessor(MapParser):
         binning_dict.pop('dfield')
         metadata_dict['binning'] = binning_dict
         
-        #get fa size and ca size
-    #     fa_in = metadata_dict['file']['KTOF:Apertures:m1:RBV']
-    #     fa_hor = metadata_dict['file']['KTOF:Apertures:m2:RBV']
-    #     ca = metadata_dict['file']['KTOF:Apertures:m3:RBV']
+        #get fa size. Missing open and grid --> needs review
+        if 'KTOF:Apertures:m1.RBV' in metadata_dict['file'].keys() and \
+           'KTOF:Apertures:m2.RBV' in metadata_dict['file'].keys():
+            fa_in = metadata_dict['file']['KTOF:Apertures:m1:RBV']
+            fa_hor = metadata_dict['file']['KTOF:Apertures:m2:RBV']
 
-    #     if <fa< and <ca< :
-    #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
-    #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
-    #     elif <fa< and <ca< :
-    #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
-    #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
-    #     elif <fa< and <ca< :
-    #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
-    #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
-    #     elif <fa< and <ca< :
-    #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
-    #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
-    #     elif <fa< and <ca< :
-    #         metadata_dict['instrument']['analyzer']['fa_size'] = 200
-    #         metadata_dict['instrument']['analyzer']['ca_size'] = 200
+            if 0.6748<fa_in<0.6752 and -0.4252<fa_hor<-0.4248 :
+                metadata_dict['instrument']['analyzer']['fa_size'] = 200.
+            elif 6.7397<fa_in<6.7401 and -6.4505<fa_hor<-6.4501 :
+                metadata_dict['instrument']['analyzer']['fa_size'] = 10.
+            elif -5.3504<fa_in<-5.3500 and 5.4498<fa_hor<5.4502 :
+                metadata_dict['instrument']['analyzer']['fa_size'] = 750.
+            elif 6.7197<fa_in<6.7201 and -0.4256<fa_hor<-0.4252 :
+                metadata_dict['instrument']['analyzer']['fa_size'] = 20.
+            elif -5.7255<fa_in<-5.7251 and -6.5605<fa_hor<-6.5601 :
+                metadata_dict['instrument']['analyzer']['fa_size'] = 500.
+            elif 0.7249<fa_in<0.7253 and -6.4255<fa_hor<-6.4251 :
+                metadata_dict['instrument']['analyzer']['fa_size'] = 100.
+            elif 0.6997<fa_in<0.7001 and 5.5497<fa_hor<5.5501 :
+                metadata_dict['instrument']['analyzer']['fa_size'] = 300.
+            elif 6.6998<fa_in<6.7002 and 5.5498<fa_hor<5.5502 :
+                metadata_dict['instrument']['analyzer']['fa_size'] = 50.
+            else:
+                metadata_dict['instrument']['analyzer']['fa_size'] = 200. #needs review
+
+        else: #assign a value commonly used or nan
+            metadata_dict['instrument']['analyzer']['fa_size'] = 200. #needs review
+
+        #get ca size. Missing open and grid --> needs review
+        if 'KTOF:Apertures:m3.RBV' in metadata_dict['file'].keys():
+            ca = metadata_dict['file']['KTOF:Apertures:m3:RBV']
+            if 9.1220<ca<11.1220 :
+                metadata_dict['instrument']['analyzer']['ca_size'] = 50.
+            if -0.0500<ca<0.0500 :
+                metadata_dict['instrument']['analyzer']['ca_size'] = 300.
+            if 0.7000<ca<1.5000 :
+                metadata_dict['instrument']['analyzer']['ca_size'] = 200.
+            if 5.1000<ca<5.9000 :
+                metadata_dict['instrument']['analyzer']['ca_size'] = 100.
+            else :
+                metadata_dict['instrument']['analyzer']['ca_size'] = 50.
+
+        else:
+            metadata_dict['instrument']['analyzer']['ca_size'] = 100. #needs review
 
         default_units = {
         'X': 'step', 
