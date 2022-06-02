@@ -12,6 +12,7 @@
 # =========================
 
 from __future__ import print_function, division
+from importlib.metadata import metadata
 from .base import FileCollection, MapParser, saveClassAttributes
 from .visualization import grid_histogram
 from . import utils as u, bandstructure as bs, base as b
@@ -2304,13 +2305,13 @@ class dataframeProcessor(MapParser):
         if ret:
             return self.histdict
 
-    def gather_metadata(self, metadata_dict=None, mc_dict=None, ec_dict=None):
+    def gather_metadata(self, metadata_dict=None, mc=None, ec=None):
         """ Gathers additional metadata from the source file and updates 
         the existing metadata if provided.
         Parameters:
             metadata: Initial manual metadata (optional)
-            ec_dict: Energy calibration dictionary from the pre-processing
-            mc_dict: Momentum calibration dictionary from the pre-processing
+            ec: Energy calibration object from the analysis routine in pre-processing
+            mc: Momentum calibration object from the analysis routine in pre-processing
         Returns: xarray object containing the updated metadata 
             
         """
@@ -2365,7 +2366,7 @@ class dataframeProcessor(MapParser):
                 req = urlopen(req_str)
                 data = json.load(req)
                 vals = [x['val'] for x in data[0]['data']]
-                metadata_dict['file'][f'{channel}'] = np.average(np.array(vals)) #Change temp and pressurue config translation paths  
+                metadata_dict['file'][f'{channel}'] = np.average(np.array(vals))   
             except urllib.error.HTTPError as e:
                 print(f"Incorrect URL for the archive channel {channel}. "
                      "Make sure that the channel name and file start and end times are correct.")
@@ -2376,19 +2377,34 @@ class dataframeProcessor(MapParser):
                       f"Skipping over channels {channels_missing}.")
                 print("Error code: ", e)
                 break
-                
+        
+        if "sample" not in metadata_dict.keys():
+            metadata_dict['sample'] = {}
+        if "trARPES:Carving:TEMP_RBV" in metadata_dict['file'].keys() and \
+           "trARPES:XGS600:PressureAC:P_RD" in metadata_dict['file'].keys():
+            metadata_dict['sample']['temperature'] = metadata_dict['file']["trARPES:Carving:TEMP_RBV"]
+            metadata_dict['sample']['pressure'] = metadata_dict['file']["trARPES:XGS600:PressureAC:P_RD"]
+            
         #Meta data of the binning
         print("Collecting metadata from the binning...")
-        if mc_dict is not None:
-            momentum_dict = mc_dict.__dict__.copy()
+        if mc is not None:
+            momentum_dict = mc.__dict__.copy()
+            momentum_dict['calibration']['axes'] = np.array(momentum_dict['calibration']['axes'])
             momentum_dict['calibration']['coeffs'] = np.array(momentum_dict['calibration']['coeffs'])
             momentum_dict['adjust_params']['center'] = np.array(momentum_dict['adjust_params']['center'])
             momentum_dict['pcent'] = np.array(momentum_dict['pcent'])
+            # For registration metadata
+            momentum_dict['adjust_params']['translation_vector'] = np.array([momentum_dict['adjust_params']['xtrans'], \
+                                                                   momentum_dict['adjust_params']['ytrans'], 0.])
+            momentum_dict['adjust_params']['rotation_vector'] = np.array([0.,0., \
+                                                                momentum_dict['adjust_params']['angle']])
+            momentum_dict['adjust_params']['offset'] = np.concatenate((momentum_dict['adjust_params']['center'],[0.]))
+
             # to reduce the size of h5 file
             momentum_dict.pop('image')
             metadata_dict['momentum_correction'] = momentum_dict
-        if ec_dict is not None:
-            energy_dict = ec_dict.__dict__
+        if ec is not None:
+            energy_dict = ec.__dict__.copy()
             metadata_dict['energy_correction'] = energy_dict
             
         binning_dict = self.__dict__.copy()
@@ -2396,7 +2412,7 @@ class dataframeProcessor(MapParser):
         binning_dict.pop('dfield')
         metadata_dict['binning'] = binning_dict
         
-        #get fa size. Missing open and grid --> needs review
+        #get fa size. Missing open and grid --> issue added
         if 'KTOF:Apertures:m1.RBV' in metadata_dict['file'].keys() and \
            'KTOF:Apertures:m2.RBV' in metadata_dict['file'].keys():
             fa_in = metadata_dict['file']['KTOF:Apertures:m1:RBV']
@@ -2419,12 +2435,12 @@ class dataframeProcessor(MapParser):
             elif 6.6998<fa_in<6.7002 and 5.5498<fa_hor<5.5502 :
                 metadata_dict['instrument']['analyzer']['fa_size'] = 50.
             else:
-                metadata_dict['instrument']['analyzer']['fa_size'] = 200. #needs review
+                metadata_dict['instrument']['analyzer']['fa_size'] = 200. #issue added
 
         else: #assign a value commonly used or nan
-            metadata_dict['instrument']['analyzer']['fa_size'] = 200. #needs review
+            metadata_dict['instrument']['analyzer']['fa_size'] = 200. #issue added
 
-        #get ca size. Missing open and grid --> needs review
+        #get ca size. Missing open and grid --> issue added
         if 'KTOF:Apertures:m3.RBV' in metadata_dict['file'].keys():
             ca = metadata_dict['file']['KTOF:Apertures:m3:RBV']
             if 9.1220<ca<11.1220 :
@@ -2439,7 +2455,7 @@ class dataframeProcessor(MapParser):
                 metadata_dict['instrument']['analyzer']['ca_size'] = 50.
 
         else:
-            metadata_dict['instrument']['analyzer']['ca_size'] = 100. #needs review
+            metadata_dict['instrument']['analyzer']['ca_size'] = 100. #issue added
 
         default_units = {
         'X': 'step', 
