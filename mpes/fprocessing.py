@@ -12,7 +12,6 @@
 # =========================
 
 from __future__ import print_function, division
-from importlib.metadata import metadata
 from .base import FileCollection, MapParser, saveClassAttributes
 from .visualization import grid_histogram
 from . import utils as u, bandstructure as bs, base as b
