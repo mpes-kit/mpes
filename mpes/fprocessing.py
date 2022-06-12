@@ -12,6 +12,7 @@
 # =========================
 
 from __future__ import print_function, division
+from curses import meta
 from .base import FileCollection, MapParser, saveClassAttributes
 from .visualization import grid_histogram
 from . import utils as u, bandstructure as bs, base as b
@@ -1865,6 +1866,20 @@ class dataframeProcessor(MapParser):
         self.histogram = None
         self.histdict = {}
         self.npart = 0
+        self.aperture_config = {"2020-05-23T19:35:15":{'fa_size':{((0.6748,0.6752),(-0.4252,-0.4248)):200.,
+                                                    ((6.7397,6.7401),(-6.4505,-6.4501)):10.,
+                                                    ((-5.354,-5.3500),(5.4498,5.4502)):750.,
+                                                    ((6.7197,6.7201),(-0.4256,-0.4252)):20.,
+                                                    ((-5.7255,-5.7251),(-6.5605,-6.5601)):500.,
+                                                    ((0.7249,0.7253),(-6.4255,-6.4251)):100.,
+                                                    ((0.6997,0.7001),(5.5497,5.5501)):300.,
+                                                    ((6.6998,6.7002),(5.5498,5.5502)):50.,
+                                                    ((-5.8005,-5.8001),(-0.5252,-0.5248)):"grid",
+                                                    ((-10.400,-9.400),(-9.500,-8.900)):"open"},
+                                              'ca_size':{(9.1220,11.1220):50, (-0.0500,0.0500):300,
+                                                    (0.7000,1.5000):200,(5.1000,5.9000):100,
+                                                    (-5.500,-5.200):"grid",(-11.200,-10.800):"open"}
+                                               }}
 
         # Instantiate the MapParser class (contains parameters related to binning and image transformation)
         super().__init__(file_sorting=False, folder=paramfolder)
@@ -2355,7 +2370,8 @@ class dataframeProcessor(MapParser):
         filestart = dt.datetime.utcfromtimestamp(tsFrom/1000).isoformat()
         fileend = dt.datetime.utcfromtimestamp(tsTo/1000).isoformat()
         Epics_channels = ["KTOF:Lens:Extr:I", "trARPES:Carving:TEMP_RBV",
-                        "trARPES:XGS600:PressureAC:P_RD", "KTOF:Lens:UDLD:V", "KTOF:Lens:Sample:V"]
+                        "trARPES:XGS600:PressureAC:P_RD", "KTOF:Lens:UDLD:V", "KTOF:Lens:Sample:V",
+                        "KTOF:Apertures:m1.RBV", "KTOF:Apertures:m2.RBV", "KTOF:Apertures:m3.RBV"]
         
         channels_missing = set(Epics_channels)-set(metadata_dict['file'].keys())
         for channel in channels_missing:
@@ -2393,11 +2409,20 @@ class dataframeProcessor(MapParser):
             momentum_dict['adjust_params']['center'] = np.array(momentum_dict['adjust_params']['center'])
             momentum_dict['pcent'] = np.array(momentum_dict['pcent'])
             # For registration metadata
-            momentum_dict['adjust_params']['translation_vector'] = np.array([momentum_dict['adjust_params']['xtrans'], \
-                                                                   momentum_dict['adjust_params']['ytrans'], 0.])
-            momentum_dict['adjust_params']['rotation_vector'] = np.array([0.,0., \
-                                                                momentum_dict['adjust_params']['angle']])
+            momentum_dict['adjust_params']['x_trans'] = momentum_dict['adjust_params']['xtrans']
+            momentum_dict['adjust_params']['y_trans'] = momentum_dict['adjust_params']['ytrans']
+            momentum_dict['adjust_params']['x_vector'] = np.array([1., 0., 0.])
+            momentum_dict['adjust_params']['y_vector'] = np.array([0., 1., 0.])
+            momentum_dict['adjust_params']['angle_radians'] = momentum_dict['adjust_params']['angle']*np.pi/180
+            momentum_dict['adjust_params']['rotation_vector'] = np.array([0.,0.,1.])
             momentum_dict['adjust_params']['offset'] = np.concatenate((momentum_dict['adjust_params']['center'],[0.]))
+            # For momentum calibration
+            momentum_dict['calibration']['scale_kx'] = momentum_dict['calibration']['coeffs'][0]
+            momentum_dict['calibration']['scale_ky'] = momentum_dict['calibration']['coeffs'][1]
+            momentum_dict['offset_kx'] = momentum_dict['BZcenter'][0]
+            momentum_dict['offset_ky'] = momentum_dict['BZcenter'][1]
+            momentum_dict['calibration']['axis_kx'] = momentum_dict['calibration']['axes'][0]
+            momentum_dict['calibration']['axis_ky'] = momentum_dict['calibration']['axes'][1]
 
             # to reduce the size of h5 file
             momentum_dict.pop('image')
@@ -2410,51 +2435,85 @@ class dataframeProcessor(MapParser):
         binning_dict.pop('histdict')
         binning_dict.pop('dfield')
         metadata_dict['binning'] = binning_dict
-        
-        #get fa size. Missing open and grid --> issue added
-        if 'KTOF:Apertures:m1.RBV' in metadata_dict['file'].keys() and \
-           'KTOF:Apertures:m2.RBV' in metadata_dict['file'].keys():
-            fa_in = metadata_dict['file']['KTOF:Apertures:m1:RBV']
-            fa_hor = metadata_dict['file']['KTOF:Apertures:m2:RBV']
 
-            if 0.6748<fa_in<0.6752 and -0.4252<fa_hor<-0.4248 :
-                metadata_dict['instrument']['analyzer']['fa_size'] = 200.
-            elif 6.7397<fa_in<6.7401 and -6.4505<fa_hor<-6.4501 :
-                metadata_dict['instrument']['analyzer']['fa_size'] = 10.
-            elif -5.3504<fa_in<-5.3500 and 5.4498<fa_hor<5.4502 :
-                metadata_dict['instrument']['analyzer']['fa_size'] = 750.
-            elif 6.7197<fa_in<6.7201 and -0.4256<fa_hor<-0.4252 :
-                metadata_dict['instrument']['analyzer']['fa_size'] = 20.
-            elif -5.7255<fa_in<-5.7251 and -6.5605<fa_hor<-6.5601 :
-                metadata_dict['instrument']['analyzer']['fa_size'] = 500.
-            elif 0.7249<fa_in<0.7253 and -6.4255<fa_hor<-6.4251 :
-                metadata_dict['instrument']['analyzer']['fa_size'] = 100.
-            elif 0.6997<fa_in<0.7001 and 5.5497<fa_hor<5.5501 :
-                metadata_dict['instrument']['analyzer']['fa_size'] = 300.
-            elif 6.6998<fa_in<6.7002 and 5.5498<fa_hor<5.5502 :
-                metadata_dict['instrument']['analyzer']['fa_size'] = 50.
+        # To determine the timestamp from aperture_config
+        timestamp = None
+        stamps = sorted(list(self.aperture_config) + [filestart])
+        filestart_index = stamps.index(filestart)
+        if filestart_index != 0:
+            timestamp = stamps[stamps.index(filestart)-1] 
+
+        # aperture metadata for old files. Other alternative: store nothing at all.
+        metadata_dict['instrument']['analyzer']['fa_shape'] = "circle"
+        metadata_dict['instrument']['analyzer']['ca_shape'] = "circle"
+        metadata_dict['instrument']['analyzer']['fa_size'] = np.nan
+        metadata_dict['instrument']['analyzer']['ca_size'] = np.nan
+        # get field aperture shape and size
+        if {'KTOF:Apertures:m1.RBV','KTOF:Apertures:m2.RBV'}.issubset(set(metadata_dict['file'].keys())) \
+                                                                                            and timestamp:
+            fa_in = metadata_dict['file']['KTOF:Apertures:m1.RBV']
+            fa_hor = metadata_dict['file']['KTOF:Apertures:m2.RBV']
+            for k,v in self.aperture_config[timestamp]['fa_size'].items():
+                if k[0][0]<fa_in<k[0][1] and k[1][0]<fa_hor<k[1][1]:
+                    if isinstance(v, int):
+                        metadata_dict['instrument']['analyzer']['fa_size'] = v   
+                    else: # considering that only int and str type values are present
+                        metadata_dict['instrument']['analyzer']['fa_shape'] = v
+                    break
             else:
-                metadata_dict['instrument']['analyzer']['fa_size'] = 200. #issue added
+                print("Incorrect aperture config data. Field aperture size not found.")
 
-        else: #assign a value commonly used or nan
-            metadata_dict['instrument']['analyzer']['fa_size'] = 200. #issue added
+        # get contrast aperture shape and size
+        if {'KTOF:Apertures:m3.RBV'}.issubset(set(metadata_dict['file'].keys())) and timestamp:
+            ca = metadata_dict['file']['KTOF:Apertures:m3.RBV']
+            for k,v in self.aperture_config[timestamp]['ca_size'].items():
+                if k[0]<ca<k[1]:
+                    if isinstance(v, int):
+                        metadata_dict['instrument']['analyzer']['ca_size'] = v   
+                    else: # considering that only int and str type values are present
+                        metadata_dict['instrument']['analyzer']['ca_shape'] = v
+                    break
+            else:
+                print("Incorrect aperture config data. Contrast aperture size not found.") 
 
-        #get ca size. Missing open and grid --> issue added
-        if 'KTOF:Apertures:m3.RBV' in metadata_dict['file'].keys():
-            ca = metadata_dict['file']['KTOF:Apertures:m3:RBV']
-            if 9.1220<ca<11.1220 :
-                metadata_dict['instrument']['analyzer']['ca_size'] = 50.
-            if -0.0500<ca<0.0500 :
-                metadata_dict['instrument']['analyzer']['ca_size'] = 300.
-            if 0.7000<ca<1.5000 :
-                metadata_dict['instrument']['analyzer']['ca_size'] = 200.
-            if 5.1000<ca<5.9000 :
-                metadata_dict['instrument']['analyzer']['ca_size'] = 100.
-            else :
-                metadata_dict['instrument']['analyzer']['ca_size'] = 50.
+            # if 0.6748<fa_in<0.6752 and -0.4252<fa_hor<-0.4248 :
+            #     metadata_dict['instrument']['analyzer']['fa_size'] = 200.
+            # elif 6.7397<fa_in<6.7401 and -6.4505<fa_hor<-6.4501 :
+            #     metadata_dict['instrument']['analyzer']['fa_size'] = 10.
+            # elif -5.3504<fa_in<-5.3500 and 5.4498<fa_hor<5.4502 :
+            #     metadata_dict['instrument']['analyzer']['fa_size'] = 750.
+            # elif 6.7197<fa_in<6.7201 and -0.4256<fa_hor<-0.4252 :
+            #     metadata_dict['instrument']['analyzer']['fa_size'] = 20.
+            # elif -5.7255<fa_in<-5.7251 and -6.5605<fa_hor<-6.5601 :
+            #     metadata_dict['instrument']['analyzer']['fa_size'] = 500.
+            # elif 0.7249<fa_in<0.7253 and -6.4255<fa_hor<-6.4251 :
+            #     metadata_dict['instrument']['analyzer']['fa_size'] = 100.
+            # elif 0.6997<fa_in<0.7001 and 5.5497<fa_hor<5.5501 :
+            #     metadata_dict['instrument']['analyzer']['fa_size'] = 300.
+            # elif 6.6998<fa_in<6.7002 and 5.5498<fa_hor<5.5502 :
+            #     metadata_dict['instrument']['analyzer']['fa_size'] = 50.
+            # else:
+            #     metadata_dict['instrument']['analyzer']['fa_size'] = 200. #issue added
 
-        else:
-            metadata_dict['instrument']['analyzer']['ca_size'] = 100. #issue added
+        # else: # get values from archiver
+        #     metadata_dict['instrument']['analyzer']['fa_size'] = 200. #issue added
+
+        # #get ca size. Missing open and grid --> issue added
+        # if 'KTOF:Apertures:m3.RBV' in metadata_dict['file'].keys():
+        #     ca = metadata_dict['file']['KTOF:Apertures:m3:RBV']
+        #     if 9.1220<ca<11.1220 :
+        #         metadata_dict['instrument']['analyzer']['ca_size'] = 50.
+        #     if -0.0500<ca<0.0500 :
+        #         metadata_dict['instrument']['analyzer']['ca_size'] = 300.
+        #     if 0.7000<ca<1.5000 :
+        #         metadata_dict['instrument']['analyzer']['ca_size'] = 200.
+        #     if 5.1000<ca<5.9000 :
+        #         metadata_dict['instrument']['analyzer']['ca_size'] = 100.
+        #     else :
+        #         metadata_dict['instrument']['analyzer']['ca_size'] = 50.
+
+        # else: # Get values from archiver
+        #     metadata_dict['instrument']['analyzer']['ca_size'] = 100.
 
         default_units = {
         'X': 'step', 
