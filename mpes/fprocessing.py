@@ -2440,7 +2440,7 @@ class dataframeProcessor(MapParser):
         stamps = sorted(list(self.aperture_config) + [filestart])
         filestart_index = stamps.index(filestart)
         if filestart_index != 0:
-            timestamp = stamps[stamps.index(filestart)-1] 
+            timestamp = stamps[filestart_index-1] 
 
         # aperture metadata for old files. Other alternative: store nothing at all.
         metadata_dict['instrument']['analyzer']['fa_shape'] = "circle"
@@ -2460,10 +2460,10 @@ class dataframeProcessor(MapParser):
                         metadata_dict['instrument']['analyzer']['fa_shape'] = v
                     break
             else:
-                print("Incorrect aperture config data. Field aperture size not found.")
+                print("Field aperture size not found.")
 
         # get contrast aperture shape and size
-        if {'KTOF:Apertures:m3.RBV'}.issubset(set(metadata_dict['file'].keys())) and timestamp:
+        if 'KTOF:Apertures:m3.RBV' in metadata_dict['file'] and timestamp:
             ca = metadata_dict['file']['KTOF:Apertures:m3.RBV']
             for k,v in self.aperture_config[timestamp]['ca_size'].items():
                 if k[0]<ca<k[1]:
@@ -2473,7 +2473,7 @@ class dataframeProcessor(MapParser):
                         metadata_dict['instrument']['analyzer']['ca_shape'] = v
                     break
             else:
-                print("Incorrect aperture config data. Contrast aperture size not found.") 
+                print("Contrast aperture size not found.") 
 
         default_units = {
         'X': 'step', 
