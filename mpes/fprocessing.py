@@ -2373,7 +2373,8 @@ class dataframeProcessor(MapParser):
         fileend = dt.datetime.utcfromtimestamp(tsTo/1000).isoformat()
         Epics_channels = ["KTOF:Lens:Extr:I", "trARPES:Carving:TEMP_RBV",
                         "trARPES:XGS600:PressureAC:P_RD", "KTOF:Lens:UDLD:V", "KTOF:Lens:Sample:V",
-                        "KTOF:Apertures:m1.RBV", "KTOF:Apertures:m2.RBV", "KTOF:Apertures:m3.RBV"]
+                        "KTOF:Apertures:m1.RBV", "KTOF:Apertures:m2.RBV", "KTOF:Apertures:m3.RBV"] + \
+                        [f"trARPES:Carving:{x}.RBV" for x in ['TRX','TRY','TRZ','THT','PHI','OMG']]
         
         channels_missing = set(Epics_channels)-set(metadata_dict['file'].keys())
         for channel in channels_missing:
@@ -2382,8 +2383,11 @@ class dataframeProcessor(MapParser):
                            channel + "&from=" + filestart + "Z&to=" + fileend + "Z"
                 req = urlopen(req_str)
                 data = json.load(req)
-                vals = [x['val'] for x in data[0]['data']]
-                metadata_dict['file'][f'{channel}'] = np.average(np.array(vals))   
+                if data:
+                    vals = [x['val'] for x in data[0]['data']]
+                    metadata_dict['file'][f'{channel}'] = np.average(np.array(vals))
+                else:
+                    print(f"Data for channel {channel} doesn't exist for time {filestart}")     
             except urllib.error.HTTPError as e:
                 print(f"Incorrect URL for the archive channel {channel}. "
                      "Make sure that the channel name and file start and end times are correct.")
@@ -2406,13 +2410,10 @@ class dataframeProcessor(MapParser):
         print("Collecting metadata from the binning...")
         if mc is not None:
             momentum_dict = mc.__dict__.copy()
-            momentum_dict['calibration']['axes'] = np.array(momentum_dict['calibration']['axes'])
             momentum_dict['calibration']['coeffs'] = np.array(momentum_dict['calibration']['coeffs'])
             momentum_dict['adjust_params']['center'] = np.array(momentum_dict['adjust_params']['center'])
             momentum_dict['pcent'] = np.array(momentum_dict['pcent'])
             # For registration metadata
-            momentum_dict['adjust_params']['x_trans'] = momentum_dict['adjust_params']['xtrans']
-            momentum_dict['adjust_params']['y_trans'] = momentum_dict['adjust_params']['ytrans']
             momentum_dict['adjust_params']['x_vector'] = np.array([1., 0., 0.])
             momentum_dict['adjust_params']['y_vector'] = np.array([0., 1., 0.])
             momentum_dict['adjust_params']['angle_radians'] = momentum_dict['adjust_params']['angle']*np.pi/180
@@ -2428,14 +2429,24 @@ class dataframeProcessor(MapParser):
 
             # to reduce the size of h5 file
             momentum_dict.pop('image')
+            momentum_dict['calibration'].pop('axes') 
+            momentum_dict['calibration'].pop('grid') 
+            momentum_dict.pop('slice')
+            momentum_dict.pop('slice_transformed')
+            momentum_dict.pop('splinewarp')
             metadata_dict['momentum_correction'] = momentum_dict
+
         if ec is not None:
             energy_dict = ec.__dict__.copy()
+            energy_dict.pop('traces')
+            energy_dict.pop('traces_normed')
+            energy_dict.pop('pathcorr')
             metadata_dict['energy_correction'] = energy_dict
             
         binning_dict = self.__dict__.copy()
         binning_dict.pop('histdict')
         binning_dict.pop('dfield')
+        binning_dict.pop('edf')
         metadata_dict['binning'] = binning_dict
 
         # To determine the timestamp from aperture_config
