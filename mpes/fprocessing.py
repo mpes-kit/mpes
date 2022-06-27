@@ -48,6 +48,21 @@ import h5py
 
 N_CPU = ps.cpu_count()
 
+aperture_dict = {"2020-05-23T19:35:15":{"fa_size":{200.:((0.6748,0.6752),(-0.4252,-0.4248)),
+                                                  10.:((6.7397,6.7401),(-6.4505,-6.4501)),
+                                                  750.:((-5.354,-5.3500),(5.4498,5.4502)),
+                                                  20.:((6.7197,6.7201),(-0.4256,-0.4252)),
+                                                  500.:((-5.7255,-5.7251),(-6.5605,-6.5601)),
+                                                  100.:((0.7249,0.7253),(-6.4255,-6.4251)),
+                                                  300.:((0.6997,0.7001),(5.5497,5.5501)),
+                                                  50.:((6.6998,6.7002),(5.5498,5.5502)),
+                                                  "grid":((-5.8005,-5.8001),(-0.5252,-0.5248)),
+                                                  "open":((-10.400,-9.400),(-9.500,-8.900))},
+                                        "ca_size":{50.:(9.1220,11.1220), 300.:(-0.0500,0.0500),
+                                                   200.:(0.7000,1.5000),100:(5.1000,5.9000),
+                                                   "grid":(-5.500,-5.200),"open":(-11.200,-10.800)
+                }}}
+
 # ================= #
 # Utility functions #
 # ================= #
@@ -1857,7 +1872,8 @@ class dataframeProcessor(MapParser):
     Processs the parquet file converted from single events data.
     """
 
-    def __init__(self, datafolder, paramfolder='', datafiles=[], ncores=None):
+    def __init__(self, datafolder, paramfolder='', datafiles=[],\
+                 ncores=None, aperture_config=aperture_dict):
 
         self.datafolder = datafolder
         self.paramfolder = paramfolder
@@ -1865,20 +1881,7 @@ class dataframeProcessor(MapParser):
         self.histogram = None
         self.histdict = {}
         self.npart = 0
-        self.aperture_config = {"2020-05-23T19:35:15":{'fa_size':{((0.6748,0.6752),(-0.4252,-0.4248)):200.,
-                                                    ((6.7397,6.7401),(-6.4505,-6.4501)):10.,
-                                                    ((-5.354,-5.3500),(5.4498,5.4502)):750.,
-                                                    ((6.7197,6.7201),(-0.4256,-0.4252)):20.,
-                                                    ((-5.7255,-5.7251),(-6.5605,-6.5601)):500.,
-                                                    ((0.7249,0.7253),(-6.4255,-6.4251)):100.,
-                                                    ((0.6997,0.7001),(5.5497,5.5501)):300.,
-                                                    ((6.6998,6.7002),(5.5498,5.5502)):50.,
-                                                    ((-5.8005,-5.8001),(-0.5252,-0.5248)):"grid",
-                                                    ((-10.400,-9.400),(-9.500,-8.900)):"open"},
-                                              'ca_size':{(9.1220,11.1220):50, (-0.0500,0.0500):300,
-                                                    (0.7000,1.5000):200,(5.1000,5.9000):100,
-                                                    (-5.500,-5.200):"grid",(-11.200,-10.800):"open"}
-                                               }}
+        self.aperture_config = aperture_config
 
         # Instantiate the MapParser class (contains parameters related to binning and image transformation)
         super().__init__(file_sorting=False, folder=paramfolder)
@@ -2443,6 +2446,8 @@ class dataframeProcessor(MapParser):
             timestamp = stamps[filestart_index-1] 
 
         # aperture metadata for old files. Other alternative: store nothing at all.
+        if 'instrument' not in metadata_dict.keys():
+            metadata_dict['instrument'] = {'analyzer':{}}
         metadata_dict['instrument']['analyzer']['fa_shape'] = "circle"
         metadata_dict['instrument']['analyzer']['ca_shape'] = "circle"
         metadata_dict['instrument']['analyzer']['fa_size'] = np.nan
@@ -2453,11 +2458,11 @@ class dataframeProcessor(MapParser):
             fa_in = metadata_dict['file']['KTOF:Apertures:m1.RBV']
             fa_hor = metadata_dict['file']['KTOF:Apertures:m2.RBV']
             for k,v in self.aperture_config[timestamp]['fa_size'].items():
-                if k[0][0]<fa_in<k[0][1] and k[1][0]<fa_hor<k[1][1]:
-                    if isinstance(v, int):
-                        metadata_dict['instrument']['analyzer']['fa_size'] = v   
+                if v[0][0]<fa_in<v[0][1] and v[1][0]<fa_hor<v[1][1]:
+                    if isinstance(k, int):
+                        metadata_dict['instrument']['analyzer']['fa_size'] = k   
                     else: # considering that only int and str type values are present
-                        metadata_dict['instrument']['analyzer']['fa_shape'] = v
+                        metadata_dict['instrument']['analyzer']['fa_shape'] = k
                     break
             else:
                 print("Field aperture size not found.")
@@ -2466,11 +2471,11 @@ class dataframeProcessor(MapParser):
         if 'KTOF:Apertures:m3.RBV' in metadata_dict['file'] and timestamp:
             ca = metadata_dict['file']['KTOF:Apertures:m3.RBV']
             for k,v in self.aperture_config[timestamp]['ca_size'].items():
-                if k[0]<ca<k[1]:
-                    if isinstance(v, int):
-                        metadata_dict['instrument']['analyzer']['ca_size'] = v   
+                if v[0]<ca<v[1]:
+                    if isinstance(k, int):
+                        metadata_dict['instrument']['analyzer']['ca_size'] = k   
                     else: # considering that only int and str type values are present
-                        metadata_dict['instrument']['analyzer']['ca_shape'] = v
+                        metadata_dict['instrument']['analyzer']['ca_shape'] = k
                     break
             else:
                 print("Contrast aperture size not found.") 
@@ -2574,14 +2579,13 @@ class dataframeProcessor(MapParser):
                 
                 def recursive_write_metadata(h5group, node):
                     for key, item in node.items():
-                        if isinstance(item, (np.ndarray, np.int64, np.float64, str, bytes, int, float, list)):
+                        if isinstance(item, (np.ndarray, np.int64, np.float64, str,\
+                            bytes, int, float, list, tuple)):
                             try:
-                                h5group.create_dataset(key, data=item)
+                                h5group.create_dataset(str(key), data=item)
                             except TypeError:
-                                h5group.create_dataset(key, data=str(item))
+                                h5group.create_dataset(str(key), data=str(item))
                                 print("saved " + key + " as string")
-                            except AttributeError:
-                                h5group.create_dataset(f"{h5group.name} "[1:]+str(item), data=str(key)+":"+str(item))
                         elif isinstance(item, dict):
                             print(key)
                             group = h5group.create_group(key)
@@ -2592,11 +2596,8 @@ class dataframeProcessor(MapParser):
                                 print("saved " + key + " as string")
                             except:
                                 raise ValueError('Cannot save %s type'%type(item))
-                
-                
-        
+
                 recursive_write_metadata(meta_group, data.attrs['metadata'])
-                
         print('Saving complete!')
 
     def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
