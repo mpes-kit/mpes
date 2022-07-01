@@ -2387,6 +2387,7 @@ class dataframeProcessor(MapParser):
                     vals = [x['val'] for x in data[0]['data']]
                     metadata_dict['file'][f'{channel}'] = np.average(np.array(vals))
                 else:
+                    metadata_dict['file'][f'{channel}'] = np.nan
                     print(f"Data for channel {channel} doesn't exist for time {filestart}")     
             except urllib.error.HTTPError as e:
                 print(f"Incorrect URL for the archive channel {channel}. "
@@ -2408,7 +2409,7 @@ class dataframeProcessor(MapParser):
             
         #Meta data of the binning
         print("Collecting metadata from the binning...")
-        if mc is not None:
+        if mc:
             momentum_dict = mc.__dict__.copy()
             momentum_dict['calibration']['coeffs'] = np.array(momentum_dict['calibration']['coeffs'])
             momentum_dict['adjust_params']['center'] = np.array(momentum_dict['adjust_params']['center'])
@@ -2436,7 +2437,7 @@ class dataframeProcessor(MapParser):
             momentum_dict.pop('splinewarp')
             metadata_dict['momentum_correction'] = momentum_dict
 
-        if ec is not None:
+        if ec:
             energy_dict = ec.__dict__.copy()
             energy_dict.pop('traces')
             energy_dict.pop('traces_normed')
