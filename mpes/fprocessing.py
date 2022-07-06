@@ -45,6 +45,7 @@ import urllib
 import json
 import xarray as xr
 import h5py
+import copy
 
 N_CPU = ps.cpu_count()
 
@@ -2410,7 +2411,7 @@ class dataframeProcessor(MapParser):
         #Meta data of the binning
         print("Collecting metadata from the binning...")
         if mc:
-            momentum_dict = mc.__dict__.copy()
+            momentum_dict = copy.deepcopy(mc.__dict__)
             momentum_dict['calibration']['coeffs'] = np.array(momentum_dict['calibration']['coeffs'])
             momentum_dict['adjust_params']['center'] = np.array(momentum_dict['adjust_params']['center'])
             momentum_dict['pcent'] = np.array(momentum_dict['pcent'])
@@ -2438,13 +2439,13 @@ class dataframeProcessor(MapParser):
             metadata_dict['momentum_correction'] = momentum_dict
 
         if ec:
-            energy_dict = ec.__dict__.copy()
+            energy_dict = copy.deepcopy(ec.__dict__)
             energy_dict.pop('traces')
             energy_dict.pop('traces_normed')
             energy_dict.pop('pathcorr')
             metadata_dict['energy_correction'] = energy_dict
             
-        binning_dict = self.__dict__.copy()
+        binning_dict = copy.deepcopy(self.__dict__)
         binning_dict.pop('histdict')
         binning_dict.pop('dfield')
         binning_dict.pop('edf')
