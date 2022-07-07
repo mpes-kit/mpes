@@ -2445,10 +2445,10 @@ class dataframeProcessor(MapParser):
             energy_dict.pop('pathcorr')
             metadata_dict['energy_correction'] = energy_dict
             
-        binning_dict = copy.deepcopy(self.__dict__)
-        binning_dict.pop('histdict')
+        binning_dict = copy.copy(self.__dict__) #Only works if the keys in root tree are deleted
+        binning_dict.pop('histdict') 
         binning_dict.pop('dfield')
-        binning_dict.pop('edf')
+        binning_dict.pop('edf') #Deepcopy doesn't work because of edf data type
         metadata_dict['binning'] = binning_dict
 
         # To determine the timestamp from aperture_config
