@@ -639,6 +639,8 @@ def fit_energyCalibation(pos, vals, refid=0, Eref=None, t=None, **kwds):
         :coeffs: Fitted function coefficents.
         :axis: Fitted energy axis.
     """
+    binwidth = kwds.pop('binwidth', 4.125e-12)
+    binning = kwds.pop('binning', 1)
 
     vals = np.array(vals)
     nvals = vals.size
@@ -648,22 +650,22 @@ def fit_energyCalibation(pos, vals, refid=0, Eref=None, t=None, **kwds):
                 Reset to the largest allowed number.')
         refid = nvals - 1
 
-    def residual(pars, time, data):
-        model =  base.tof2ev(pars['d'], pars['t0'], pars['E0'], time)
+    def residual(pars, time, data, binwidth=binwidth, binning=binning):
+        model =  base.tof2ev(pars['d'], pars['t0'], pars['E0'], time, binwidth=binwidth, binning=binning)
         if data is None:
             return model
         return model-data
 
     pars = Parameters()
-    pars.add(name="d", value=1)
-    pars.add(name="t0", value=1E5, max=min(pos)-1)
-    pars.add(name="E0", value=min(vals))
+    pars.add(name="d", value=kwds.pop('d_init', 1))
+    pars.add(name="t0", value=kwds.pop('t0_init', 1E-6), max=(min(pos)-1)*binwidth*2**binning)
+    pars.add(name="E0", value=kwds.pop('E0_init',min(vals)))
     fit = Minimizer(residual, pars, fcn_args=(pos, vals))
     result = fit.leastsq()
     report_fit(result)  
 
     # Construct the calibrating function
-    pfunc = partial(base.tof2ev, result.params['d'].value, result.params['t0'].value)
+    pfunc = partial(base.tof2ev, result.params['d'].value, result.params['t0'].value, binwidth=binwidth, binning=binning)
 
     # Return results according to specification
     ecalibdict = {}
