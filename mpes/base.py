@@ -432,7 +432,7 @@ def tof2evpoly(a, E0, t):
     return E
 
 
-def tof2ev(d, t0, E0, t):
+def tof2ev(d, t0, E0, t, binwidth=4.125e-12, binning=1):
     """
     d/(t-t0) expression of the time-of-flight to electron volt
     conversion formula.
@@ -453,7 +453,7 @@ def tof2ev(d, t0, E0, t):
     """
 
     #    m_e/2 [eV]            bin width [s]
-    E = 2.84281e-12*(d/((t-t0)*0.00823e-9))**2 + E0
+    E = 2.84281e-12*(d/(t*binwidth*2**binning-t0))**2 + E0
 
     return E
 
