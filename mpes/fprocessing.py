@@ -38,8 +38,161 @@ import natsort as nts
 from functools import reduce
 from funcy import project
 from threadpoolctl import threadpool_limits
+from dask import compute
+import datetime as dt
+from urllib.request import urlopen
+import urllib
+import json
+import xarray as xr
+import h5py
+import copy
 
 N_CPU = ps.cpu_count()
+
+aperture_dict = {
+    "2018-01-23T19:35:15":{
+        "fa_size":{750.:((-3.0, -1.4), (-5.4, -4.6)),
+                   "grid":((-3.0, -1.4), (0.15, 1.75)),
+                   1500.:((-3.0, -1.4), (6.25, 7.75)),
+                   200.:((3.3, 4.4), (-5.4, -4.6)),
+                   500.:((3.3, 4.4), (0.15, 1.75)),
+                   1000.:((3.3, 4.4), (6.25, 7.75)),
+                   20.:((9.6, 10.1), (-5.4, -4.6)),
+                   50.:((9.6, 10.1), (0.15, 1.75)),
+                   100.:((9.6, 10.1), (6.25, 7.75)),
+                   "open":((-10.4, -9.4), (-9.5, -8.9))},
+        "ca_size":{50.:(8.0, 8.4), 200.:(-0.5, -0.9),
+                   100:(3.4, 3.8), "grid":(-5.3, -5.9),
+                   "open":(-12.0, -10.8)}},
+    "2020-01-23T19:35:15":{
+        "fa_size":{750.:((-4.8, -6.2), (5.0, 6.0)),
+                  "grid":((-4.8, -6.2), (-0.3, -0.7)),
+                  500.:((-4.8, -6.2), (-6.0, -7.0)),
+                  200.:((0.5, 0.9), (-0.3, -0.7)),
+                  100.:((0.5, 0.9), (-6.0, -7.0)),
+                  300.:((0.5, 0.9), (5.0, 6.0)),
+                  10.:((6.5, 6.9), (-6.0, -7.0)),  
+                  20.:((6.5, 6.9), (-0.3, -0.7)),
+                  50.:((6.5, 6.9), (5.0, 6.0)),
+                  "open":((-10.4, -9.4), (-9.5, -8.9))},
+        "ca_size":{50.:(9.0, 11.0), 300.:(-0.1, 0.1),
+                   200.:(0.7, 1.5), 100:(5.1, 5.9),
+                   "grid":(-5.5, -5.2), "open":(-11.2, -10.8)}}
+    }
+
+lens_mode_dict = {
+    "6kV_kmodem4.0_20VTOF_v3.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200, "UFA": 600.0,
+        "Z1": 2452.9, "Z2": 1489.9, "A": 420.07, "B": 2494.8,
+        "C": 489.2, "D": 228.05, "E": 113.82, "F": 54.232,
+        "G": 20.0, "H": 25.5, "I": 36.0, "TOF": 20.0,
+        "MCPfront": 20.0
+    },
+    "6kV_kmodem4.0_30VTOF_453ns_focus.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 403.07, "B": 2500, "C": 422.25,
+        "D": 208.88, "E": 199.49, "F": 68.735,
+        "G": 30.0, "H": 30.0, "I": 44.5,
+        "TOF": 30.0, "MCPfront": 30.0
+    },
+    "6kV_kmodem4.0_30VTOF_453ns_focus_Gated_22.5V_FMCP.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2450, "Z2": 1489.9,
+        "A": 403.07, "B": 2500, "C": 422.25,
+        "D": 208.88, "E": 199.49, "F": 69.235,
+        "G": 30.0, "H": 30.0, "I": 44.5,
+        "TOF": 30.0, "MCPfront": 22.5
+    },
+    "6kV_kmodem4.2_30VTOF_453ns_focus_Gated_21.0V_FMCP.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2450, "Z2": 1489.9,
+        "A": 403.07, "B": 2500, "C": 422.25,
+        "D": 208.88, "E": 199.49, "F": 69.235,
+        "G": 30.0, "H": 30.0, "I": 44.5,
+        "TOF": 30.0, "MCPfront": 21.0
+    },
+    "6kV_kmodem1_20VTOF.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 943.97, "B": 1621.97, "C": 462.98,
+        "D": 366.31, "E": 418.83, "F": 112.99,
+        "G": 20.0, "H": 23.75, "I": 22.25,
+        "TOF": 20.0, "MCPfront": 20.0
+    },
+    "6kV_kmodem1.4_20VTOF.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 709.05, "B": 1769.3, "C": 431.03,
+        "D": 217.72, "E": 346.9, "F": 92.547,
+        "G": 20.0, "H": 22.0, "I": 24.75,
+        "TOF": 20.0, "MCPfront": 20.0
+    },
+    "6kV_kmodem2.0_20VTOF.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 772.38, "B": 2265.4, "C": 496.39,
+        "D": 228.83, "E": 246.37, "F": 50.317,
+        "G": 20.0, "H": 20.75, "I": 22.75,
+        "TOF": 20.0, "MCPfront": 20.0
+    },
+    "6kV_kmodem2.8_20VTOF_v2.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 796.85, "B": 2471.0, "C": 403.69,
+        "D": 196.85, "E": 191.16, "F": 59.557,
+        "G": 20.0, "H": 28.75, "I": 20.75,
+        "TOF": 20.0, "MCPfront": 20.0
+    },
+    "6kV_kmodem2.0_30VTOF_MoTe2_2340VMCP.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 784.58, "B": 3253.0, "C": 752.07,
+        "D": 682.18, "E": 200.93, "F": 68.557,
+        "G": 30.0, "H": 30.0, "I": 44.5,
+        "TOF": 30.0, "MCPfront": 30.0
+    },
+    "6kV_kmodem4.0_30VTOF_WTe2_2340VMCP.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2450, "Z2": 1489.9,
+        "A": 403.07, "B": 2500, "C": 422.25,
+        "D": 208.88, "E": 199.49, "F": 68.735,
+        "G": 30.0, "H": 30.0, "I": 44.5,
+        "TOF": 30.0, "MCPfront": 30.0
+    },
+    "6kV_momentum_Gerd's_setting.sav": {
+        "Extr": 6000.0, "Foc": 168, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 800.0, "B": 600.0, "C": 300.0,
+        "D": 130.0, "E": 60.0, "F": 30.0,
+        "G": 12.5, "H": 35.0, "I": 77.25,
+        "TOF": 25.0, "MCPfront": 30.0
+    },
+    "7kV_momentum_Gerd's_setting.sav": {
+        "Extr": 7000.0, "Foc": 244, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 800.0, "B": 600.0, "C": 300.0,
+        "D": 130.0, "E": 60.0, "F": 30.0,
+        "G": 12.5, "H": 35.0, "I": 77.25,
+        "TOF": 25.0, "MCPfront": 30.0
+    },
+    "6kV_spatialx4_110mumFOV_20VTOF.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 518.64, "B": 2198.97, "C": 76.771,
+        "D": 256.4, "E": 554.45, "F": 47.91,
+        "G": 20.0, "H": 35.0, "I": 42.25,
+        "TOF": 20.0, "MCPfront": 20.0
+    },
+    "6kV_spatialx4_110mumFOV_30VTOF.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 302.44, "B": 2241.7, "C": 84.478,
+        "D": 346.38, "E": 699.28, "F": 83.378,
+        "G": 30.0, "H": 35.0, "I": 48.75,
+        "TOF": 30.0, "MCPfront": 30.0
+    }
+}
 
 # ================= #
 # Utility functions #
@@ -1850,7 +2003,8 @@ class dataframeProcessor(MapParser):
     Processs the parquet file converted from single events data.
     """
 
-    def __init__(self, datafolder, paramfolder='', datafiles=[], ncores=None):
+    def __init__(self, datafolder, paramfolder='', datafiles=[],\
+                 ncores=None, aperture_config=aperture_dict, lens_config=lens_mode_dict):
 
         self.datafolder = datafolder
         self.paramfolder = paramfolder
@@ -1858,6 +2012,10 @@ class dataframeProcessor(MapParser):
         self.histogram = None
         self.histdict = {}
         self.npart = 0
+        self.config = {
+            "aperture": {**aperture_config},
+            "lens_mode": {**lens_config}
+        }
 
         # Instantiate the MapParser class (contains parameters related to binning and image transformation)
         super().__init__(file_sorting=False, folder=paramfolder)
@@ -2296,6 +2454,329 @@ class dataframeProcessor(MapParser):
 
         if ret:
             return self.histdict
+
+    def gather_metadata(self, metadata_dict=None, mc=None, ec=None):
+        """ Gathers additional metadata from the source file and updates 
+        the existing metadata if provided.
+        Parameters:
+            metadata: Initial manual metadata (optional)
+            ec: Energy calibration object from the analysis routine in pre-processing
+            mc: Momentum calibration object from the analysis routine in pre-processing
+        Returns: xarray object containing the updated metadata 
+            
+        """
+        if metadata_dict is None:
+            metadata_dict = {}
+        print("Gathering metadata from different locations")
+        # Read events in with ms time stamps
+        print("Collecting time stamps...")
+        dfpart = self.edf.get_partition(0)
+        all_data = np.array(compute(dfpart.values))[0,:,:]
+        timeStamps = all_data[:,6]
+        tsFrom = timeStamps[0]
+        dfpart = self.edf.get_partition(len(self.datafiles)-1)
+        all_data = np.array(compute(dfpart.values))[0,:,:]
+        timeStamps = all_data[:,6]
+        tsTo = timeStamps[len(timeStamps)-1]
+        metadata_dict['timing'] = {'acquisition_start': dt.datetime.utcfromtimestamp(tsFrom/1000).replace(tzinfo=dt.timezone.utc).isoformat(),
+                            'acquisition_start_ts': tsFrom/1000,
+                            'acquisition_stop': dt.datetime.utcfromtimestamp(tsTo/1000).replace(tzinfo=dt.timezone.utc).isoformat(),
+                            'acquisition_stop_ts': tsTo/1000,
+                            'acquisition_duration': int((tsTo - tsFrom)/1000),
+                            'collection_time': float((tsTo - tsFrom)/1000),
+                            'bin_array_creation': dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc).isoformat(),
+                            'bin_array_creation_ts': dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc).timestamp()
+                            }
+        # import meta data from data file
+        file0 = self.datafiles[0]
+        if 'file' not in metadata_dict.keys():  # If already present, the value is assumed to be a dictionary
+            metadata_dict['file'] = {}
+        
+        print("Collecting lens voltages etc...")
+        with h5py.File(file0, 'r') as f:
+            for k,v in f.attrs.items():
+                if "VSet" in k:  # Changing VSet to V in dict keys
+                    k = k[:-3]
+                metadata_dict['file'][k] = v
+
+        metadata_dict['entry_identifier'] = self.datafolder[13:-2]
+
+        print("Collecting data from the EPICS archive...")
+        # Get metadata from Epics archive if not present already
+        filestart = dt.datetime.utcfromtimestamp(tsFrom/1000).isoformat()
+        fileend = dt.datetime.utcfromtimestamp(tsTo/1000).isoformat()
+        Epics_channels = ["KTOF:Lens:Extr:I", "trARPES:Carving:TEMP_RBV",
+                        "trARPES:XGS600:PressureAC:P_RD", "KTOF:Lens:UDLD:V", "KTOF:Lens:Sample:V",
+                        "KTOF:Apertures:m1.RBV", "KTOF:Apertures:m2.RBV", "KTOF:Apertures:m3.RBV"] + \
+                        [f"trARPES:Carving:{x}.RBV" for x in ['TRX','TRY','TRZ','THT','PHI','OMG']]
+        
+        channels_missing = set(Epics_channels)-set(metadata_dict['file'].keys())
+        for channel in channels_missing:
+            try:
+                req_str = "http://aa0.fhi-berlin.mpg.de:17668/retrieval/data/getData.json?pv=" + \
+                           channel + "&from=" + filestart + "Z&to=" + fileend + "Z"
+                req = urlopen(req_str)
+                data = json.load(req)
+                if data:
+                    vals = [x['val'] for x in data[0]['data']]
+                    metadata_dict['file'][f'{channel}'] = np.average(np.array(vals))
+                else:
+                    metadata_dict['file'][f'{channel}'] = np.nan
+                    print(f"Data for channel {channel} doesn't exist for time {filestart}")     
+            except urllib.error.HTTPError as e:
+                print(f"Incorrect URL for the archive channel {channel}. "
+                     "Make sure that the channel name and file start and end times are correct.")
+                print("Error code: ", e)
+            except urllib.error.URLError as e:
+                print(f"Cannot access the archive URL for channel {channel}. "
+                      f"Make sure that you are within the FHI network."
+                      f"Skipping over channels {channels_missing}.")
+                print("Error code: ", e)
+                break
+        
+        if "sample" not in metadata_dict.keys():
+            metadata_dict['sample'] = {}
+        if "trARPES:Carving:TEMP_RBV" in metadata_dict['file'].keys() and \
+           "trARPES:XGS600:PressureAC:P_RD" in metadata_dict['file'].keys():
+            metadata_dict['sample']['temperature'] = metadata_dict['file']["trARPES:Carving:TEMP_RBV"]
+            metadata_dict['sample']['pressure'] = metadata_dict['file']["trARPES:XGS600:PressureAC:P_RD"]
+            
+        # Meta data of the binning
+        print("Collecting metadata from the binning...")
+        if mc:
+            momentum_dict = copy.deepcopy(mc.__dict__)
+            momentum_dict['calibration']['coeffs'] = np.array(momentum_dict['calibration']['coeffs'])
+            momentum_dict['adjust_params']['center'] = np.array(momentum_dict['adjust_params']['center'])
+            momentum_dict['pcent'] = np.array(momentum_dict['pcent'])
+            # For registration metadata
+            momentum_dict['adjust_params']['x_vector'] = np.array([1., 0., 0.])
+            momentum_dict['adjust_params']['y_vector'] = np.array([0., 1., 0.])
+            momentum_dict['adjust_params']['angle_radians'] = momentum_dict['adjust_params']['angle']*np.pi/180
+            momentum_dict['adjust_params']['rotation_vector'] = np.array([0.,0.,1.])
+            momentum_dict['adjust_params']['offset'] = np.concatenate((momentum_dict['adjust_params']['center'],[0.]))
+            # For momentum calibration
+            momentum_dict['calibration']['scale_kx'] = momentum_dict['calibration']['coeffs'][0]
+            momentum_dict['calibration']['scale_ky'] = momentum_dict['calibration']['coeffs'][1]
+            momentum_dict['offset_kx'] = momentum_dict['BZcenter'][0]
+            momentum_dict['offset_ky'] = momentum_dict['BZcenter'][1]
+            momentum_dict['calibration']['axis_kx'] = momentum_dict['calibration']['axes'][0]
+            momentum_dict['calibration']['axis_ky'] = momentum_dict['calibration']['axes'][1]
+
+            # to reduce the size of h5 file
+            momentum_dict.pop('image')
+            momentum_dict['calibration'].pop('axes') 
+            momentum_dict['calibration'].pop('grid') 
+            momentum_dict.pop('slice')
+            momentum_dict.pop('slice_transformed')
+            momentum_dict.pop('splinewarp')
+            metadata_dict['momentum_correction'] = momentum_dict
+
+        if ec:
+            energy_dict = copy.deepcopy(ec.__dict__)
+            energy_dict.pop('traces')
+            energy_dict.pop('traces_normed')
+            energy_dict.pop('pathcorr')
+            metadata_dict['energy_correction'] = energy_dict
+            
+        binning_dict = copy.copy(self.__dict__)  # Only works if the keys in root tree are deleted
+        binning_dict.pop('histdict') 
+        binning_dict.pop('dfield')
+        binning_dict.pop('edf')  # Deepcopy doesn't work because of edf data type
+        metadata_dict['binning'] = binning_dict
+
+        # To determine the timestamp in aperture_config
+        stamps = sorted(list(self.config["aperture"]) + [filestart])
+        filestart_index = stamps.index(filestart)
+        timestamp = stamps[filestart_index-1] 
+
+        # Aperture metadata
+        if 'instrument' not in metadata_dict.keys():
+            metadata_dict['instrument'] = {'analyzer':{}}
+        metadata_dict['instrument']['analyzer']['fa_shape'] = "circle"
+        metadata_dict['instrument']['analyzer']['ca_shape'] = "circle"
+        metadata_dict['instrument']['analyzer']['fa_size'] = np.nan
+        metadata_dict['instrument']['analyzer']['ca_size'] = np.nan
+        # get field aperture shape and size
+        if {'KTOF:Apertures:m1.RBV','KTOF:Apertures:m2.RBV'}.issubset(set(metadata_dict['file'].keys())):
+            fa_in = metadata_dict['file']['KTOF:Apertures:m1.RBV']
+            fa_hor = metadata_dict['file']['KTOF:Apertures:m2.RBV']
+            for k,v in self.config["aperture"][timestamp]['fa_size'].items():
+                if v[0][0]<fa_in<v[0][1] and v[1][0]<fa_hor<v[1][1]:
+                    if isinstance(k, float):
+                        metadata_dict['instrument']['analyzer']['fa_size'] = k   
+                    else: # considering that only int and str type values are present
+                        metadata_dict['instrument']['analyzer']['fa_shape'] = k
+                    break
+            else:
+                print("Field aperture size not found.")
+
+        # get contrast aperture shape and size
+        if 'KTOF:Apertures:m3.RBV' in metadata_dict['file']:
+            ca = metadata_dict['file']['KTOF:Apertures:m3.RBV']
+            for k,v in self.config["aperture"][timestamp]['ca_size'].items():
+                if v[0]<ca<v[1]:
+                    if isinstance(k, float):
+                        metadata_dict['instrument']['analyzer']['ca_size'] = k   
+                    else: # considering that only int and str type values are present
+                        metadata_dict['instrument']['analyzer']['ca_shape'] = k
+                    break
+            else:
+                print("Contrast aperture size not found.")
+        
+        # Storing the lens modes corresponding to lens voltages
+        lens_list = [
+                "Foc", "Extr", "UCA", "UFA",
+                "Z1", "Z2", "A", "B", "C",
+                "D", "E", "F", "G", "H",
+                "I", "TOF", "MCPfront"
+            ]
+
+        lens_volts = np.array([metadata_dict["file"][
+            f"KTOF:Lens:{lens}:V"] for lens in lens_list
+            ])
+        for mode, v in self.config["lens_mode"].items():
+            lens_volts_config = np.array([v[k] for k in lens_list])
+            if np.allclose(lens_volts, lens_volts_config, rtol=0.005): # Equal upto 0.5% tolerance
+                metadata_dict["instrument"]["analyzer"]["lens_mode"] = mode
+                break
+        else:
+            print("Lens mode for given lens voltages not found.\n \
+            Storing lens mode from the user, if provided.")
+            
+        # Determining projection from the lens mode
+        try:
+            lens_mode = metadata_dict["instrument"]["analyzer"]["lens_mode"]
+            if "spatial" in lens_mode.split("_")[1]:
+                metadata_dict["instrument"]["analyzer"]["projection"] = "real"
+            else:
+                metadata_dict["instrument"]["analyzer"]["projection"] = "reciprocal"
+        except IndexError:
+            print("Lens mode must have the form, '6kV_kmodem4.0_20VTOF_v3.sav'.\
+                Can't determine projection.\n \
+                Storing projection from the user, if provided.")
+        except KeyError:
+            print("Lens mode not found. Can't determine projection.\n \
+                Storing projection from the user, if provided.")
+
+        default_units = {
+        'X': 'step', 
+        'Y': 'step', 
+        't': 'step', 
+        'tofVoltage':'V',
+        'extractorVoltage':'V',
+        'extractorCurrent':'A',
+        'cryoTemperature':'K',
+        'sampleTemperature':'K',
+        'dldTimeBinSize':'ns',
+        'delay':'ps',
+        'timeStamp':'s',
+        'E':'eV',
+        'kx':'1/A',
+        'ky':'1/A'}
+
+        def res_to_xarray(res, binNames, binAxes, metadata=None):
+            """ creates a BinnedArray (xarray subclass) out of the given np.array
+            Parameters:
+                res: np.array
+                    nd array of binned data
+                binNames (list): list of names of the binned axes
+                binAxes (list): list of np.arrays with the values of the axes
+            Returns:
+                ba: BinnedArray (xarray)
+                    an xarray-like container with binned data, axis, and all available metadata
+            """
+            dims = binNames
+            coords = {}
+            for name, vals in zip(binNames, binAxes):
+                coords[name] = vals
+
+            xres = xr.DataArray(res, dims=dims, coords=coords)
+
+            for name in binNames:
+                try:
+                    xres[name].attrs['unit'] = default_units[name]
+                except KeyError:
+                    pass
+
+            xres.attrs['units'] = 'counts'
+            xres.attrs['long_name'] = 'photoelectron counts'
+
+            if metadata is not None:
+                xres.attrs['metadata'] = metadata
+
+            return xres
+
+        print("Building the xarray data object...")
+        axnames = self.binaxes.copy()
+        axnames[2] = "energy"
+        axes = [self.histdict[ax] for ax in self.binaxes]
+        res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata_dict)
+        print("Done!")
+        return res_xarray
+
+    def xarray_to_h5(self, data, faddr, mode='w'):
+        """ Save xarray formatted data to hdf5
+        Args:
+            data (xarray.DataArray): input data
+            faddr (str): complete file name (including path)
+            mode (str): hdf5 read/write mode
+        Returns:
+        """
+        with h5py.File(faddr, mode) as h5File:
+
+            print(f'saving data to {faddr}')
+
+            # Saving data
+
+            ff = h5File.create_group('binned')
+
+            # make a single dataset
+            ff.create_dataset('BinnedData', data=data.data)
+
+            # Saving axes
+            aa = h5File.create_group("axes")
+            # aa.create_dataset('axis_order', data=data.dims)
+            ax_n = 0
+            for binName in data.dims:
+                ds = aa.create_dataset(f'ax{ax_n}', data=data.coords[binName])
+                ds.attrs['name'] = binName
+                ax_n += 1
+            # Saving delay histograms
+            #                hh = h5File.create_group("histograms")
+            #                if hasattr(data, 'delaystageHistogram'):
+            #                    hh.create_dataset(
+            #                        'delaystageHistogram',
+            #                        data=data.delaystageHistogram)
+            #                if hasattr(data, 'pumpProbeHistogram'):
+            #                    hh.create_dataset(
+            #                        'pumpProbeHistogram',
+            #                        data=data.pumpProbeHistogram)\
+
+            if ('metadata' in data.attrs and isinstance(data.attrs['metadata'], dict)):
+                meta_group = h5File.create_group('metadata')
+                
+                def recursive_write_metadata(h5group, node):
+                    for key, item in node.items():
+                        if isinstance(item, (np.ndarray, np.int64, np.float64, str,\
+                            bytes, int, float, list, tuple)):
+                            try:
+                                h5group.create_dataset(str(key), data=item)
+                            except TypeError:
+                                h5group.create_dataset(str(key), data=str(item))
+                                print("saved " + key + " as string")
+                        elif isinstance(item, dict):
+                            print(key)
+                            group = h5group.create_group(key)
+                            recursive_write_metadata(group, item)
+                        else:
+                            try:
+                                h5group.create_dataset(key, data=str(item))
+                                print("saved " + key + " as string")
+                            except:
+                                raise ValueError('Cannot save %s type'%type(item))
+
+                recursive_write_metadata(meta_group, data.attrs['metadata'])
+        print('Saving complete!')
 
     def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
         """ Update or convert to other file formats.
