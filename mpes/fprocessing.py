@@ -49,20 +49,150 @@ import copy
 
 N_CPU = ps.cpu_count()
 
-aperture_dict = {"2020-05-23T19:35:15":{"fa_size":{200.:((0.6748,0.6752),(-0.4252,-0.4248)),
-                                                  10.:((6.7397,6.7401),(-6.4505,-6.4501)),
-                                                  750.:((-5.354,-5.3500),(5.4498,5.4502)),
-                                                  20.:((6.7197,6.7201),(-0.4256,-0.4252)),
-                                                  500.:((-5.7255,-5.7251),(-6.5605,-6.5601)),
-                                                  100.:((0.7249,0.7253),(-6.4255,-6.4251)),
-                                                  300.:((0.6997,0.7001),(5.5497,5.5501)),
-                                                  50.:((6.6998,6.7002),(5.5498,5.5502)),
-                                                  "grid":((-5.8005,-5.8001),(-0.5252,-0.5248)),
-                                                  "open":((-10.400,-9.400),(-9.500,-8.900))},
-                                        "ca_size":{50.:(9.1220,11.1220), 300.:(-0.0500,0.0500),
-                                                   200.:(0.7000,1.5000),100:(5.1000,5.9000),
-                                                   "grid":(-5.500,-5.200),"open":(-11.200,-10.800)
-                }}}
+aperture_dict = {
+    "2018-01-23T19:35:15":{
+        "fa_size":{750.:((-3.0, -1.4), (-5.4, -4.6)),
+                   "grid":((-3.0, -1.4), (0.15, 1.75)),
+                   1500.:((-3.0, -1.4), (6.25, 7.75)),
+                   200.:((3.3, 4.4), (-5.4, -4.6)),
+                   500.:((3.3, 4.4), (0.15, 1.75)),
+                   1000.:((3.3, 4.4), (6.25, 7.75)),
+                   20.:((9.6, 10.1), (-5.4, -4.6)),
+                   50.:((9.6, 10.1), (0.15, 1.75)),
+                   100.:((9.6, 10.1), (6.25, 7.75)),
+                   "open":((-10.4, -9.4), (-9.5, -8.9))},
+        "ca_size":{50.:(8.0, 8.4), 200.:(-0.5, -0.9),
+                   100:(3.4, 3.8), "grid":(-5.3, -5.9),
+                   "open":(-12.0, -10.8)}},
+    "2020-01-23T19:35:15":{
+        "fa_size":{750.:((-4.8, -6.2), (5.0, 6.0)),
+                  "grid":((-4.8, -6.2), (-0.3, -0.7)),
+                  500.:((-4.8, -6.2), (-6.0, -7.0)),
+                  200.:((0.5, 0.9), (-0.3, -0.7)),
+                  100.:((0.5, 0.9), (-6.0, -7.0)),
+                  300.:((0.5, 0.9), (5.0, 6.0)),
+                  10.:((6.5, 6.9), (-6.0, -7.0)),  
+                  20.:((6.5, 6.9), (-0.3, -0.7)),
+                  50.:((6.5, 6.9), (5.0, 6.0)),
+                  "open":((-10.4, -9.4), (-9.5, -8.9))},
+        "ca_size":{50.:(9.0, 11.0), 300.:(-0.1, 0.1),
+                   200.:(0.7, 1.5), 100:(5.1, 5.9),
+                   "grid":(-5.5, -5.2), "open":(-11.2, -10.8)}}
+    }
+
+lens_mode_dict = {
+    "6kV_kmodem4.0_20VTOF_v3.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200, "UFA": 600.0,
+        "Z1": 2452.9, "Z2": 1489.9, "A": 420.07, "B": 2494.8,
+        "C": 489.2, "D": 228.05, "E": 113.82, "F": 54.232,
+        "G": 20.0, "H": 25.5, "I": 36.0, "TOF": 20.0,
+        "MCPfront": 20.0
+    },
+    "6kV_kmodem4.0_30VTOF_453ns_focus.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 403.07, "B": 2500, "C": 422.25,
+        "D": 208.88, "E": 199.49, "F": 68.735,
+        "G": 30.0, "H": 30.0, "I": 44.5,
+        "TOF": 30.0, "MCPfront": 30.0
+    },
+    "6kV_kmodem4.0_30VTOF_453ns_focus_Gated_22.5V_FMCP.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2450, "Z2": 1489.9,
+        "A": 403.07, "B": 2500, "C": 422.25,
+        "D": 208.88, "E": 199.49, "F": 69.235,
+        "G": 30.0, "H": 30.0, "I": 44.5,
+        "TOF": 30.0, "MCPfront": 22.5
+    },
+    "6kV_kmodem4.2_30VTOF_453ns_focus_Gated_21.0V_FMCP.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2450, "Z2": 1489.9,
+        "A": 403.07, "B": 2500, "C": 422.25,
+        "D": 208.88, "E": 199.49, "F": 69.235,
+        "G": 30.0, "H": 30.0, "I": 44.5,
+        "TOF": 30.0, "MCPfront": 21.0
+    },
+    "6kV_kmodem1_20VTOF.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 943.97, "B": 1621.97, "C": 462.98,
+        "D": 366.31, "E": 418.83, "F": 112.99,
+        "G": 20.0, "H": 23.75, "I": 22.25,
+        "TOF": 20.0, "MCPfront": 20.0
+    },
+    "6kV_kmodem1.4_20VTOF.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 709.05, "B": 1769.3, "C": 431.03,
+        "D": 217.72, "E": 346.9, "F": 92.547,
+        "G": 20.0, "H": 22.0, "I": 24.75,
+        "TOF": 20.0, "MCPfront": 20.0
+    },
+    "6kV_kmodem2.0_20VTOF.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 772.38, "B": 2265.4, "C": 496.39,
+        "D": 228.83, "E": 246.37, "F": 50.317,
+        "G": 20.0, "H": 20.75, "I": 22.75,
+        "TOF": 20.0, "MCPfront": 20.0
+    },
+    "6kV_kmodem2.8_20VTOF_v2.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 796.85, "B": 2471.0, "C": 403.69,
+        "D": 196.85, "E": 191.16, "F": 59.557,
+        "G": 20.0, "H": 28.75, "I": 20.75,
+        "TOF": 20.0, "MCPfront": 20.0
+    },
+    "6kV_kmodem2.0_30VTOF_MoTe2_2340VMCP.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 784.58, "B": 3253.0, "C": 752.07,
+        "D": 682.18, "E": 200.93, "F": 68.557,
+        "G": 30.0, "H": 30.0, "I": 44.5,
+        "TOF": 30.0, "MCPfront": 30.0
+    },
+    "6kV_kmodem4.0_30VTOF_WTe2_2340VMCP.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2450, "Z2": 1489.9,
+        "A": 403.07, "B": 2500, "C": 422.25,
+        "D": 208.88, "E": 199.49, "F": 68.735,
+        "G": 30.0, "H": 30.0, "I": 44.5,
+        "TOF": 30.0, "MCPfront": 30.0
+    },
+    "6kV_momentum_Gerd's_setting.sav": {
+        "Extr": 6000.0, "Foc": 168, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 800.0, "B": 600.0, "C": 300.0,
+        "D": 130.0, "E": 60.0, "F": 30.0,
+        "G": 12.5, "H": 35.0, "I": 77.25,
+        "TOF": 25.0, "MCPfront": 30.0
+    },
+    "7kV_momentum_Gerd's_setting.sav": {
+        "Extr": 7000.0, "Foc": 244, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 800.0, "B": 600.0, "C": 300.0,
+        "D": 130.0, "E": 60.0, "F": 30.0,
+        "G": 12.5, "H": 35.0, "I": 77.25,
+        "TOF": 25.0, "MCPfront": 30.0
+    },
+    "6kV_spatialx4_110mumFOV_20VTOF.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 518.64, "B": 2198.97, "C": 76.771,
+        "D": 256.4, "E": 554.45, "F": 47.91,
+        "G": 20.0, "H": 35.0, "I": 42.25,
+        "TOF": 20.0, "MCPfront": 20.0
+    },
+    "6kV_spatialx4_110mumFOV_30VTOF.sav": {
+        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
+        "A": 302.44, "B": 2241.7, "C": 84.478,
+        "D": 346.38, "E": 699.28, "F": 83.378,
+        "G": 30.0, "H": 35.0, "I": 48.75,
+        "TOF": 30.0, "MCPfront": 30.0
+    }
+}
 
 # ================= #
 # Utility functions #
@@ -1874,7 +2004,7 @@ class dataframeProcessor(MapParser):
     """
 
     def __init__(self, datafolder, paramfolder='', datafiles=[],\
-                 ncores=None, aperture_config=aperture_dict):
+                 ncores=None, aperture_config=aperture_dict, lens_config=lens_mode_dict):
 
         self.datafolder = datafolder
         self.paramfolder = paramfolder
@@ -1882,7 +2012,10 @@ class dataframeProcessor(MapParser):
         self.histogram = None
         self.histdict = {}
         self.npart = 0
-        self.aperture_config = aperture_config
+        self.config = {
+            "aperture": {**aperture_config},
+            "lens_mode": {**lens_config}
+        }
 
         # Instantiate the MapParser class (contains parameters related to binning and image transformation)
         super().__init__(file_sorting=False, folder=paramfolder)
@@ -2354,22 +2487,22 @@ class dataframeProcessor(MapParser):
                             'bin_array_creation': dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc).isoformat(),
                             'bin_array_creation_ts': dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc).timestamp()
                             }
-        #import meta data from data file
+        # import meta data from data file
         file0 = self.datafiles[0]
-        if 'file' not in metadata_dict.keys(): #If already present, the value is assumed to be a dictionary
+        if 'file' not in metadata_dict.keys():  # If already present, the value is assumed to be a dictionary
             metadata_dict['file'] = {}
         
         print("Collecting lens voltages etc...")
         with h5py.File(file0, 'r') as f:
             for k,v in f.attrs.items():
-                if "VSet" in k: #Changing VSet to V in dict keys
+                if "VSet" in k:  # Changing VSet to V in dict keys
                     k = k[:-3]
                 metadata_dict['file'][k] = v
 
         metadata_dict['entry_identifier'] = self.datafolder[13:-2]
 
         print("Collecting data from the EPICS archive...")
-        #Get metadata from Epics archive if not present already
+        # Get metadata from Epics archive if not present already
         filestart = dt.datetime.utcfromtimestamp(tsFrom/1000).isoformat()
         fileend = dt.datetime.utcfromtimestamp(tsTo/1000).isoformat()
         Epics_channels = ["KTOF:Lens:Extr:I", "trARPES:Carving:TEMP_RBV",
@@ -2408,7 +2541,7 @@ class dataframeProcessor(MapParser):
             metadata_dict['sample']['temperature'] = metadata_dict['file']["trARPES:Carving:TEMP_RBV"]
             metadata_dict['sample']['pressure'] = metadata_dict['file']["trARPES:XGS600:PressureAC:P_RD"]
             
-        #Meta data of the binning
+        # Meta data of the binning
         print("Collecting metadata from the binning...")
         if mc:
             momentum_dict = copy.deepcopy(mc.__dict__)
@@ -2445,20 +2578,18 @@ class dataframeProcessor(MapParser):
             energy_dict.pop('pathcorr')
             metadata_dict['energy_correction'] = energy_dict
             
-        binning_dict = copy.copy(self.__dict__) #Only works if the keys in root tree are deleted
+        binning_dict = copy.copy(self.__dict__)  # Only works if the keys in root tree are deleted
         binning_dict.pop('histdict') 
         binning_dict.pop('dfield')
-        binning_dict.pop('edf') #Deepcopy doesn't work because of edf data type
+        binning_dict.pop('edf')  # Deepcopy doesn't work because of edf data type
         metadata_dict['binning'] = binning_dict
 
-        # To determine the timestamp from aperture_config
-        timestamp = None
-        stamps = sorted(list(self.aperture_config) + [filestart])
+        # To determine the timestamp in aperture_config
+        stamps = sorted(list(self.config["aperture"]) + [filestart])
         filestart_index = stamps.index(filestart)
-        if filestart_index != 0:
-            timestamp = stamps[filestart_index-1] 
+        timestamp = stamps[filestart_index-1] 
 
-        # aperture metadata for old files. Other alternative: store nothing at all.
+        # Aperture metadata
         if 'instrument' not in metadata_dict.keys():
             metadata_dict['instrument'] = {'analyzer':{}}
         metadata_dict['instrument']['analyzer']['fa_shape'] = "circle"
@@ -2466,13 +2597,12 @@ class dataframeProcessor(MapParser):
         metadata_dict['instrument']['analyzer']['fa_size'] = np.nan
         metadata_dict['instrument']['analyzer']['ca_size'] = np.nan
         # get field aperture shape and size
-        if {'KTOF:Apertures:m1.RBV','KTOF:Apertures:m2.RBV'}.issubset(set(metadata_dict['file'].keys())) \
-                                                                                            and timestamp:
+        if {'KTOF:Apertures:m1.RBV','KTOF:Apertures:m2.RBV'}.issubset(set(metadata_dict['file'].keys())):
             fa_in = metadata_dict['file']['KTOF:Apertures:m1.RBV']
             fa_hor = metadata_dict['file']['KTOF:Apertures:m2.RBV']
-            for k,v in self.aperture_config[timestamp]['fa_size'].items():
+            for k,v in self.config["aperture"][timestamp]['fa_size'].items():
                 if v[0][0]<fa_in<v[0][1] and v[1][0]<fa_hor<v[1][1]:
-                    if isinstance(k, int):
+                    if isinstance(k, float):
                         metadata_dict['instrument']['analyzer']['fa_size'] = k   
                     else: # considering that only int and str type values are present
                         metadata_dict['instrument']['analyzer']['fa_shape'] = k
@@ -2481,17 +2611,52 @@ class dataframeProcessor(MapParser):
                 print("Field aperture size not found.")
 
         # get contrast aperture shape and size
-        if 'KTOF:Apertures:m3.RBV' in metadata_dict['file'] and timestamp:
+        if 'KTOF:Apertures:m3.RBV' in metadata_dict['file']:
             ca = metadata_dict['file']['KTOF:Apertures:m3.RBV']
-            for k,v in self.aperture_config[timestamp]['ca_size'].items():
+            for k,v in self.config["aperture"][timestamp]['ca_size'].items():
                 if v[0]<ca<v[1]:
-                    if isinstance(k, int):
+                    if isinstance(k, float):
                         metadata_dict['instrument']['analyzer']['ca_size'] = k   
                     else: # considering that only int and str type values are present
                         metadata_dict['instrument']['analyzer']['ca_shape'] = k
                     break
             else:
-                print("Contrast aperture size not found.") 
+                print("Contrast aperture size not found.")
+        
+        # Storing the lens modes corresponding to lens voltages
+        lens_list = [
+                "Foc", "Extr", "UCA", "UFA",
+                "Z1", "Z2", "A", "B", "C",
+                "D", "E", "F", "G", "H",
+                "I", "TOF", "MCPfront"
+            ]
+
+        lens_volts = np.array([metadata_dict["file"][
+            f"KTOF:Lens:{lens}:V"] for lens in lens_list
+            ])
+        for mode, v in self.config["lens_mode"].items():
+            lens_volts_config = np.array([v[k] for k in lens_list])
+            if np.allclose(lens_volts, lens_volts_config, rtol=0.005): # Equal upto 0.5% tolerance
+                metadata_dict["instrument"]["analyzer"]["lens_mode"] = mode
+                break
+        else:
+            print("Lens mode for given lens voltages not found.\n \
+            Storing lens mode from the user, if provided.")
+            
+        # Determining projection from the lens mode
+        try:
+            lens_mode = metadata_dict["instrument"]["analyzer"]["lens_mode"]
+            if "spatial" in lens_mode.split("_")[1]:
+                metadata_dict["instrument"]["analyzer"]["projection"] = "real"
+            else:
+                metadata_dict["instrument"]["analyzer"]["projection"] = "reciprocal"
+        except IndexError:
+            print("Lens mode must have the form, '6kV_kmodem4.0_20VTOF_v3.sav'.\
+                Can't determine projection.\n \
+                Storing projection from the user, if provided.")
+        except KeyError:
+            print("Lens mode not found. Can't determine projection.\n \
+                Storing projection from the user, if provided.")
 
         default_units = {
         'X': 'step', 
