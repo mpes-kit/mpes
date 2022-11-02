@@ -12,6 +12,7 @@
 # =========================
 
 from __future__ import print_function, division
+import datetime
 from .base import FileCollection, MapParser, saveClassAttributes
 from .visualization import grid_histogram
 from . import utils as u, bandstructure as bs, base as b
@@ -494,21 +495,35 @@ class hdf5Reader(File):
             # print('{}: {}'.format(g_name, g_values.dtype))
 
         # calculate time Stamps
-        if timeStamps == True:
+        if timeStamps:
             # create target array for time stamps
             ts = np.zeros(len(gdict[self.readAttribute(g_dataset, 'Name', nullval=gnames[0])]))
-            # get the start time of the file from its modification date for now
-            startTime = os.path.getmtime(self.filename) * 1000 #convert to ms
             # the ms marker contains a list of events that occurred at full ms intervals. It's monotonically increasing, and can contain duplicates
-            msMarker_ds = self.readGroup(self, 'msMarkers', sliced=False)
-            # convert into numpy array
-            msMarker = msMarker_ds[slice(None, None)]
-            # the modification time points to the time when the file was finished, so we need to correct for the length it took to write the file
-            startTime -= len(msMarker_ds)
+            msMarker = np.asarray(self.readGroup(self, 'msMarkers', sliced=False))
+            # try to get start timestamp from "FirstEventTimeStamp" attribute
+            start_time_str = self.readAttribute(self, "FirstEventTimeStamp")
+            if start_time_str != "None":
+                startTime = (
+                    datetime.datetime.strptime(
+                        start_time_str,
+                        "%Y-%m-%dT%H:%M:%S.%f%z",
+                    ).timestamp()
+                )
+            else:
+                # get the start time of the file from its modification date if the key
+                # does not exist (old files)
+                startTime = (
+                    os.path.getmtime(self.filename)
+                )  # convert to ms
+                # the modification time points to the time when the file was finished, so we
+                # need to correct for the length it took to write the file
+                startTime -= len(msMarker)
+                
+            ts[0:msMarker[0]] = startTime
             for n in range(len(msMarker)-1):
                 # linear interpolation between ms: Disabled, because it takes a lot of time, and external signals are anyway not better synchronized than 1 ms
                 # ts[msMarker[n]:msMarker[n+1]] = np.linspace(startTime+n, startTime+n+1, msMarker[n+1]-msMarker[n])
-                ts[msMarker[n]:msMarker[n+1]] = startTime+n
+                ts[msMarker[n]:msMarker[n+1]] = startTime+n/1000
             # fill any remaining points
             ts[msMarker[len(msMarker)-1]:len(ts)] = startTime + len(msMarker)
 
