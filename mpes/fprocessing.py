@@ -517,8 +517,8 @@ class hdf5Reader(File):
                 )  # convert to ms
                 # the modification time points to the time when the file was finished, so we
                 # need to correct for the length it took to write the file
-                startTime -= len(msMarker)
-                
+                startTime -= len(msMarker)/1000
+
             ts[0:msMarker[0]] = startTime
             for n in range(len(msMarker)-1):
                 # linear interpolation between ms: Disabled, because it takes a lot of time, and external signals are anyway not better synchronized than 1 ms
@@ -946,8 +946,8 @@ class hdf5Processor(hdf5Reader):
 
         **Return**\n
             The length of the the file in seconds.
-        """ 
-        
+        """
+
         secs = self.get('msMarkers').len()/1000
         return secs
 
@@ -2065,8 +2065,8 @@ class dataframeProcessor(MapParser):
         """
 
         self.edf = self.edf.map_partitions(mapping, *args, **kwds)
-        
-        
+
+
     def transformColumn(self, oldcolname, mapping, newcolname='Transformed',
                         args=(), update='append', **kwds):
         """ Apply a simple function to an existing column.
@@ -2134,9 +2134,9 @@ class dataframeProcessor(MapParser):
             :sig: numeric
                 Standard deviation for correction using a 2D Gaussian profile.
             :gam2: numeric
-                Linewidth value for correction using an asymmetric 2D Lorentz profile, X-direction.   
+                Linewidth value for correction using an asymmetric 2D Lorentz profile, X-direction.
             :amplitude2: numeric
-                Amplitude value for correction using an asymmetric 2D Lorentz profile, X-direction.                 
+                Amplitude value for correction using an asymmetric 2D Lorentz profile, X-direction.
         """
 
         corraxis = kwds.pop('corraxis', 't')
@@ -2158,7 +2158,7 @@ class dataframeProcessor(MapParser):
             sig = kwds.pop('sigma', 300)
             self.edf[corraxis] += amplitude/np.sqrt(2*np.pi*sig**2) *\
                 np.exp(-((self.edf['X'] - xcenter)**2 + (self.edf['Y'] - ycenter)**2) / (2*sig**2))
-                
+
         elif type == 'Lorentzian_asymmetric':
             gam = kwds.pop('gamma', 300)
             gam2 = kwds.pop('gamma2', 300)
@@ -2184,7 +2184,7 @@ class dataframeProcessor(MapParser):
             if ('warping' in kwds):
                 self.warping = kwds.pop('warping')
                 self.transformColumn2D(map2D=b.perspectiveTransform, X=X, Y=Y, newX=newX, newY=newY, M=self.warping, **kwds)
-            else:        
+            else:
                 self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
                 self.transformColumn2D(map2D=self.wMap, X=X, Y=Y, newX=newX, newY=newY, **kwds)
         elif type == 'tps':
@@ -2211,8 +2211,8 @@ class dataframeProcessor(MapParser):
             self.fr = kwds.pop('fr')
             self.fc = kwds.pop('fc')
             self.transformColumn2D(map2D=b.detrc2krc, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0, fr=self.fr, fc=self.fc, **kwds)
-            
-        else:        
+
+        else:
             self.transformColumn2D(map2D=self.kMap, X=X, Y=Y, newX=newX, newY=newY, r0=x0, c0=y0, **kwds)
 
     def appendEAxis(self, E0, **kwds):
@@ -2223,7 +2223,7 @@ class dataframeProcessor(MapParser):
         E0: numeric
             Time-of-flight offset.
         """
-        
+
         t = kwds.pop('t', self.edf['t'].astype('float64'))
 
         if ('t0' in kwds) and ('d' in kwds):
@@ -2233,7 +2233,7 @@ class dataframeProcessor(MapParser):
         elif ('a' in kwds):
             self.poly_a = kwds.pop('a')
             self.columnApply(mapping=b.tof2evpoly, rescolname='E', E0=E0, a=self.poly_a, t=t, **kwds)
-        else:        
+        else:
             self.columnApply(mapping=self.EMap, rescolname='E', E0=E0, t=t, **kwds)
 
     # Row operation
@@ -2454,15 +2454,15 @@ class dataframeProcessor(MapParser):
         **Return**\n
             The length of the the file in seconds.
         """
-        
+
         if fids == 'all':
             fids = range(0, len(self.datafiles))
-        
+
         secs = 0
         for fid in fids:
             subproc = hdf5Processor(self.datafiles[fid])
             secs += subproc.get('msMarkers').len()/1000
-            
+
         return secs
 
 
@@ -2611,15 +2611,15 @@ class parallelHDF5Processor(FileCollection):
 
             return: secs: the length of the the file in seconds.
         """
-        
+
         if fids == 'all':
             fids = range(0, len(self.files))
-        
+
         secs = 0
         for fid in fids:
             subproc = self.subset(fid)
             secs += subproc.get('msMarkers').len()/1000
-            
+
         return secs
 
     def parallelBinning(self, axes, nbins, ranges, scheduler='threads', combine=True,
@@ -2669,11 +2669,11 @@ class parallelHDF5Processor(FileCollection):
 
         # Execute binning tasks
         binning_kwds = u.dictmerge({'ret':'histogram'}, binning_kwds)
-        
+
         # limit multithreading in worker threads
         nthreads_per_worker = binning_kwds.pop('nthreads_per_worker', 1)
         threadpool_api = binning_kwds.pop('threadpool_api', 'blas')
-        with threadpool_limits(limits=nthreads_per_worker, user_api=threadpool_api):        
+        with threadpool_limits(limits=nthreads_per_worker, user_api=threadpool_api):
             # Construct binning tasks
             for i in tqdm(range(0, len(self.files), ncores), disable=not(pbar)):
                 coreTasks = [] # Core-level jobs
