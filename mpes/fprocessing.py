@@ -38,13 +38,10 @@ import natsort as nts
 from functools import reduce
 from funcy import project
 from threadpoolctl import threadpool_limits
-from dask import compute
 import datetime as dt
-from urllib.request import urlopen
 import urllib
 import json
 import xarray as xr
-import h5py
 import copy
 
 N_CPU = ps.cpu_count()
@@ -192,6 +189,23 @@ lens_mode_dict = {
         "G": 30.0, "H": 35.0, "I": 48.75,
         "TOF": 30.0, "MCPfront": 30.0
     }
+}
+
+default_units = {
+    'X': 'step', 
+    'Y': 'step', 
+    't': 'step', 
+    'tofVoltage':'V',
+    'extractorVoltage':'V',
+    'extractorCurrent':'A',
+    'cryoTemperature':'K',
+    'sampleTemperature':'K',
+    'dldTimeBinSize':'ns',
+    'delay':'ps',
+    'timeStamp':'s',
+    'energy':'eV',
+    'kx':'1/A',
+    'ky':'1/A'
 }
 
 # ================= #
@@ -2016,6 +2030,7 @@ class dataframeProcessor(MapParser):
             "aperture": {**aperture_config},
             "lens_mode": {**lens_config}
         }
+        self.metadata = {}
 
         # Instantiate the MapParser class (contains parameters related to binning and image transformation)
         super().__init__(file_sorting=False, folder=paramfolder)
@@ -2372,12 +2387,12 @@ class dataframeProcessor(MapParser):
         if ('t0' in kwds) and ('d' in kwds):
             self.ecalib_t0 = kwds.pop('t0')
             self.ecalib_d = kwds.pop('d')
-            self.columnApply(mapping=b.tof2ev, rescolname='E', E0=E0, d=self.ecalib_d, t0=self.ecalib_t0, t=t, **kwds)
+            self.columnApply(mapping=b.tof2ev, rescolname="energy", E0=E0, d=self.ecalib_d, t0=self.ecalib_t0, t=t, **kwds)
         elif ('a' in kwds):
             self.poly_a = kwds.pop('a')
-            self.columnApply(mapping=b.tof2evpoly, rescolname='E', E0=E0, a=self.poly_a, t=t, **kwds)
+            self.columnApply(mapping=b.tof2evpoly, rescolname="energy", E0=E0, a=self.poly_a, t=t, **kwds)
         else:        
-            self.columnApply(mapping=self.EMap, rescolname='E', E0=E0, t=t, **kwds)
+            self.columnApply(mapping=self.EMap, rescolname="energy", E0=E0, t=t, **kwds)
 
     # Row operation
     def appendRow(self, folder=None, df=None, ftype='parquet', **kwds):
@@ -2470,41 +2485,34 @@ class dataframeProcessor(MapParser):
         print("Gathering metadata from different locations")
         # Read events in with ms time stamps
         print("Collecting time stamps...")
-        dfpart = self.edf.get_partition(0)
-        all_data = np.array(compute(dfpart.values))[0,:,:]
-        timeStamps = all_data[:,6]
-        tsFrom = timeStamps[0]
-        dfpart = self.edf.get_partition(len(self.datafiles)-1)
-        all_data = np.array(compute(dfpart.values))[0,:,:]
-        timeStamps = all_data[:,6]
-        tsTo = timeStamps[len(timeStamps)-1]
-        metadata_dict['timing'] = {'acquisition_start': dt.datetime.utcfromtimestamp(tsFrom/1000).replace(tzinfo=dt.timezone.utc).isoformat(),
-                            'acquisition_start_ts': tsFrom/1000,
-                            'acquisition_stop': dt.datetime.utcfromtimestamp(tsTo/1000).replace(tzinfo=dt.timezone.utc).isoformat(),
-                            'acquisition_stop_ts': tsTo/1000,
-                            'acquisition_duration': int((tsTo - tsFrom)/1000),
-                            'collection_time': float((tsTo - tsFrom)/1000),
-                            'bin_array_creation': dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc).isoformat(),
-                            'bin_array_creation_ts': dt.datetime.utcnow().replace(tzinfo=dt.timezone.utc).timestamp()
+
+        hf = hdf5Reader(self.datafiles[0])
+        group_dict = hf._assembleGroups(["msMarkers"], ret="dict", timeStamps=True)
+        tsFrom = group_dict["timeStamps"][0]/1000
+        tsTo = os.path.getmtime(self.datafiles[-1])
+
+        metadata_dict['timing'] = {'acquisition_start': dt.datetime.utcfromtimestamp(tsFrom).replace(tzinfo=dt.timezone.utc).isoformat(),
+                            'acquisition_stop': dt.datetime.utcfromtimestamp(tsTo).replace(tzinfo=dt.timezone.utc).isoformat(),
+                            'acquisition_duration': int(tsTo - tsFrom),
+                            'collection_time': float(tsTo - tsFrom),
                             }
         # import meta data from data file
         file0 = self.datafiles[0]
-        if 'file' not in metadata_dict.keys():  # If already present, the value is assumed to be a dictionary
+        if 'file' not in metadata_dict:  # If already present, the value is assumed to be a dictionary
             metadata_dict['file'] = {}
         
         print("Collecting lens voltages etc...")
-        with h5py.File(file0, 'r') as f:
+        with File(file0, 'r') as f:
             for k,v in f.attrs.items():
-                if "VSet" in k:  # Changing VSet to V in dict keys
-                    k = k[:-3]
+                k = k.replace("VSet", "V")
                 metadata_dict['file'][k] = v
 
-        metadata_dict['entry_identifier'] = self.datafolder[13:-2]
+        metadata_dict['entry_identifier'] = self.datafolder
 
         print("Collecting data from the EPICS archive...")
         # Get metadata from Epics archive if not present already
-        filestart = dt.datetime.utcfromtimestamp(tsFrom/1000).isoformat()
-        fileend = dt.datetime.utcfromtimestamp(tsTo/1000).isoformat()
+        filestart = dt.datetime.utcfromtimestamp(tsFrom).isoformat()
+        fileend = dt.datetime.utcfromtimestamp(tsTo).isoformat()
         Epics_channels = ["KTOF:Lens:Extr:I", "trARPES:Carving:TEMP_RBV",
                         "trARPES:XGS600:PressureAC:P_RD", "KTOF:Lens:UDLD:V", "KTOF:Lens:Sample:V",
                         "KTOF:Apertures:m1.RBV", "KTOF:Apertures:m2.RBV", "KTOF:Apertures:m3.RBV"] + \
@@ -2515,7 +2523,7 @@ class dataframeProcessor(MapParser):
             try:
                 req_str = "http://aa0.fhi-berlin.mpg.de:17668/retrieval/data/getData.json?pv=" + \
                            channel + "&from=" + filestart + "Z&to=" + fileend + "Z"
-                req = urlopen(req_str)
+                req = urllib.request.urlopen(req_str)
                 data = json.load(req)
                 if data:
                     vals = [x['val'] for x in data[0]['data']]
@@ -2533,14 +2541,7 @@ class dataframeProcessor(MapParser):
                       f"Skipping over channels {channels_missing}.")
                 print("Error code: ", e)
                 break
-        
-        if "sample" not in metadata_dict.keys():
-            metadata_dict['sample'] = {}
-        if "trARPES:Carving:TEMP_RBV" in metadata_dict['file'].keys() and \
-           "trARPES:XGS600:PressureAC:P_RD" in metadata_dict['file'].keys():
-            metadata_dict['sample']['temperature'] = metadata_dict['file']["trARPES:Carving:TEMP_RBV"]
-            metadata_dict['sample']['pressure'] = metadata_dict['file']["trARPES:XGS600:PressureAC:P_RD"]
-            
+
         # Meta data of the binning
         print("Collecting metadata from the binning...")
         if mc:
@@ -2573,8 +2574,6 @@ class dataframeProcessor(MapParser):
 
         if ec:
             energy_dict = copy.deepcopy(ec.__dict__)
-            energy_dict.pop('traces')
-            energy_dict.pop('traces_normed')
             energy_dict.pop('pathcorr')
             metadata_dict['energy_correction'] = energy_dict
             
@@ -2658,60 +2657,28 @@ class dataframeProcessor(MapParser):
             print("Lens mode not found. Can't determine projection.\n \
                 Storing projection from the user, if provided.")
 
-        default_units = {
-        'X': 'step', 
-        'Y': 'step', 
-        't': 'step', 
-        'tofVoltage':'V',
-        'extractorVoltage':'V',
-        'extractorCurrent':'A',
-        'cryoTemperature':'K',
-        'sampleTemperature':'K',
-        'dldTimeBinSize':'ns',
-        'delay':'ps',
-        'timeStamp':'s',
-        'E':'eV',
-        'kx':'1/A',
-        'ky':'1/A'}
+        self.metadata = metadata_dict
 
-        def res_to_xarray(res, binNames, binAxes, metadata=None):
-            """ creates a BinnedArray (xarray subclass) out of the given np.array
-            Parameters:
-                res: np.array
-                    nd array of binned data
-                binNames (list): list of names of the binned axes
-                binAxes (list): list of np.arrays with the values of the axes
-            Returns:
-                ba: BinnedArray (xarray)
-                    an xarray-like container with binned data, axis, and all available metadata
-            """
-            dims = binNames
-            coords = {}
-            for name, vals in zip(binNames, binAxes):
-                coords[name] = vals
+        return self.metadata
 
-            xres = xr.DataArray(res, dims=dims, coords=coords)
 
-            for name in binNames:
-                try:
-                    xres[name].attrs['unit'] = default_units[name]
-                except KeyError:
-                    pass
-
-            xres.attrs['units'] = 'counts'
-            xres.attrs['long_name'] = 'photoelectron counts'
-
-            if metadata is not None:
-                xres.attrs['metadata'] = metadata
-
-            return xres
-
+    def get_xarray(self, metadata):
+        """Converts the binned numpy array into an xarray with
+        attached metadata gathered from the gather_metadata function
+        and corresponding axes.
+        Args:
+            metadata: metadata related to the experiment and the binning routines.
+                    Using the gather_metadata method to collect extensive metadata
+                    is recommended.
+        Returns:
+            res_xarray: xr.DataArray object with the binned data and metadata.
+        """
         print("Building the xarray data object...")
         axnames = self.binaxes.copy()
-        axnames[2] = "energy"
         axes = [self.histdict[ax] for ax in self.binaxes]
-        res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata_dict)
+        res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata)
         print("Done!")
+
         return res_xarray
 
     def xarray_to_h5(self, data, faddr, mode='w'):
@@ -2720,9 +2687,9 @@ class dataframeProcessor(MapParser):
             data (xarray.DataArray): input data
             faddr (str): complete file name (including path)
             mode (str): hdf5 read/write mode
-        Returns:
+        Returns: None
         """
-        with h5py.File(faddr, mode) as h5File:
+        with File(faddr, mode) as h5File:
 
             print(f'saving data to {faddr}')
 
@@ -3396,6 +3363,41 @@ class parallelHDF5Processor(FileCollection):
         """
 
         saveClassAttributes(self, form, save_addr)
+
+
+def res_to_xarray(res, binNames, binAxes, metadata=None):
+    """Helper function for get_xarray method of class DataFrameProcessor to create
+    a BinnedArray (xarray subclass) out of the given np.array
+    Parameters:
+        res: np.array
+            nd array of binned data
+        binNames (list): list of names of the binned axes
+        binAxes (list): list of np.arrays with the values of the axes
+    Returns:
+        ba: BinnedArray (xarray)
+            an xarray-like container with binned data, axis, and all available metadata
+    """
+
+    dims = binNames
+    coords = {}
+    for name, vals in zip(binNames, binAxes):
+        coords[name] = vals
+
+    xres = xr.DataArray(res, dims=dims, coords=coords)
+
+    for name in binNames:
+        try:
+            xres[name].attrs['unit'] = default_units[name]
+        except KeyError:
+            pass
+
+    xres.attrs['units'] = 'counts'
+    xres.attrs['long_name'] = 'photoelectron counts'
+
+    if metadata is not None:
+        xres.attrs['metadata'] = metadata
+
+    return xres
 
 
 def extractEDC(folder=None, files=[], axes=['t'], bins=[1000], ranges=[(65000, 100000)],
