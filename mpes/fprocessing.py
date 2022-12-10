@@ -2402,12 +2402,12 @@ class dataframeProcessor(MapParser):
         if ('t0' in kwds) and ('d' in kwds):
             self.ecalib_t0 = kwds.pop('t0')
             self.ecalib_d = kwds.pop('d')
-            self.columnApply(mapping=b.tof2ev, rescolname="energy", E0=E0, d=self.ecalib_d, t0=self.ecalib_t0, t=t, **kwds)
+            self.columnApply(mapping=b.tof2ev, rescolname="E", E0=E0, d=self.ecalib_d, t0=self.ecalib_t0, t=t, **kwds)
         elif ('a' in kwds):
             self.poly_a = kwds.pop('a')
-            self.columnApply(mapping=b.tof2evpoly, rescolname='energy', E0=E0, a=self.poly_a, t=t, **kwds)
+            self.columnApply(mapping=b.tof2evpoly, rescolname="E", E0=E0, a=self.poly_a, t=t, **kwds)
         else:
-            self.columnApply(mapping=self.EMap, rescolname='energy', E0=E0, t=t, **kwds)
+            self.columnApply(mapping=self.EMap, rescolname="E", E0=E0, t=t, **kwds)
 
     # Row operation
     def appendRow(self, folder=None, df=None, ftype='parquet', **kwds):
@@ -2677,7 +2677,7 @@ class dataframeProcessor(MapParser):
         return self.metadata
 
 
-    def get_xarray(self, metadata):
+    def get_xarray(self, metadata=None):
         """Converts the binned numpy array into an xarray with
         attached metadata gathered from the gather_metadata function
         and corresponding axes.
@@ -2688,8 +2688,14 @@ class dataframeProcessor(MapParser):
         Returns:
             res_xarray: xr.DataArray object with the binned data and metadata.
         """
+
         print("Building the xarray data object...")
+        if metadata is None:
+            metadata = self.metadata
         axnames = self.binaxes.copy()
+        for i in range(len(axnames)):
+            if axnames[i] == "E":
+                axnames[i] = "energy"
         axes = [self.histdict[ax] for ax in self.binaxes]
         res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata)
         print("Done!")
