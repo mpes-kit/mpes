@@ -63,14 +63,14 @@ aperture_dict = {
                    100:(3.4, 3.8), "grid":(-5.3, -5.9),
                    "open":(-12.0, -10.8)}},
     "2020-01-23T19:35:15":{
-        "fa_size":{750.:((-4.8, -6.2), (5.0, 6.0)),
-                  "grid":((-4.8, -6.2), (-0.3, -0.7)),
-                  500.:((-4.8, -6.2), (-6.0, -7.0)),
-                  200.:((0.5, 0.9), (-0.3, -0.7)),
-                  100.:((0.5, 0.9), (-6.0, -7.0)),
+        "fa_size":{750.:((-6.2, -4.8), (5.0, 6.0)),
+                  "grid":((-6.2, -4.8), (-0.7, -0.3)),
+                  500.:((-6.2, -4.8), (-7.0, -6.0)),
+                  200.:((0.5, 0.9), (-0.7, -0.3)),
+                  100.:((0.5, 0.9), (-7.0, -6.0)),
                   300.:((0.5, 0.9), (5.0, 6.0)),
-                  10.:((6.5, 6.9), (-6.0, -7.0)),  
-                  20.:((6.5, 6.9), (-0.3, -0.7)),
+                  10.:((6.5, 6.9), (-7.0, -6.0)),  
+                  20.:((6.5, 6.9), (-0.7, -0.3)),
                   50.:((6.5, 6.9), (5.0, 6.0)),
                   "open":((-10.4, -9.4), (-9.5, -8.9))},
         "ca_size":{50.:(9.0, 11.0), 300.:(-0.1, 0.1),
@@ -2489,10 +2489,11 @@ class dataframeProcessor(MapParser):
         """ Gathers additional metadata from the source file and updates 
         the existing metadata if provided.
         Parameters:
-            metadata: Initial manual metadata (optional)
-            ec: Energy calibration object from the analysis routine in pre-processing
+            metadata_dict: Initial manual metadata (optional)
             mc: Momentum calibration object from the analysis routine in pre-processing
-        Returns: xarray object containing the updated metadata 
+            ec: Energy calibration object from the analysis routine in pre-processing
+        Returns:
+            None
             
         """
         if metadata_dict is None:
@@ -2596,6 +2597,7 @@ class dataframeProcessor(MapParser):
         binning_dict.pop('histdict') 
         binning_dict.pop('dfield')
         binning_dict.pop('edf')  # Deepcopy doesn't work because of edf data type
+        binning_dict.pop("metadata")
         metadata_dict['binning'] = binning_dict
 
         # To determine the timestamp in aperture_config
@@ -2674,19 +2676,21 @@ class dataframeProcessor(MapParser):
 
         self.metadata = metadata_dict
 
-        return self.metadata
+        return None
 
-
-    def get_xarray(self, metadata=None):
-        """Converts the binned numpy array into an xarray with
-        attached metadata gathered from the gather_metadata function
-        and corresponding axes.
+    def save_to_h5(self, filename, metadata=None):
+        """Converts the binned numpy array into an hdf5 file with
+        metadata gathered from the gather_metadata function
+        and corresponding axes. The process involves the creation
+        of an xarray.DataFrame type object stored under the class
+        attribute res_xarray.
         Args:
+            filename: String containing output filepath.
             metadata: metadata related to the experiment and the binning routines.
                     Using the gather_metadata method to collect extensive metadata
                     is recommended.
         Returns:
-            res_xarray: xr.DataArray object with the binned data and metadata.
+            None
         """
 
         print("Building the xarray data object...")
@@ -2697,74 +2701,10 @@ class dataframeProcessor(MapParser):
             if axnames[i] == "E":
                 axnames[i] = "energy"
         axes = [self.histdict[ax] for ax in self.binaxes]
-        res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata)
-        print("Done!")
+        self.res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata)
+        xarray_to_h5(self.res_xarray, filename)
 
-        return res_xarray
-
-    def xarray_to_h5(self, data, faddr, mode='w'):
-        """ Save xarray formatted data to hdf5
-        Args:
-            data (xarray.DataArray): input data
-            faddr (str): complete file name (including path)
-            mode (str): hdf5 read/write mode
-        Returns: None
-        """
-        with File(faddr, mode) as h5File:
-
-            print(f'saving data to {faddr}')
-
-            # Saving data
-
-            ff = h5File.create_group('binned')
-
-            # make a single dataset
-            ff.create_dataset('BinnedData', data=data.data)
-
-            # Saving axes
-            aa = h5File.create_group("axes")
-            # aa.create_dataset('axis_order', data=data.dims)
-            ax_n = 0
-            for binName in data.dims:
-                ds = aa.create_dataset(f'ax{ax_n}', data=data.coords[binName])
-                ds.attrs['name'] = binName
-                ax_n += 1
-            # Saving delay histograms
-            #                hh = h5File.create_group("histograms")
-            #                if hasattr(data, 'delaystageHistogram'):
-            #                    hh.create_dataset(
-            #                        'delaystageHistogram',
-            #                        data=data.delaystageHistogram)
-            #                if hasattr(data, 'pumpProbeHistogram'):
-            #                    hh.create_dataset(
-            #                        'pumpProbeHistogram',
-            #                        data=data.pumpProbeHistogram)\
-
-            if ('metadata' in data.attrs and isinstance(data.attrs['metadata'], dict)):
-                meta_group = h5File.create_group('metadata')
-                
-                def recursive_write_metadata(h5group, node):
-                    for key, item in node.items():
-                        if isinstance(item, (np.ndarray, np.int64, np.float64, str,\
-                            bytes, int, float, list, tuple)):
-                            try:
-                                h5group.create_dataset(str(key), data=item)
-                            except TypeError:
-                                h5group.create_dataset(str(key), data=str(item))
-                                print("saved " + key + " as string")
-                        elif isinstance(item, dict):
-                            print(key)
-                            group = h5group.create_group(key)
-                            recursive_write_metadata(group, item)
-                        else:
-                            try:
-                                h5group.create_dataset(key, data=str(item))
-                                print("saved " + key + " as string")
-                            except:
-                                raise ValueError('Cannot save %s type'%type(item))
-
-                recursive_write_metadata(meta_group, data.attrs['metadata'])
-        print('Saving complete!')
+        return None
 
     def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
         """ Update or convert to other file formats.
@@ -3420,6 +3360,69 @@ def res_to_xarray(res, binNames, binAxes, metadata=None):
 
     return xres
 
+def xarray_to_h5(data, faddr, mode='w'):
+    """ Save xarray formatted data to hdf5
+    Args:
+        data (xarray.DataArray): input data
+        faddr (str): complete file name (including path)
+        mode (str): hdf5 read/write mode
+    Returns: None
+    """
+    with File(faddr, mode) as h5File:
+
+        print(f'saving data to {faddr}')
+
+        # Saving data
+
+        ff = h5File.create_group('binned')
+
+        # make a single dataset
+        ff.create_dataset('BinnedData', data=data.data)
+
+        # Saving axes
+        aa = h5File.create_group("axes")
+        # aa.create_dataset('axis_order', data=data.dims)
+        ax_n = 0
+        for binName in data.dims:
+            ds = aa.create_dataset(f'ax{ax_n}', data=data.coords[binName])
+            ds.attrs['name'] = binName
+            ax_n += 1
+        # Saving delay histograms
+        #                hh = h5File.create_group("histograms")
+        #                if hasattr(data, 'delaystageHistogram'):
+        #                    hh.create_dataset(
+        #                        'delaystageHistogram',
+        #                        data=data.delaystageHistogram)
+        #                if hasattr(data, 'pumpProbeHistogram'):
+        #                    hh.create_dataset(
+        #                        'pumpProbeHistogram',
+        #                        data=data.pumpProbeHistogram)\
+
+        if ('metadata' in data.attrs and isinstance(data.attrs['metadata'], dict)):
+            meta_group = h5File.create_group('metadata')
+            
+            def recursive_write_metadata(h5group, node):
+                for key, item in node.items():
+                    if isinstance(item, (np.ndarray, np.int64, np.float64, str,\
+                        bytes, int, float, list, tuple)):
+                        try:
+                            h5group.create_dataset(str(key), data=item)
+                        except TypeError:
+                            h5group.create_dataset(str(key), data=str(item))
+                            print("saved " + key + " as string")
+                    elif isinstance(item, dict):
+                        print(key)
+                        group = h5group.create_group(key)
+                        recursive_write_metadata(group, item)
+                    else:
+                        try:
+                            h5group.create_dataset(key, data=str(item))
+                            print("saved " + key + " as string")
+                        except:
+                            raise ValueError('Cannot save %s type'%type(item))
+
+            recursive_write_metadata(meta_group, data.attrs['metadata'])
+    print('Saving complete!')
 
 def extractEDC(folder=None, files=[], axes=['t'], bins=[1000], ranges=[(65000, 100000)],
                 binning_kwds={'jittered':True}, ret=True, **kwds):
