@@ -2678,14 +2678,11 @@ class dataframeProcessor(MapParser):
 
         return None
 
-    def save_to_h5(self, filename, metadata=None):
-        """Converts the binned numpy array into an hdf5 file with
-        metadata gathered from the gather_metadata function
-        and corresponding axes. The process involves the creation
-        of an xarray.DataFrame type object stored under the class
-        attribute res_xarray.
+    def save_to_xarray(self, metadata=None):
+        """Stores the binned numpy array into an xarray.DataFrame
+        as a class attribute with metadata gathered from the 
+        gather_metadata function and corresponding axes.
         Args:
-            filename: String containing output filepath.
             metadata: metadata related to the experiment and the binning routines.
                     Using the gather_metadata method to collect extensive metadata
                     is recommended.
@@ -2693,7 +2690,6 @@ class dataframeProcessor(MapParser):
             None
         """
 
-        print("Building the xarray data object...")
         if metadata is None:
             metadata = self.metadata
         axnames = self.binaxes.copy()
@@ -2702,7 +2698,6 @@ class dataframeProcessor(MapParser):
                 axnames[i] = "energy"
         axes = [self.histdict[ax] for ax in self.binaxes]
         self.res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata)
-        xarray_to_h5(self.res_xarray, filename)
 
         return None
 
