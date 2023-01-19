@@ -80,14 +80,14 @@ aperture_dict = {
 
 lens_mode_dict = {
     "6kV_kmodem4.0_20VTOF_v3.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200, "UFA": 600.0,
+        "Extr": 6000.0, "UCA": 1200, "UFA": 600.0,
         "Z1": 2452.9, "Z2": 1489.9, "A": 420.07, "B": 2494.8,
         "C": 489.2, "D": 228.05, "E": 113.82, "F": 54.232,
         "G": 20.0, "H": 25.5, "I": 36.0, "TOF": 20.0,
         "MCPfront": 20.0
     },
     "6kV_kmodem4.0_30VTOF_453ns_focus.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
         "A": 403.07, "B": 2500, "C": 422.25,
         "D": 208.88, "E": 199.49, "F": 68.735,
@@ -95,7 +95,7 @@ lens_mode_dict = {
         "TOF": 30.0, "MCPfront": 30.0
     },
     "6kV_kmodem4.0_30VTOF_453ns_focus_Gated_22.5V_FMCP.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0,  "UCA": 1200,
         "UFA": 600.0, "Z1": 2450, "Z2": 1489.9,
         "A": 403.07, "B": 2500, "C": 422.25,
         "D": 208.88, "E": 199.49, "F": 69.235,
@@ -103,7 +103,7 @@ lens_mode_dict = {
         "TOF": 30.0, "MCPfront": 22.5
     },
     "6kV_kmodem4.2_30VTOF_453ns_focus_Gated_21.0V_FMCP.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2450, "Z2": 1489.9,
         "A": 403.07, "B": 2500, "C": 422.25,
         "D": 208.88, "E": 199.49, "F": 69.235,
@@ -111,7 +111,7 @@ lens_mode_dict = {
         "TOF": 30.0, "MCPfront": 21.0
     },
     "6kV_kmodem1_20VTOF.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
         "A": 943.97, "B": 1621.97, "C": 462.98,
         "D": 366.31, "E": 418.83, "F": 112.99,
@@ -119,7 +119,7 @@ lens_mode_dict = {
         "TOF": 20.0, "MCPfront": 20.0
     },
     "6kV_kmodem1.4_20VTOF.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
         "A": 709.05, "B": 1769.3, "C": 431.03,
         "D": 217.72, "E": 346.9, "F": 92.547,
@@ -127,7 +127,7 @@ lens_mode_dict = {
         "TOF": 20.0, "MCPfront": 20.0
     },
     "6kV_kmodem2.0_20VTOF.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
         "A": 772.38, "B": 2265.4, "C": 496.39,
         "D": 228.83, "E": 246.37, "F": 50.317,
@@ -135,7 +135,7 @@ lens_mode_dict = {
         "TOF": 20.0, "MCPfront": 20.0
     },
     "6kV_kmodem2.8_20VTOF_v2.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
         "A": 796.85, "B": 2471.0, "C": 403.69,
         "D": 196.85, "E": 191.16, "F": 59.557,
@@ -143,7 +143,7 @@ lens_mode_dict = {
         "TOF": 20.0, "MCPfront": 20.0
     },
     "6kV_kmodem2.0_30VTOF_MoTe2_2340VMCP.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
         "A": 784.58, "B": 3253.0, "C": 752.07,
         "D": 682.18, "E": 200.93, "F": 68.557,
@@ -151,7 +151,7 @@ lens_mode_dict = {
         "TOF": 30.0, "MCPfront": 30.0
     },
     "6kV_kmodem4.0_30VTOF_WTe2_2340VMCP.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2450, "Z2": 1489.9,
         "A": 403.07, "B": 2500, "C": 422.25,
         "D": 208.88, "E": 199.49, "F": 68.735,
@@ -159,7 +159,7 @@ lens_mode_dict = {
         "TOF": 30.0, "MCPfront": 30.0
     },
     "6kV_momentum_Gerd's_setting.sav": {
-        "Extr": 6000.0, "Foc": 168, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
         "A": 800.0, "B": 600.0, "C": 300.0,
         "D": 130.0, "E": 60.0, "F": 30.0,
@@ -167,7 +167,7 @@ lens_mode_dict = {
         "TOF": 25.0, "MCPfront": 30.0
     },
     "7kV_momentum_Gerd's_setting.sav": {
-        "Extr": 7000.0, "Foc": 244, "UCA": 1200,
+        "Extr": 7000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
         "A": 800.0, "B": 600.0, "C": 300.0,
         "D": 130.0, "E": 60.0, "F": 30.0,
@@ -175,7 +175,7 @@ lens_mode_dict = {
         "TOF": 25.0, "MCPfront": 30.0
     },
     "6kV_spatialx4_110mumFOV_20VTOF.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
         "A": 518.64, "B": 2198.97, "C": 76.771,
         "D": 256.4, "E": 554.45, "F": 47.91,
@@ -183,7 +183,7 @@ lens_mode_dict = {
         "TOF": 20.0, "MCPfront": 20.0
     },
     "6kV_spatialx4_110mumFOV_30VTOF.sav": {
-        "Extr": 6000.0, "Foc": 158, "UCA": 1200,
+        "Extr": 6000.0, "UCA": 1200,
         "UFA": 600.0, "Z1": 2452.9, "Z2": 1489.9,
         "A": 302.44, "B": 2241.7, "C": 84.478,
         "D": 346.38, "E": 699.28, "F": 83.378,
@@ -2487,13 +2487,14 @@ class dataframeProcessor(MapParser):
 
     def gather_metadata(self, metadata_dict=None, mc=None, ec=None):
         """ Gathers additional metadata from the source file and updates 
-        the existing metadata if provided.
+        the existing metadata if provided. 
         Parameters:
             metadata_dict: Initial manual metadata (optional)
             mc: Momentum calibration object from the analysis routine in pre-processing
             ec: Energy calibration object from the analysis routine in pre-processing
         Returns:
-            None
+            self.res_xarray: Object of class xarray.DataArray containing the binned data,
+                axes and the gathered metadata.
             
         """
         if metadata_dict is None:
@@ -2641,7 +2642,7 @@ class dataframeProcessor(MapParser):
         
         # Storing the lens modes corresponding to lens voltages
         lens_list = [
-                "Foc", "Extr", "UCA", "UFA",
+                "Extr", "UCA", "UFA",
                 "Z1", "Z2", "A", "B", "C",
                 "D", "E", "F", "G", "H",
                 "I", "TOF", "MCPfront"
@@ -2656,8 +2657,8 @@ class dataframeProcessor(MapParser):
                 metadata_dict["instrument"]["analyzer"]["lens_mode"] = mode
                 break
         else:
-            print("Lens mode for given lens voltages not found.\n \
-            Storing lens mode from the user, if provided.")
+            print("Lens mode for given lens voltages not found. "
+            "Storing lens mode from the user, if provided.")
             
         # Determining projection from the lens mode
         try:
@@ -2667,39 +2668,27 @@ class dataframeProcessor(MapParser):
             else:
                 metadata_dict["instrument"]["analyzer"]["projection"] = "reciprocal"
         except IndexError:
-            print("Lens mode must have the form, '6kV_kmodem4.0_20VTOF_v3.sav'.\
-                Can't determine projection.\n \
-                Storing projection from the user, if provided.")
+            print("Lens mode must have the form, '6kV_kmodem4.0_20VTOF_v3.sav'. "
+                "Can't determine projection. "
+                "Storing projection from the user, if provided.")
         except KeyError:
-            print("Lens mode not found. Can't determine projection.\n \
-                Storing projection from the user, if provided.")
+            print("Lens mode not found. Can't determine projection. "
+                "Storing projection from the user, if provided.")
 
         self.metadata = metadata_dict
 
-        return None
-
-    def save_to_xarray(self, metadata=None):
-        """Stores the binned numpy array into an xarray.DataFrame
-        as a class attribute with metadata gathered from the 
-        gather_metadata function and corresponding axes.
-        Args:
-            metadata: metadata related to the experiment and the binning routines.
-                    Using the gather_metadata method to collect extensive metadata
-                    is recommended.
-        Returns:
-            None
-        """
-
-        if metadata is None:
-            metadata = self.metadata
         axnames = self.binaxes.copy()
         for i in range(len(axnames)):
             if axnames[i] == "E":
                 axnames[i] = "energy"
         axes = [self.histdict[ax] for ax in self.binaxes]
-        self.res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata)
+        self.res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata_dict)
 
-        return None
+        return self.res_xarray
+
+    def save_to_h5(self, filepath):
+        """Class wrapper for the xarray_to_h5 function"""
+        xarray_to_h5(self.res_xarray, filepath)
 
     def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
         """ Update or convert to other file formats.
