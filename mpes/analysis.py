@@ -678,15 +678,15 @@ def fit_energyCalibation(pos, vals, refid=0, Eref=None, t=None, **kwds):
         ecalibdict['axis'] = pfunc(E0, t)
         ecalibdict['E0'] = E0
 
+    # Fitting metadata for nexus
     ecalibdict["fit_function"] = "(a0/(x0-a1))**2 + a2"
-    ecalibdict["coeffs"] =  np.array(
+    ecalibdict["coefficients"] =  np.array(
         [
             ecalibdict["d"],
             ecalibdict["t0"],
             ecalibdict["E0"],
         ]
     )
-    ecalibdict["offset"] = ecalibdict["E0"]
 
     return ecalibdict  
 
@@ -785,11 +785,12 @@ def calibrateE(pos, vals, order=3, refid=0, ret='func', E0=None, Eref=None, t=No
         ecalibdict['axis'] = pfunc(E0, t)
         ecalibdict['E0'] = E0
 
+    # Fitting metadata for nexus
     fit_function = 'a0'
     for n in range(1,order+1):
         fit_function += f' + a{n}*x0**{n}'
     ecalibdict['fit_function'] = fit_function
-    ecalibdict['coeffs'] = np.concatenate(
+    ecalibdict['coefficients'] = np.concatenate(
         (
             ecalibdict['coeffs'],
             [ecalibdict['E0']]
