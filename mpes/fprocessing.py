@@ -2542,12 +2542,11 @@ class dataframeProcessor(MapParser):
                            channel + "&from=" + filestart + "Z&to=" + fileend + "Z"
                 req = urllib.request.urlopen(req_str)
                 data = json.load(req)
-                if data:
-                    vals = [x['val'] for x in data[0]['data']]
-                    metadata_dict['file'][f'{channel}'] = np.average(np.array(vals))
-                else:
-                    metadata_dict['file'][f'{channel}'] = np.nan
-                    print(f"Data for channel {channel} doesn't exist for time {filestart}")
+                vals = [x['val'] for x in data[0]['data']]
+                metadata_dict['file'][f'{channel}'] = sum(vals)/len(vals)
+            except (IndexError, ZeroDivisionError):
+                metadata_dict['file'][f'{channel}'] = np.nan
+                print(f"Data for channel {channel} doesn't exist for time {filestart}")
             except urllib.error.HTTPError as e:
                 print(f"Incorrect URL for the archive channel {channel}. "
                      "Make sure that the channel name and file start and end times are correct.")
