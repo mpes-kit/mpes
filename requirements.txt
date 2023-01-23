@@ -1,9 +1,9 @@
 # Dev/Deployment
 numpy
 pandas
-scipy
+scipy<1.9.0
 matplotlib
-bokeh
+bokeh<3.0.0
 scikit-image
 sphinx
 nose
