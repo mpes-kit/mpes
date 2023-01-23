@@ -69,7 +69,7 @@ aperture_dict = {
                   200.:((0.5, 0.9), (-0.7, -0.3)),
                   100.:((0.5, 0.9), (-7.0, -6.0)),
                   300.:((0.5, 0.9), (5.0, 6.0)),
-                  10.:((6.5, 6.9), (-7.0, -6.0)),  
+                  10.:((6.5, 6.9), (-7.0, -6.0)),
                   20.:((6.5, 6.9), (-0.7, -0.3)),
                   50.:((6.5, 6.9), (5.0, 6.0)),
                   "open":((-10.4, -9.4), (-9.5, -8.9))},
@@ -193,9 +193,9 @@ lens_mode_dict = {
 }
 
 default_units = {
-    'X': 'step', 
-    'Y': 'step', 
-    't': 'step', 
+    'X': 'step',
+    'Y': 'step',
+    't': 'step',
     'tofVoltage':'V',
     'extractorVoltage':'V',
     'extractorCurrent':'A',
@@ -2486,8 +2486,8 @@ class dataframeProcessor(MapParser):
             return self.histdict
 
     def gather_metadata(self, metadata_dict=None, mc=None, ec=None):
-        """ Gathers additional metadata from the source file and updates 
-        the existing metadata if provided. 
+        """ Gathers additional metadata from the source file and updates
+        the existing metadata if provided.
         Parameters:
             metadata_dict: Initial manual metadata (optional)
             mc: Momentum calibration object from the analysis routine in pre-processing
@@ -2495,7 +2495,7 @@ class dataframeProcessor(MapParser):
         Returns:
             self.res_xarray: Object of class xarray.DataArray containing the binned data,
                 axes and the gathered metadata.
-            
+
         """
         if metadata_dict is None:
             metadata_dict = {}
@@ -2517,7 +2517,7 @@ class dataframeProcessor(MapParser):
         file0 = self.datafiles[0]
         if 'file' not in metadata_dict:  # If already present, the value is assumed to be a dictionary
             metadata_dict['file'] = {}
-        
+
         print("Collecting lens voltages etc...")
         with File(file0, 'r') as f:
             for k,v in f.attrs.items():
@@ -2534,7 +2534,7 @@ class dataframeProcessor(MapParser):
                         "trARPES:XGS600:PressureAC:P_RD", "KTOF:Lens:UDLD:V", "KTOF:Lens:Sample:V",
                         "KTOF:Apertures:m1.RBV", "KTOF:Apertures:m2.RBV", "KTOF:Apertures:m3.RBV"] + \
                         [f"trARPES:Carving:{x}.RBV" for x in ['TRX','TRY','TRZ','THT','PHI','OMG']]
-        
+
         channels_missing = set(Epics_channels)-set(metadata_dict['file'].keys())
         for channel in channels_missing:
             try:
@@ -2547,7 +2547,7 @@ class dataframeProcessor(MapParser):
                     metadata_dict['file'][f'{channel}'] = np.average(np.array(vals))
                 else:
                     metadata_dict['file'][f'{channel}'] = np.nan
-                    print(f"Data for channel {channel} doesn't exist for time {filestart}")     
+                    print(f"Data for channel {channel} doesn't exist for time {filestart}")
             except urllib.error.HTTPError as e:
                 print(f"Incorrect URL for the archive channel {channel}. "
                      "Make sure that the channel name and file start and end times are correct.")
@@ -2582,8 +2582,8 @@ class dataframeProcessor(MapParser):
 
             # to reduce the size of h5 file
             momentum_dict.pop('image')
-            momentum_dict['calibration'].pop('axes') 
-            momentum_dict['calibration'].pop('grid') 
+            momentum_dict['calibration'].pop('axes')
+            momentum_dict['calibration'].pop('grid')
             momentum_dict.pop('slice')
             momentum_dict.pop('slice_transformed')
             momentum_dict.pop('splinewarp')
@@ -2593,9 +2593,9 @@ class dataframeProcessor(MapParser):
             energy_dict = copy.deepcopy(ec.__dict__)
             energy_dict.pop('pathcorr')
             metadata_dict['energy_correction'] = energy_dict
-            
+
         binning_dict = copy.copy(self.__dict__)  # Only works if the keys in root tree are deleted
-        binning_dict.pop('histdict') 
+        binning_dict.pop('histdict')
         binning_dict.pop('dfield')
         binning_dict.pop('edf')  # Deepcopy doesn't work because of edf data type
         binning_dict.pop("metadata")
@@ -2604,7 +2604,7 @@ class dataframeProcessor(MapParser):
         # To determine the timestamp in aperture_config
         stamps = sorted(list(self.config["aperture"]) + [filestart])
         filestart_index = stamps.index(filestart)
-        timestamp = stamps[filestart_index-1] 
+        timestamp = stamps[filestart_index-1]
 
         # Aperture metadata
         if 'instrument' not in metadata_dict.keys():
@@ -2620,7 +2620,7 @@ class dataframeProcessor(MapParser):
             for k,v in self.config["aperture"][timestamp]['fa_size'].items():
                 if v[0][0]<fa_in<v[0][1] and v[1][0]<fa_hor<v[1][1]:
                     if isinstance(k, float):
-                        metadata_dict['instrument']['analyzer']['fa_size'] = k   
+                        metadata_dict['instrument']['analyzer']['fa_size'] = k
                     else: # considering that only int and str type values are present
                         metadata_dict['instrument']['analyzer']['fa_shape'] = k
                     break
@@ -2633,13 +2633,13 @@ class dataframeProcessor(MapParser):
             for k,v in self.config["aperture"][timestamp]['ca_size'].items():
                 if v[0]<ca<v[1]:
                     if isinstance(k, float):
-                        metadata_dict['instrument']['analyzer']['ca_size'] = k   
+                        metadata_dict['instrument']['analyzer']['ca_size'] = k
                     else: # considering that only int and str type values are present
                         metadata_dict['instrument']['analyzer']['ca_shape'] = k
                     break
             else:
                 print("Contrast aperture size not found.")
-        
+
         # Storing the lens modes corresponding to lens voltages
         lens_list = [
                 "Extr", "UCA", "UFA",
@@ -2659,7 +2659,7 @@ class dataframeProcessor(MapParser):
         else:
             print("Lens mode for given lens voltages not found. "
             "Storing lens mode from the user, if provided.")
-            
+
         # Determining projection from the lens mode
         try:
             lens_mode = metadata_dict["instrument"]["analyzer"]["lens_mode"]
@@ -2677,17 +2677,25 @@ class dataframeProcessor(MapParser):
 
         self.metadata = metadata_dict
 
-        axnames = self.binaxes.copy()
-        for i in range(len(axnames)):
-            if axnames[i] == "E":
-                axnames[i] = "energy"
-        axes = [self.histdict[ax] for ax in self.binaxes]
-        self.res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata_dict)
+        try:
+            axnames = self.binaxes.copy()
+            for i in range(len(axnames)):
+                if axnames[i] == "E":
+                    axnames[i] = "energy"
+            axes = [self.histdict[ax] for ax in self.binaxes]
+            self.res_xarray = res_to_xarray(self.histdict['binned'], axnames, axes, metadata=metadata_dict)
+        except AttributeError:
+            raise AttributeError("No binned data found, bin data first!")
 
         return self.res_xarray
 
     def save_to_h5(self, filepath):
         """Class wrapper for the xarray_to_h5 function"""
+        try:
+            self.res_xarray
+        except AttributeError:
+            raise AttributeError("Xarray not found, generate it with 'dataframeProcessor.gather_metadata()' first!")
+
         xarray_to_h5(self.res_xarray, filepath)
 
     def convert(self, form='parquet', save_addr=None, namestr='/data', pq_append=False, **kwds):
@@ -3384,7 +3392,7 @@ def xarray_to_h5(data, faddr, mode='w'):
 
         if ('metadata' in data.attrs and isinstance(data.attrs['metadata'], dict)):
             meta_group = h5File.create_group('metadata')
-            
+
             def recursive_write_metadata(h5group, node):
                 for key, item in node.items():
                     if isinstance(item, (np.ndarray, np.int64, np.float64, str,\
