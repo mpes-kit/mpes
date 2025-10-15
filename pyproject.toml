@@ -1,0 +1,107 @@
+[build-system]
+requires = ["setuptools>=64.0.1", "setuptools-scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["mpes"]
+
+[tool.setuptools_scm]
+
+[project]
+name = "mpes"
+dynamic = ["version"]
+authors = [
+    {name = "R. Patrick Xian, Laurenz Rettig"},
+]
+description = "Distributed data processing routines for multidimensional photoemission spectroscopy (MPES)"
+readme = "README.md"
+license-files = ["LICENSE"]
+requires-python = ">=3.9,<3.13"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "numpy<2.0",
+    "pandas",
+    "scipy",
+    "matplotlib",
+    "bokeh<3.0.0",
+    "scikit-image",
+    "nose",
+    "lmfit",
+    "h5py>=2.9.0",
+    "dask[dataframe]",
+    "fastparquet",
+    "tqdm",
+    "natsort",
+    "funcy",
+    "imageio",
+    "numba",
+    "opencv-python",
+    "xarray",
+    "astropy",
+    "photutils<2.0",
+    "symmetrize",
+    "silx",
+    "deepdish",
+    "fastdtw",
+    "threadpoolctl",
+]
+
+[project.urls]
+Homepage = "https://github.com/mpes-kit/mpes"
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.1.7",
+    "mypy>=1.6.0",
+    "pre-commit>=3.0.0",
+    "coverage",
+    "sphinx",
+]
+
+examples = [
+    "ipywidgets",
+    "ipykernel",
+]
+
+[tool.pydocstyle]
+convention = "google"
+
+[tool.coverage.report]
+exclude_lines = [
+  "raise NotImplementedError",
+  "pragma: no cover",
+]
+
+[tool.ruff]
+include = ["src/*.py", "tests/*.py"]
+lint.select = [
+    "E", # pycodestyle
+    "W", # pycodestyle
+    "PL", # pylint
+    "F841", # unused variable
+    "F401", # unused imports
+    "ARG", # unused arguments
+]
+lint.ignore = [
+    "E701", # Multiple statements on one line (colon)
+    "PLR0911", # Too many return statements
+    "PLR0912", # Too many branches
+    "PLR0913", # Too many arguments in function definition
+    "PLR0915", # Too many statements
+    "PLR2004", # Magic value used instead of constant
+    "PLR5501", # else-if-used
+    "PLW2901", # redefined-loop-name
+]
+lint.fixable = ["ALL"]
+line-length = 120 # change the default line length number or characters.
+
+[tool.mypy]
+strict = false
+ignore_missing_imports = true
+follow_imports = "silent"
+no_strict_optional = true
+disable_error_code = "import, annotation-unchecked"
