@@ -1,2 +1,4 @@
-include README.md
-include requirements.txt
+prune *
+exclude *
+recursive-include mpes *.py
+include pyproject.toml README.md
