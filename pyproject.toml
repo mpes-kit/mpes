@@ -15,7 +15,7 @@ authors = [
 ]
 description = "Distributed data processing routines for multidimensional photoemission spectroscopy (MPES)"
 readme = "README.md"
-license = ["LICENSE"]
+license-files = ["LICENSE"]
 requires-python = ">=3.9,<3.13"
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -30,10 +30,9 @@ dependencies = [
     "bokeh<3.0.0",
     "scikit-image",
     "nose",
-    "igor",
     "lmfit",
     "h5py>=2.9.0",
-    "dask",
+    "dask[dataframe]",
     "fastparquet",
     "tqdm",
     "natsort",

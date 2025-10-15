@@ -17,7 +17,6 @@ from .base import FileCollection, MapParser, saveClassAttributes
 from .visualization import grid_histogram
 from . import utils as u, bandstructure as bs, base as b
 from . import dask_tps as tpsd
-import igor.igorpy as igor
 import pandas as pd
 import os
 import re
@@ -330,11 +329,7 @@ def readIgorBinFile(fdir, **kwds):
     errmsg = "Error in file loading, please check the file format."
 
     if ftype == 'pxp':
-
-        try:
-            igfile = igor.load(fdir)
-        except IOError:
-            print(errmsg)
+        raise NotImplementedError("PXP file format is not supported.")
 
     elif ftype == 'ibw':
 
@@ -970,11 +965,11 @@ def saveDict(dct={}, processor=None, dictname='', form='h5', save_addr='./histog
             raise NotImplementedError('The output format is undefined for data \
             with higher than three dimensions!')
 
-    elif form == 'ibw': # Save as Igor wave
+    # elif form == 'ibw': # Save as Igor wave
 
-        from igorwriter import IgorWave
-        wave = IgorWave(dct[bdn], name=bdn)
-        wave.save(save_addr)
+    #     from igorwriter import IgorWave
+    #     wave = IgorWave(dct[bdn], name=bdn)
+    #     wave.save(save_addr)
 
     else:
         raise NotImplementedError('Not implemented output format!')
