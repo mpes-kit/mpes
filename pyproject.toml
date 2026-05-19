@@ -23,11 +23,11 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 dependencies = [
-    "numpy<2.0",
+    "numpy>2.0",
     "pandas",
     "scipy",
     "matplotlib",
-    "bokeh<3.0.0",
+    "bokeh>3.0.0",
     "scikit-image",
     "nose",
     "lmfit",
@@ -42,10 +42,10 @@ dependencies = [
     "opencv-python",
     "xarray",
     "astropy",
-    "photutils<2.0",
+    "photutils>2.0",
     "symmetrize",
     "silx",
-    "deepdish",
+    "deepdish @ git+https://github.com/divyajyoti09/deepdish.git",
     "fastdtw",
     "threadpoolctl",
 ]
