@@ -35,7 +35,7 @@ from skimage.draw import line, disk, polygon
 from skimage.feature import peak_local_max
 import cv2
 import astropy.stats as astat
-from photutils.detection import DAOStarFinder
+import photutils as pho
 from symmetrize import sym, tps, pointops as po
 from fastdtw import fastdtw
 from functools import reduce, partial
@@ -465,7 +465,7 @@ def peakdetect2d(img, method='daofind', **kwds):
         threshfactor = kwds.pop('threshfactor', 8)
 
         mean, median, std = astat.sigma_clipped_stats(img, sigma=sg)
-        daofind = DAOStarFinder(fwhm=fwhm, threshold=threshfactor*std)
+        daofind = pho.DAOStarFinder(fwhm=fwhm, threshold=threshfactor*std)
         sources = daofind(img)
         pks = np.stack((sources['ycentroid'], sources['xcentroid']), axis=1)
 
